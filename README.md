@@ -2,6 +2,8 @@
 
 Quick start for developing with React and Vite.
 
+Geliştirme Tarihi: 12 Ağustos 2025
+
 ## Scripts
 
 - Development server:
