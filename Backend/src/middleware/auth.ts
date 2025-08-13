@@ -8,21 +8,22 @@ interface AuthRequest extends Request {
     id: string;
     email: string;
     role: string;
-    firstName: string;
-    lastName: string;
-    name: string;
+    first_name: string;
+    last_name: string;
+    username: string | null;
   };
 }
 
-export const authMiddleware = async (req: AuthRequest, res: Response, next: NextFunction) => {
+export const authMiddleware = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
     const authHeader = req.headers.authorization;
     
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({
+      res.status(401).json({
         success: false,
         message: 'Access denied. No token provided.',
       });
+      return;
     }
 
     const token = authHeader.substring(7); // Remove 'Bearer ' prefix
@@ -36,96 +37,106 @@ export const authMiddleware = async (req: AuthRequest, res: Response, next: Next
         select: {
           id: true,
           email: true,
-          firstName: true,
-          lastName: true,
-          name: true,
+          first_name: true,
+          last_name: true,
+          username: true,
           role: true,
-          isActive: true,
-          isVerified: true,
+          is_active: true,
+          is_email_verified: true,
         }
       });
 
       if (!user) {
-        return res.status(401).json({
+        res.status(401).json({
           success: false,
           message: 'Access denied. User not found.',
         });
+        return;
       }
 
-      if (!user.isActive) {
-        return res.status(401).json({
+      if (!user.is_active) {
+        res.status(401).json({
           success: false,
           message: 'Access denied. Account is deactivated.',
         });
+        return;
       }
 
       req.user = user;
       next();
     } catch (jwtError) {
       logger.error('JWT verification error:', jwtError);
-      return res.status(401).json({
+      res.status(401).json({
         success: false,
         message: 'Access denied. Invalid token.',
       });
+      return;
     }
   } catch (error) {
     logger.error('Auth middleware error:', error);
-    return res.status(500).json({
+    res.status(500).json({
       success: false,
       message: 'Internal server error.',
     });
+    return;
   }
 };
 
-export const adminMiddleware = async (req: AuthRequest, res: Response, next: NextFunction) => {
+export const adminMiddleware = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
     if (!req.user) {
-      return res.status(401).json({
+      res.status(401).json({
         success: false,
         message: 'Access denied. Authentication required.',
       });
+      return;
     }
 
     if (req.user.role !== 'ADMIN' && req.user.role !== 'SUPER_ADMIN') {
-      return res.status(403).json({
+      res.status(403).json({
         success: false,
         message: 'Access denied. Admin privileges required.',
       });
+      return;
     }
 
     next();
   } catch (error) {
     logger.error('Admin middleware error:', error);
-    return res.status(500).json({
+    res.status(500).json({
       success: false,
       message: 'Internal server error.',
     });
+    return;
   }
 };
 
-export const superAdminMiddleware = async (req: AuthRequest, res: Response, next: NextFunction) => {
+export const superAdminMiddleware = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
     if (!req.user) {
-      return res.status(401).json({
+      res.status(401).json({
         success: false,
         message: 'Access denied. Authentication required.',
       });
+      return;
     }
 
     if (req.user.role !== 'SUPER_ADMIN') {
-      return res.status(403).json({
+      res.status(403).json({
         success: false,
         message: 'Access denied. Super admin privileges required.',
       });
+      return;
     }
 
     next();
   } catch (error) {
     logger.error('Super admin middleware error:', error);
-    return res.status(500).json({
+    res.status(500).json({
       success: false,
       message: 'Internal server error.',
     });
+    return;
   }
 };
 
@@ -147,16 +158,16 @@ export const optionalAuthMiddleware = async (req: AuthRequest, res: Response, ne
         select: {
           id: true,
           email: true,
-          firstName: true,
-          lastName: true,
-          name: true,
+          first_name: true,
+          last_name: true,
+          username: true,
           role: true,
-          isActive: true,
-          isVerified: true,
+          is_active: true,
+          is_email_verified: true,
         }
       });
 
-      if (user && user.isActive) {
+      if (user && user.is_active) {
         req.user = user;
       }
     } catch (jwtError) {

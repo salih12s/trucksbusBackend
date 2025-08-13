@@ -2,16 +2,17 @@
 export interface User {
   id: string;
   email: string;
-  username: string;
-  firstName: string;
-  lastName: string;
-  name: string; // Added for compatibility
+  username?: string;
+  first_name: string;
+  last_name: string;
   phone?: string;
-  avatar?: string;
-  isVerified: boolean;
-  role: 'user' | 'admin'; // Added for compatibility
-  createdAt: Date;
-  updatedAt: Date;
+  city?: string;
+  district?: string;
+  role: 'USER' | 'ADMIN';
+  is_active: boolean;
+  is_email_verified: boolean;
+  created_at: Date;
+  updated_at: Date;
 }
 
 // Listing Types

@@ -105,3 +105,1771 @@
     at Module._load (node:internal/modules/cjs/loader:1250:12)
     at TracingChannel.traceSync (node:diagnostics_channel:322:14)
 2025-08-13 00:01:57 [info]: Server is running on port 3001
+2025-08-13 13:16:50 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/authController.ts[0m:[93m10[0m:[93m14[0m - [91merror[0m[90m TS2769: [0mNo overload matches this call.
+  Overload 1 of 5, '(payload: string | object | Buffer<ArrayBufferLike>, secretOrPrivateKey: null, options?: (SignOptions & { algorithm: "none"; }) | undefined): string', gave the following error.
+    Argument of type 'string' is not assignable to parameter of type 'null'.
+  Overload 2 of 5, '(payload: string | object | Buffer<ArrayBufferLike>, secretOrPrivateKey: Secret | Buffer<ArrayBufferLike> | JsonWebKeyInput | PrivateKeyInput, options?: SignOptions | undefined): string', gave the following error.
+    Type 'string' is not assignable to type 'number | StringValue | undefined'.
+  Overload 3 of 5, '(payload: string | object | Buffer<ArrayBufferLike>, secretOrPrivateKey: Secret | Buffer<ArrayBufferLike> | JsonWebKeyInput | PrivateKeyInput, callback: SignCallback): void', gave the following error.
+    Object literal may only specify known properties, and 'expiresIn' does not exist in type 'SignCallback'.
+
+[7m10[0m   return jwt.sign({ userId }, process.env.JWT_SECRET!, {
+[7m  [0m [91m             ~~~~[0m
+
+[96msrc/controllers/authController.ts[0m:[93m16[0m:[93m25[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m16[0m export const register = async (req: Request, res: Response) => {
+[7m  [0m [91m                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/authController.ts[0m:[93m88[0m:[93m22[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m88[0m export const login = async (req: Request, res: Response) => {
+[7m  [0m [91m                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/authController.ts[0m:[93m105[0m:[93m60[0m - [91merror[0m[90m TS2769: [0mNo overload matches this call.
+  Overload 1 of 2, '(s: string, hash: string): Promise<boolean>', gave the following error.
+    Argument of type 'string | null' is not assignable to parameter of type 'string'.
+      Type 'null' is not assignable to type 'string'.
+  Overload 2 of 2, '(s: string, hash: string, callback?: ((err: Error | null, success: boolean) => void) | undefined, progressCallback?: ((percent: number) => void) | undefined): void', gave the following error.
+    Argument of type 'string | null' is not assignable to parameter of type 'string'.
+      Type 'null' is not assignable to type 'string'.
+
+[7m105[0m     const isPasswordValid = await bcrypt.compare(password, user.password);
+[7m   [0m [91m                                                           ~~~~~~~~~~~~~[0m
+
+[96msrc/controllers/authController.ts[0m:[93m115[0m:[93m15[0m - [91merror[0m[90m TS2551: [0mProperty 'isActive' does not exist on type '{ id: string; email: string; password: string | null; first_name: string; last_name: string; username: string | null; phone: string | null; city: string | null; district: string | null; ... 15 more ...; refresh_token_expires: Date | null; }'. Did you mean 'is_active'?
+
+[7m115[0m     if (!user.isActive) {
+[7m   [0m [91m              ~~~~~~~~[0m
+[96msrc/controllers/authController.ts[0m:[93m125[0m:[93m15[0m - [91merror[0m[90m TS2561: [0mObject literal may only specify known properties, but 'lastLoginAt' does not exist in type '(Without<UserUpdateInput, UserUncheckedUpdateInput> & UserUncheckedUpdateInput) | (Without<...> & UserUpdateInput)'. Did you mean to write 'last_login'?
+
+[7m125[0m       data: { lastLoginAt: new Date() },
+[7m   [0m [91m              ~~~~~~~~~~~[0m
+
+  [96mnode_modules/.prisma/client/index.d.ts[0m:[93m4153[0m:[93m5[0m
+    [7m4153[0m     data: XOR<UserUpdateInput, UserUncheckedUpdateInput>
+    [7m    [0m [96m    ~~~~[0m
+    The expected type comes from property 'data' which is declared here on type '{ select?: UserSelect<DefaultArgs> | null | undefined; include?: UserInclude<DefaultArgs> | null | undefined; data: (Without<UserUpdateInput, UserUncheckedUpdateInput> & UserUncheckedUpdateInput) | (Without<...> & UserUpdateInput); where: UserWhereUniqueInput; }'
+[96msrc/controllers/authController.ts[0m:[93m174[0m:[93m22[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m174[0m export const getMe = async (req: AuthRequest, res: Response) => {
+[7m   [0m [91m                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/authController.ts[0m:[93m182[0m:[93m9[0m - [91merror[0m[90m TS2561: [0mObject literal may only specify known properties, but 'firstName' does not exist in type 'UserSelect<DefaultArgs>'. Did you mean to write 'first_name'?
+
+[7m182[0m         firstName: true,
+[7m   [0m [91m        ~~~~~~~~~[0m
+
+  [96mnode_modules/.prisma/client/index.d.ts[0m:[93m3926[0m:[93m5[0m
+    [7m3926[0m     select?: UserSelect<ExtArgs> | null
+    [7m    [0m [96m    ~~~~~~[0m
+    The expected type comes from property 'select' which is declared here on type '{ select?: UserSelect<DefaultArgs> | null | undefined; include?: UserInclude<DefaultArgs> | null | undefined; where: UserWhereUniqueInput; }'
+[96msrc/controllers/authController.ts[0m:[93m218[0m:[93m29[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m218[0m export const refreshToken = async (req: Request, res: Response) => {
+[7m   [0m [91m                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/authController.ts[0m:[93m235[0m:[93m29[0m - [91merror[0m[90m TS2561: [0mObject literal may only specify known properties, but 'isActive' does not exist in type 'UserSelect<DefaultArgs>'. Did you mean to write 'is_active'?
+
+[7m235[0m         select: { id: true, isActive: true }
+[7m   [0m [91m                            ~~~~~~~~[0m
+
+  [96mnode_modules/.prisma/client/index.d.ts[0m:[93m3926[0m:[93m5[0m
+    [7m3926[0m     select?: UserSelect<ExtArgs> | null
+    [7m    [0m [96m    ~~~~~~[0m
+    The expected type comes from property 'select' which is declared here on type '{ select?: UserSelect<DefaultArgs> | null | undefined; include?: UserInclude<DefaultArgs> | null | undefined; where: UserWhereUniqueInput; }'
+[96msrc/controllers/authController.ts[0m:[93m238[0m:[93m26[0m - [91merror[0m[90m TS2551: [0mProperty 'isActive' does not exist on type '{ id: string; email: string; password: string | null; first_name: string; last_name: string; username: string | null; phone: string | null; city: string | null; district: string | null; ... 15 more ...; refresh_token_expires: Date | null; }'. Did you mean 'is_active'?
+
+[7m238[0m       if (!user || !user.isActive) {
+[7m   [0m [91m                         ~~~~~~~~[0m
+[96msrc/controllers/authController.ts[0m:[93m268[0m:[93m31[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m268[0m export const forgotPassword = async (req: Request, res: Response) => {
+[7m   [0m [91m                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/authController.ts[0m:[93m306[0m:[93m30[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m306[0m export const resetPassword = async (req: Request, res: Response) => {
+[7m   [0m [91m                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/authController.ts[0m:[93m345[0m:[93m28[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m345[0m export const verifyEmail = async (req: Request, res: Response) => {
+[7m   [0m [91m                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/authController.ts[0m:[93m356[0m:[93m11[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'isVerified' does not exist in type '(Without<UserUpdateInput, UserUncheckedUpdateInput> & UserUncheckedUpdateInput) | (Without<...> & UserUpdateInput)'.
+
+[7m356[0m           isVerified: true,
+[7m   [0m [91m          ~~~~~~~~~~[0m
+
+  [96mnode_modules/.prisma/client/index.d.ts[0m:[93m4153[0m:[93m5[0m
+    [7m4153[0m     data: XOR<UserUpdateInput, UserUncheckedUpdateInput>
+    [7m    [0m [96m    ~~~~[0m
+    The expected type comes from property 'data' which is declared here on type '{ select?: UserSelect<DefaultArgs> | null | undefined; include?: UserInclude<DefaultArgs> | null | undefined; data: (Without<UserUpdateInput, UserUncheckedUpdateInput> & UserUncheckedUpdateInput) | (Without<...> & UserUpdateInput); where: UserWhereUniqueInput; }'
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-13 13:16:50 [info]: Server is running on port 3001
+2025-08-13 13:25:59 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/authController.ts[0m:[93m10[0m:[93m14[0m - [91merror[0m[90m TS2769: [0mNo overload matches this call.
+  Overload 1 of 5, '(payload: string | object | Buffer<ArrayBufferLike>, secretOrPrivateKey: null, options?: (SignOptions & { algorithm: "none"; }) | undefined): string', gave the following error.
+    Argument of type 'string' is not assignable to parameter of type 'null'.
+  Overload 2 of 5, '(payload: string | object | Buffer<ArrayBufferLike>, secretOrPrivateKey: Secret | Buffer<ArrayBufferLike> | JsonWebKeyInput | PrivateKeyInput, options?: SignOptions | undefined): string', gave the following error.
+    Type 'string' is not assignable to type 'number | StringValue | undefined'.
+  Overload 3 of 5, '(payload: string | object | Buffer<ArrayBufferLike>, secretOrPrivateKey: Secret | Buffer<ArrayBufferLike> | JsonWebKeyInput | PrivateKeyInput, callback: SignCallback): void', gave the following error.
+    Object literal may only specify known properties, and 'expiresIn' does not exist in type 'SignCallback'.
+
+[7m10[0m   return jwt.sign({ userId }, process.env.JWT_SECRET!, {
+[7m  [0m [91m             ~~~~[0m
+
+[96msrc/controllers/authController.ts[0m:[93m16[0m:[93m25[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m16[0m export const register = async (req: Request, res: Response) => {
+[7m  [0m [91m                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/authController.ts[0m:[93m88[0m:[93m22[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m88[0m export const login = async (req: Request, res: Response) => {
+[7m  [0m [91m                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/authController.ts[0m:[93m105[0m:[93m60[0m - [91merror[0m[90m TS2769: [0mNo overload matches this call.
+  Overload 1 of 2, '(s: string, hash: string): Promise<boolean>', gave the following error.
+    Argument of type 'string | null' is not assignable to parameter of type 'string'.
+      Type 'null' is not assignable to type 'string'.
+  Overload 2 of 2, '(s: string, hash: string, callback?: ((err: Error | null, success: boolean) => void) | undefined, progressCallback?: ((percent: number) => void) | undefined): void', gave the following error.
+    Argument of type 'string | null' is not assignable to parameter of type 'string'.
+      Type 'null' is not assignable to type 'string'.
+
+[7m105[0m     const isPasswordValid = await bcrypt.compare(password, user.password);
+[7m   [0m [91m                                                           ~~~~~~~~~~~~~[0m
+
+[96msrc/controllers/authController.ts[0m:[93m115[0m:[93m15[0m - [91merror[0m[90m TS2551: [0mProperty 'isActive' does not exist on type '{ id: string; email: string; password: string | null; first_name: string; last_name: string; username: string | null; phone: string | null; city: string | null; district: string | null; ... 15 more ...; refresh_token_expires: Date | null; }'. Did you mean 'is_active'?
+
+[7m115[0m     if (!user.isActive) {
+[7m   [0m [91m              ~~~~~~~~[0m
+[96msrc/controllers/authController.ts[0m:[93m125[0m:[93m15[0m - [91merror[0m[90m TS2561: [0mObject literal may only specify known properties, but 'lastLoginAt' does not exist in type '(Without<UserUpdateInput, UserUncheckedUpdateInput> & UserUncheckedUpdateInput) | (Without<...> & UserUpdateInput)'. Did you mean to write 'last_login'?
+
+[7m125[0m       data: { lastLoginAt: new Date() },
+[7m   [0m [91m              ~~~~~~~~~~~[0m
+
+  [96mnode_modules/.prisma/client/index.d.ts[0m:[93m4153[0m:[93m5[0m
+    [7m4153[0m     data: XOR<UserUpdateInput, UserUncheckedUpdateInput>
+    [7m    [0m [96m    ~~~~[0m
+    The expected type comes from property 'data' which is declared here on type '{ select?: UserSelect<DefaultArgs> | null | undefined; include?: UserInclude<DefaultArgs> | null | undefined; data: (Without<UserUpdateInput, UserUncheckedUpdateInput> & UserUncheckedUpdateInput) | (Without<...> & UserUpdateInput); where: UserWhereUniqueInput; }'
+[96msrc/controllers/authController.ts[0m:[93m174[0m:[93m22[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m174[0m export const getMe = async (req: AuthRequest, res: Response) => {
+[7m   [0m [91m                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/authController.ts[0m:[93m182[0m:[93m9[0m - [91merror[0m[90m TS2561: [0mObject literal may only specify known properties, but 'firstName' does not exist in type 'UserSelect<DefaultArgs>'. Did you mean to write 'first_name'?
+
+[7m182[0m         firstName: true,
+[7m   [0m [91m        ~~~~~~~~~[0m
+
+  [96mnode_modules/.prisma/client/index.d.ts[0m:[93m3926[0m:[93m5[0m
+    [7m3926[0m     select?: UserSelect<ExtArgs> | null
+    [7m    [0m [96m    ~~~~~~[0m
+    The expected type comes from property 'select' which is declared here on type '{ select?: UserSelect<DefaultArgs> | null | undefined; include?: UserInclude<DefaultArgs> | null | undefined; where: UserWhereUniqueInput; }'
+[96msrc/controllers/authController.ts[0m:[93m218[0m:[93m29[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m218[0m export const refreshToken = async (req: Request, res: Response) => {
+[7m   [0m [91m                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/authController.ts[0m:[93m235[0m:[93m29[0m - [91merror[0m[90m TS2561: [0mObject literal may only specify known properties, but 'isActive' does not exist in type 'UserSelect<DefaultArgs>'. Did you mean to write 'is_active'?
+
+[7m235[0m         select: { id: true, isActive: true }
+[7m   [0m [91m                            ~~~~~~~~[0m
+
+  [96mnode_modules/.prisma/client/index.d.ts[0m:[93m3926[0m:[93m5[0m
+    [7m3926[0m     select?: UserSelect<ExtArgs> | null
+    [7m    [0m [96m    ~~~~~~[0m
+    The expected type comes from property 'select' which is declared here on type '{ select?: UserSelect<DefaultArgs> | null | undefined; include?: UserInclude<DefaultArgs> | null | undefined; where: UserWhereUniqueInput; }'
+[96msrc/controllers/authController.ts[0m:[93m238[0m:[93m26[0m - [91merror[0m[90m TS2551: [0mProperty 'isActive' does not exist on type '{ id: string; email: string; password: string | null; first_name: string; last_name: string; username: string | null; phone: string | null; city: string | null; district: string | null; ... 15 more ...; refresh_token_expires: Date | null; }'. Did you mean 'is_active'?
+
+[7m238[0m       if (!user || !user.isActive) {
+[7m   [0m [91m                         ~~~~~~~~[0m
+[96msrc/controllers/authController.ts[0m:[93m268[0m:[93m31[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m268[0m export const forgotPassword = async (req: Request, res: Response) => {
+[7m   [0m [91m                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/authController.ts[0m:[93m306[0m:[93m30[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m306[0m export const resetPassword = async (req: Request, res: Response) => {
+[7m   [0m [91m                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/authController.ts[0m:[93m345[0m:[93m28[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m345[0m export const verifyEmail = async (req: Request, res: Response) => {
+[7m   [0m [91m                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/authController.ts[0m:[93m356[0m:[93m11[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'isVerified' does not exist in type '(Without<UserUpdateInput, UserUncheckedUpdateInput> & UserUncheckedUpdateInput) | (Without<...> & UserUpdateInput)'.
+
+[7m356[0m           isVerified: true,
+[7m   [0m [91m          ~~~~~~~~~~[0m
+
+  [96mnode_modules/.prisma/client/index.d.ts[0m:[93m4153[0m:[93m5[0m
+    [7m4153[0m     data: XOR<UserUpdateInput, UserUncheckedUpdateInput>
+    [7m    [0m [96m    ~~~~[0m
+    The expected type comes from property 'data' which is declared here on type '{ select?: UserSelect<DefaultArgs> | null | undefined; include?: UserInclude<DefaultArgs> | null | undefined; data: (Without<UserUpdateInput, UserUncheckedUpdateInput> & UserUncheckedUpdateInput) | (Without<...> & UserUpdateInput); where: UserWhereUniqueInput; }'
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-13 13:25:59 [info]: Server is running on port 3001
+2025-08-13 13:26:47 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/authController.ts[0m:[93m10[0m:[93m14[0m - [91merror[0m[90m TS2769: [0mNo overload matches this call.
+  Overload 1 of 5, '(payload: string | object | Buffer<ArrayBufferLike>, secretOrPrivateKey: null, options?: (SignOptions & { algorithm: "none"; }) | undefined): string', gave the following error.
+    Argument of type 'string' is not assignable to parameter of type 'null'.
+  Overload 2 of 5, '(payload: string | object | Buffer<ArrayBufferLike>, secretOrPrivateKey: Secret | Buffer<ArrayBufferLike> | JsonWebKeyInput | PrivateKeyInput, options?: SignOptions | undefined): string', gave the following error.
+    Type 'string' is not assignable to type 'number | StringValue | undefined'.
+  Overload 3 of 5, '(payload: string | object | Buffer<ArrayBufferLike>, secretOrPrivateKey: Secret | Buffer<ArrayBufferLike> | JsonWebKeyInput | PrivateKeyInput, callback: SignCallback): void', gave the following error.
+    Object literal may only specify known properties, and 'expiresIn' does not exist in type 'SignCallback'.
+
+[7m10[0m   return jwt.sign({ userId }, process.env.JWT_SECRET!, {
+[7m  [0m [91m             ~~~~[0m
+
+[96msrc/controllers/authController.ts[0m:[93m16[0m:[93m25[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m16[0m export const register = async (req: Request, res: Response) => {
+[7m  [0m [91m                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/authController.ts[0m:[93m88[0m:[93m22[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m88[0m export const login = async (req: Request, res: Response) => {
+[7m  [0m [91m                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/authController.ts[0m:[93m105[0m:[93m60[0m - [91merror[0m[90m TS2769: [0mNo overload matches this call.
+  Overload 1 of 2, '(s: string, hash: string): Promise<boolean>', gave the following error.
+    Argument of type 'string | null' is not assignable to parameter of type 'string'.
+      Type 'null' is not assignable to type 'string'.
+  Overload 2 of 2, '(s: string, hash: string, callback?: ((err: Error | null, success: boolean) => void) | undefined, progressCallback?: ((percent: number) => void) | undefined): void', gave the following error.
+    Argument of type 'string | null' is not assignable to parameter of type 'string'.
+      Type 'null' is not assignable to type 'string'.
+
+[7m105[0m     const isPasswordValid = await bcrypt.compare(password, user.password);
+[7m   [0m [91m                                                           ~~~~~~~~~~~~~[0m
+
+[96msrc/controllers/authController.ts[0m:[93m115[0m:[93m15[0m - [91merror[0m[90m TS2551: [0mProperty 'isActive' does not exist on type '{ id: string; email: string; password: string | null; first_name: string; last_name: string; username: string | null; phone: string | null; city: string | null; district: string | null; ... 15 more ...; refresh_token_expires: Date | null; }'. Did you mean 'is_active'?
+
+[7m115[0m     if (!user.isActive) {
+[7m   [0m [91m              ~~~~~~~~[0m
+[96msrc/controllers/authController.ts[0m:[93m125[0m:[93m15[0m - [91merror[0m[90m TS2561: [0mObject literal may only specify known properties, but 'lastLoginAt' does not exist in type '(Without<UserUpdateInput, UserUncheckedUpdateInput> & UserUncheckedUpdateInput) | (Without<...> & UserUpdateInput)'. Did you mean to write 'last_login'?
+
+[7m125[0m       data: { lastLoginAt: new Date() },
+[7m   [0m [91m              ~~~~~~~~~~~[0m
+
+  [96mnode_modules/.prisma/client/index.d.ts[0m:[93m4153[0m:[93m5[0m
+    [7m4153[0m     data: XOR<UserUpdateInput, UserUncheckedUpdateInput>
+    [7m    [0m [96m    ~~~~[0m
+    The expected type comes from property 'data' which is declared here on type '{ select?: UserSelect<DefaultArgs> | null | undefined; include?: UserInclude<DefaultArgs> | null | undefined; data: (Without<UserUpdateInput, UserUncheckedUpdateInput> & UserUncheckedUpdateInput) | (Without<...> & UserUpdateInput); where: UserWhereUniqueInput; }'
+[96msrc/controllers/authController.ts[0m:[93m174[0m:[93m22[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m174[0m export const getMe = async (req: AuthRequest, res: Response) => {
+[7m   [0m [91m                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/authController.ts[0m:[93m182[0m:[93m9[0m - [91merror[0m[90m TS2561: [0mObject literal may only specify known properties, but 'firstName' does not exist in type 'UserSelect<DefaultArgs>'. Did you mean to write 'first_name'?
+
+[7m182[0m         firstName: true,
+[7m   [0m [91m        ~~~~~~~~~[0m
+
+  [96mnode_modules/.prisma/client/index.d.ts[0m:[93m3926[0m:[93m5[0m
+    [7m3926[0m     select?: UserSelect<ExtArgs> | null
+    [7m    [0m [96m    ~~~~~~[0m
+    The expected type comes from property 'select' which is declared here on type '{ select?: UserSelect<DefaultArgs> | null | undefined; include?: UserInclude<DefaultArgs> | null | undefined; where: UserWhereUniqueInput; }'
+[96msrc/controllers/authController.ts[0m:[93m218[0m:[93m29[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m218[0m export const refreshToken = async (req: Request, res: Response) => {
+[7m   [0m [91m                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/authController.ts[0m:[93m235[0m:[93m29[0m - [91merror[0m[90m TS2561: [0mObject literal may only specify known properties, but 'isActive' does not exist in type 'UserSelect<DefaultArgs>'. Did you mean to write 'is_active'?
+
+[7m235[0m         select: { id: true, isActive: true }
+[7m   [0m [91m                            ~~~~~~~~[0m
+
+  [96mnode_modules/.prisma/client/index.d.ts[0m:[93m3926[0m:[93m5[0m
+    [7m3926[0m     select?: UserSelect<ExtArgs> | null
+    [7m    [0m [96m    ~~~~~~[0m
+    The expected type comes from property 'select' which is declared here on type '{ select?: UserSelect<DefaultArgs> | null | undefined; include?: UserInclude<DefaultArgs> | null | undefined; where: UserWhereUniqueInput; }'
+[96msrc/controllers/authController.ts[0m:[93m238[0m:[93m26[0m - [91merror[0m[90m TS2551: [0mProperty 'isActive' does not exist on type '{ id: string; email: string; password: string | null; first_name: string; last_name: string; username: string | null; phone: string | null; city: string | null; district: string | null; ... 15 more ...; refresh_token_expires: Date | null; }'. Did you mean 'is_active'?
+
+[7m238[0m       if (!user || !user.isActive) {
+[7m   [0m [91m                         ~~~~~~~~[0m
+[96msrc/controllers/authController.ts[0m:[93m268[0m:[93m31[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m268[0m export const forgotPassword = async (req: Request, res: Response) => {
+[7m   [0m [91m                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/authController.ts[0m:[93m306[0m:[93m30[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m306[0m export const resetPassword = async (req: Request, res: Response) => {
+[7m   [0m [91m                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/authController.ts[0m:[93m345[0m:[93m28[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m345[0m export const verifyEmail = async (req: Request, res: Response) => {
+[7m   [0m [91m                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/authController.ts[0m:[93m356[0m:[93m11[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'isVerified' does not exist in type '(Without<UserUpdateInput, UserUncheckedUpdateInput> & UserUncheckedUpdateInput) | (Without<...> & UserUpdateInput)'.
+
+[7m356[0m           isVerified: true,
+[7m   [0m [91m          ~~~~~~~~~~[0m
+
+  [96mnode_modules/.prisma/client/index.d.ts[0m:[93m4153[0m:[93m5[0m
+    [7m4153[0m     data: XOR<UserUpdateInput, UserUncheckedUpdateInput>
+    [7m    [0m [96m    ~~~~[0m
+    The expected type comes from property 'data' which is declared here on type '{ select?: UserSelect<DefaultArgs> | null | undefined; include?: UserInclude<DefaultArgs> | null | undefined; data: (Without<UserUpdateInput, UserUncheckedUpdateInput> & UserUncheckedUpdateInput) | (Without<...> & UserUpdateInput); where: UserWhereUniqueInput; }'
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-13 13:26:47 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/categoryController.ts[0m:[93m38[0m:[93m32[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m38[0m export const getCategoryById = async (req: Request, res: Response) => {
+[7m  [0m [91m                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-13 13:26:47 [info]: Server is running on port 3001
+2025-08-13 13:32:31 [info]: Category routes loaded
+2025-08-13 13:32:31 [info]: Server is running on port 3001
+2025-08-13 13:34:08 [info]: Category routes loaded
+2025-08-13 13:34:08 [info]: Server is running on port 3001
+2025-08-13 13:36:11 [info]: Category routes loaded
+2025-08-13 13:36:11 [info]: Server is running on port 3001
+2025-08-13 13:37:56 [info]: Category routes loaded
+2025-08-13 13:37:56 [info]: Database connected successfully
+2025-08-13 13:37:56 [info]: Server is running on port 3001
+2025-08-13 13:39:56 [info]: Category routes loaded
+2025-08-13 13:39:56 [info]: Database connected successfully
+2025-08-13 13:42:52 [info]: Category routes loaded
+2025-08-13 13:42:52 [info]: Database connected successfully
+2025-08-13 13:42:52 [info]: Server is running on port 3002
+2025-08-13 13:48:30 [info]: Category routes loaded
+2025-08-13 13:48:30 [info]: Database connected successfully
+2025-08-13 13:49:18 [info]: Category routes loaded
+2025-08-13 13:49:18 [info]: Category routes loaded
+2025-08-13 13:49:18 [info]: Database connected successfully
+2025-08-13 13:49:18 [info]: Server is running on port 3003
+2025-08-13 13:49:18 [info]: Database connected successfully
+2025-08-13 13:49:44 [info]: Category routes loaded
+2025-08-13 13:49:44 [info]: Database connected successfully
+2025-08-13 13:49:44 [info]: Server is running on port 3005
+2025-08-13 13:49:44 [info]: Category routes loaded
+2025-08-13 13:49:44 [info]: Database connected successfully
+2025-08-13 13:50:16 [info]: Category routes loaded
+2025-08-13 13:50:16 [info]: Database connected successfully
+2025-08-13 13:50:16 [info]: Server is running on port 3005
+2025-08-13 13:50:16 [info]: Category routes loaded
+2025-08-13 13:50:16 [info]: Database connected successfully
+2025-08-13 13:51:51 [info]: Category routes loaded
+2025-08-13 13:51:51 [info]: Database connected successfully
+2025-08-13 13:51:51 [info]: Server is running on port 3005
+2025-08-13 13:54:48 [info]: Query: SELECT 1
+2025-08-13 13:54:48 [info]: Duration: 0ms
+2025-08-13 13:54:48 [info]: Query: SELECT 1
+2025-08-13 13:54:48 [info]: Duration: 0ms
+2025-08-13 17:16:44 [info]: Category routes loaded
+2025-08-13 17:16:44 [info]: Database connected successfully
+2025-08-13 17:16:44 [info]: Server is running on port 3005
+2025-08-13 17:17:33 [info]: Category routes loaded
+2025-08-13 17:17:33 [info]: Database connected successfully
+2025-08-13 17:17:33 [info]: Server is running on port 3005
+2025-08-13 17:17:47 [info]: Category routes loaded
+2025-08-13 17:17:47 [info]: Database connected successfully
+2025-08-13 17:17:47 [info]: Server is running on port 3005
+2025-08-13 17:18:05 [info]: Category routes loaded
+2025-08-13 17:18:05 [info]: Database connected successfully
+2025-08-13 17:18:05 [info]: Server is running on port 3005
+2025-08-13 17:18:24 [info]: Category routes loaded
+2025-08-13 17:18:25 [info]: Database connected successfully
+2025-08-13 17:18:25 [info]: Server is running on port 3005
+2025-08-13 17:26:43 [info]: Category routes loaded
+2025-08-13 17:26:43 [info]: Database connected successfully
+2025-08-13 17:26:43 [info]: Server is running on port 3005
+2025-08-13 17:26:50 [info]: Category routes loaded
+2025-08-13 17:26:50 [info]: Database connected successfully
+2025-08-13 17:26:50 [info]: Server is running on port 3005
+2025-08-13 17:26:56 [info]: Category routes loaded
+2025-08-13 17:26:56 [info]: Database connected successfully
+2025-08-13 17:26:56 [info]: Server is running on port 3005
+2025-08-13 17:27:06 [info]: Category routes loaded
+2025-08-13 17:27:06 [info]: Database connected successfully
+2025-08-13 17:27:06 [info]: Server is running on port 3005
+2025-08-13 17:29:51 [info]: Category routes loaded
+2025-08-13 17:29:51 [info]: Database connected successfully
+2025-08-13 17:34:01 [info]: Category routes loaded
+2025-08-13 17:34:01 [info]: Database connected successfully
+2025-08-13 17:34:01 [info]: Server is running on port 3005
+2025-08-13 17:38:54 [info]: Category routes loaded
+2025-08-13 17:38:54 [info]: Database connected successfully
+2025-08-13 17:38:54 [info]: Server is running on port 3005
+2025-08-13 17:39:22 [info]: Category routes loaded
+2025-08-13 17:39:22 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/middleware/auth.ts[0m:[93m17[0m:[93m31[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m17[0m export const authMiddleware = async (req: AuthRequest, res: Response, next: NextFunction) => {
+[7m  [0m [91m                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/middleware/auth.ts[0m:[93m80[0m:[93m32[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m80[0m export const adminMiddleware = async (req: AuthRequest, res: Response, next: NextFunction) => {
+[7m  [0m [91m                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/middleware/auth.ts[0m:[93m106[0m:[93m37[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m106[0m export const superAdminMiddleware = async (req: AuthRequest, res: Response, next: NextFunction) => {
+[7m   [0m [91m                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/middleware/auth.ts[0m:[93m150[0m:[93m11[0m - [91merror[0m[90m TS2561: [0mObject literal may only specify known properties, but 'firstName' does not exist in type 'UserSelect<DefaultArgs>'. Did you mean to write 'first_name'?
+
+[7m150[0m           firstName: true,
+[7m   [0m [91m          ~~~~~~~~~[0m
+
+  [96mnode_modules/.prisma/client/index.d.ts[0m:[93m3926[0m:[93m5[0m
+    [7m3926[0m     select?: UserSelect<ExtArgs> | null
+    [7m    [0m [96m    ~~~~~~[0m
+    The expected type comes from property 'select' which is declared here on type '{ select?: UserSelect<DefaultArgs> | null | undefined; include?: UserInclude<DefaultArgs> | null | undefined; where: UserWhereUniqueInput; }'
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-13 17:39:22 [info]: Database connected successfully
+2025-08-13 17:39:22 [info]: Server is running on port 3005
+2025-08-13 17:39:54 [info]: Category routes loaded
+2025-08-13 17:39:54 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/middleware/auth.ts[0m:[93m17[0m:[93m31[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m17[0m export const authMiddleware = async (req: AuthRequest, res: Response, next: NextFunction) => {
+[7m  [0m [91m                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/middleware/auth.ts[0m:[93m80[0m:[93m32[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m80[0m export const adminMiddleware = async (req: AuthRequest, res: Response, next: NextFunction) => {
+[7m  [0m [91m                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/middleware/auth.ts[0m:[93m106[0m:[93m37[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m106[0m export const superAdminMiddleware = async (req: AuthRequest, res: Response, next: NextFunction) => {
+[7m   [0m [91m                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-13 17:39:54 [info]: Database connected successfully
+2025-08-13 17:39:54 [info]: Server is running on port 3005
+2025-08-13 17:40:10 [info]: Category routes loaded
+2025-08-13 17:40:11 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/middleware/auth.ts[0m:[93m22[0m:[93m7[0m - [91merror[0m[90m TS2322: [0mType 'Response<any, Record<string, any>>' is not assignable to type 'void'.
+
+[7m22[0m       return res.status(401).json({
+[7m  [0m [91m      ~~~~~~[0m
+[96msrc/middleware/auth.ts[0m:[93m49[0m:[93m9[0m - [91merror[0m[90m TS2322: [0mType 'Response<any, Record<string, any>>' is not assignable to type 'void'.
+
+[7m49[0m         return res.status(401).json({
+[7m  [0m [91m        ~~~~~~[0m
+[96msrc/middleware/auth.ts[0m:[93m56[0m:[93m9[0m - [91merror[0m[90m TS2322: [0mType 'Response<any, Record<string, any>>' is not assignable to type 'void'.
+
+[7m56[0m         return res.status(401).json({
+[7m  [0m [91m        ~~~~~~[0m
+[96msrc/middleware/auth.ts[0m:[93m66[0m:[93m7[0m - [91merror[0m[90m TS2322: [0mType 'Response<any, Record<string, any>>' is not assignable to type 'void'.
+
+[7m66[0m       return res.status(401).json({
+[7m  [0m [91m      ~~~~~~[0m
+[96msrc/middleware/auth.ts[0m:[93m73[0m:[93m5[0m - [91merror[0m[90m TS2322: [0mType 'Response<any, Record<string, any>>' is not assignable to type 'void'.
+
+[7m73[0m     return res.status(500).json({
+[7m  [0m [91m    ~~~~~~[0m
+[96msrc/middleware/auth.ts[0m:[93m80[0m:[93m32[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m80[0m export const adminMiddleware = async (req: AuthRequest, res: Response, next: NextFunction) => {
+[7m  [0m [91m                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/middleware/auth.ts[0m:[93m106[0m:[93m37[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m106[0m export const superAdminMiddleware = async (req: AuthRequest, res: Response, next: NextFunction) => {
+[7m   [0m [91m                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-13 17:40:11 [info]: Database connected successfully
+2025-08-13 17:40:11 [info]: Server is running on port 3005
+2025-08-13 17:40:25 [info]: Category routes loaded
+2025-08-13 17:40:26 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/middleware/auth.ts[0m:[93m80[0m:[93m32[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m80[0m export const adminMiddleware = async (req: AuthRequest, res: Response, next: NextFunction) => {
+[7m  [0m [91m                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/middleware/auth.ts[0m:[93m106[0m:[93m37[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m106[0m export const superAdminMiddleware = async (req: AuthRequest, res: Response, next: NextFunction) => {
+[7m   [0m [91m                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-13 17:40:26 [info]: Database connected successfully
+2025-08-13 17:40:26 [info]: Server is running on port 3005
+2025-08-13 17:40:36 [info]: Category routes loaded
+2025-08-13 17:40:37 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/middleware/auth.ts[0m:[93m106[0m:[93m37[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m106[0m export const superAdminMiddleware = async (req: AuthRequest, res: Response, next: NextFunction) => {
+[7m   [0m [91m                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-13 17:40:37 [info]: Database connected successfully
+2025-08-13 17:40:37 [info]: Server is running on port 3005
+2025-08-13 17:40:46 [info]: Category routes loaded
+2025-08-13 17:40:46 [info]: Auth routes loaded
+2025-08-13 17:40:47 [info]: Database connected successfully
+2025-08-13 17:40:47 [info]: Server is running on port 3005
+2025-08-13 17:41:51 [info]: Query: SELECT 1
+2025-08-13 17:41:51 [info]: Duration: 1ms
+2025-08-13 17:41:51 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."password", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."phone", "public"."users"."city", "public"."users"."district", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified", "public"."users"."reset_password_token", "public"."users"."reset_password_expires", "public"."users"."last_login", "public"."users"."login_attempts", "public"."users"."lock_until", "public"."users"."created_at", "public"."users"."updated_at", "public"."users"."email_verification_expires", "public"."users"."email_verification_token", "public"."users"."google_id", "public"."users"."provider", "public"."users"."refresh_token", "public"."users"."refresh_token_expires" FROM "public"."users" WHERE ("public"."users"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 17:41:51 [info]: Duration: 14ms
+2025-08-13 17:41:52 [info]: Query: UPDATE "public"."users" SET "last_login" = $1 WHERE ("public"."users"."id" = $2 AND 1=1) RETURNING "public"."users"."id", "public"."users"."email", "public"."users"."password", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."phone", "public"."users"."city", "public"."users"."district", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified", "public"."users"."reset_password_token", "public"."users"."reset_password_expires", "public"."users"."last_login", "public"."users"."login_attempts", "public"."users"."lock_until", "public"."users"."created_at", "public"."users"."updated_at", "public"."users"."email_verification_expires", "public"."users"."email_verification_token", "public"."users"."google_id", "public"."users"."provider", "public"."users"."refresh_token", "public"."users"."refresh_token_expires"
+2025-08-13 17:41:52 [info]: Duration: 4ms
+2025-08-13 17:41:52 [info]: User logged in: salihsaydam81@hotmail.com
+2025-08-13 17:42:10 [info]: Query: SELECT 1
+2025-08-13 17:42:10 [info]: Duration: 0ms
+2025-08-13 17:42:10 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."password", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."phone", "public"."users"."city", "public"."users"."district", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified", "public"."users"."reset_password_token", "public"."users"."reset_password_expires", "public"."users"."last_login", "public"."users"."login_attempts", "public"."users"."lock_until", "public"."users"."created_at", "public"."users"."updated_at", "public"."users"."email_verification_expires", "public"."users"."email_verification_token", "public"."users"."google_id", "public"."users"."provider", "public"."users"."refresh_token", "public"."users"."refresh_token_expires" FROM "public"."users" WHERE ("public"."users"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 17:42:10 [info]: Duration: 0ms
+2025-08-13 17:42:10 [info]: Query: UPDATE "public"."users" SET "last_login" = $1 WHERE ("public"."users"."id" = $2 AND 1=1) RETURNING "public"."users"."id", "public"."users"."email", "public"."users"."password", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."phone", "public"."users"."city", "public"."users"."district", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified", "public"."users"."reset_password_token", "public"."users"."reset_password_expires", "public"."users"."last_login", "public"."users"."login_attempts", "public"."users"."lock_until", "public"."users"."created_at", "public"."users"."updated_at", "public"."users"."email_verification_expires", "public"."users"."email_verification_token", "public"."users"."google_id", "public"."users"."provider", "public"."users"."refresh_token", "public"."users"."refresh_token_expires"
+2025-08-13 17:42:10 [info]: Duration: 1ms
+2025-08-13 17:42:10 [info]: User logged in: victorosimhen@codlean.com
+2025-08-13 17:42:16 [info]: Category routes loaded
+2025-08-13 17:42:17 [info]: Auth routes loaded
+2025-08-13 17:42:17 [info]: Database connected successfully
+2025-08-13 17:42:17 [info]: Server is running on port 3005
+2025-08-13 17:46:49 [info]: Query: SELECT 1
+2025-08-13 17:46:49 [info]: Duration: 0ms
+2025-08-13 17:46:49 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 17:46:49 [info]: Duration: 3ms
+2025-08-13 17:46:49 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."phone", "public"."users"."city", "public"."users"."district", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified", "public"."users"."created_at", "public"."users"."updated_at" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 17:46:49 [info]: Duration: 0ms
+2025-08-13 17:46:49 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 17:46:49 [info]: Duration: 0ms
+2025-08-13 17:46:49 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."phone", "public"."users"."city", "public"."users"."district", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified", "public"."users"."created_at", "public"."users"."updated_at" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 17:46:49 [info]: Duration: 0ms
+2025-08-13 17:48:43 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 17:48:43 [info]: Duration: 6ms
+2025-08-13 17:48:43 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."phone", "public"."users"."city", "public"."users"."district", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified", "public"."users"."created_at", "public"."users"."updated_at" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 17:48:43 [info]: Duration: 1ms
+2025-08-13 17:48:43 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 17:48:43 [info]: Duration: 0ms
+2025-08-13 17:48:43 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."phone", "public"."users"."city", "public"."users"."district", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified", "public"."users"."created_at", "public"."users"."updated_at" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 17:48:43 [info]: Duration: 0ms
+2025-08-13 17:53:46 [info]: Category routes loaded
+2025-08-13 17:53:46 [info]: Auth routes loaded
+2025-08-13 17:53:46 [info]: Database connected successfully
+2025-08-13 17:53:46 [info]: Server is running on port 3005
+2025-08-13 17:53:55 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 17:53:55 [info]: Duration: 4ms
+2025-08-13 17:53:55 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."phone", "public"."users"."city", "public"."users"."district", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified", "public"."users"."created_at", "public"."users"."updated_at" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 17:53:55 [info]: Duration: 0ms
+2025-08-13 17:53:55 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 17:53:55 [info]: Duration: 0ms
+2025-08-13 17:53:55 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."phone", "public"."users"."city", "public"."users"."district", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified", "public"."users"."created_at", "public"."users"."updated_at" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 17:53:55 [info]: Duration: 0ms
+2025-08-13 17:55:05 [info]: Query: SELECT 1
+2025-08-13 17:55:05 [info]: Duration: 0ms
+2025-08-13 17:55:05 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 17:55:05 [info]: Duration: 0ms
+2025-08-13 17:55:05 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."phone", "public"."users"."city", "public"."users"."district", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified", "public"."users"."created_at", "public"."users"."updated_at" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 17:55:05 [info]: Duration: 0ms
+2025-08-13 17:55:05 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 17:55:05 [info]: Duration: 0ms
+2025-08-13 17:55:05 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."phone", "public"."users"."city", "public"."users"."district", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified", "public"."users"."created_at", "public"."users"."updated_at" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 17:55:05 [info]: Duration: 0ms
+2025-08-13 17:58:27 [info]: Query: SELECT 1
+2025-08-13 17:58:27 [info]: Duration: 0ms
+2025-08-13 17:58:27 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 17:58:27 [info]: Duration: 1ms
+2025-08-13 17:58:27 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."phone", "public"."users"."city", "public"."users"."district", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified", "public"."users"."created_at", "public"."users"."updated_at" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 17:58:27 [info]: Duration: 3ms
+2025-08-13 17:58:27 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 17:58:27 [info]: Duration: 0ms
+2025-08-13 17:58:27 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."phone", "public"."users"."city", "public"."users"."district", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified", "public"."users"."created_at", "public"."users"."updated_at" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 17:58:27 [info]: Duration: 0ms
+2025-08-13 17:58:37 [info]: Vehicle types for category otobus fetched successfully
+2025-08-13 17:58:37 [info]: Vehicle types for category otobus fetched successfully
+2025-08-13 17:58:37 [info]: Vehicle types for category kurtarici fetched successfully
+2025-08-13 17:58:38 [info]: Vehicle types for category minibus fetched successfully
+2025-08-13 17:58:39 [info]: Vehicle types for category karoser fetched successfully
+2025-08-13 17:58:39 [info]: Vehicle types for category kamyon fetched successfully
+2025-08-13 17:58:40 [info]: Vehicle types for category dorse fetched successfully
+2025-08-13 17:58:40 [info]: Vehicle types for category cekici fetched successfully
+2025-08-13 18:00:27 [info]: Vehicle types for category karoser fetched successfully
+2025-08-13 18:00:27 [info]: Vehicle types for category karoser fetched successfully
+2025-08-13 18:00:28 [info]: Vehicle types for category kamyon fetched successfully
+2025-08-13 18:00:36 [info]: Vehicle types for category cekici fetched successfully
+2025-08-13 18:00:36 [info]: Vehicle types for category cekici fetched successfully
+2025-08-13 18:00:36 [info]: Vehicle types for category dorse fetched successfully
+2025-08-13 18:00:36 [info]: Vehicle types for category kamyon fetched successfully
+2025-08-13 18:00:37 [info]: Vehicle types for category karoser fetched successfully
+2025-08-13 18:00:37 [info]: Vehicle types for category minibus fetched successfully
+2025-08-13 18:00:37 [info]: Vehicle types for category kurtarici fetched successfully
+2025-08-13 18:00:38 [info]: Vehicle types for category otobus fetched successfully
+2025-08-13 18:00:38 [info]: Vehicle types for category kurtarici fetched successfully
+2025-08-13 18:00:38 [info]: Vehicle types for category minibus fetched successfully
+2025-08-13 18:00:39 [info]: Vehicle types for category kamyon fetched successfully
+2025-08-13 18:00:40 [info]: Vehicle types for category dorse fetched successfully
+2025-08-13 18:00:40 [info]: Vehicle types for category cekici fetched successfully
+2025-08-13 18:04:38 [error]: PrismaClientKnownRequestError: 
+Invalid `prisma.category.findMany()` invocation in
+C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\categoryController.ts:9:46
+
+  6 
+  7 export const getCategories = async (req: Request, res: Response) => {
+  8   try {
+→ 9     const categories = await prisma.category.findMany(
+The table `public.categories` does not exist in the current database.
+    at $n.handleRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:121:7315)
+    at $n.handleAndLogRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:121:6623)
+    at $n.request (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:121:6307)
+    at async l (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:130:9633)
+    at async getCategories (C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\categoryController.ts:9:24)
+2025-08-13 18:04:48 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 18:04:48 [info]: Duration: 11ms
+2025-08-13 18:04:48 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."phone", "public"."users"."city", "public"."users"."district", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified", "public"."users"."created_at", "public"."users"."updated_at" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 18:04:48 [info]: Duration: 2ms
+2025-08-13 18:04:48 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 18:04:48 [info]: Duration: 0ms
+2025-08-13 18:04:48 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."phone", "public"."users"."city", "public"."users"."district", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified", "public"."users"."created_at", "public"."users"."updated_at" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 18:04:48 [info]: Duration: 0ms
+2025-08-13 18:05:01 [info]: Category routes loaded
+2025-08-13 18:05:01 [info]: Auth routes loaded
+2025-08-13 18:05:01 [info]: Database connected successfully
+2025-08-13 18:05:01 [info]: Server is running on port 3005
+2025-08-13 18:05:16 [error]: PrismaClientKnownRequestError: 
+Invalid `prisma.category.findMany()` invocation in
+C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\categoryController.ts:9:46
+
+  6 
+  7 export const getCategories = async (req: Request, res: Response) => {
+  8   try {
+→ 9     const categories = await prisma.category.findMany(
+The table `public.categories` does not exist in the current database.
+    at $n.handleRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:121:7315)
+    at $n.handleAndLogRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:121:6623)
+    at $n.request (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:121:6307)
+    at async l (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:130:9633)
+    at async getCategories (C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\categoryController.ts:9:24)
+2025-08-13 18:06:58 [info]: Category routes loaded
+2025-08-13 18:06:59 [info]: Auth routes loaded
+2025-08-13 18:06:59 [info]: Database connected successfully
+2025-08-13 18:06:59 [info]: Server is running on port 3005
+2025-08-13 18:07:18 [info]: Category routes loaded
+2025-08-13 18:07:19 [info]: Auth routes loaded
+2025-08-13 18:07:19 [info]: Database connected successfully
+2025-08-13 18:07:19 [info]: Server is running on port 3005
+2025-08-13 18:07:24 [info]: Category routes loaded
+2025-08-13 18:07:25 [info]: Auth routes loaded
+2025-08-13 18:07:25 [info]: Database connected successfully
+2025-08-13 18:07:25 [info]: Server is running on port 3005
+2025-08-13 18:12:31 [error]: PrismaClientKnownRequestError: 
+Invalid `prisma.vehicle_types.findMany()` invocation in
+C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\categoryController.ts:215:53
+
+  212 // Get all vehicle types
+  213 export const getAllVehicleTypes = async (req: Request, res: Response): Promise<void> => {
+  214   try {
+→ 215     const vehicleTypes = await prisma.vehicle_types.findMany(
+The table `public.categories` does not exist in the current database.
+    at $n.handleRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:121:7315)
+    at $n.handleAndLogRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:121:6623)
+    at $n.request (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:121:6307)
+    at async l (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:130:9633)
+    at async getAllVehicleTypes (C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\categoryController.ts:215:26)
+2025-08-13 18:12:56 [error]: PrismaClientKnownRequestError: 
+Invalid `prisma.vehicle_types.findMany()` invocation in
+C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\categoryController.ts:215:53
+
+  212 // Get all vehicle types
+  213 export const getAllVehicleTypes = async (req: Request, res: Response): Promise<void> => {
+  214   try {
+→ 215     const vehicleTypes = await prisma.vehicle_types.findMany(
+The table `public.categories` does not exist in the current database.
+    at $n.handleRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:121:7315)
+    at $n.handleAndLogRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:121:6623)
+    at $n.request (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:121:6307)
+    at async l (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:130:9633)
+    at async getAllVehicleTypes (C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\categoryController.ts:215:26)
+2025-08-13 18:15:33 [error]: PrismaClientKnownRequestError: 
+Invalid `prisma.vehicle_types.findMany()` invocation in
+C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\categoryController.ts:215:53
+
+  212 // Get all vehicle types
+  213 export const getAllVehicleTypes = async (req: Request, res: Response): Promise<void> => {
+  214   try {
+→ 215     const vehicleTypes = await prisma.vehicle_types.findMany(
+The table `public.categories` does not exist in the current database.
+    at $n.handleRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:121:7315)
+    at $n.handleAndLogRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:121:6623)
+    at $n.request (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:121:6307)
+    at async l (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:130:9633)
+    at async getAllVehicleTypes (C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\categoryController.ts:215:26)
+2025-08-13 18:15:33 [error]: PrismaClientKnownRequestError: 
+Invalid `prisma.vehicle_types.findMany()` invocation in
+C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\categoryController.ts:215:53
+
+  212 // Get all vehicle types
+  213 export const getAllVehicleTypes = async (req: Request, res: Response): Promise<void> => {
+  214   try {
+→ 215     const vehicleTypes = await prisma.vehicle_types.findMany(
+The table `public.categories` does not exist in the current database.
+    at $n.handleRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:121:7315)
+    at $n.handleAndLogRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:121:6623)
+    at $n.request (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:121:6307)
+    at async l (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:130:9633)
+    at async getAllVehicleTypes (C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\categoryController.ts:215:26)
+2025-08-13 18:17:23 [info]: Category routes loaded
+2025-08-13 18:17:23 [info]: Auth routes loaded
+2025-08-13 18:17:23 [info]: Database connected successfully
+2025-08-13 18:17:23 [info]: Server is running on port 3005
+2025-08-13 18:17:53 [error]: PrismaClientKnownRequestError: 
+Invalid `prisma.vehicle_types.findMany()` invocation in
+C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\categoryController.ts:215:53
+
+  212 // Get all vehicle types
+  213 export const getAllVehicleTypes = async (req: Request, res: Response): Promise<void> => {
+  214   try {
+→ 215     const vehicleTypes = await prisma.vehicle_types.findMany(
+The table `public.categories` does not exist in the current database.
+    at $n.handleRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:121:7315)
+    at $n.handleAndLogRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:121:6623)
+    at $n.request (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:121:6307)
+    at async l (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:130:9633)
+    at async getAllVehicleTypes (C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\categoryController.ts:215:26)
+2025-08-13 18:18:28 [error]: PrismaClientKnownRequestError: 
+Invalid `prisma.vehicle_types.findMany()` invocation in
+C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\categoryController.ts:215:53
+
+  212 // Get all vehicle types
+  213 export const getAllVehicleTypes = async (req: Request, res: Response): Promise<void> => {
+  214   try {
+→ 215     const vehicleTypes = await prisma.vehicle_types.findMany(
+The table `public.categories` does not exist in the current database.
+    at $n.handleRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:121:7315)
+    at $n.handleAndLogRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:121:6623)
+    at $n.request (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:121:6307)
+    at async l (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:130:9633)
+    at async getAllVehicleTypes (C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\categoryController.ts:215:26)
+2025-08-13 18:19:19 [info]: Category routes loaded
+2025-08-13 18:19:19 [info]: Auth routes loaded
+2025-08-13 18:19:19 [info]: Database connected successfully
+2025-08-13 18:19:19 [info]: Server is running on port 3005
+2025-08-13 18:19:25 [info]: Fetching all vehicle types...
+2025-08-13 18:19:25 [error]: PrismaClientUnknownRequestError: 
+Invalid `prisma.vehicle_types.findMany()` invocation in
+C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\categoryController.ts:217:53
+
+  214 try {
+  215   logger.info('Fetching all vehicle types...');
+  216   
+→ 217   const vehicleTypes = await prisma.vehicle_types.findMany(
+Inconsistent query result: Field categories is required to return data, got `null` instead.
+    at $n.handleRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:121:7505)
+    at $n.handleAndLogRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:121:6623)
+    at $n.request (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:121:6307)
+    at async l (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:130:9633)
+    at async getAllVehicleTypes (C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\categoryController.ts:217:26)
+2025-08-13 18:20:33 [info]: Category routes loaded
+2025-08-13 18:20:33 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/middleware/auth.ts[0m:[93m50[0m:[93m9[0m - [91merror[0m[90m TS2322: [0mType 'Response<any, Record<string, any>>' is not assignable to type 'void'.
+
+[7m50[0m         return res.status(401).json({
+[7m  [0m [91m        ~~~~~~[0m
+[96msrc/middleware/auth.ts[0m:[93m57[0m:[93m9[0m - [91merror[0m[90m TS2322: [0mType 'Response<any, Record<string, any>>' is not assignable to type 'void'.
+
+[7m57[0m         return res.status(401).json({
+[7m  [0m [91m        ~~~~~~[0m
+[96msrc/middleware/auth.ts[0m:[93m67[0m:[93m7[0m - [91merror[0m[90m TS2322: [0mType 'Response<any, Record<string, any>>' is not assignable to type 'void'.
+
+[7m67[0m       return res.status(401).json({
+[7m  [0m [91m      ~~~~~~[0m
+[96msrc/middleware/auth.ts[0m:[93m74[0m:[93m5[0m - [91merror[0m[90m TS2322: [0mType 'Response<any, Record<string, any>>' is not assignable to type 'void'.
+
+[7m74[0m     return res.status(500).json({
+[7m  [0m [91m    ~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-13 18:20:33 [info]: Database connected successfully
+2025-08-13 18:20:33 [info]: Server is running on port 3005
+2025-08-13 18:20:39 [info]: Category routes loaded
+2025-08-13 18:20:40 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/middleware/auth.ts[0m:[93m69[0m:[93m7[0m - [91merror[0m[90m TS2322: [0mType 'Response<any, Record<string, any>>' is not assignable to type 'void'.
+
+[7m69[0m       return res.status(401).json({
+[7m  [0m [91m      ~~~~~~[0m
+[96msrc/middleware/auth.ts[0m:[93m76[0m:[93m5[0m - [91merror[0m[90m TS2322: [0mType 'Response<any, Record<string, any>>' is not assignable to type 'void'.
+
+[7m76[0m     return res.status(500).json({
+[7m  [0m [91m    ~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-13 18:20:40 [info]: Database connected successfully
+2025-08-13 18:20:40 [info]: Server is running on port 3005
+2025-08-13 18:20:50 [info]: Category routes loaded
+2025-08-13 18:20:50 [info]: Auth routes loaded
+2025-08-13 18:20:50 [info]: Database connected successfully
+2025-08-13 18:20:50 [info]: Server is running on port 3005
+2025-08-13 18:21:01 [info]: Category routes loaded
+2025-08-13 18:21:02 [info]: Auth routes loaded
+2025-08-13 18:21:02 [info]: Database connected successfully
+2025-08-13 18:21:02 [info]: Server is running on port 3005
+2025-08-13 18:21:11 [info]: Category routes loaded
+2025-08-13 18:21:11 [info]: Auth routes loaded
+2025-08-13 18:21:11 [info]: Database connected successfully
+2025-08-13 18:21:11 [info]: Server is running on port 3005
+2025-08-13 18:21:22 [info]: Fetching all vehicle types...
+2025-08-13 18:21:22 [error]: PrismaClientUnknownRequestError: 
+Invalid `prisma.vehicle_types.findMany()` invocation in
+C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\categoryController.ts:217:53
+
+  214 try {
+  215   logger.info('Fetching all vehicle types...');
+  216   
+→ 217   const vehicleTypes = await prisma.vehicle_types.findMany(
+Inconsistent query result: Field categories is required to return data, got `null` instead.
+    at $n.handleRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:121:7505)
+    at $n.handleAndLogRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:121:6623)
+    at $n.request (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:121:6307)
+    at async l (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:130:9633)
+    at async getAllVehicleTypes (C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\categoryController.ts:217:26)
+2025-08-13 18:22:04 [info]: Category routes loaded
+2025-08-13 18:22:05 [info]: Auth routes loaded
+2025-08-13 18:22:05 [info]: Database connected successfully
+2025-08-13 18:22:05 [info]: Server is running on port 3005
+2025-08-13 18:22:18 [info]: Fetching all vehicle types...
+2025-08-13 18:22:18 [info]: Found 8 vehicle types
+2025-08-13 18:22:25 [info]: Fetching all vehicle types...
+2025-08-13 18:22:25 [info]: Found 8 vehicle types
+2025-08-13 18:23:31 [info]: Query: SELECT 1
+2025-08-13 18:23:31 [info]: Duration: 0ms
+2025-08-13 18:23:31 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 18:23:31 [info]: Duration: 7ms
+2025-08-13 18:23:31 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."phone", "public"."users"."city", "public"."users"."district", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified", "public"."users"."created_at", "public"."users"."updated_at" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 18:23:31 [info]: Duration: 1ms
+2025-08-13 18:23:31 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 18:23:31 [info]: Duration: 0ms
+2025-08-13 18:23:31 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."phone", "public"."users"."city", "public"."users"."district", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified", "public"."users"."created_at", "public"."users"."updated_at" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 18:23:31 [info]: Duration: 0ms
+2025-08-13 18:23:38 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."password", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."phone", "public"."users"."city", "public"."users"."district", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified", "public"."users"."reset_password_token", "public"."users"."reset_password_expires", "public"."users"."last_login", "public"."users"."login_attempts", "public"."users"."lock_until", "public"."users"."created_at", "public"."users"."updated_at", "public"."users"."email_verification_expires", "public"."users"."email_verification_token", "public"."users"."google_id", "public"."users"."provider", "public"."users"."refresh_token", "public"."users"."refresh_token_expires" FROM "public"."users" WHERE ("public"."users"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 18:23:38 [info]: Duration: 1ms
+2025-08-13 18:23:40 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."password", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."phone", "public"."users"."city", "public"."users"."district", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified", "public"."users"."reset_password_token", "public"."users"."reset_password_expires", "public"."users"."last_login", "public"."users"."login_attempts", "public"."users"."lock_until", "public"."users"."created_at", "public"."users"."updated_at", "public"."users"."email_verification_expires", "public"."users"."email_verification_token", "public"."users"."google_id", "public"."users"."provider", "public"."users"."refresh_token", "public"."users"."refresh_token_expires" FROM "public"."users" WHERE ("public"."users"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 18:23:40 [info]: Duration: 0ms
+2025-08-13 18:23:46 [info]: Query: SELECT 1
+2025-08-13 18:23:46 [info]: Duration: 0ms
+2025-08-13 18:23:46 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."password", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."phone", "public"."users"."city", "public"."users"."district", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified", "public"."users"."reset_password_token", "public"."users"."reset_password_expires", "public"."users"."last_login", "public"."users"."login_attempts", "public"."users"."lock_until", "public"."users"."created_at", "public"."users"."updated_at", "public"."users"."email_verification_expires", "public"."users"."email_verification_token", "public"."users"."google_id", "public"."users"."provider", "public"."users"."refresh_token", "public"."users"."refresh_token_expires" FROM "public"."users" WHERE ("public"."users"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 18:23:46 [info]: Duration: 0ms
+2025-08-13 18:23:47 [info]: Query: UPDATE "public"."users" SET "last_login" = $1 WHERE ("public"."users"."id" = $2 AND 1=1) RETURNING "public"."users"."id", "public"."users"."email", "public"."users"."password", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."phone", "public"."users"."city", "public"."users"."district", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified", "public"."users"."reset_password_token", "public"."users"."reset_password_expires", "public"."users"."last_login", "public"."users"."login_attempts", "public"."users"."lock_until", "public"."users"."created_at", "public"."users"."updated_at", "public"."users"."email_verification_expires", "public"."users"."email_verification_token", "public"."users"."google_id", "public"."users"."provider", "public"."users"."refresh_token", "public"."users"."refresh_token_expires"
+2025-08-13 18:23:47 [info]: Duration: 5ms
+2025-08-13 18:23:47 [info]: User logged in: victorosimhen@codlean.com
+2025-08-13 18:23:50 [info]: Fetching all vehicle types...
+2025-08-13 18:23:50 [info]: Found 8 vehicle types
+2025-08-13 18:23:50 [info]: Fetching all vehicle types...
+2025-08-13 18:23:50 [info]: Found 8 vehicle types
+2025-08-13 18:23:53 [info]: Fetching all vehicle types...
+2025-08-13 18:23:53 [info]: Found 8 vehicle types
+2025-08-13 18:23:53 [info]: Fetching all vehicle types...
+2025-08-13 18:23:53 [info]: Found 8 vehicle types
+2025-08-13 22:09:51 [info]: Fetching all vehicle types...
+2025-08-13 22:09:51 [info]: Found 8 vehicle types
+2025-08-13 22:09:51 [info]: Fetching all vehicle types...
+2025-08-13 22:09:51 [info]: Found 8 vehicle types
+2025-08-13 22:09:51 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 22:09:51 [info]: Duration: 3ms
+2025-08-13 22:09:51 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."phone", "public"."users"."city", "public"."users"."district", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified", "public"."users"."created_at", "public"."users"."updated_at" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 22:09:51 [info]: Duration: 0ms
+2025-08-13 22:09:51 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 22:09:51 [info]: Duration: 0ms
+2025-08-13 22:09:51 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."phone", "public"."users"."city", "public"."users"."district", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified", "public"."users"."created_at", "public"."users"."updated_at" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 22:09:51 [info]: Duration: 0ms
+2025-08-13 22:10:54 [info]: Category routes loaded
+2025-08-13 22:10:54 [info]: Auth routes loaded
+2025-08-13 22:10:54 [info]: Database connected successfully
+2025-08-13 22:10:54 [info]: Server is running on port 3005
+2025-08-13 22:10:56 [info]: Fetching all vehicle types...
+2025-08-13 22:10:56 [info]: Found 8 vehicle types
+2025-08-13 22:10:56 [info]: Fetching all vehicle types...
+2025-08-13 22:10:56 [info]: Found 8 vehicle types
+2025-08-13 22:11:06 [info]: Category routes loaded
+2025-08-13 22:11:06 [info]: Auth routes loaded
+2025-08-13 22:11:06 [info]: Database connected successfully
+2025-08-13 22:11:06 [info]: Server is running on port 3005
+2025-08-13 22:11:20 [info]: Category routes loaded
+2025-08-13 22:11:20 [info]: Auth routes loaded
+2025-08-13 22:11:21 [info]: Database connected successfully
+2025-08-13 22:11:39 [info]: Query: SELECT 1
+2025-08-13 22:11:39 [info]: Duration: 1ms
+2025-08-13 22:11:39 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 22:11:39 [info]: Duration: 12ms
+2025-08-13 22:11:39 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."phone", "public"."users"."city", "public"."users"."district", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified", "public"."users"."created_at", "public"."users"."updated_at" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 22:11:39 [info]: Duration: 2ms
+2025-08-13 22:11:39 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 22:11:39 [info]: Duration: 1ms
+2025-08-13 22:11:39 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."phone", "public"."users"."city", "public"."users"."district", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified", "public"."users"."created_at", "public"."users"."updated_at" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 22:11:39 [info]: Duration: 0ms
+2025-08-13 22:11:48 [info]: Fetching all vehicle types...
+2025-08-13 22:11:48 [info]: Found 8 vehicle types
+2025-08-13 22:11:48 [info]: Fetching all vehicle types...
+2025-08-13 22:11:48 [info]: Found 8 vehicle types
+2025-08-13 22:23:10 [info]: Fetching all vehicle types...
+2025-08-13 22:23:11 [info]: Found 8 vehicle types
+2025-08-13 22:23:20 [info]: Brands for vehicle type cme633w9e0007981kn46jy5ot fetched successfully
+2025-08-13 22:27:25 [info]: Brands for vehicle type cme633w9e0007981kn46jy5ot fetched successfully
+2025-08-13 22:31:02 [info]: Category routes loaded
+2025-08-13 22:31:03 [info]: Auth routes loaded
+2025-08-13 22:31:03 [info]: Database connected successfully
+2025-08-13 22:31:14 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 22:31:14 [info]: Duration: 13ms
+2025-08-13 22:31:14 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."phone", "public"."users"."city", "public"."users"."district", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified", "public"."users"."created_at", "public"."users"."updated_at" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 22:31:14 [info]: Duration: 2ms
+2025-08-13 22:31:14 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 22:31:14 [info]: Duration: 1ms
+2025-08-13 22:31:14 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."phone", "public"."users"."city", "public"."users"."district", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified", "public"."users"."created_at", "public"."users"."updated_at" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 22:31:14 [info]: Duration: 0ms
+2025-08-13 22:31:16 [info]: Fetching all vehicle types...
+2025-08-13 22:31:16 [info]: Found 8 vehicle types
+2025-08-13 22:31:16 [info]: Fetching all vehicle types...
+2025-08-13 22:31:16 [info]: Found 8 vehicle types
+2025-08-13 22:31:17 [info]: Brands for vehicle type cme633w9e0007981kn46jy5ot fetched successfully
+2025-08-13 22:31:18 [info]: Brands for vehicle type cme633w9e0007981kn46jy5ot fetched successfully
+2025-08-13 22:32:42 [info]: Category routes loaded
+2025-08-13 22:32:43 [info]: Auth routes loaded
+2025-08-13 22:32:43 [info]: Database connected successfully
+2025-08-13 22:33:00 [info]: Query: SELECT 1
+2025-08-13 22:33:00 [info]: Duration: 1ms
+2025-08-13 22:33:00 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 22:33:00 [info]: Duration: 0ms
+2025-08-13 22:33:00 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."phone", "public"."users"."city", "public"."users"."district", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified", "public"."users"."created_at", "public"."users"."updated_at" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 22:33:00 [info]: Duration: 0ms
+2025-08-13 22:33:00 [info]: Brands for vehicle type cme633w9e0007981kn46jy5ot fetched successfully
+2025-08-13 22:33:00 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 22:33:00 [info]: Duration: 0ms
+2025-08-13 22:33:00 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."phone", "public"."users"."city", "public"."users"."district", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified", "public"."users"."created_at", "public"."users"."updated_at" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 22:33:00 [info]: Duration: 0ms
+2025-08-13 22:33:00 [info]: Brands for vehicle type cme633w9e0007981kn46jy5ot fetched successfully
+2025-08-13 22:33:03 [info]: Fetching all vehicle types...
+2025-08-13 22:33:03 [info]: Found 8 vehicle types
+2025-08-13 22:33:03 [info]: Fetching all vehicle types...
+2025-08-13 22:33:03 [info]: Found 8 vehicle types
+2025-08-13 22:33:04 [info]: Brands for vehicle type cme633w9j0009981k0lqq166x fetched successfully
+2025-08-13 22:33:04 [info]: Brands for vehicle type cme633w9j0009981k0lqq166x fetched successfully
+2025-08-13 22:42:28 [info]: Category routes loaded
+2025-08-13 22:42:28 [info]: Auth routes loaded
+2025-08-13 22:42:28 [info]: Database connected successfully
+2025-08-13 22:42:45 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 22:42:45 [info]: Duration: 5ms
+2025-08-13 22:42:45 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."phone", "public"."users"."city", "public"."users"."district", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified", "public"."users"."created_at", "public"."users"."updated_at" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 22:42:45 [info]: Duration: 1ms
+2025-08-13 22:42:45 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 22:42:45 [info]: Duration: 0ms
+2025-08-13 22:42:45 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."phone", "public"."users"."city", "public"."users"."district", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified", "public"."users"."created_at", "public"."users"."updated_at" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 22:42:45 [info]: Duration: 0ms
+2025-08-13 22:42:46 [info]: Fetching all vehicle types...
+2025-08-13 22:42:46 [info]: Found 8 vehicle types
+2025-08-13 22:42:46 [info]: Fetching all vehicle types...
+2025-08-13 22:42:46 [info]: Found 8 vehicle types
+2025-08-13 22:42:48 [info]: Brands for vehicle type cme633w9e0007981kn46jy5ot fetched successfully
+2025-08-13 22:42:48 [info]: Brands for vehicle type cme633w9e0007981kn46jy5ot fetched successfully
+2025-08-13 22:43:29 [info]: Category routes loaded
+2025-08-13 22:43:29 [info]: Auth routes loaded
+2025-08-13 22:43:29 [info]: Database connected successfully
+2025-08-13 22:44:32 [info]: Category routes loaded
+2025-08-13 22:44:32 [info]: Auth routes loaded
+2025-08-13 22:44:32 [info]: Database connected successfully
+2025-08-13 22:44:32 [info]: Server is running on port 3005
+2025-08-13 22:45:53 [info]: Category routes loaded
+2025-08-13 22:45:53 [info]: Auth routes loaded
+2025-08-13 22:45:53 [info]: Database connected successfully
+2025-08-13 22:45:53 [info]: Server is running on port 3005
+2025-08-13 22:46:55 [info]: Category routes loaded
+2025-08-13 22:46:55 [info]: Auth routes loaded
+2025-08-13 22:46:55 [info]: Database connected successfully
+2025-08-13 22:46:55 [info]: Server is running on port 3005
+2025-08-13 22:48:38 [info]: Category routes loaded
+2025-08-13 22:48:39 [info]: Auth routes loaded
+2025-08-13 22:48:39 [info]: Database connected successfully
+2025-08-13 22:48:39 [info]: Server is running on port 3005
+2025-08-13 22:48:58 [info]: Query: SELECT 1
+2025-08-13 22:48:58 [info]: Duration: 1ms
+2025-08-13 22:48:58 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 22:48:58 [info]: Duration: 11ms
+2025-08-13 22:48:58 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."phone", "public"."users"."city", "public"."users"."district", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified", "public"."users"."created_at", "public"."users"."updated_at" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 22:48:58 [info]: Duration: 3ms
+2025-08-13 22:48:58 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 22:48:58 [info]: Duration: 1ms
+2025-08-13 22:48:58 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."phone", "public"."users"."city", "public"."users"."district", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified", "public"."users"."created_at", "public"."users"."updated_at" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 22:48:58 [info]: Duration: 0ms
+2025-08-13 22:48:59 [info]: Fetching all vehicle types...
+2025-08-13 22:48:59 [info]: Found 8 vehicle types
+2025-08-13 22:48:59 [info]: Fetching all vehicle types...
+2025-08-13 22:48:59 [info]: Found 8 vehicle types
+2025-08-13 22:49:00 [info]: Fetching brands for vehicle type: cme633w9j0009981k0lqq166x
+2025-08-13 22:49:00 [info]: Found 10 brands for vehicle type cme633w9j0009981k0lqq166x
+2025-08-13 22:49:00 [info]: Fetching brands for vehicle type: cme633w9j0009981k0lqq166x
+2025-08-13 22:49:00 [info]: Found 10 brands for vehicle type cme633w9j0009981k0lqq166x
+2025-08-13 22:49:05 [info]: Fetching all vehicle types...
+2025-08-13 22:49:05 [info]: Found 8 vehicle types
+2025-08-13 22:49:05 [info]: Fetching all vehicle types...
+2025-08-13 22:49:05 [info]: Found 8 vehicle types
+2025-08-13 22:49:06 [info]: Fetching brands for vehicle type: cme633w9e0007981kn46jy5ot
+2025-08-13 22:49:06 [info]: Found 21 brands for vehicle type cme633w9e0007981kn46jy5ot
+2025-08-13 22:49:06 [info]: Fetching brands for vehicle type: cme633w9e0007981kn46jy5ot
+2025-08-13 22:49:06 [info]: Found 21 brands for vehicle type cme633w9e0007981kn46jy5ot
+2025-08-13 22:49:13 [info]: Fetching all vehicle types...
+2025-08-13 22:49:13 [info]: Found 8 vehicle types
+2025-08-13 22:49:13 [info]: Fetching all vehicle types...
+2025-08-13 22:49:13 [info]: Found 8 vehicle types
+2025-08-13 22:49:16 [info]: Fetching brands for vehicle type: cme633w980005981kt3picv7s
+2025-08-13 22:49:16 [info]: Found 72 brands for vehicle type cme633w980005981kt3picv7s
+2025-08-13 22:49:16 [info]: Fetching brands for vehicle type: cme633w980005981kt3picv7s
+2025-08-13 22:49:16 [info]: Found 72 brands for vehicle type cme633w980005981kt3picv7s
+2025-08-13 22:52:21 [info]: Fetching all vehicle types...
+2025-08-13 22:52:21 [info]: Found 8 vehicle types
+2025-08-13 22:52:21 [info]: Fetching all vehicle types...
+2025-08-13 22:52:21 [info]: Found 8 vehicle types
+2025-08-13 22:52:22 [info]: Fetching brands for vehicle type: cme633w9j0009981k0lqq166x
+2025-08-13 22:52:22 [info]: Found 10 brands for vehicle type cme633w9j0009981k0lqq166x
+2025-08-13 22:52:22 [info]: Fetching brands for vehicle type: cme633w9j0009981k0lqq166x
+2025-08-13 22:52:22 [info]: Found 10 brands for vehicle type cme633w9j0009981k0lqq166x
+2025-08-13 22:52:35 [info]: Fetching all vehicle types...
+2025-08-13 22:52:35 [info]: Found 8 vehicle types
+2025-08-13 22:52:35 [info]: Fetching all vehicle types...
+2025-08-13 22:52:35 [info]: Found 8 vehicle types
+2025-08-13 22:52:37 [info]: Fetching brands for vehicle type: cme633w9q000d981k253reql7
+2025-08-13 22:52:37 [info]: Found 2 brands for vehicle type cme633w9q000d981k253reql7
+2025-08-13 22:52:37 [info]: Fetching brands for vehicle type: cme633w9q000d981k253reql7
+2025-08-13 22:52:37 [info]: Found 2 brands for vehicle type cme633w9q000d981k253reql7
+2025-08-13 22:52:40 [info]: Fetching all vehicle types...
+2025-08-13 22:52:40 [info]: Found 8 vehicle types
+2025-08-13 22:52:40 [info]: Fetching all vehicle types...
+2025-08-13 22:52:40 [info]: Found 8 vehicle types
+2025-08-13 22:52:41 [info]: Fetching brands for vehicle type: cme633w9m000b981kfmvvpzb3
+2025-08-13 22:52:41 [info]: Found 4 brands for vehicle type cme633w9m000b981kfmvvpzb3
+2025-08-13 22:52:41 [info]: Fetching brands for vehicle type: cme633w9m000b981kfmvvpzb3
+2025-08-13 22:52:41 [info]: Found 4 brands for vehicle type cme633w9m000b981kfmvvpzb3
+2025-08-13 22:52:45 [info]: Fetching all vehicle types...
+2025-08-13 22:52:45 [info]: Found 8 vehicle types
+2025-08-13 22:52:45 [info]: Fetching all vehicle types...
+2025-08-13 22:52:45 [info]: Found 8 vehicle types
+2025-08-13 22:52:46 [info]: Fetching brands for vehicle type: cme633w980005981kt3picv7s
+2025-08-13 22:52:46 [info]: Found 72 brands for vehicle type cme633w980005981kt3picv7s
+2025-08-13 22:52:46 [info]: Fetching brands for vehicle type: cme633w980005981kt3picv7s
+2025-08-13 22:52:46 [info]: Found 72 brands for vehicle type cme633w980005981kt3picv7s
+2025-08-13 22:53:00 [info]: Fetching brands for vehicle type: cme633w980005981kt3picv7s
+2025-08-13 22:53:00 [info]: Found 72 brands for vehicle type cme633w980005981kt3picv7s
+2025-08-13 22:53:00 [info]: Fetching brands for vehicle type: cme633w980005981kt3picv7s
+2025-08-13 22:53:00 [info]: Query: SELECT 1
+2025-08-13 22:53:00 [info]: Duration: 0ms
+2025-08-13 22:53:00 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 22:53:00 [info]: Duration: 1ms
+2025-08-13 22:53:00 [info]: Found 72 brands for vehicle type cme633w980005981kt3picv7s
+2025-08-13 22:53:00 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."phone", "public"."users"."city", "public"."users"."district", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified", "public"."users"."created_at", "public"."users"."updated_at" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 22:53:00 [info]: Duration: 0ms
+2025-08-13 22:53:00 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 22:53:00 [info]: Duration: 0ms
+2025-08-13 22:53:00 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."phone", "public"."users"."city", "public"."users"."district", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified", "public"."users"."created_at", "public"."users"."updated_at" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 22:53:00 [info]: Duration: 0ms
+2025-08-13 22:53:09 [info]: Fetching all vehicle types...
+2025-08-13 22:53:09 [info]: Found 8 vehicle types
+2025-08-13 22:53:09 [info]: Fetching all vehicle types...
+2025-08-13 22:53:09 [info]: Found 8 vehicle types
+2025-08-13 22:53:10 [info]: Fetching brands for vehicle type: cme633w9e0007981kn46jy5ot
+2025-08-13 22:53:10 [info]: Found 21 brands for vehicle type cme633w9e0007981kn46jy5ot
+2025-08-13 22:53:10 [info]: Fetching brands for vehicle type: cme633w9e0007981kn46jy5ot
+2025-08-13 22:53:10 [info]: Found 21 brands for vehicle type cme633w9e0007981kn46jy5ot
+2025-08-13 22:53:48 [info]: Fetching all vehicle types...
+2025-08-13 22:53:48 [info]: Found 8 vehicle types
+2025-08-13 22:53:48 [info]: Fetching all vehicle types...
+2025-08-13 22:53:48 [info]: Found 8 vehicle types
+2025-08-13 22:53:57 [info]: Fetching brands for vehicle type: cme633w980005981kt3picv7s
+2025-08-13 22:53:57 [info]: Found 72 brands for vehicle type cme633w980005981kt3picv7s
+2025-08-13 22:53:57 [info]: Fetching brands for vehicle type: cme633w980005981kt3picv7s
+2025-08-13 22:53:57 [info]: Found 72 brands for vehicle type cme633w980005981kt3picv7s
+2025-08-13 22:54:00 [info]: Fetching all vehicle types...
+2025-08-13 22:54:00 [info]: Found 8 vehicle types
+2025-08-13 22:54:00 [info]: Fetching all vehicle types...
+2025-08-13 22:54:00 [info]: Found 8 vehicle types
+2025-08-13 22:54:03 [info]: Fetching brands for vehicle type: cme633w980005981kt3picv7s
+2025-08-13 22:54:03 [info]: Found 72 brands for vehicle type cme633w980005981kt3picv7s
+2025-08-13 22:54:03 [info]: Fetching brands for vehicle type: cme633w980005981kt3picv7s
+2025-08-13 22:54:03 [info]: Found 72 brands for vehicle type cme633w980005981kt3picv7s
+2025-08-13 22:54:52 [info]: Fetching brands for vehicle type: cme633w980005981kt3picv7s
+2025-08-13 22:54:52 [info]: Found 72 brands for vehicle type cme633w980005981kt3picv7s
+2025-08-13 22:54:52 [info]: Fetching brands for vehicle type: cme633w980005981kt3picv7s
+2025-08-13 22:54:52 [info]: Found 72 brands for vehicle type cme633w980005981kt3picv7s
+2025-08-13 22:54:52 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 22:54:52 [info]: Duration: 4ms
+2025-08-13 22:54:52 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."phone", "public"."users"."city", "public"."users"."district", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified", "public"."users"."created_at", "public"."users"."updated_at" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 22:54:52 [info]: Duration: 0ms
+2025-08-13 22:54:52 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 22:54:52 [info]: Duration: 0ms
+2025-08-13 22:54:52 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."phone", "public"."users"."city", "public"."users"."district", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified", "public"."users"."created_at", "public"."users"."updated_at" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 22:54:52 [info]: Duration: 0ms
+2025-08-13 22:54:57 [info]: Fetching all vehicle types...
+2025-08-13 22:54:57 [info]: Found 8 vehicle types
+2025-08-13 22:54:57 [info]: Fetching all vehicle types...
+2025-08-13 22:54:57 [info]: Found 8 vehicle types
+2025-08-13 22:54:59 [info]: Fetching brands for vehicle type: cme633w980005981kt3picv7s
+2025-08-13 22:54:59 [info]: Found 72 brands for vehicle type cme633w980005981kt3picv7s
+2025-08-13 22:54:59 [info]: Fetching brands for vehicle type: cme633w980005981kt3picv7s
+2025-08-13 22:54:59 [info]: Found 72 brands for vehicle type cme633w980005981kt3picv7s
+2025-08-13 22:55:06 [info]: Fetching brands for vehicle type: cme633w980005981kt3picv7s
+2025-08-13 22:55:06 [info]: Found 72 brands for vehicle type cme633w980005981kt3picv7s
+2025-08-13 22:55:06 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 22:55:06 [info]: Duration: 0ms
+2025-08-13 22:55:06 [info]: Fetching brands for vehicle type: cme633w980005981kt3picv7s
+2025-08-13 22:55:06 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."phone", "public"."users"."city", "public"."users"."district", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified", "public"."users"."created_at", "public"."users"."updated_at" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 22:55:06 [info]: Duration: 1ms
+2025-08-13 22:55:06 [info]: Found 72 brands for vehicle type cme633w980005981kt3picv7s
+2025-08-13 22:55:06 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 22:55:06 [info]: Duration: 0ms
+2025-08-13 22:55:06 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."phone", "public"."users"."city", "public"."users"."district", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified", "public"."users"."created_at", "public"."users"."updated_at" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 22:55:06 [info]: Duration: 0ms
+2025-08-13 22:57:03 [info]: Fetching brands for vehicle type: cme633w980005981kt3picv7s
+2025-08-13 22:57:03 [info]: Found 72 brands for vehicle type cme633w980005981kt3picv7s
+2025-08-13 22:57:03 [info]: Fetching brands for vehicle type: cme633w980005981kt3picv7s
+2025-08-13 22:57:03 [info]: Found 72 brands for vehicle type cme633w980005981kt3picv7s
+2025-08-13 22:58:08 [info]: Fetching brands for vehicle type: cme633w980005981kt3picv7s
+2025-08-13 22:58:08 [info]: Found 72 brands for vehicle type cme633w980005981kt3picv7s
+2025-08-13 22:58:08 [info]: Fetching brands for vehicle type: cme633w980005981kt3picv7s
+2025-08-13 22:58:08 [info]: Query: SELECT 1
+2025-08-13 22:58:08 [info]: Duration: 0ms
+2025-08-13 22:58:08 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 22:58:08 [info]: Duration: 0ms
+2025-08-13 22:58:08 [info]: Found 72 brands for vehicle type cme633w980005981kt3picv7s
+2025-08-13 22:58:08 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."phone", "public"."users"."city", "public"."users"."district", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified", "public"."users"."created_at", "public"."users"."updated_at" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 22:58:08 [info]: Duration: 0ms
+2025-08-13 22:58:08 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 22:58:08 [info]: Duration: 0ms
+2025-08-13 22:58:08 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."phone", "public"."users"."city", "public"."users"."district", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified", "public"."users"."created_at", "public"."users"."updated_at" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 22:58:08 [info]: Duration: 1ms
+2025-08-13 22:58:12 [info]: Fetching all vehicle types...
+2025-08-13 22:58:12 [info]: Found 8 vehicle types
+2025-08-13 22:58:12 [info]: Fetching all vehicle types...
+2025-08-13 22:58:12 [info]: Found 8 vehicle types
+2025-08-13 22:58:13 [info]: Fetching brands for vehicle type: cme633w9q000d981k253reql7
+2025-08-13 22:58:13 [info]: Found 2 brands for vehicle type cme633w9q000d981k253reql7
+2025-08-13 22:58:13 [info]: Fetching brands for vehicle type: cme633w9q000d981k253reql7
+2025-08-13 22:58:13 [info]: Found 2 brands for vehicle type cme633w9q000d981k253reql7
+2025-08-13 22:58:15 [info]: Fetching all vehicle types...
+2025-08-13 22:58:15 [info]: Found 8 vehicle types
+2025-08-13 22:58:15 [info]: Fetching all vehicle types...
+2025-08-13 22:58:15 [info]: Found 8 vehicle types
+2025-08-13 22:58:16 [info]: Fetching brands for vehicle type: cme633w930003981kvlr5jb4a
+2025-08-13 22:58:16 [info]: Found 25 brands for vehicle type cme633w930003981kvlr5jb4a
+2025-08-13 22:58:16 [info]: Fetching brands for vehicle type: cme633w930003981kvlr5jb4a
+2025-08-13 22:58:16 [info]: Found 25 brands for vehicle type cme633w930003981kvlr5jb4a
+2025-08-13 22:58:40 [info]: Fetching all vehicle types...
+2025-08-13 22:58:40 [info]: Found 8 vehicle types
+2025-08-13 22:58:40 [info]: Fetching all vehicle types...
+2025-08-13 22:58:40 [info]: Found 8 vehicle types
+2025-08-13 22:58:41 [info]: Fetching brands for vehicle type: cme633w9e0007981kn46jy5ot
+2025-08-13 22:58:41 [info]: Found 21 brands for vehicle type cme633w9e0007981kn46jy5ot
+2025-08-13 22:58:41 [info]: Fetching brands for vehicle type: cme633w9e0007981kn46jy5ot
+2025-08-13 22:58:41 [info]: Found 21 brands for vehicle type cme633w9e0007981kn46jy5ot
+2025-08-13 22:58:44 [info]: Fetching all vehicle types...
+2025-08-13 22:58:44 [info]: Found 8 vehicle types
+2025-08-13 22:58:44 [info]: Fetching all vehicle types...
+2025-08-13 22:58:44 [info]: Found 8 vehicle types
+2025-08-13 22:58:45 [info]: Fetching brands for vehicle type: cme633w980005981kt3picv7s
+2025-08-13 22:58:45 [info]: Found 72 brands for vehicle type cme633w980005981kt3picv7s
+2025-08-13 22:58:45 [info]: Fetching brands for vehicle type: cme633w980005981kt3picv7s
+2025-08-13 22:58:45 [info]: Found 72 brands for vehicle type cme633w980005981kt3picv7s
+2025-08-13 22:58:54 [info]: Fetching all vehicle types...
+2025-08-13 22:58:54 [info]: Found 8 vehicle types
+2025-08-13 22:58:54 [info]: Fetching all vehicle types...
+2025-08-13 22:58:54 [info]: Found 8 vehicle types
+2025-08-13 23:01:37 [info]: Category routes loaded
+2025-08-13 23:01:37 [info]: Auth routes loaded
+2025-08-13 23:01:37 [info]: Database connected successfully
+2025-08-13 23:01:37 [info]: Server is running on port 3005
+2025-08-13 23:01:49 [info]: Category routes loaded
+2025-08-13 23:01:49 [info]: Auth routes loaded
+2025-08-13 23:01:49 [info]: Database connected successfully
+2025-08-13 23:01:49 [info]: Server is running on port 3005
+2025-08-13 23:07:49 [info]: Fetching brands for vehicle type: cme633w9j0009981k0lqq166x
+2025-08-13 23:07:49 [info]: Found 10 brands for vehicle type cme633w9j0009981k0lqq166x
+2025-08-13 23:07:49 [info]: Fetching brands for vehicle type: cme633w9j0009981k0lqq166x
+2025-08-13 23:07:49 [info]: Found 10 brands for vehicle type cme633w9j0009981k0lqq166x
+2025-08-13 23:07:50 [info]: Models for brand cme6bt07v002940qacezs8e8p fetched successfully
+2025-08-13 23:07:50 [info]: Models for brand cme6bt07v002940qacezs8e8p fetched successfully
+2025-08-13 23:07:51 [info]: Variants for model cme6bt07x002b40qaev81urlp fetched successfully
+2025-08-13 23:07:51 [info]: Variants for model cme6bt07x002b40qaev81urlp fetched successfully
+2025-08-13 23:07:53 [info]: Models for brand cme6bt07v002940qacezs8e8p fetched successfully
+2025-08-13 23:07:53 [info]: Models for brand cme6bt07v002940qacezs8e8p fetched successfully
+2025-08-13 23:07:55 [info]: Variants for model cme6bt08b002j40qaqvvhd422 fetched successfully
+2025-08-13 23:07:55 [info]: Variants for model cme6bt08b002j40qaqvvhd422 fetched successfully
+2025-08-13 23:07:56 [info]: Models for brand cme6bt07v002940qacezs8e8p fetched successfully
+2025-08-13 23:07:56 [info]: Models for brand cme6bt07v002940qacezs8e8p fetched successfully
+2025-08-13 23:07:57 [info]: Variants for model cme6bt08k002n40qankw6pwxd fetched successfully
+2025-08-13 23:07:57 [info]: Variants for model cme6bt08k002n40qankw6pwxd fetched successfully
+2025-08-13 23:07:58 [info]: Models for brand cme6bt07v002940qacezs8e8p fetched successfully
+2025-08-13 23:07:58 [info]: Models for brand cme6bt07v002940qacezs8e8p fetched successfully
+2025-08-13 23:07:59 [info]: Variants for model cme6bt082002f40qaoh72e2wt fetched successfully
+2025-08-13 23:07:59 [info]: Variants for model cme6bt082002f40qaoh72e2wt fetched successfully
+2025-08-13 23:08:01 [info]: Models for brand cme6bt07v002940qacezs8e8p fetched successfully
+2025-08-13 23:08:01 [info]: Models for brand cme6bt07v002940qacezs8e8p fetched successfully
+2025-08-13 23:08:01 [info]: Fetching brands for vehicle type: cme633w9j0009981k0lqq166x
+2025-08-13 23:08:01 [info]: Found 10 brands for vehicle type cme633w9j0009981k0lqq166x
+2025-08-13 23:08:01 [info]: Fetching brands for vehicle type: cme633w9j0009981k0lqq166x
+2025-08-13 23:08:01 [info]: Found 10 brands for vehicle type cme633w9j0009981k0lqq166x
+2025-08-13 23:08:03 [info]: Models for brand cme6bt05j000140qa3luxzpyy fetched successfully
+2025-08-13 23:08:03 [info]: Models for brand cme6bt05j000140qa3luxzpyy fetched successfully
+2025-08-13 23:08:04 [info]: Variants for model cme6bt060000f40qa8syjxrwu fetched successfully
+2025-08-13 23:08:04 [info]: Variants for model cme6bt060000f40qa8syjxrwu fetched successfully
+2025-08-13 23:08:05 [info]: Models for brand cme6bt05j000140qa3luxzpyy fetched successfully
+2025-08-13 23:08:05 [info]: Models for brand cme6bt05j000140qa3luxzpyy fetched successfully
+2025-08-13 23:08:06 [info]: Variants for model cme6bt05n000340qa0b0ptkgs fetched successfully
+2025-08-13 23:08:06 [info]: Variants for model cme6bt05n000340qa0b0ptkgs fetched successfully
+2025-08-13 23:08:07 [info]: Models for brand cme6bt05j000140qa3luxzpyy fetched successfully
+2025-08-13 23:08:07 [info]: Models for brand cme6bt05j000140qa3luxzpyy fetched successfully
+2025-08-13 23:08:07 [info]: Fetching brands for vehicle type: cme633w9j0009981k0lqq166x
+2025-08-13 23:08:07 [info]: Found 10 brands for vehicle type cme633w9j0009981k0lqq166x
+2025-08-13 23:08:07 [info]: Fetching brands for vehicle type: cme633w9j0009981k0lqq166x
+2025-08-13 23:08:07 [info]: Found 10 brands for vehicle type cme633w9j0009981k0lqq166x
+2025-08-13 23:08:09 [info]: Fetching all vehicle types...
+2025-08-13 23:08:09 [info]: Found 8 vehicle types
+2025-08-13 23:08:09 [info]: Fetching all vehicle types...
+2025-08-13 23:08:09 [info]: Found 8 vehicle types
+2025-08-13 23:08:11 [info]: Fetching brands for vehicle type: cme633w980005981kt3picv7s
+2025-08-13 23:08:11 [info]: Found 72 brands for vehicle type cme633w980005981kt3picv7s
+2025-08-13 23:08:11 [info]: Fetching brands for vehicle type: cme633w980005981kt3picv7s
+2025-08-13 23:08:11 [info]: Found 72 brands for vehicle type cme633w980005981kt3picv7s
+2025-08-13 23:08:13 [info]: Models for brand cme6qe2yt0001fyj4ql00kt9j fetched successfully
+2025-08-13 23:08:13 [info]: Models for brand cme6qe2yt0001fyj4ql00kt9j fetched successfully
+2025-08-13 23:08:14 [info]: Variants for model cme6qszna00016w73gg41zbm0 fetched successfully
+2025-08-13 23:08:14 [info]: Variants for model cme6qszna00016w73gg41zbm0 fetched successfully
+2025-08-13 23:08:16 [info]: Models for brand cme6qe2yt0001fyj4ql00kt9j fetched successfully
+2025-08-13 23:08:16 [info]: Models for brand cme6qe2yt0001fyj4ql00kt9j fetched successfully
+2025-08-13 23:08:16 [info]: Fetching brands for vehicle type: cme633w980005981kt3picv7s
+2025-08-13 23:08:16 [info]: Found 72 brands for vehicle type cme633w980005981kt3picv7s
+2025-08-13 23:08:16 [info]: Fetching brands for vehicle type: cme633w980005981kt3picv7s
+2025-08-13 23:08:16 [info]: Found 72 brands for vehicle type cme633w980005981kt3picv7s
+2025-08-13 23:08:18 [info]: Models for brand cme6s8lfn0001w7wcgfb7s2u5 fetched successfully
+2025-08-13 23:08:18 [info]: Models for brand cme6s8lfn0001w7wcgfb7s2u5 fetched successfully
+2025-08-13 23:08:19 [info]: Variants for model cme6s8lgf000xw7wcaltdivv0 fetched successfully
+2025-08-13 23:08:19 [info]: Variants for model cme6s8lgf000xw7wcaltdivv0 fetched successfully
+2025-08-13 23:08:21 [info]: Models for brand cme6s8lfn0001w7wcgfb7s2u5 fetched successfully
+2025-08-13 23:08:21 [info]: Models for brand cme6s8lfn0001w7wcgfb7s2u5 fetched successfully
+2025-08-13 23:08:22 [info]: Fetching brands for vehicle type: cme633w980005981kt3picv7s
+2025-08-13 23:08:22 [info]: Found 72 brands for vehicle type cme633w980005981kt3picv7s
+2025-08-13 23:08:22 [info]: Fetching brands for vehicle type: cme633w980005981kt3picv7s
+2025-08-13 23:08:22 [info]: Found 72 brands for vehicle type cme633w980005981kt3picv7s
+2025-08-13 23:08:25 [info]: Fetching all vehicle types...
+2025-08-13 23:08:25 [info]: Found 8 vehicle types
+2025-08-13 23:08:25 [info]: Fetching all vehicle types...
+2025-08-13 23:08:25 [info]: Found 8 vehicle types
+2025-08-13 23:08:27 [info]: Fetching brands for vehicle type: cme633w9m000b981kfmvvpzb3
+2025-08-13 23:08:27 [info]: Found 4 brands for vehicle type cme633w9m000b981kfmvvpzb3
+2025-08-13 23:08:27 [info]: Fetching brands for vehicle type: cme633w9m000b981kfmvvpzb3
+2025-08-13 23:08:27 [info]: Found 4 brands for vehicle type cme633w9m000b981kfmvvpzb3
+2025-08-13 23:08:28 [info]: Models for brand cme6pd73g0005ecf5zjg4lb3c fetched successfully
+2025-08-13 23:08:28 [info]: Models for brand cme6pd73g0005ecf5zjg4lb3c fetched successfully
+2025-08-13 23:08:30 [info]: Variants for model cme6pd73k000becf5a49sht89 fetched successfully
+2025-08-13 23:08:30 [info]: Variants for model cme6pd73k000becf5a49sht89 fetched successfully
+2025-08-13 23:08:32 [info]: Models for brand cme6pd73g0005ecf5zjg4lb3c fetched successfully
+2025-08-13 23:08:32 [info]: Models for brand cme6pd73g0005ecf5zjg4lb3c fetched successfully
+2025-08-13 23:08:33 [info]: Fetching brands for vehicle type: cme633w9m000b981kfmvvpzb3
+2025-08-13 23:08:33 [info]: Found 4 brands for vehicle type cme633w9m000b981kfmvvpzb3
+2025-08-13 23:08:33 [info]: Fetching brands for vehicle type: cme633w9m000b981kfmvvpzb3
+2025-08-13 23:08:33 [info]: Found 4 brands for vehicle type cme633w9m000b981kfmvvpzb3
+2025-08-13 23:08:34 [info]: Models for brand cme6pd73x000xecf5miwi1zwo fetched successfully
+2025-08-13 23:08:34 [info]: Models for brand cme6pd73x000xecf5miwi1zwo fetched successfully
+2025-08-13 23:08:37 [info]: Fetching brands for vehicle type: cme633w9m000b981kfmvvpzb3
+2025-08-13 23:08:37 [info]: Found 4 brands for vehicle type cme633w9m000b981kfmvvpzb3
+2025-08-13 23:08:37 [info]: Fetching brands for vehicle type: cme633w9m000b981kfmvvpzb3
+2025-08-13 23:08:37 [info]: Found 4 brands for vehicle type cme633w9m000b981kfmvvpzb3
+2025-08-13 23:08:37 [info]: Fetching all vehicle types...
+2025-08-13 23:08:37 [info]: Found 8 vehicle types
+2025-08-13 23:08:37 [info]: Fetching all vehicle types...
+2025-08-13 23:08:37 [info]: Found 8 vehicle types
+2025-08-13 23:08:39 [info]: Fetching brands for vehicle type: cme633w9q000d981k253reql7
+2025-08-13 23:08:39 [info]: Found 2 brands for vehicle type cme633w9q000d981k253reql7
+2025-08-13 23:08:40 [info]: Fetching brands for vehicle type: cme633w9q000d981k253reql7
+2025-08-13 23:08:40 [info]: Found 2 brands for vehicle type cme633w9q000d981k253reql7
+2025-08-13 23:08:41 [info]: Models for brand cme6pnnzk000111xaub7vd7up fetched successfully
+2025-08-13 23:08:41 [info]: Models for brand cme6pnnzk000111xaub7vd7up fetched successfully
+2025-08-13 23:08:42 [info]: Variants for model cme6pno00000711xariq9re8l fetched successfully
+2025-08-13 23:08:42 [info]: Variants for model cme6pno00000711xariq9re8l fetched successfully
+2025-08-13 23:08:44 [info]: Models for brand cme6pnnzk000111xaub7vd7up fetched successfully
+2025-08-13 23:08:44 [info]: Models for brand cme6pnnzk000111xaub7vd7up fetched successfully
+2025-08-13 23:08:44 [info]: Fetching brands for vehicle type: cme633w9q000d981k253reql7
+2025-08-13 23:08:44 [info]: Found 2 brands for vehicle type cme633w9q000d981k253reql7
+2025-08-13 23:08:44 [info]: Fetching brands for vehicle type: cme633w9q000d981k253reql7
+2025-08-13 23:08:44 [info]: Found 2 brands for vehicle type cme633w9q000d981k253reql7
+2025-08-13 23:08:46 [info]: Fetching all vehicle types...
+2025-08-13 23:08:46 [info]: Found 8 vehicle types
+2025-08-13 23:08:46 [info]: Fetching all vehicle types...
+2025-08-13 23:08:46 [info]: Found 8 vehicle types
+2025-08-13 23:08:47 [info]: Fetching brands for vehicle type: cme633w9j0009981k0lqq166x
+2025-08-13 23:08:47 [info]: Found 10 brands for vehicle type cme633w9j0009981k0lqq166x
+2025-08-13 23:08:47 [info]: Fetching brands for vehicle type: cme633w9j0009981k0lqq166x
+2025-08-13 23:08:47 [info]: Found 10 brands for vehicle type cme633w9j0009981k0lqq166x
+2025-08-13 23:08:54 [info]: Category routes loaded
+2025-08-13 23:08:54 [info]: Auth routes loaded
+2025-08-13 23:08:54 [info]: Database connected successfully
+2025-08-13 23:08:54 [info]: Server is running on port 3005
+2025-08-13 23:09:32 [info]: Models for brand cme6bt063000j40qau9q4y4g5 fetched successfully
+2025-08-13 23:09:32 [info]: Models for brand cme6bt063000j40qau9q4y4g5 fetched successfully
+2025-08-13 23:15:11 [info]: Fetching brands for vehicle type: cme633w9j0009981k0lqq166x
+2025-08-13 23:15:11 [info]: Found 10 brands for vehicle type cme633w9j0009981k0lqq166x
+2025-08-13 23:15:11 [info]: Fetching brands for vehicle type: cme633w9j0009981k0lqq166x
+2025-08-13 23:15:11 [info]: Found 10 brands for vehicle type cme633w9j0009981k0lqq166x
+2025-08-13 23:15:12 [info]: Fetching all vehicle types...
+2025-08-13 23:15:12 [info]: Found 8 vehicle types
+2025-08-13 23:15:12 [info]: Fetching all vehicle types...
+2025-08-13 23:15:12 [info]: Found 8 vehicle types
+2025-08-13 23:15:14 [info]: Fetching brands for vehicle type: cme633w980005981kt3picv7s
+2025-08-13 23:15:14 [info]: Found 72 brands for vehicle type cme633w980005981kt3picv7s
+2025-08-13 23:15:14 [info]: Fetching brands for vehicle type: cme633w980005981kt3picv7s
+2025-08-13 23:15:14 [info]: Found 72 brands for vehicle type cme633w980005981kt3picv7s
+2025-08-13 23:15:16 [info]: Models for brand cme6qe2z7000dfyj48lm1qlcm fetched successfully
+2025-08-13 23:15:16 [info]: Models for brand cme6qe2z7000dfyj48lm1qlcm fetched successfully
+2025-08-13 23:15:17 [info]: Variants for model cme6qsznn000d6w73ydozmlzf fetched successfully
+2025-08-13 23:15:17 [info]: Variants for model cme6qsznn000d6w73ydozmlzf fetched successfully
+2025-08-13 23:15:21 [info]: Fetching all vehicle types...
+2025-08-13 23:15:21 [info]: Found 8 vehicle types
+2025-08-13 23:15:21 [info]: Fetching all vehicle types...
+2025-08-13 23:15:21 [info]: Found 8 vehicle types
+2025-08-13 23:15:22 [info]: Fetching brands for vehicle type: cme633w9q000d981k253reql7
+2025-08-13 23:15:22 [info]: Found 2 brands for vehicle type cme633w9q000d981k253reql7
+2025-08-13 23:15:22 [info]: Fetching brands for vehicle type: cme633w9q000d981k253reql7
+2025-08-13 23:15:22 [info]: Found 2 brands for vehicle type cme633w9q000d981k253reql7
+2025-08-13 23:15:23 [info]: Models for brand cme6pno0b000b11xairmly2sr fetched successfully
+2025-08-13 23:15:23 [info]: Models for brand cme6pno0b000b11xairmly2sr fetched successfully
+2025-08-13 23:15:24 [info]: Variants for model cme6pno0s000h11xa7uow4gi5 fetched successfully
+2025-08-13 23:15:25 [info]: Variants for model cme6pno0s000h11xa7uow4gi5 fetched successfully
+2025-08-13 23:15:28 [info]: Fetching all vehicle types...
+2025-08-13 23:15:28 [info]: Found 8 vehicle types
+2025-08-13 23:15:28 [info]: Fetching all vehicle types...
+2025-08-13 23:15:28 [info]: Found 8 vehicle types
+2025-08-13 23:15:29 [info]: Fetching brands for vehicle type: cme633w9q000d981k253reql7
+2025-08-13 23:15:29 [info]: Found 2 brands for vehicle type cme633w9q000d981k253reql7
+2025-08-13 23:15:29 [info]: Fetching brands for vehicle type: cme633w9q000d981k253reql7
+2025-08-13 23:15:29 [info]: Found 2 brands for vehicle type cme633w9q000d981k253reql7
+2025-08-13 23:15:30 [info]: Models for brand cme6pno0b000b11xairmly2sr fetched successfully
+2025-08-13 23:15:30 [info]: Models for brand cme6pno0b000b11xairmly2sr fetched successfully
+2025-08-13 23:17:11 [info]: Models for brand cme6pno0b000b11xairmly2sr fetched successfully
+2025-08-13 23:17:11 [info]: Models for brand cme6pno0b000b11xairmly2sr fetched successfully
+2025-08-13 23:17:11 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 23:17:11 [info]: Duration: 4ms
+2025-08-13 23:17:11 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."phone", "public"."users"."city", "public"."users"."district", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified", "public"."users"."created_at", "public"."users"."updated_at" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 23:17:11 [info]: Duration: 1ms
+2025-08-13 23:17:11 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 23:17:11 [info]: Duration: 0ms
+2025-08-13 23:17:11 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."phone", "public"."users"."city", "public"."users"."district", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified", "public"."users"."created_at", "public"."users"."updated_at" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 23:17:11 [info]: Duration: 0ms
+2025-08-13 23:17:12 [info]: Fetching brands for vehicle type: cme633w9q000d981k253reql7
+2025-08-13 23:17:12 [info]: Found 2 brands for vehicle type cme633w9q000d981k253reql7
+2025-08-13 23:17:12 [info]: Fetching brands for vehicle type: cme633w9q000d981k253reql7
+2025-08-13 23:17:12 [info]: Found 2 brands for vehicle type cme633w9q000d981k253reql7
+2025-08-13 23:17:13 [info]: Fetching all vehicle types...
+2025-08-13 23:17:13 [info]: Found 8 vehicle types
+2025-08-13 23:17:13 [info]: Fetching all vehicle types...
+2025-08-13 23:17:13 [info]: Found 8 vehicle types
+2025-08-13 23:17:17 [info]: Fetching all vehicle types...
+2025-08-13 23:17:17 [info]: Found 8 vehicle types
+2025-08-13 23:17:17 [info]: Fetching all vehicle types...
+2025-08-13 23:17:17 [info]: Found 8 vehicle types
+2025-08-13 23:17:17 [info]: Fetching brands for vehicle type: cme633w980005981kt3picv7s
+2025-08-13 23:17:17 [info]: Found 72 brands for vehicle type cme633w980005981kt3picv7s
+2025-08-13 23:17:17 [info]: Fetching brands for vehicle type: cme633w980005981kt3picv7s
+2025-08-13 23:17:17 [info]: Found 72 brands for vehicle type cme633w980005981kt3picv7s
+2025-08-13 23:20:43 [info]: Fetching all vehicle types...
+2025-08-13 23:20:43 [info]: Found 8 vehicle types
+2025-08-13 23:20:43 [info]: Fetching all vehicle types...
+2025-08-13 23:20:43 [info]: Found 8 vehicle types
+2025-08-13 23:20:44 [info]: Fetching brands for vehicle type: cme633w9e0007981kn46jy5ot
+2025-08-13 23:20:44 [info]: Found 21 brands for vehicle type cme633w9e0007981kn46jy5ot
+2025-08-13 23:20:44 [info]: Fetching brands for vehicle type: cme633w9e0007981kn46jy5ot
+2025-08-13 23:20:44 [info]: Found 21 brands for vehicle type cme633w9e0007981kn46jy5ot
+2025-08-13 23:20:46 [info]: Fetching all vehicle types...
+2025-08-13 23:20:46 [info]: Found 8 vehicle types
+2025-08-13 23:20:46 [info]: Fetching all vehicle types...
+2025-08-13 23:20:46 [info]: Found 8 vehicle types
+2025-08-13 23:20:48 [info]: Fetching all vehicle types...
+2025-08-13 23:20:48 [info]: Found 8 vehicle types
+2025-08-13 23:20:48 [info]: Fetching all vehicle types...
+2025-08-13 23:20:48 [info]: Found 8 vehicle types
+2025-08-13 23:20:50 [info]: Fetching brands for vehicle type: cme633w980005981kt3picv7s
+2025-08-13 23:20:50 [info]: Found 72 brands for vehicle type cme633w980005981kt3picv7s
+2025-08-13 23:20:50 [info]: Fetching brands for vehicle type: cme633w980005981kt3picv7s
+2025-08-13 23:20:50 [info]: Found 72 brands for vehicle type cme633w980005981kt3picv7s
+2025-08-13 23:20:51 [info]: Models for brand cme6qe2zb000jfyj44c8zlb2q fetched successfully
+2025-08-13 23:20:51 [info]: Models for brand cme6qe2zb000jfyj44c8zlb2q fetched successfully
+2025-08-13 23:20:52 [info]: Variants for model cme6qszns000h6w73y7io4ynh fetched successfully
+2025-08-13 23:20:52 [info]: Variants for model cme6qszns000h6w73y7io4ynh fetched successfully
+2025-08-13 23:20:54 [info]: Models for brand cme6qe2zb000jfyj44c8zlb2q fetched successfully
+2025-08-13 23:20:54 [info]: Models for brand cme6qe2zb000jfyj44c8zlb2q fetched successfully
+2025-08-13 23:20:55 [info]: Fetching brands for vehicle type: cme633w980005981kt3picv7s
+2025-08-13 23:20:55 [info]: Found 72 brands for vehicle type cme633w980005981kt3picv7s
+2025-08-13 23:20:55 [info]: Fetching brands for vehicle type: cme633w980005981kt3picv7s
+2025-08-13 23:20:55 [info]: Found 72 brands for vehicle type cme633w980005981kt3picv7s
+2025-08-13 23:20:55 [info]: Fetching all vehicle types...
+2025-08-13 23:20:55 [info]: Found 8 vehicle types
+2025-08-13 23:20:55 [info]: Fetching all vehicle types...
+2025-08-13 23:20:55 [info]: Found 8 vehicle types
+2025-08-13 23:26:15 [info]: Fetching all vehicle types...
+2025-08-13 23:26:15 [info]: Found 8 vehicle types
+2025-08-13 23:26:15 [info]: Fetching all vehicle types...
+2025-08-13 23:26:15 [info]: Found 8 vehicle types
+2025-08-13 23:26:16 [info]: Fetching brands for vehicle type: cme633w9j0009981k0lqq166x
+2025-08-13 23:26:16 [info]: Found 10 brands for vehicle type cme633w9j0009981k0lqq166x
+2025-08-13 23:26:16 [info]: Fetching brands for vehicle type: cme633w9j0009981k0lqq166x
+2025-08-13 23:26:16 [info]: Found 10 brands for vehicle type cme633w9j0009981k0lqq166x
+2025-08-13 23:26:19 [info]: Models for brand cme6bt07v002940qacezs8e8p fetched successfully
+2025-08-13 23:26:19 [info]: Models for brand cme6bt07v002940qacezs8e8p fetched successfully
+2025-08-13 23:26:22 [info]: Fetching brands for vehicle type: cme633w9j0009981k0lqq166x
+2025-08-13 23:26:22 [info]: Found 10 brands for vehicle type cme633w9j0009981k0lqq166x
+2025-08-13 23:26:22 [info]: Fetching brands for vehicle type: cme633w9j0009981k0lqq166x
+2025-08-13 23:26:22 [info]: Found 10 brands for vehicle type cme633w9j0009981k0lqq166x
+2025-08-13 23:34:29 [info]: Fetching all vehicle types...
+2025-08-13 23:34:29 [info]: Found 8 vehicle types
+2025-08-13 23:34:29 [info]: Fetching all vehicle types...
+2025-08-13 23:34:29 [info]: Found 8 vehicle types
+2025-08-13 23:34:30 [info]: Fetching brands for vehicle type: cme633w9j0009981k0lqq166x
+2025-08-13 23:34:30 [info]: Found 10 brands for vehicle type cme633w9j0009981k0lqq166x
+2025-08-13 23:34:30 [info]: Fetching brands for vehicle type: cme633w9j0009981k0lqq166x
+2025-08-13 23:34:30 [info]: Found 10 brands for vehicle type cme633w9j0009981k0lqq166x
+2025-08-13 23:34:32 [info]: Models for brand cme6bt06y001l40qazrvsertp fetched successfully
+2025-08-13 23:34:32 [info]: Models for brand cme6bt06y001l40qazrvsertp fetched successfully
+2025-08-13 23:34:33 [info]: Variants for model cme6bt071001n40qaktpfw2cb fetched successfully
+2025-08-13 23:34:33 [info]: Variants for model cme6bt071001n40qaktpfw2cb fetched successfully
+2025-08-13 23:44:04 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 23:44:04 [info]: Duration: 5ms
+2025-08-13 23:44:04 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."phone", "public"."users"."city", "public"."users"."district", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified", "public"."users"."created_at", "public"."users"."updated_at" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 23:44:04 [info]: Duration: 1ms
+2025-08-13 23:44:04 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 23:44:04 [info]: Duration: 0ms
+2025-08-13 23:44:04 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."phone", "public"."users"."city", "public"."users"."district", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified", "public"."users"."created_at", "public"."users"."updated_at" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 23:44:04 [info]: Duration: 0ms
+2025-08-13 23:44:06 [info]: Fetching all vehicle types...
+2025-08-13 23:44:06 [info]: Found 8 vehicle types
+2025-08-13 23:44:06 [info]: Fetching all vehicle types...
+2025-08-13 23:44:06 [info]: Found 8 vehicle types
+2025-08-13 23:44:07 [info]: Fetching brands for vehicle type: cme633w9j0009981k0lqq166x
+2025-08-13 23:44:07 [info]: Found 10 brands for vehicle type cme633w9j0009981k0lqq166x
+2025-08-13 23:44:07 [info]: Fetching brands for vehicle type: cme633w9j0009981k0lqq166x
+2025-08-13 23:44:07 [info]: Found 10 brands for vehicle type cme633w9j0009981k0lqq166x
+2025-08-13 23:44:08 [info]: Models for brand cme6bt06y001l40qazrvsertp fetched successfully
+2025-08-13 23:44:08 [info]: Models for brand cme6bt06y001l40qazrvsertp fetched successfully
+2025-08-13 23:44:10 [info]: Variants for model cme6bt071001n40qaktpfw2cb fetched successfully
+2025-08-13 23:44:10 [info]: Variants for model cme6bt071001n40qaktpfw2cb fetched successfully
+2025-08-13 23:44:30 [info]: Fetching all vehicle types...
+2025-08-13 23:44:30 [info]: Found 8 vehicle types
+2025-08-13 23:44:30 [info]: Fetching all vehicle types...
+2025-08-13 23:44:30 [info]: Found 8 vehicle types
+2025-08-13 23:44:31 [info]: Fetching brands for vehicle type: cme633w9q000d981k253reql7
+2025-08-13 23:44:31 [info]: Found 2 brands for vehicle type cme633w9q000d981k253reql7
+2025-08-13 23:44:31 [info]: Fetching brands for vehicle type: cme633w9q000d981k253reql7
+2025-08-13 23:44:31 [info]: Found 2 brands for vehicle type cme633w9q000d981k253reql7
+2025-08-13 23:44:32 [info]: Models for brand cme6pno0b000b11xairmly2sr fetched successfully
+2025-08-13 23:44:32 [info]: Models for brand cme6pno0b000b11xairmly2sr fetched successfully
+2025-08-13 23:44:33 [info]: Variants for model cme6pno0o000f11xa2h0r26oc fetched successfully
+2025-08-13 23:44:33 [info]: Variants for model cme6pno0o000f11xa2h0r26oc fetched successfully
+2025-08-13 23:49:29 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 23:49:29 [info]: Duration: 4ms
+2025-08-13 23:49:29 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."phone", "public"."users"."city", "public"."users"."district", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified", "public"."users"."created_at", "public"."users"."updated_at" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 23:49:29 [info]: Duration: 1ms
+2025-08-13 23:49:29 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 23:49:29 [info]: Duration: 0ms
+2025-08-13 23:49:29 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."phone", "public"."users"."city", "public"."users"."district", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified", "public"."users"."created_at", "public"."users"."updated_at" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-13 23:49:29 [info]: Duration: 0ms
+2025-08-13 23:49:31 [info]: Fetching all vehicle types...
+2025-08-13 23:49:31 [info]: Found 8 vehicle types
+2025-08-13 23:49:31 [info]: Fetching all vehicle types...
+2025-08-13 23:49:31 [info]: Found 8 vehicle types
+2025-08-13 23:49:32 [info]: Fetching brands for vehicle type: cme633w9j0009981k0lqq166x
+2025-08-13 23:49:32 [info]: Found 10 brands for vehicle type cme633w9j0009981k0lqq166x
+2025-08-13 23:49:33 [info]: Fetching brands for vehicle type: cme633w9j0009981k0lqq166x
+2025-08-13 23:49:33 [info]: Found 10 brands for vehicle type cme633w9j0009981k0lqq166x
+2025-08-13 23:49:34 [info]: Models for brand cme6bt06y001l40qazrvsertp fetched successfully
+2025-08-13 23:49:34 [info]: Models for brand cme6bt06y001l40qazrvsertp fetched successfully
+2025-08-13 23:49:35 [info]: Variants for model cme6bt071001n40qaktpfw2cb fetched successfully
+2025-08-13 23:49:35 [info]: Variants for model cme6bt071001n40qaktpfw2cb fetched successfully
+2025-08-13 23:49:43 [info]: Fetching all vehicle types...
+2025-08-13 23:49:43 [info]: Found 8 vehicle types
+2025-08-13 23:49:43 [info]: Fetching all vehicle types...
+2025-08-13 23:49:43 [info]: Found 8 vehicle types
+2025-08-13 23:50:17 [info]: Fetching brands for vehicle type: cme633w9m000b981kfmvvpzb3
+2025-08-13 23:50:17 [info]: Found 4 brands for vehicle type cme633w9m000b981kfmvvpzb3
+2025-08-13 23:50:17 [info]: Fetching brands for vehicle type: cme633w9m000b981kfmvvpzb3
+2025-08-13 23:50:17 [info]: Found 4 brands for vehicle type cme633w9m000b981kfmvvpzb3
+2025-08-13 23:50:24 [info]: Models for brand cme6pd73g0005ecf5zjg4lb3c fetched successfully
+2025-08-13 23:50:24 [info]: Models for brand cme6pd73g0005ecf5zjg4lb3c fetched successfully
+2025-08-13 23:50:26 [info]: Variants for model cme6pd73j0009ecf5dcc5r8f8 fetched successfully
+2025-08-13 23:50:26 [info]: Variants for model cme6pd73j0009ecf5dcc5r8f8 fetched successfully
+2025-08-13 23:50:28 [info]: Fetching all vehicle types...
+2025-08-13 23:50:28 [info]: Found 8 vehicle types
+2025-08-13 23:50:28 [info]: Fetching all vehicle types...
+2025-08-13 23:50:28 [info]: Found 8 vehicle types
+2025-08-13 23:50:29 [info]: Fetching brands for vehicle type: cme633w980005981kt3picv7s
+2025-08-13 23:50:29 [info]: Found 72 brands for vehicle type cme633w980005981kt3picv7s
+2025-08-13 23:50:29 [info]: Fetching brands for vehicle type: cme633w980005981kt3picv7s
+2025-08-13 23:50:29 [info]: Found 72 brands for vehicle type cme633w980005981kt3picv7s
+2025-08-13 23:50:31 [info]: Models for brand cme6qe2zl0011fyj4eg6x0ved fetched successfully
+2025-08-13 23:50:31 [info]: Models for brand cme6qe2zl0011fyj4eg6x0ved fetched successfully
+2025-08-13 23:50:32 [info]: Variants for model cme6qszp300276w73ohfd15xm fetched successfully
+2025-08-13 23:50:32 [info]: Variants for model cme6qszp300276w73ohfd15xm fetched successfully
+2025-08-13 23:50:36 [info]: Fetching all vehicle types...
+2025-08-13 23:50:36 [info]: Found 8 vehicle types
+2025-08-13 23:50:36 [info]: Fetching all vehicle types...
+2025-08-13 23:50:36 [info]: Found 8 vehicle types
+2025-08-14 00:03:22 [info]: Fetching all vehicle types...
+2025-08-14 00:03:22 [info]: Found 8 vehicle types
+2025-08-14 00:03:22 [info]: Fetching all vehicle types...
+2025-08-14 00:03:22 [info]: Found 8 vehicle types
+2025-08-14 00:03:22 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-14 00:03:22 [info]: Duration: 4ms
+2025-08-14 00:03:22 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."phone", "public"."users"."city", "public"."users"."district", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified", "public"."users"."created_at", "public"."users"."updated_at" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-14 00:03:22 [info]: Duration: 1ms
+2025-08-14 00:03:22 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-14 00:03:22 [info]: Duration: 0ms
+2025-08-14 00:03:22 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."phone", "public"."users"."city", "public"."users"."district", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified", "public"."users"."created_at", "public"."users"."updated_at" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-14 00:03:22 [info]: Duration: 0ms
+2025-08-14 00:05:04 [info]: Fetching all vehicle types...
+2025-08-14 00:05:04 [info]: Found 8 vehicle types
+2025-08-14 00:05:04 [info]: Fetching all vehicle types...
+2025-08-14 00:05:04 [info]: Found 8 vehicle types
+2025-08-14 00:05:04 [info]: Query: SELECT 1
+2025-08-14 00:05:04 [info]: Duration: 0ms
+2025-08-14 00:05:04 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-14 00:05:04 [info]: Duration: 0ms
+2025-08-14 00:05:04 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."phone", "public"."users"."city", "public"."users"."district", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified", "public"."users"."created_at", "public"."users"."updated_at" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-14 00:05:04 [info]: Duration: 0ms
+2025-08-14 00:05:04 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-14 00:05:04 [info]: Duration: 0ms
+2025-08-14 00:05:04 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."phone", "public"."users"."city", "public"."users"."district", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified", "public"."users"."created_at", "public"."users"."updated_at" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-14 00:05:04 [info]: Duration: 0ms
+2025-08-14 00:05:06 [info]: Fetching brands for vehicle type: cme633w9j0009981k0lqq166x
+2025-08-14 00:05:06 [info]: Found 10 brands for vehicle type cme633w9j0009981k0lqq166x
+2025-08-14 00:05:06 [info]: Fetching brands for vehicle type: cme633w9j0009981k0lqq166x
+2025-08-14 00:05:06 [info]: Found 10 brands for vehicle type cme633w9j0009981k0lqq166x
+2025-08-14 00:05:07 [info]: Models for brand cme6bt06y001l40qazrvsertp fetched successfully
+2025-08-14 00:05:07 [info]: Models for brand cme6bt06y001l40qazrvsertp fetched successfully
+2025-08-14 00:05:11 [info]: Fetching all vehicle types...
+2025-08-14 00:05:11 [info]: Found 8 vehicle types
+2025-08-14 00:05:11 [info]: Fetching all vehicle types...
+2025-08-14 00:05:11 [info]: Found 8 vehicle types
+2025-08-14 00:05:16 [info]: Fetching brands for vehicle type: cme633w9e0007981kn46jy5ot
+2025-08-14 00:05:16 [info]: Found 21 brands for vehicle type cme633w9e0007981kn46jy5ot
+2025-08-14 00:05:16 [info]: Fetching brands for vehicle type: cme633w9e0007981kn46jy5ot
+2025-08-14 00:05:16 [info]: Found 21 brands for vehicle type cme633w9e0007981kn46jy5ot
+2025-08-14 00:05:18 [info]: Models for brand cme6a2tsx000364avwc2bi1sf fetched successfully
+2025-08-14 00:05:18 [info]: Models for brand cme6a2tsx000364avwc2bi1sf fetched successfully
+2025-08-14 00:05:19 [info]: Variants for model cme6ab37w000p4e3dmh3l33re fetched successfully
+2025-08-14 00:05:19 [info]: Variants for model cme6ab37w000p4e3dmh3l33re fetched successfully
+2025-08-14 00:05:22 [info]: Fetching all vehicle types...
+2025-08-14 00:05:22 [info]: Found 8 vehicle types
+2025-08-14 00:05:22 [info]: Fetching all vehicle types...
+2025-08-14 00:05:22 [info]: Found 8 vehicle types
+2025-08-14 00:05:25 [info]: Fetching brands for vehicle type: cme633w8v0001981ksnpl6dj4
+2025-08-14 00:05:25 [info]: Found 23 brands for vehicle type cme633w8v0001981ksnpl6dj4
+2025-08-14 00:05:25 [info]: Fetching brands for vehicle type: cme633w8v0001981ksnpl6dj4
+2025-08-14 00:05:25 [info]: Found 23 brands for vehicle type cme633w8v0001981ksnpl6dj4
+2025-08-14 00:05:28 [info]: Models for brand cme66w3c0002d47w4i5k81v51 fetched successfully
+2025-08-14 00:05:28 [info]: Models for brand cme66w3c0002d47w4i5k81v51 fetched successfully
+2025-08-14 00:05:29 [info]: Variants for model cme66w3c4002f47w4lye8cdoz fetched successfully
+2025-08-14 00:05:29 [info]: Variants for model cme66w3c4002f47w4lye8cdoz fetched successfully
+2025-08-14 00:08:50 [info]: Category routes loaded
+2025-08-14 00:08:50 [info]: Auth routes loaded
+2025-08-14 00:08:51 [info]: Database connected successfully
+2025-08-14 00:08:51 [info]: Server is running on port 3005
+2025-08-14 00:09:03 [info]: Category routes loaded
+2025-08-14 00:09:03 [info]: Auth routes loaded
+2025-08-14 00:09:03 [info]: Database connected successfully
+2025-08-14 00:09:03 [info]: Server is running on port 3005
+2025-08-14 00:10:37 [info]: Category routes loaded
+2025-08-14 00:10:37 [info]: Auth routes loaded
+2025-08-14 00:10:37 [info]: Database connected successfully
+2025-08-14 00:10:37 [info]: Server is running on port 3005
+2025-08-14 00:10:45 [info]: Category routes loaded
+2025-08-14 00:10:46 [info]: Auth routes loaded
+2025-08-14 00:10:46 [info]: Database connected successfully
+2025-08-14 00:10:46 [info]: Server is running on port 3005
+2025-08-14 00:11:02 [info]: Category routes loaded
+2025-08-14 00:11:02 [info]: Auth routes loaded
+2025-08-14 00:11:02 [info]: Database connected successfully
+2025-08-14 00:11:02 [info]: Server is running on port 3005
+2025-08-14 00:11:09 [info]: Category routes loaded
+2025-08-14 00:11:09 [info]: Auth routes loaded
+2025-08-14 00:11:09 [info]: Database connected successfully
+2025-08-14 00:11:09 [info]: Server is running on port 3005
+2025-08-14 00:11:58 [info]: Query: SELECT 1
+2025-08-14 00:11:58 [info]: Duration: 0ms
+2025-08-14 00:11:58 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-14 00:11:58 [info]: Duration: 6ms
+2025-08-14 00:11:58 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."phone", "public"."users"."city", "public"."users"."district", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified", "public"."users"."created_at", "public"."users"."updated_at" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-14 00:11:58 [info]: Duration: 2ms
+2025-08-14 00:11:58 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-14 00:11:58 [info]: Duration: 0ms
+2025-08-14 00:11:58 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."phone", "public"."users"."city", "public"."users"."district", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified", "public"."users"."created_at", "public"."users"."updated_at" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-14 00:11:58 [info]: Duration: 0ms
+2025-08-14 00:14:27 [info]: Category routes loaded
+2025-08-14 00:14:27 [info]: Auth routes loaded
+2025-08-14 00:14:27 [info]: Database connected successfully
+2025-08-14 00:16:06 [info]: Category routes loaded
+2025-08-14 00:16:06 [info]: Auth routes loaded
+2025-08-14 00:16:06 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/locationController.ts[0m:[93m33[0m:[93m35[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m33[0m export const getDistrictsByCity = async (req: Request, res: Response) => {
+[7m  [0m [91m                                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-14 00:16:07 [info]: Database connected successfully
+2025-08-14 00:16:07 [info]: Server is running on port 3005
+2025-08-14 00:16:24 [info]: Category routes loaded
+2025-08-14 00:16:24 [info]: Auth routes loaded
+2025-08-14 00:16:24 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/locationController.ts[0m:[93m39[0m:[93m7[0m - [91merror[0m[90m TS2322: [0mType 'Response<any, Record<string, any>>' is not assignable to type 'void'.
+
+[7m39[0m       return res.status(400).json({
+[7m  [0m [91m      ~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-14 00:16:24 [info]: Database connected successfully
+2025-08-14 00:16:24 [info]: Server is running on port 3005
+2025-08-14 00:16:32 [info]: Category routes loaded
+2025-08-14 00:16:32 [info]: Auth routes loaded
+2025-08-14 00:16:32 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/locationController.ts[0m:[93m33[0m:[93m35[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m33[0m export const getDistrictsByCity = async (req: Request, res: Response) => {
+[7m  [0m [91m                                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-14 00:16:32 [info]: Database connected successfully
+2025-08-14 00:16:32 [info]: Server is running on port 3005
+2025-08-14 00:22:32 [info]: Category routes loaded
+2025-08-14 00:22:32 [info]: Auth routes loaded
+2025-08-14 00:22:32 [info]: Location routes loaded
+2025-08-14 00:22:32 [info]: Database connected successfully
+2025-08-14 00:22:32 [info]: Server is running on port 3005
+2025-08-14 00:28:23 [info]: Category routes loaded
+2025-08-14 00:28:23 [info]: Auth routes loaded
+2025-08-14 00:28:23 [info]: Location routes loaded
+2025-08-14 00:28:24 [info]: Database connected successfully
+2025-08-14 00:28:24 [info]: Server is running on port 3005
+2025-08-14 00:28:27 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."password", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."phone", "public"."users"."city", "public"."users"."district", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified", "public"."users"."reset_password_token", "public"."users"."reset_password_expires", "public"."users"."last_login", "public"."users"."login_attempts", "public"."users"."lock_until", "public"."users"."created_at", "public"."users"."updated_at", "public"."users"."email_verification_expires", "public"."users"."email_verification_token", "public"."users"."google_id", "public"."users"."provider", "public"."users"."refresh_token", "public"."users"."refresh_token_expires" FROM "public"."users" WHERE ("public"."users"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-14 00:28:27 [info]: Duration: 7ms
+2025-08-14 00:28:27 [info]: Query: UPDATE "public"."users" SET "last_login" = $1 WHERE ("public"."users"."id" = $2 AND 1=1) RETURNING "public"."users"."id", "public"."users"."email", "public"."users"."password", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."phone", "public"."users"."city", "public"."users"."district", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified", "public"."users"."reset_password_token", "public"."users"."reset_password_expires", "public"."users"."last_login", "public"."users"."login_attempts", "public"."users"."lock_until", "public"."users"."created_at", "public"."users"."updated_at", "public"."users"."email_verification_expires", "public"."users"."email_verification_token", "public"."users"."google_id", "public"."users"."provider", "public"."users"."refresh_token", "public"."users"."refresh_token_expires"
+2025-08-14 00:28:27 [info]: Duration: 3ms
+2025-08-14 00:28:27 [info]: User logged in: salihsaydam81@hotmail.com
+2025-08-14 00:28:29 [info]: Fetching all vehicle types...
+2025-08-14 00:28:29 [info]: Found 8 vehicle types
+2025-08-14 00:28:29 [info]: Fetching all vehicle types...
+2025-08-14 00:28:29 [info]: Found 8 vehicle types
+2025-08-14 00:28:30 [info]: Fetching brands for vehicle type: cme633w9j0009981k0lqq166x
+2025-08-14 00:28:30 [info]: Found 10 brands for vehicle type cme633w9j0009981k0lqq166x
+2025-08-14 00:28:30 [info]: Fetching brands for vehicle type: cme633w9j0009981k0lqq166x
+2025-08-14 00:28:30 [info]: Found 10 brands for vehicle type cme633w9j0009981k0lqq166x
+2025-08-14 00:28:32 [info]: Models for brand cme6bt06y001l40qazrvsertp fetched successfully
+2025-08-14 00:28:32 [info]: Models for brand cme6bt06y001l40qazrvsertp fetched successfully
+2025-08-14 00:28:33 [info]: Variants for model cme6bt071001n40qaktpfw2cb fetched successfully
+2025-08-14 00:28:33 [info]: Variants for model cme6bt071001n40qaktpfw2cb fetched successfully
+2025-08-14 00:28:34 [info]: Fetching all vehicle types...
+2025-08-14 00:28:34 [info]: Found 8 vehicle types
+2025-08-14 00:28:35 [info]: Fetching all vehicle types...
+2025-08-14 00:28:35 [info]: Found 8 vehicle types
+2025-08-14 00:28:36 [info]: Fetching brands for vehicle type: cme633w8v0001981ksnpl6dj4
+2025-08-14 00:28:36 [info]: Found 23 brands for vehicle type cme633w8v0001981ksnpl6dj4
+2025-08-14 00:28:36 [info]: Fetching brands for vehicle type: cme633w8v0001981ksnpl6dj4
+2025-08-14 00:28:36 [info]: Found 23 brands for vehicle type cme633w8v0001981ksnpl6dj4
+2025-08-14 00:28:37 [info]: Models for brand cme66vyth000712eide1a5ter fetched successfully
+2025-08-14 00:28:37 [info]: Models for brand cme66vyth000712eide1a5ter fetched successfully
+2025-08-14 00:28:38 [info]: Variants for model cme66vytk000d12ei0u49ev7v fetched successfully
+2025-08-14 00:28:38 [info]: Variants for model cme66vytk000d12ei0u49ev7v fetched successfully

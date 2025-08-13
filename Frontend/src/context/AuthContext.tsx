@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
-import { User, AuthResponse } from '@/types';
-import { authService } from '@/services/authService';
+import { User, AuthResponse } from '../types';
+import { authService } from '../services/authService';
 
 interface AuthState {
   user: User | null;
@@ -29,6 +29,8 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export { AuthContext };
 
 const authReducer = (state: AuthState, action: AuthAction): AuthState => {
+  console.log('🔐 Auth action:', action.type, action);
+  
   switch (action.type) {
     case 'AUTH_START':
       return { ...state, isLoading: true, error: null };
@@ -79,20 +81,30 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+  console.log('🏗️ AuthProvider initializing...');
+  
   const [state, dispatch] = useReducer(authReducer, initialState);
 
+  console.log('🔐 Current auth state:', state);
+
   useEffect(() => {
+    console.log('🔍 AuthProvider useEffect running...');
     const token = localStorage.getItem('token');
+    console.log('🎟️ Token from localStorage:', token ? 'exists' : 'not found');
+    
     if (token) {
       // Verify token and get user data
+      console.log('🔒 Verifying token...');
       authService.verifyToken(token)
         .then((user: User) => {
+          console.log('✅ Token verified, user:', user);
           dispatch({
             type: 'AUTH_SUCCESS',
             payload: { user, token, refreshToken: '' }
           });
         })
-        .catch(() => {
+        .catch((error) => {
+          console.error('❌ Token verification failed:', error);
           localStorage.removeItem('token');
           dispatch({ type: 'AUTH_LOGOUT' });
         });

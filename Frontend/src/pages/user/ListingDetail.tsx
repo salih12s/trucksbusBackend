@@ -21,7 +21,6 @@ import {
 import {
   LocationOn,
   CalendarToday,
-  AttachMoney,
   Phone,
   Email,
   Share,
@@ -32,7 +31,7 @@ import {
   Message,
 } from '@mui/icons-material';
 import { useState, useEffect } from 'react';
-import { Listing } from '@/types';
+import { Listing } from '../../types';
 
 const ListingDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -80,6 +79,8 @@ const ListingDetail: React.FC = () => {
           isVerified: true,
           createdAt: new Date(),
           updatedAt: new Date(),
+          name: '',
+          role: 'user'
         },
         images: [
           'https://via.placeholder.com/800x400?text=Kamyon+1',
@@ -140,7 +141,7 @@ const ListingDetail: React.FC = () => {
     return (
       <Container maxWidth="lg" sx={{ py: 4 }}>
         <Typography variant="h5">İlan bulunamadı</Typography>
-        <Button onClick={() => navigate('/')} sx={{ mt: 2 }}>
+        <Button type="button" onClick={() => navigate('/')} sx={{ mt: 2 }}>
           Ana Sayfaya Dön
         </Button>
       </Container>

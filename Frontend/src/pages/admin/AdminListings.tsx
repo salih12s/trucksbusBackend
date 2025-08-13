@@ -38,7 +38,7 @@ import {
 } from '@mui/icons-material';
 import { formatDistanceToNow } from 'date-fns';
 import { tr } from 'date-fns/locale';
-import { Listing, ListingStatus } from '@/types';
+import { Listing, ListingStatus } from '../../types';
 
 const AdminListings: React.FC = () => {
   const [listings, setListings] = useState<Listing[]>([]);

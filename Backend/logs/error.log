@@ -104,3 +104,706 @@
     at Module.load (node:internal/modules/cjs/loader:1427:32)
     at Module._load (node:internal/modules/cjs/loader:1250:12)
     at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-13 13:16:50 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/authController.ts[0m:[93m10[0m:[93m14[0m - [91merror[0m[90m TS2769: [0mNo overload matches this call.
+  Overload 1 of 5, '(payload: string | object | Buffer<ArrayBufferLike>, secretOrPrivateKey: null, options?: (SignOptions & { algorithm: "none"; }) | undefined): string', gave the following error.
+    Argument of type 'string' is not assignable to parameter of type 'null'.
+  Overload 2 of 5, '(payload: string | object | Buffer<ArrayBufferLike>, secretOrPrivateKey: Secret | Buffer<ArrayBufferLike> | JsonWebKeyInput | PrivateKeyInput, options?: SignOptions | undefined): string', gave the following error.
+    Type 'string' is not assignable to type 'number | StringValue | undefined'.
+  Overload 3 of 5, '(payload: string | object | Buffer<ArrayBufferLike>, secretOrPrivateKey: Secret | Buffer<ArrayBufferLike> | JsonWebKeyInput | PrivateKeyInput, callback: SignCallback): void', gave the following error.
+    Object literal may only specify known properties, and 'expiresIn' does not exist in type 'SignCallback'.
+
+[7m10[0m   return jwt.sign({ userId }, process.env.JWT_SECRET!, {
+[7m  [0m [91m             ~~~~[0m
+
+[96msrc/controllers/authController.ts[0m:[93m16[0m:[93m25[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m16[0m export const register = async (req: Request, res: Response) => {
+[7m  [0m [91m                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/authController.ts[0m:[93m88[0m:[93m22[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m88[0m export const login = async (req: Request, res: Response) => {
+[7m  [0m [91m                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/authController.ts[0m:[93m105[0m:[93m60[0m - [91merror[0m[90m TS2769: [0mNo overload matches this call.
+  Overload 1 of 2, '(s: string, hash: string): Promise<boolean>', gave the following error.
+    Argument of type 'string | null' is not assignable to parameter of type 'string'.
+      Type 'null' is not assignable to type 'string'.
+  Overload 2 of 2, '(s: string, hash: string, callback?: ((err: Error | null, success: boolean) => void) | undefined, progressCallback?: ((percent: number) => void) | undefined): void', gave the following error.
+    Argument of type 'string | null' is not assignable to parameter of type 'string'.
+      Type 'null' is not assignable to type 'string'.
+
+[7m105[0m     const isPasswordValid = await bcrypt.compare(password, user.password);
+[7m   [0m [91m                                                           ~~~~~~~~~~~~~[0m
+
+[96msrc/controllers/authController.ts[0m:[93m115[0m:[93m15[0m - [91merror[0m[90m TS2551: [0mProperty 'isActive' does not exist on type '{ id: string; email: string; password: string | null; first_name: string; last_name: string; username: string | null; phone: string | null; city: string | null; district: string | null; ... 15 more ...; refresh_token_expires: Date | null; }'. Did you mean 'is_active'?
+
+[7m115[0m     if (!user.isActive) {
+[7m   [0m [91m              ~~~~~~~~[0m
+[96msrc/controllers/authController.ts[0m:[93m125[0m:[93m15[0m - [91merror[0m[90m TS2561: [0mObject literal may only specify known properties, but 'lastLoginAt' does not exist in type '(Without<UserUpdateInput, UserUncheckedUpdateInput> & UserUncheckedUpdateInput) | (Without<...> & UserUpdateInput)'. Did you mean to write 'last_login'?
+
+[7m125[0m       data: { lastLoginAt: new Date() },
+[7m   [0m [91m              ~~~~~~~~~~~[0m
+
+  [96mnode_modules/.prisma/client/index.d.ts[0m:[93m4153[0m:[93m5[0m
+    [7m4153[0m     data: XOR<UserUpdateInput, UserUncheckedUpdateInput>
+    [7m    [0m [96m    ~~~~[0m
+    The expected type comes from property 'data' which is declared here on type '{ select?: UserSelect<DefaultArgs> | null | undefined; include?: UserInclude<DefaultArgs> | null | undefined; data: (Without<UserUpdateInput, UserUncheckedUpdateInput> & UserUncheckedUpdateInput) | (Without<...> & UserUpdateInput); where: UserWhereUniqueInput; }'
+[96msrc/controllers/authController.ts[0m:[93m174[0m:[93m22[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m174[0m export const getMe = async (req: AuthRequest, res: Response) => {
+[7m   [0m [91m                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/authController.ts[0m:[93m182[0m:[93m9[0m - [91merror[0m[90m TS2561: [0mObject literal may only specify known properties, but 'firstName' does not exist in type 'UserSelect<DefaultArgs>'. Did you mean to write 'first_name'?
+
+[7m182[0m         firstName: true,
+[7m   [0m [91m        ~~~~~~~~~[0m
+
+  [96mnode_modules/.prisma/client/index.d.ts[0m:[93m3926[0m:[93m5[0m
+    [7m3926[0m     select?: UserSelect<ExtArgs> | null
+    [7m    [0m [96m    ~~~~~~[0m
+    The expected type comes from property 'select' which is declared here on type '{ select?: UserSelect<DefaultArgs> | null | undefined; include?: UserInclude<DefaultArgs> | null | undefined; where: UserWhereUniqueInput; }'
+[96msrc/controllers/authController.ts[0m:[93m218[0m:[93m29[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m218[0m export const refreshToken = async (req: Request, res: Response) => {
+[7m   [0m [91m                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/authController.ts[0m:[93m235[0m:[93m29[0m - [91merror[0m[90m TS2561: [0mObject literal may only specify known properties, but 'isActive' does not exist in type 'UserSelect<DefaultArgs>'. Did you mean to write 'is_active'?
+
+[7m235[0m         select: { id: true, isActive: true }
+[7m   [0m [91m                            ~~~~~~~~[0m
+
+  [96mnode_modules/.prisma/client/index.d.ts[0m:[93m3926[0m:[93m5[0m
+    [7m3926[0m     select?: UserSelect<ExtArgs> | null
+    [7m    [0m [96m    ~~~~~~[0m
+    The expected type comes from property 'select' which is declared here on type '{ select?: UserSelect<DefaultArgs> | null | undefined; include?: UserInclude<DefaultArgs> | null | undefined; where: UserWhereUniqueInput; }'
+[96msrc/controllers/authController.ts[0m:[93m238[0m:[93m26[0m - [91merror[0m[90m TS2551: [0mProperty 'isActive' does not exist on type '{ id: string; email: string; password: string | null; first_name: string; last_name: string; username: string | null; phone: string | null; city: string | null; district: string | null; ... 15 more ...; refresh_token_expires: Date | null; }'. Did you mean 'is_active'?
+
+[7m238[0m       if (!user || !user.isActive) {
+[7m   [0m [91m                         ~~~~~~~~[0m
+[96msrc/controllers/authController.ts[0m:[93m268[0m:[93m31[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m268[0m export const forgotPassword = async (req: Request, res: Response) => {
+[7m   [0m [91m                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/authController.ts[0m:[93m306[0m:[93m30[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m306[0m export const resetPassword = async (req: Request, res: Response) => {
+[7m   [0m [91m                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/authController.ts[0m:[93m345[0m:[93m28[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m345[0m export const verifyEmail = async (req: Request, res: Response) => {
+[7m   [0m [91m                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/authController.ts[0m:[93m356[0m:[93m11[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'isVerified' does not exist in type '(Without<UserUpdateInput, UserUncheckedUpdateInput> & UserUncheckedUpdateInput) | (Without<...> & UserUpdateInput)'.
+
+[7m356[0m           isVerified: true,
+[7m   [0m [91m          ~~~~~~~~~~[0m
+
+  [96mnode_modules/.prisma/client/index.d.ts[0m:[93m4153[0m:[93m5[0m
+    [7m4153[0m     data: XOR<UserUpdateInput, UserUncheckedUpdateInput>
+    [7m    [0m [96m    ~~~~[0m
+    The expected type comes from property 'data' which is declared here on type '{ select?: UserSelect<DefaultArgs> | null | undefined; include?: UserInclude<DefaultArgs> | null | undefined; data: (Without<UserUpdateInput, UserUncheckedUpdateInput> & UserUncheckedUpdateInput) | (Without<...> & UserUpdateInput); where: UserWhereUniqueInput; }'
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-13 13:25:59 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/authController.ts[0m:[93m10[0m:[93m14[0m - [91merror[0m[90m TS2769: [0mNo overload matches this call.
+  Overload 1 of 5, '(payload: string | object | Buffer<ArrayBufferLike>, secretOrPrivateKey: null, options?: (SignOptions & { algorithm: "none"; }) | undefined): string', gave the following error.
+    Argument of type 'string' is not assignable to parameter of type 'null'.
+  Overload 2 of 5, '(payload: string | object | Buffer<ArrayBufferLike>, secretOrPrivateKey: Secret | Buffer<ArrayBufferLike> | JsonWebKeyInput | PrivateKeyInput, options?: SignOptions | undefined): string', gave the following error.
+    Type 'string' is not assignable to type 'number | StringValue | undefined'.
+  Overload 3 of 5, '(payload: string | object | Buffer<ArrayBufferLike>, secretOrPrivateKey: Secret | Buffer<ArrayBufferLike> | JsonWebKeyInput | PrivateKeyInput, callback: SignCallback): void', gave the following error.
+    Object literal may only specify known properties, and 'expiresIn' does not exist in type 'SignCallback'.
+
+[7m10[0m   return jwt.sign({ userId }, process.env.JWT_SECRET!, {
+[7m  [0m [91m             ~~~~[0m
+
+[96msrc/controllers/authController.ts[0m:[93m16[0m:[93m25[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m16[0m export const register = async (req: Request, res: Response) => {
+[7m  [0m [91m                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/authController.ts[0m:[93m88[0m:[93m22[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m88[0m export const login = async (req: Request, res: Response) => {
+[7m  [0m [91m                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/authController.ts[0m:[93m105[0m:[93m60[0m - [91merror[0m[90m TS2769: [0mNo overload matches this call.
+  Overload 1 of 2, '(s: string, hash: string): Promise<boolean>', gave the following error.
+    Argument of type 'string | null' is not assignable to parameter of type 'string'.
+      Type 'null' is not assignable to type 'string'.
+  Overload 2 of 2, '(s: string, hash: string, callback?: ((err: Error | null, success: boolean) => void) | undefined, progressCallback?: ((percent: number) => void) | undefined): void', gave the following error.
+    Argument of type 'string | null' is not assignable to parameter of type 'string'.
+      Type 'null' is not assignable to type 'string'.
+
+[7m105[0m     const isPasswordValid = await bcrypt.compare(password, user.password);
+[7m   [0m [91m                                                           ~~~~~~~~~~~~~[0m
+
+[96msrc/controllers/authController.ts[0m:[93m115[0m:[93m15[0m - [91merror[0m[90m TS2551: [0mProperty 'isActive' does not exist on type '{ id: string; email: string; password: string | null; first_name: string; last_name: string; username: string | null; phone: string | null; city: string | null; district: string | null; ... 15 more ...; refresh_token_expires: Date | null; }'. Did you mean 'is_active'?
+
+[7m115[0m     if (!user.isActive) {
+[7m   [0m [91m              ~~~~~~~~[0m
+[96msrc/controllers/authController.ts[0m:[93m125[0m:[93m15[0m - [91merror[0m[90m TS2561: [0mObject literal may only specify known properties, but 'lastLoginAt' does not exist in type '(Without<UserUpdateInput, UserUncheckedUpdateInput> & UserUncheckedUpdateInput) | (Without<...> & UserUpdateInput)'. Did you mean to write 'last_login'?
+
+[7m125[0m       data: { lastLoginAt: new Date() },
+[7m   [0m [91m              ~~~~~~~~~~~[0m
+
+  [96mnode_modules/.prisma/client/index.d.ts[0m:[93m4153[0m:[93m5[0m
+    [7m4153[0m     data: XOR<UserUpdateInput, UserUncheckedUpdateInput>
+    [7m    [0m [96m    ~~~~[0m
+    The expected type comes from property 'data' which is declared here on type '{ select?: UserSelect<DefaultArgs> | null | undefined; include?: UserInclude<DefaultArgs> | null | undefined; data: (Without<UserUpdateInput, UserUncheckedUpdateInput> & UserUncheckedUpdateInput) | (Without<...> & UserUpdateInput); where: UserWhereUniqueInput; }'
+[96msrc/controllers/authController.ts[0m:[93m174[0m:[93m22[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m174[0m export const getMe = async (req: AuthRequest, res: Response) => {
+[7m   [0m [91m                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/authController.ts[0m:[93m182[0m:[93m9[0m - [91merror[0m[90m TS2561: [0mObject literal may only specify known properties, but 'firstName' does not exist in type 'UserSelect<DefaultArgs>'. Did you mean to write 'first_name'?
+
+[7m182[0m         firstName: true,
+[7m   [0m [91m        ~~~~~~~~~[0m
+
+  [96mnode_modules/.prisma/client/index.d.ts[0m:[93m3926[0m:[93m5[0m
+    [7m3926[0m     select?: UserSelect<ExtArgs> | null
+    [7m    [0m [96m    ~~~~~~[0m
+    The expected type comes from property 'select' which is declared here on type '{ select?: UserSelect<DefaultArgs> | null | undefined; include?: UserInclude<DefaultArgs> | null | undefined; where: UserWhereUniqueInput; }'
+[96msrc/controllers/authController.ts[0m:[93m218[0m:[93m29[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m218[0m export const refreshToken = async (req: Request, res: Response) => {
+[7m   [0m [91m                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/authController.ts[0m:[93m235[0m:[93m29[0m - [91merror[0m[90m TS2561: [0mObject literal may only specify known properties, but 'isActive' does not exist in type 'UserSelect<DefaultArgs>'. Did you mean to write 'is_active'?
+
+[7m235[0m         select: { id: true, isActive: true }
+[7m   [0m [91m                            ~~~~~~~~[0m
+
+  [96mnode_modules/.prisma/client/index.d.ts[0m:[93m3926[0m:[93m5[0m
+    [7m3926[0m     select?: UserSelect<ExtArgs> | null
+    [7m    [0m [96m    ~~~~~~[0m
+    The expected type comes from property 'select' which is declared here on type '{ select?: UserSelect<DefaultArgs> | null | undefined; include?: UserInclude<DefaultArgs> | null | undefined; where: UserWhereUniqueInput; }'
+[96msrc/controllers/authController.ts[0m:[93m238[0m:[93m26[0m - [91merror[0m[90m TS2551: [0mProperty 'isActive' does not exist on type '{ id: string; email: string; password: string | null; first_name: string; last_name: string; username: string | null; phone: string | null; city: string | null; district: string | null; ... 15 more ...; refresh_token_expires: Date | null; }'. Did you mean 'is_active'?
+
+[7m238[0m       if (!user || !user.isActive) {
+[7m   [0m [91m                         ~~~~~~~~[0m
+[96msrc/controllers/authController.ts[0m:[93m268[0m:[93m31[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m268[0m export const forgotPassword = async (req: Request, res: Response) => {
+[7m   [0m [91m                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/authController.ts[0m:[93m306[0m:[93m30[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m306[0m export const resetPassword = async (req: Request, res: Response) => {
+[7m   [0m [91m                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/authController.ts[0m:[93m345[0m:[93m28[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m345[0m export const verifyEmail = async (req: Request, res: Response) => {
+[7m   [0m [91m                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/authController.ts[0m:[93m356[0m:[93m11[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'isVerified' does not exist in type '(Without<UserUpdateInput, UserUncheckedUpdateInput> & UserUncheckedUpdateInput) | (Without<...> & UserUpdateInput)'.
+
+[7m356[0m           isVerified: true,
+[7m   [0m [91m          ~~~~~~~~~~[0m
+
+  [96mnode_modules/.prisma/client/index.d.ts[0m:[93m4153[0m:[93m5[0m
+    [7m4153[0m     data: XOR<UserUpdateInput, UserUncheckedUpdateInput>
+    [7m    [0m [96m    ~~~~[0m
+    The expected type comes from property 'data' which is declared here on type '{ select?: UserSelect<DefaultArgs> | null | undefined; include?: UserInclude<DefaultArgs> | null | undefined; data: (Without<UserUpdateInput, UserUncheckedUpdateInput> & UserUncheckedUpdateInput) | (Without<...> & UserUpdateInput); where: UserWhereUniqueInput; }'
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-13 13:26:47 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/authController.ts[0m:[93m10[0m:[93m14[0m - [91merror[0m[90m TS2769: [0mNo overload matches this call.
+  Overload 1 of 5, '(payload: string | object | Buffer<ArrayBufferLike>, secretOrPrivateKey: null, options?: (SignOptions & { algorithm: "none"; }) | undefined): string', gave the following error.
+    Argument of type 'string' is not assignable to parameter of type 'null'.
+  Overload 2 of 5, '(payload: string | object | Buffer<ArrayBufferLike>, secretOrPrivateKey: Secret | Buffer<ArrayBufferLike> | JsonWebKeyInput | PrivateKeyInput, options?: SignOptions | undefined): string', gave the following error.
+    Type 'string' is not assignable to type 'number | StringValue | undefined'.
+  Overload 3 of 5, '(payload: string | object | Buffer<ArrayBufferLike>, secretOrPrivateKey: Secret | Buffer<ArrayBufferLike> | JsonWebKeyInput | PrivateKeyInput, callback: SignCallback): void', gave the following error.
+    Object literal may only specify known properties, and 'expiresIn' does not exist in type 'SignCallback'.
+
+[7m10[0m   return jwt.sign({ userId }, process.env.JWT_SECRET!, {
+[7m  [0m [91m             ~~~~[0m
+
+[96msrc/controllers/authController.ts[0m:[93m16[0m:[93m25[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m16[0m export const register = async (req: Request, res: Response) => {
+[7m  [0m [91m                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/authController.ts[0m:[93m88[0m:[93m22[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m88[0m export const login = async (req: Request, res: Response) => {
+[7m  [0m [91m                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/authController.ts[0m:[93m105[0m:[93m60[0m - [91merror[0m[90m TS2769: [0mNo overload matches this call.
+  Overload 1 of 2, '(s: string, hash: string): Promise<boolean>', gave the following error.
+    Argument of type 'string | null' is not assignable to parameter of type 'string'.
+      Type 'null' is not assignable to type 'string'.
+  Overload 2 of 2, '(s: string, hash: string, callback?: ((err: Error | null, success: boolean) => void) | undefined, progressCallback?: ((percent: number) => void) | undefined): void', gave the following error.
+    Argument of type 'string | null' is not assignable to parameter of type 'string'.
+      Type 'null' is not assignable to type 'string'.
+
+[7m105[0m     const isPasswordValid = await bcrypt.compare(password, user.password);
+[7m   [0m [91m                                                           ~~~~~~~~~~~~~[0m
+
+[96msrc/controllers/authController.ts[0m:[93m115[0m:[93m15[0m - [91merror[0m[90m TS2551: [0mProperty 'isActive' does not exist on type '{ id: string; email: string; password: string | null; first_name: string; last_name: string; username: string | null; phone: string | null; city: string | null; district: string | null; ... 15 more ...; refresh_token_expires: Date | null; }'. Did you mean 'is_active'?
+
+[7m115[0m     if (!user.isActive) {
+[7m   [0m [91m              ~~~~~~~~[0m
+[96msrc/controllers/authController.ts[0m:[93m125[0m:[93m15[0m - [91merror[0m[90m TS2561: [0mObject literal may only specify known properties, but 'lastLoginAt' does not exist in type '(Without<UserUpdateInput, UserUncheckedUpdateInput> & UserUncheckedUpdateInput) | (Without<...> & UserUpdateInput)'. Did you mean to write 'last_login'?
+
+[7m125[0m       data: { lastLoginAt: new Date() },
+[7m   [0m [91m              ~~~~~~~~~~~[0m
+
+  [96mnode_modules/.prisma/client/index.d.ts[0m:[93m4153[0m:[93m5[0m
+    [7m4153[0m     data: XOR<UserUpdateInput, UserUncheckedUpdateInput>
+    [7m    [0m [96m    ~~~~[0m
+    The expected type comes from property 'data' which is declared here on type '{ select?: UserSelect<DefaultArgs> | null | undefined; include?: UserInclude<DefaultArgs> | null | undefined; data: (Without<UserUpdateInput, UserUncheckedUpdateInput> & UserUncheckedUpdateInput) | (Without<...> & UserUpdateInput); where: UserWhereUniqueInput; }'
+[96msrc/controllers/authController.ts[0m:[93m174[0m:[93m22[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m174[0m export const getMe = async (req: AuthRequest, res: Response) => {
+[7m   [0m [91m                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/authController.ts[0m:[93m182[0m:[93m9[0m - [91merror[0m[90m TS2561: [0mObject literal may only specify known properties, but 'firstName' does not exist in type 'UserSelect<DefaultArgs>'. Did you mean to write 'first_name'?
+
+[7m182[0m         firstName: true,
+[7m   [0m [91m        ~~~~~~~~~[0m
+
+  [96mnode_modules/.prisma/client/index.d.ts[0m:[93m3926[0m:[93m5[0m
+    [7m3926[0m     select?: UserSelect<ExtArgs> | null
+    [7m    [0m [96m    ~~~~~~[0m
+    The expected type comes from property 'select' which is declared here on type '{ select?: UserSelect<DefaultArgs> | null | undefined; include?: UserInclude<DefaultArgs> | null | undefined; where: UserWhereUniqueInput; }'
+[96msrc/controllers/authController.ts[0m:[93m218[0m:[93m29[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m218[0m export const refreshToken = async (req: Request, res: Response) => {
+[7m   [0m [91m                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/authController.ts[0m:[93m235[0m:[93m29[0m - [91merror[0m[90m TS2561: [0mObject literal may only specify known properties, but 'isActive' does not exist in type 'UserSelect<DefaultArgs>'. Did you mean to write 'is_active'?
+
+[7m235[0m         select: { id: true, isActive: true }
+[7m   [0m [91m                            ~~~~~~~~[0m
+
+  [96mnode_modules/.prisma/client/index.d.ts[0m:[93m3926[0m:[93m5[0m
+    [7m3926[0m     select?: UserSelect<ExtArgs> | null
+    [7m    [0m [96m    ~~~~~~[0m
+    The expected type comes from property 'select' which is declared here on type '{ select?: UserSelect<DefaultArgs> | null | undefined; include?: UserInclude<DefaultArgs> | null | undefined; where: UserWhereUniqueInput; }'
+[96msrc/controllers/authController.ts[0m:[93m238[0m:[93m26[0m - [91merror[0m[90m TS2551: [0mProperty 'isActive' does not exist on type '{ id: string; email: string; password: string | null; first_name: string; last_name: string; username: string | null; phone: string | null; city: string | null; district: string | null; ... 15 more ...; refresh_token_expires: Date | null; }'. Did you mean 'is_active'?
+
+[7m238[0m       if (!user || !user.isActive) {
+[7m   [0m [91m                         ~~~~~~~~[0m
+[96msrc/controllers/authController.ts[0m:[93m268[0m:[93m31[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m268[0m export const forgotPassword = async (req: Request, res: Response) => {
+[7m   [0m [91m                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/authController.ts[0m:[93m306[0m:[93m30[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m306[0m export const resetPassword = async (req: Request, res: Response) => {
+[7m   [0m [91m                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/authController.ts[0m:[93m345[0m:[93m28[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m345[0m export const verifyEmail = async (req: Request, res: Response) => {
+[7m   [0m [91m                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/authController.ts[0m:[93m356[0m:[93m11[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'isVerified' does not exist in type '(Without<UserUpdateInput, UserUncheckedUpdateInput> & UserUncheckedUpdateInput) | (Without<...> & UserUpdateInput)'.
+
+[7m356[0m           isVerified: true,
+[7m   [0m [91m          ~~~~~~~~~~[0m
+
+  [96mnode_modules/.prisma/client/index.d.ts[0m:[93m4153[0m:[93m5[0m
+    [7m4153[0m     data: XOR<UserUpdateInput, UserUncheckedUpdateInput>
+    [7m    [0m [96m    ~~~~[0m
+    The expected type comes from property 'data' which is declared here on type '{ select?: UserSelect<DefaultArgs> | null | undefined; include?: UserInclude<DefaultArgs> | null | undefined; data: (Without<UserUpdateInput, UserUncheckedUpdateInput> & UserUncheckedUpdateInput) | (Without<...> & UserUpdateInput); where: UserWhereUniqueInput; }'
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-13 13:26:47 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/categoryController.ts[0m:[93m38[0m:[93m32[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m38[0m export const getCategoryById = async (req: Request, res: Response) => {
+[7m  [0m [91m                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-13 17:39:22 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/middleware/auth.ts[0m:[93m17[0m:[93m31[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m17[0m export const authMiddleware = async (req: AuthRequest, res: Response, next: NextFunction) => {
+[7m  [0m [91m                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/middleware/auth.ts[0m:[93m80[0m:[93m32[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m80[0m export const adminMiddleware = async (req: AuthRequest, res: Response, next: NextFunction) => {
+[7m  [0m [91m                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/middleware/auth.ts[0m:[93m106[0m:[93m37[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m106[0m export const superAdminMiddleware = async (req: AuthRequest, res: Response, next: NextFunction) => {
+[7m   [0m [91m                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/middleware/auth.ts[0m:[93m150[0m:[93m11[0m - [91merror[0m[90m TS2561: [0mObject literal may only specify known properties, but 'firstName' does not exist in type 'UserSelect<DefaultArgs>'. Did you mean to write 'first_name'?
+
+[7m150[0m           firstName: true,
+[7m   [0m [91m          ~~~~~~~~~[0m
+
+  [96mnode_modules/.prisma/client/index.d.ts[0m:[93m3926[0m:[93m5[0m
+    [7m3926[0m     select?: UserSelect<ExtArgs> | null
+    [7m    [0m [96m    ~~~~~~[0m
+    The expected type comes from property 'select' which is declared here on type '{ select?: UserSelect<DefaultArgs> | null | undefined; include?: UserInclude<DefaultArgs> | null | undefined; where: UserWhereUniqueInput; }'
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-13 17:39:54 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/middleware/auth.ts[0m:[93m17[0m:[93m31[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m17[0m export const authMiddleware = async (req: AuthRequest, res: Response, next: NextFunction) => {
+[7m  [0m [91m                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/middleware/auth.ts[0m:[93m80[0m:[93m32[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m80[0m export const adminMiddleware = async (req: AuthRequest, res: Response, next: NextFunction) => {
+[7m  [0m [91m                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/middleware/auth.ts[0m:[93m106[0m:[93m37[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m106[0m export const superAdminMiddleware = async (req: AuthRequest, res: Response, next: NextFunction) => {
+[7m   [0m [91m                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-13 17:40:11 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/middleware/auth.ts[0m:[93m22[0m:[93m7[0m - [91merror[0m[90m TS2322: [0mType 'Response<any, Record<string, any>>' is not assignable to type 'void'.
+
+[7m22[0m       return res.status(401).json({
+[7m  [0m [91m      ~~~~~~[0m
+[96msrc/middleware/auth.ts[0m:[93m49[0m:[93m9[0m - [91merror[0m[90m TS2322: [0mType 'Response<any, Record<string, any>>' is not assignable to type 'void'.
+
+[7m49[0m         return res.status(401).json({
+[7m  [0m [91m        ~~~~~~[0m
+[96msrc/middleware/auth.ts[0m:[93m56[0m:[93m9[0m - [91merror[0m[90m TS2322: [0mType 'Response<any, Record<string, any>>' is not assignable to type 'void'.
+
+[7m56[0m         return res.status(401).json({
+[7m  [0m [91m        ~~~~~~[0m
+[96msrc/middleware/auth.ts[0m:[93m66[0m:[93m7[0m - [91merror[0m[90m TS2322: [0mType 'Response<any, Record<string, any>>' is not assignable to type 'void'.
+
+[7m66[0m       return res.status(401).json({
+[7m  [0m [91m      ~~~~~~[0m
+[96msrc/middleware/auth.ts[0m:[93m73[0m:[93m5[0m - [91merror[0m[90m TS2322: [0mType 'Response<any, Record<string, any>>' is not assignable to type 'void'.
+
+[7m73[0m     return res.status(500).json({
+[7m  [0m [91m    ~~~~~~[0m
+[96msrc/middleware/auth.ts[0m:[93m80[0m:[93m32[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m80[0m export const adminMiddleware = async (req: AuthRequest, res: Response, next: NextFunction) => {
+[7m  [0m [91m                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/middleware/auth.ts[0m:[93m106[0m:[93m37[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m106[0m export const superAdminMiddleware = async (req: AuthRequest, res: Response, next: NextFunction) => {
+[7m   [0m [91m                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-13 17:40:26 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/middleware/auth.ts[0m:[93m80[0m:[93m32[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m80[0m export const adminMiddleware = async (req: AuthRequest, res: Response, next: NextFunction) => {
+[7m  [0m [91m                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/middleware/auth.ts[0m:[93m106[0m:[93m37[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m106[0m export const superAdminMiddleware = async (req: AuthRequest, res: Response, next: NextFunction) => {
+[7m   [0m [91m                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-13 17:40:37 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/middleware/auth.ts[0m:[93m106[0m:[93m37[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m106[0m export const superAdminMiddleware = async (req: AuthRequest, res: Response, next: NextFunction) => {
+[7m   [0m [91m                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-13 18:04:38 [error]: PrismaClientKnownRequestError: 
+Invalid `prisma.category.findMany()` invocation in
+C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\categoryController.ts:9:46
+
+  6 
+  7 export const getCategories = async (req: Request, res: Response) => {
+  8   try {
+→ 9     const categories = await prisma.category.findMany(
+The table `public.categories` does not exist in the current database.
+    at $n.handleRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:121:7315)
+    at $n.handleAndLogRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:121:6623)
+    at $n.request (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:121:6307)
+    at async l (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:130:9633)
+    at async getCategories (C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\categoryController.ts:9:24)
+2025-08-13 18:05:16 [error]: PrismaClientKnownRequestError: 
+Invalid `prisma.category.findMany()` invocation in
+C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\categoryController.ts:9:46
+
+  6 
+  7 export const getCategories = async (req: Request, res: Response) => {
+  8   try {
+→ 9     const categories = await prisma.category.findMany(
+The table `public.categories` does not exist in the current database.
+    at $n.handleRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:121:7315)
+    at $n.handleAndLogRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:121:6623)
+    at $n.request (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:121:6307)
+    at async l (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:130:9633)
+    at async getCategories (C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\categoryController.ts:9:24)
+2025-08-13 18:12:31 [error]: PrismaClientKnownRequestError: 
+Invalid `prisma.vehicle_types.findMany()` invocation in
+C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\categoryController.ts:215:53
+
+  212 // Get all vehicle types
+  213 export const getAllVehicleTypes = async (req: Request, res: Response): Promise<void> => {
+  214   try {
+→ 215     const vehicleTypes = await prisma.vehicle_types.findMany(
+The table `public.categories` does not exist in the current database.
+    at $n.handleRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:121:7315)
+    at $n.handleAndLogRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:121:6623)
+    at $n.request (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:121:6307)
+    at async l (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:130:9633)
+    at async getAllVehicleTypes (C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\categoryController.ts:215:26)
+2025-08-13 18:12:56 [error]: PrismaClientKnownRequestError: 
+Invalid `prisma.vehicle_types.findMany()` invocation in
+C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\categoryController.ts:215:53
+
+  212 // Get all vehicle types
+  213 export const getAllVehicleTypes = async (req: Request, res: Response): Promise<void> => {
+  214   try {
+→ 215     const vehicleTypes = await prisma.vehicle_types.findMany(
+The table `public.categories` does not exist in the current database.
+    at $n.handleRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:121:7315)
+    at $n.handleAndLogRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:121:6623)
+    at $n.request (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:121:6307)
+    at async l (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:130:9633)
+    at async getAllVehicleTypes (C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\categoryController.ts:215:26)
+2025-08-13 18:15:33 [error]: PrismaClientKnownRequestError: 
+Invalid `prisma.vehicle_types.findMany()` invocation in
+C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\categoryController.ts:215:53
+
+  212 // Get all vehicle types
+  213 export const getAllVehicleTypes = async (req: Request, res: Response): Promise<void> => {
+  214   try {
+→ 215     const vehicleTypes = await prisma.vehicle_types.findMany(
+The table `public.categories` does not exist in the current database.
+    at $n.handleRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:121:7315)
+    at $n.handleAndLogRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:121:6623)
+    at $n.request (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:121:6307)
+    at async l (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:130:9633)
+    at async getAllVehicleTypes (C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\categoryController.ts:215:26)
+2025-08-13 18:15:33 [error]: PrismaClientKnownRequestError: 
+Invalid `prisma.vehicle_types.findMany()` invocation in
+C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\categoryController.ts:215:53
+
+  212 // Get all vehicle types
+  213 export const getAllVehicleTypes = async (req: Request, res: Response): Promise<void> => {
+  214   try {
+→ 215     const vehicleTypes = await prisma.vehicle_types.findMany(
+The table `public.categories` does not exist in the current database.
+    at $n.handleRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:121:7315)
+    at $n.handleAndLogRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:121:6623)
+    at $n.request (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:121:6307)
+    at async l (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:130:9633)
+    at async getAllVehicleTypes (C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\categoryController.ts:215:26)
+2025-08-13 18:17:53 [error]: PrismaClientKnownRequestError: 
+Invalid `prisma.vehicle_types.findMany()` invocation in
+C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\categoryController.ts:215:53
+
+  212 // Get all vehicle types
+  213 export const getAllVehicleTypes = async (req: Request, res: Response): Promise<void> => {
+  214   try {
+→ 215     const vehicleTypes = await prisma.vehicle_types.findMany(
+The table `public.categories` does not exist in the current database.
+    at $n.handleRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:121:7315)
+    at $n.handleAndLogRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:121:6623)
+    at $n.request (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:121:6307)
+    at async l (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:130:9633)
+    at async getAllVehicleTypes (C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\categoryController.ts:215:26)
+2025-08-13 18:18:28 [error]: PrismaClientKnownRequestError: 
+Invalid `prisma.vehicle_types.findMany()` invocation in
+C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\categoryController.ts:215:53
+
+  212 // Get all vehicle types
+  213 export const getAllVehicleTypes = async (req: Request, res: Response): Promise<void> => {
+  214   try {
+→ 215     const vehicleTypes = await prisma.vehicle_types.findMany(
+The table `public.categories` does not exist in the current database.
+    at $n.handleRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:121:7315)
+    at $n.handleAndLogRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:121:6623)
+    at $n.request (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:121:6307)
+    at async l (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:130:9633)
+    at async getAllVehicleTypes (C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\categoryController.ts:215:26)
+2025-08-13 18:19:25 [error]: PrismaClientUnknownRequestError: 
+Invalid `prisma.vehicle_types.findMany()` invocation in
+C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\categoryController.ts:217:53
+
+  214 try {
+  215   logger.info('Fetching all vehicle types...');
+  216   
+→ 217   const vehicleTypes = await prisma.vehicle_types.findMany(
+Inconsistent query result: Field categories is required to return data, got `null` instead.
+    at $n.handleRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:121:7505)
+    at $n.handleAndLogRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:121:6623)
+    at $n.request (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:121:6307)
+    at async l (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:130:9633)
+    at async getAllVehicleTypes (C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\categoryController.ts:217:26)
+2025-08-13 18:20:33 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/middleware/auth.ts[0m:[93m50[0m:[93m9[0m - [91merror[0m[90m TS2322: [0mType 'Response<any, Record<string, any>>' is not assignable to type 'void'.
+
+[7m50[0m         return res.status(401).json({
+[7m  [0m [91m        ~~~~~~[0m
+[96msrc/middleware/auth.ts[0m:[93m57[0m:[93m9[0m - [91merror[0m[90m TS2322: [0mType 'Response<any, Record<string, any>>' is not assignable to type 'void'.
+
+[7m57[0m         return res.status(401).json({
+[7m  [0m [91m        ~~~~~~[0m
+[96msrc/middleware/auth.ts[0m:[93m67[0m:[93m7[0m - [91merror[0m[90m TS2322: [0mType 'Response<any, Record<string, any>>' is not assignable to type 'void'.
+
+[7m67[0m       return res.status(401).json({
+[7m  [0m [91m      ~~~~~~[0m
+[96msrc/middleware/auth.ts[0m:[93m74[0m:[93m5[0m - [91merror[0m[90m TS2322: [0mType 'Response<any, Record<string, any>>' is not assignable to type 'void'.
+
+[7m74[0m     return res.status(500).json({
+[7m  [0m [91m    ~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-13 18:20:40 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/middleware/auth.ts[0m:[93m69[0m:[93m7[0m - [91merror[0m[90m TS2322: [0mType 'Response<any, Record<string, any>>' is not assignable to type 'void'.
+
+[7m69[0m       return res.status(401).json({
+[7m  [0m [91m      ~~~~~~[0m
+[96msrc/middleware/auth.ts[0m:[93m76[0m:[93m5[0m - [91merror[0m[90m TS2322: [0mType 'Response<any, Record<string, any>>' is not assignable to type 'void'.
+
+[7m76[0m     return res.status(500).json({
+[7m  [0m [91m    ~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-13 18:21:22 [error]: PrismaClientUnknownRequestError: 
+Invalid `prisma.vehicle_types.findMany()` invocation in
+C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\categoryController.ts:217:53
+
+  214 try {
+  215   logger.info('Fetching all vehicle types...');
+  216   
+→ 217   const vehicleTypes = await prisma.vehicle_types.findMany(
+Inconsistent query result: Field categories is required to return data, got `null` instead.
+    at $n.handleRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:121:7505)
+    at $n.handleAndLogRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:121:6623)
+    at $n.request (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:121:6307)
+    at async l (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\runtime\library.js:130:9633)
+    at async getAllVehicleTypes (C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\categoryController.ts:217:26)
+2025-08-14 00:16:06 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/locationController.ts[0m:[93m33[0m:[93m35[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m33[0m export const getDistrictsByCity = async (req: Request, res: Response) => {
+[7m  [0m [91m                                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-14 00:16:24 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/locationController.ts[0m:[93m39[0m:[93m7[0m - [91merror[0m[90m TS2322: [0mType 'Response<any, Record<string, any>>' is not assignable to type 'void'.
+
+[7m39[0m       return res.status(400).json({
+[7m  [0m [91m      ~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-14 00:16:32 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/locationController.ts[0m:[93m33[0m:[93m35[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m33[0m export const getDistrictsByCity = async (req: Request, res: Response) => {
+[7m  [0m [91m                                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)

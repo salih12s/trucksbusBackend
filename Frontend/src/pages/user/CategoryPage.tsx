@@ -19,7 +19,7 @@ import {
 } from '@mui/material';
 import { Home, NavigateNext } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
-import { Listing, Category } from '@/types';
+import { Listing, Category } from '../../types';
 
 const CategoryPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -125,8 +125,16 @@ const CategoryPage: React.FC = () => {
         <Link
           underline="hover"
           color="inherit"
-          href="/"
-          sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
+          component="button"
+          sx={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            cursor: 'pointer',
+            border: 'none',
+            background: 'none',
+            padding: 0,
+            font: 'inherit'
+          }}
           onClick={() => navigate('/')}
         >
           <Home sx={{ mr: 0.5 }} fontSize="inherit" />

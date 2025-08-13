@@ -1,12 +1,22 @@
+@import "tailwindcss/preflight";
 @import "tailwindcss";
 
 /* Global Styles for TruckBus */
 body {
   margin: 0;
-  font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;
+  font-family: 'Inter', 'Poppins', 'Roboto', 'Helvetica', 'Arial', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: #f5f5f5;
+}
+
+/* İlan sitesi için uygun font sınıfları */
+.font-primary {
+  font-family: 'Inter', sans-serif;
+}
+
+.font-secondary {
+  font-family: 'Poppins', sans-serif;
 }
 
 /* Custom CSS Variables */

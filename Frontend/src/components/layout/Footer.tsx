@@ -1,5 +1,6 @@
 import React from 'react';
 import { Box, Container, Typography, Link, Divider } from '@mui/material';
+import { Link as RouterLink } from 'react-router-dom';
 
 const Footer: React.FC = () => {
   return (
@@ -28,16 +29,16 @@ const Footer: React.FC = () => {
               Hızlı Linkler
             </Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <Link href="/" color="grey.400" underline="hover">
+              <Link component={RouterLink} to="/" color="grey.400" underline="hover">
                 Ana Sayfa
               </Link>
-              <Link href="/categories" color="grey.400" underline="hover">
+              <Link component={RouterLink} to="/categories" color="grey.400" underline="hover">
                 Kategoriler
               </Link>
-              <Link href="/about" color="grey.400" underline="hover">
+              <Link component={RouterLink} to="/about" color="grey.400" underline="hover">
                 Hakkımızda
               </Link>
-              <Link href="/contact" color="grey.400" underline="hover">
+              <Link component={RouterLink} to="/contact" color="grey.400" underline="hover">
                 İletişim
               </Link>
             </Box>
@@ -48,16 +49,16 @@ const Footer: React.FC = () => {
               Yardım
             </Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <Link href="/help" color="grey.400" underline="hover">
+              <Link component={RouterLink} to="/help" color="grey.400" underline="hover">
                 Yardım Merkezi
               </Link>
-              <Link href="/privacy" color="grey.400" underline="hover">
+              <Link component={RouterLink} to="/privacy" color="grey.400" underline="hover">
                 Gizlilik Politikası
               </Link>
-              <Link href="/terms" color="grey.400" underline="hover">
+              <Link component={RouterLink} to="/terms" color="grey.400" underline="hover">
                 Kullanım Şartları
               </Link>
-              <Link href="/support" color="grey.400" underline="hover">
+              <Link component={RouterLink} to="/support" color="grey.400" underline="hover">
                 Destek
               </Link>
             </Box>

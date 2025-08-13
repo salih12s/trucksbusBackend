@@ -36,8 +36,8 @@ import {
   Email,
   LocationOn,
 } from '@mui/icons-material';
-import { AuthContext } from '@/context/AuthContext';
-import { Listing, ListingStatus } from '@/types';
+import { AuthContext } from '../../context/AuthContext';
+import { Listing, ListingStatus } from '../../types';
 
 interface TabPanelProps {
   children?: React.ReactNode;

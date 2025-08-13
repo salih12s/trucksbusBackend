@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Outlet, useNavigate, Link, useLocation } from 'react-router-dom';
+import { Outlet, useNavigate,  useLocation } from 'react-router-dom';
 import {
   Box,
   Drawer,
@@ -27,7 +27,7 @@ import {
   Logout,
   Notifications,
 } from '@mui/icons-material';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '../../context/AuthContext';
 
 const drawerWidth = 240;
 

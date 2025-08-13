@@ -5,12 +5,13 @@
   "main": "dist/index.js",
   "scripts": {
     "dev": "nodemon src/simpleIndex.ts",
+    "dev-category": "nodemon src/categoryServer.ts",
     "build": "tsc",
     "start": "node dist/index.js",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
-    "db:seed": "ts-node src/prisma/seed.ts",
+    "db:seed": "ts-node prisma/seed.ts",
     "db:studio": "prisma studio"
   },
   "keywords": [
@@ -22,6 +23,10 @@
   "author": "TruckBus Team",
   "license": "MIT",
   "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@mui/icons-material": "^7.3.1",
+    "@mui/material": "^7.3.1",
     "@prisma/client": "^5.8.0",
     "@types/compression": "^1.8.1",
     "@types/morgan": "^1.9.10",

@@ -10,6 +10,8 @@ import dotenv from 'dotenv';
 import authRoutes from './routes/authRoutes';
 import listingRoutes from './routes/listingRoutes';
 import adminRoutes from './routes/adminRoutes';
+import categoryRoutes from './routes/categoryRoutes';
+import locationRoutes from './routes/locationRoutes';
 
 // Import utils
 import { logger } from './utils/logger';
@@ -55,6 +57,8 @@ app.get('/health', (req, res) => {
 
 // API Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/categories', categoryRoutes);
+app.use('/api/locations', locationRoutes);
 app.use('/api', listingRoutes);
 app.use('/api/admin', adminRoutes);
 

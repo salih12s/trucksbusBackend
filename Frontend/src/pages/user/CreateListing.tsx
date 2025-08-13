@@ -29,7 +29,7 @@ import {
   Check,
   PhotoCamera,
 } from '@mui/icons-material';
-import { Category } from '@/types';
+import { Category } from '../../types';
 
 const steps = ['Kategori Seçimi', 'İlan Bilgileri', 'Fotoğraflar', 'Önizleme'];
 
