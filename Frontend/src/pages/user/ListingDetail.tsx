@@ -16,7 +16,6 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  TextField,
 } from '@mui/material';
 import {
   LocationOn,
@@ -32,6 +31,7 @@ import {
 } from '@mui/icons-material';
 import { useState, useEffect } from 'react';
 import { Listing } from '../../types';
+import ReportModal from '../../components/ReportModal';
 
 const ListingDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -40,8 +40,14 @@ const ListingDetail: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [isFavorite, setIsFavorite] = useState(false);
   const [contactDialogOpen, setContactDialogOpen] = useState(false);
-  const [reportDialogOpen, setReportDialogOpen] = useState(false);
-  const [reportReason, setReportReason] = useState('');
+  const [reportModalOpen, setReportModalOpen] = useState(false);
+
+  const handleSendMessage = () => {
+    if (!listing) return;
+    
+    // Navigate to chat page with listing ID
+    navigate(`/real-time-messages?listing=${listing.id}`);
+  };
 
   useEffect(() => {
     // Mock data - replace with API call
@@ -73,14 +79,14 @@ const ListingDetail: React.FC = () => {
           id: 'user-1',
           email: 'satici@example.com',
           username: 'kamyoncu',
-          firstName: 'Ahmet',
-          lastName: 'Yılmaz',
+          first_name: 'Ahmet',
+          last_name: 'Yılmaz',
           phone: '+90 532 123 45 67',
-          isVerified: true,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          name: '',
-          role: 'user'
+          role: 'USER',
+          is_active: true,
+          is_email_verified: true,
+          created_at: new Date(),
+          updated_at: new Date(),
         },
         images: [
           'https://via.placeholder.com/800x400?text=Kamyon+1',
@@ -119,14 +125,7 @@ const ListingDetail: React.FC = () => {
   };
 
   const handleReport = () => {
-    setReportDialogOpen(true);
-  };
-
-  const submitReport = () => {
-    // Handle report submission
-    console.log('Report submitted:', reportReason);
-    setReportDialogOpen(false);
-    setReportReason('');
+    setReportModalOpen(true);
   };
 
   if (loading) {
@@ -229,10 +228,10 @@ const ListingDetail: React.FC = () => {
 
             {/* Seller Info */}
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
-              <Avatar>{listing.user.firstName[0]}</Avatar>
+              <Avatar>{listing.user.first_name[0]}</Avatar>
               <Box>
                 <Typography variant="subtitle1" fontWeight="bold">
-                  {listing.user.firstName} {listing.user.lastName}
+                  {listing.user.first_name} {listing.user.last_name}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
                   @{listing.user.username}
@@ -257,6 +256,7 @@ const ListingDetail: React.FC = () => {
                 fullWidth
                 startIcon={<Message />}
                 size="large"
+                onClick={handleSendMessage}
               >
                 Mesaj Gönder
               </Button>
@@ -307,26 +307,11 @@ const ListingDetail: React.FC = () => {
       </Dialog>
 
       {/* Report Dialog */}
-      <Dialog open={reportDialogOpen} onClose={() => setReportDialogOpen(false)}>
-        <DialogTitle>İlan Şikayet Et</DialogTitle>
-        <DialogContent>
-          <TextField
-            fullWidth
-            multiline
-            rows={4}
-            label="Şikayet Sebebi"
-            value={reportReason}
-            onChange={(e) => setReportReason(e.target.value)}
-            sx={{ mt: 1 }}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setReportDialogOpen(false)}>İptal</Button>
-          <Button onClick={submitReport} variant="contained" color="warning">
-            Şikayet Et
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <ReportModal
+        open={reportModalOpen}
+        onClose={() => setReportModalOpen(false)}
+        listingId={listing.id}
+      />
     </Container>
   );
 };

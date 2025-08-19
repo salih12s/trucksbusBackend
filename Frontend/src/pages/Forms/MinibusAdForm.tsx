@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../context/AuthContext';
+import { api } from '../../services/api';
 import {
   Box,
   Container,
@@ -16,19 +18,19 @@ import {
   FormControlLabel,
   Checkbox,
   Alert,
-  Chip,
   InputAdornment,
   Card,
   CardContent,
   LinearProgress,
   Autocomplete,
   Stack,
+  Chip,
 } from '@mui/material';
 import {
   ArrowForward,
   Upload,
   LocationOn,
-  LocalShipping,
+  DirectionsBus,
   Speed,
   DateRange,
   Build,
@@ -39,8 +41,8 @@ import {
   Email,
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { locationService, City, District } from '../../services/locationService';
 import UserHeader from '../../components/layout/UserHeader';
+import { locationService, City, District } from '../../services/locationService';
 
 // Renk seçenekleri
 const colorOptions = [
@@ -48,37 +50,20 @@ const colorOptions = [
   'Lacivert', 'Mavi', 'Mor', 'Pembe', 'Sarı', 'Siyah', 'Turkuaz', 'Turuncu', 'Yeşil'
 ];
 
-// Motor Gücü seçenekleri
-const motorPowerOptions = [
-  '100 hp\'ye kadar', '101 - 125 hp', '126 - 150 hp', '151 - 175 hp', 
+// Motor gücü seçenekleri (HP)
+const enginePowerOptions = [
+  '100 hp\'ye kadar', '101 - 125 hp', '126 - 150 hp', '151 - 175 hp',
   '176 - 200 hp', '201 - 225 hp', '226 - 250 hp', '251 - 275 hp',
   '276 - 300 hp', '301 - 325 hp', '326 - 350 hp', '351 - 375 hp',
   '376 - 400 hp', '401 - 425 hp', '426 - 450 hp', '451 - 475 hp',
-  '476 - 500 hp'
+  '476 - 500 hp', '501 hp ve üzeri'
 ];
 
-// Üst Yapı seçenekleri
-const bodyTypeOptions = [
-  'Açık Kasa', 'Ahşap Damper', 'Ahşap Kasa', 'Ambulans', 'Cenaze Aracı',
-  'Çöp Kamyonu', 'Fiber Kasa', 'Frigorifik', 'Hardox Damper', 'Havuz Damper',
-  'Kapalı Kasa', 'Lowbed', 'Merdivenli İtfaiye Aracı', 'Meşrubat Kasası',
-  'Saç Damper', 'Saç Kasa', 'Şasi', 'Tanker', 'Temizlik Kamyonu', 'Tenteli Kasa'
-];
-
-// Taşıma Kapasitesi seçenekleri
-const carryingCapacityOptions = [
-  '0 - 1.500', '1.501 - 3.000', '3.001 - 3.500', '3.501 - 5.000',
-  '5.001 - 10.000', '10.001 - 20.000', '20.001 - 30.000', '30.001 - 40.000'
-];
-
-// Çekiş Türü seçenekleri
-const driveTypeOptions = [
-  '4x2', '4x4', '6x2', '6x4', '6x6', '8x2', '8x2x2', '8x2x4', '8x4x4', '8x8x4'
-];
-
-// Kabin Türü seçenekleri
-const cabinTypeOptions = [
-  'Tek Kabin', 'Çift Kabin', 'Yüksek Kabin', 'Normal Kabin'
+// Motor hacmi seçenekleri (cm³)
+const engineCapacityOptions = [
+  '1300 cm³\'e kadar', '1301 - 1600 cm³', '1601 - 1800 cm³', '1801 - 2000 cm³',
+  '2001 - 2500 cm³', '2501 - 3000 cm³', '3001 - 3500 cm³', '3501 - 4000 cm³',
+  '4001 - 4500 cm³', '4501 - 5000 cm³', '5001 cm³ ve üzeri'
 ];
 
 const steps = [
@@ -89,25 +74,19 @@ const steps = [
   'İletişim & Fiyat'
 ];
 
-const KamyonAdForm = () => {
+const MinibusAdForm: React.FC = () => {
+  const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  
-  // Location state'den gelen varyant bilgilerini al
-  const selectedVariant = location.state?.selectedVariant;
-  const selectedModel = location.state?.selectedModel;
-  const selectedBrand = location.state?.selectedBrand;
-  
   const [activeStep, setActiveStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [uploadedImages, setUploadedImages] = useState<File[]>([]);
   const [error, setError] = useState('');
   
-  // State for cities and districts from API
-  const [cities, setCities] = useState<City[]>([]);
-  const [districts, setDistricts] = useState<District[]>([]);
-  const [loadingCities, setLoadingCities] = useState(true);
-  const [loadingDistricts, setLoadingDistricts] = useState(false);
+  // Brand/Model/Variant states - location.state'den gelecek
+  const selectedVariant = location.state?.variant;
+  const selectedModel = location.state?.model;
+  const selectedBrand = location.state?.brand;
   
   // Ana form verisi
   const [formData, setFormData] = useState({
@@ -119,73 +98,80 @@ const KamyonAdForm = () => {
     district: '',
     
     // Araç Bilgileri  
-    brand: '',
-    model: '',
-    variant: '',
+    brand: selectedBrand?.name || '',
+    model: selectedModel?.name || '',
+    variant: selectedVariant?.name || '',
     year: new Date().getFullYear(),
     vehicleCondition: 'İkinci El',
     km: '',
     fuelType: 'Dizel',
     transmission: 'Manuel',
+    enginePower: '',
+    engineCapacity: '',
     color: '',
     
-    // Kamyon Özel Alanları
-    motorPower: '', // Motor Gücü
-    bodyType: '', // Üst Yapı
-    carryingCapacity: '', // Taşıma Kapasitesi (KG)
-    cabinType: '', // Kabin Türü
-    tireCondition: '', // Lastik Durumu (%)
-    driveType: '', // Çekiş Türü
-    plateOrigin: 'Türk Plakası', // Plaka/Uyruk
-    vehiclePlate: '', // Araç Plakası
+    // Minibüs Özel Alanları
+    seatCount: '17+1', // Koltuk sayısı
+    pullType: 'Arkadan', // Çekiş
+    airConditioning: false, // Klima
+    chassisType: 'Orta', // Şasi tipi
+    roofType: 'Normal Tavan', // Tavan tipi
     
     // Konfor Özellikleri
     features: {
-      // Güvenlik
-      abs: false, // ABS
-      adr: false, // ADR
-      alarm: false, // Alarm
-      asr: false, // ASR
-      ebv: false, // EBV
-      esp: false, // ESP
-      havaPastigiSurucu: false, // Hava Yastığı (Sürücü)
-      havaPastigiYolcu: false, // Hava Yastığı (Yolcu)
-      immobilizer: false, // Immobilizer
-      merkeziKilit: false, // Merkezi Kilit
-      retarder: false, // Retarder
-      yokusKalkisDestegi: false, // Yokuş Kalkış Desteği
-      yanHavaYastigi: false, // Yan Hava Yastığı
-      
-      // İç Donanım
-      cdCalar: false, // CD Çalar
-      deriDoseme: false, // Deri Döşeme
-      elektrikliAynalar: false, // Elektrikli Aynalar
-      elektrikliCam: false, // Elektrikli Cam
-      esnekOkumaLambasi: false, // Esnek Okuma Lambası
-      havaliKoltuk: false, // Havalı Koltuk
-      hizSabitleyici: false, // Hız Sabitleyici
-      hidrotikDireksiyon: false, // Hidrotik Direksiyon
-      isitmalıKoltuklar: false, // Isıtmalı Koltuklar
-      klima: false, // Klima
-      masa: false, // Masa
-      radioTeyp: false, // Radio - Teyp
-      startStop: false, // Start & Stop
-      tvNavigasyon: false, // TV / Navigasyon
-      yolBilgisayari: false, // Yol Bilgisayarı
-      
-      // Dış Donanım
-      alasimJant: false, // Alaşım Jant
-      camRuzgarligi: false, // Cam Rüzgarlığı
-      cekiDemiri: false, // Çeki Demiri
-      far: false, // Far (Sis)
-      farSensoru: false, // Far Sensörü
-      farYikamaSistemi: false, // Far Yıkama Sistemi
-      aynalarElektrikli: false, // Aynalar (Elektrikli)
-      aynalarKatlanir: false, // Aynalar (Katlanır)
-      spoyler: false, // Spoyler
-      sunroof: false, // Sunroof
-      xenonFar: false, // Xenon Far
-      yagmurSensoru: false, // Yağmur Sensörü
+      abs: false,
+      esp: false,
+      airBag: false,
+      centralLock: false,
+      electricWindow: false,
+      electricMirror: false,
+      powerSteering: false,
+      airCondition: false,
+      heater: false,
+      radio: false,
+      cd: false,
+      bluetooth: false,
+      gps: false,
+      camera: false,
+      parkingSensor: false,
+      xenonHeadlight: false,
+      fogLight: false,
+      sunroof: false,
+      alloyWheel: false,
+      leatherSeat: false,
+      alarm: false,
+      headlightJant: false,
+      asr: false,
+      cdPlayer: false,
+      chainIron: false,
+      leatherUpholstery: false,
+      electricMirrors: false,
+      headlight: false,
+      farSensor: false,
+      farWashingSystem: false,
+      airBagDriver: false,
+      airBagPassenger: false,
+      speedControl: false,
+      hydrolic: false,
+      immobilizer: false,
+      heatedSeats: false,
+      climate: false,
+      centralLock2: false,
+      readingLamp: false,
+      automaticGlass: false,
+      automaticDoor: false,
+      parkSensor: false,
+      radioTape: false,
+      spoiler: false,
+      sunroof2: false,
+      tourismPackage: false,
+      tvNavigation: false,
+      xenonHeadlight2: false,
+      rainSensor: false,
+      sideAirBag: false,
+      hotColdSupport: false,
+      fuelConsumptionComputer: false,
+      refrigerator: false,
     },
     
     // Diğer
@@ -203,145 +189,132 @@ const KamyonAdForm = () => {
     sellerEmail: '',
   });
 
-  // Cities'i yükle
+  // State for cities and districts from API
+  const [cities, setCities] = useState<City[]>([]);
+  const [districts, setDistricts] = useState<District[]>([]);
+  const [loadingCities, setLoadingCities] = useState(true);
+  const [loadingDistricts, setLoadingDistricts] = useState(false);
+
+  // Load cities on component mount
   useEffect(() => {
     const loadCities = async () => {
       try {
-        console.log('🏙️ KamyonAdForm: Şehirler yükleniyor...');
         setLoadingCities(true);
         const citiesData = await locationService.getCities();
-        console.log('🏙️ KamyonAdForm: Şehirler yüklendi:', citiesData);
         setCities(citiesData);
+        console.log('🏙️ MinibusAdForm: Şehirler yüklendi:', citiesData.length);
       } catch (error) {
-        console.error('❌ KamyonAdForm: Şehirler yüklenemedi:', error);
-        setError('Şehirler yüklenirken bir hata oluştu');
+        console.error('❌ MinibusAdForm: Şehirler yüklenemedi:', error);
       } finally {
         setLoadingCities(false);
       }
     };
-
+    
     loadCities();
   }, []);
 
-  // Location state'den gelen varyant bilgilerini kontrol et
-  useEffect(() => {
-    // Location state'den gelen seçim bilgilerini kontrol et
-    const selection = location.state?.selection;
-    const directVariant = location.state?.variant;
-    const directModel = location.state?.model;
-    const directBrand = location.state?.brand;
-    
-    console.log('🚛 KamyonAdForm: Location state:', location.state);
-    console.log('🚛 KamyonAdForm: Selection:', selection);
-    
-    if (selection) {
-      // Selection object'den bilgileri al
-      if (selection.brand && selection.model && selection.variant) {
-        console.log('✅ Selection bilgileri alındı:', {
-          brand: selection.brand.name,
-          model: selection.model.name,
-          variant: selection.variant.name
-        });
-        
-        setFormData(prev => ({
-          ...prev,
-          brand: selection.brand.name,
-          model: selection.model.name,
-          variant: selection.variant.name
-        }));
-      }
-    } else if (directBrand && directModel && directVariant) {
-      // Direct props'dan bilgileri al
-      console.log('✅ Direct props bilgileri alındı:', {
-        brand: directBrand.name,
-        model: directModel.name,
-        variant: directVariant.name
-      });
-      
-      setFormData(prev => ({
-        ...prev,
-        brand: directBrand.name,
-        model: directModel.name,
-        variant: directVariant.name
-      }));
-    } else if (selectedVariant && selectedModel && selectedBrand) {
-      // Fallback: selectedVariant state'den al
-      console.log('✅ State bilgileri alındı:', {
-        brand: selectedBrand.name,
-        model: selectedModel.name,
-        variant: selectedVariant.name
-      });
-      
-      setFormData(prev => ({
-        ...prev,
-        brand: selectedBrand.name,
-        model: selectedModel.name,
-        variant: selectedVariant.name
-      }));
-    } else {
-      console.log('⚠️ Araç bilgileri bulunamadı');
-    }
-  }, [location.state, selectedVariant, selectedModel, selectedBrand]);
-
-  // City değişikliğinde districts yükle
+  // Load districts when city changes
   const handleCityChange = async (cityId: string, cityName: string) => {
-    console.log('🏙️ KamyonAdForm: Şehir değişti:', cityName);
-    setFormData(prev => ({
-      ...prev,
-      city: cityName,
-      district: ''
-    }));
-    
-    if (cityId) {
-      try {
-        console.log('🏘️ KamyonAdForm: İlçeler yükleniyor...');
-        setLoadingDistricts(true);
-        const districtsData = await locationService.getDistrictsByCity(cityId);
-        console.log('🏘️ KamyonAdForm: İlçeler yüklendi:', districtsData);
-        setDistricts(districtsData);
-      } catch (error) {
-        console.error('❌ KamyonAdForm: İlçeler yüklenemedi:', error);
-        setError('İlçeler yüklenirken bir hata oluştu');
-      } finally {
-        setLoadingDistricts(false);
-      }
-    } else {
-      setDistricts([]);
+    try {
+      setLoadingDistricts(true);
+      setFormData(prev => ({ ...prev, city: cityName, district: '' }));
+      
+      const districtsData = await locationService.getDistrictsByCity(cityId);
+      setDistricts(districtsData);
+      console.log('🏘️ MinibusAdForm: İlçeler yüklendi:', districtsData.length);
+    } catch (error) {
+      console.error('❌ MinibusAdForm: İlçeler yüklenemedi:', error);
+    } finally {
+      setLoadingDistricts(false);
     }
   };
+
+  useEffect(() => {
+    // Location state'den gelen varyant bilgilerini kontrol et
+    if (selectedVariant && selectedModel && selectedBrand) {
+      console.log('Variant bilgileri alındı:', {
+        brand: selectedBrand,
+        model: selectedModel,
+        variant: selectedVariant
+      });
+      
+      // Brand, model, variant bilgilerini form'a aktar
+      setFormData(prev => ({
+        ...prev,
+        brand: selectedBrand.name,
+        model: selectedModel.name,
+        variant: selectedVariant.name
+      }));
+    }
+  }, [selectedVariant, selectedModel, selectedBrand]);
+
+  // Kullanıcı bilgilerini yükle
+  useEffect(() => {
+    if (user) {
+      setFormData(prev => ({
+        ...prev,
+        sellerName: `${user.first_name} ${user.last_name}`,
+        sellerPhone: user.phone || '',
+        sellerEmail: user.email,
+        city: user.city || '',
+        district: user.district || '',
+      }));
+    }
+  }, [user]);
 
   const handleInputChange = (field: string, value: string | number | boolean) => {
     // Kilometre formatını düzelt
     if (field === 'km' && typeof value === 'string') {
       const numericValue = value.replace(/[^\d]/g, '');
+      
       if (numericValue === '') {
-        setFormData(prev => ({ ...prev, [field]: '' }));
+        setFormData(prev => ({
+          ...prev,
+          [field]: ''
+        }));
         return;
       }
+      
       const formattedValue = numericValue.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-      setFormData(prev => ({ ...prev, [field]: formattedValue }));
+      setFormData(prev => ({
+        ...prev,
+        [field]: formattedValue
+      }));
       return;
     }
 
     // Fiyat formatını düzelt
     if (field === 'price' && typeof value === 'string') {
       const numericValue = value.replace(/[^\d]/g, '');
+      
       if (numericValue === '') {
-        setFormData(prev => ({ ...prev, [field]: '' }));
+        setFormData(prev => ({
+          ...prev,
+          [field]: ''
+        }));
         return;
       }
+      
       const formattedValue = numericValue.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-      setFormData(prev => ({ ...prev, [field]: formattedValue }));
+      setFormData(prev => ({
+        ...prev,
+        [field]: formattedValue
+      }));
       return;
     }
 
     // Telefon formatını düzelt
     if (field === 'sellerPhone' && typeof value === 'string') {
       const numericValue = value.replace(/[^\d]/g, '');
+      
       if (numericValue === '') {
-        setFormData(prev => ({ ...prev, [field]: '' }));
+        setFormData(prev => ({
+          ...prev,
+          [field]: ''
+        }));
         return;
       }
+      
       let formattedValue = numericValue;
       if (numericValue.length >= 1) {
         if (numericValue.length <= 3) {
@@ -357,7 +330,21 @@ const KamyonAdForm = () => {
           formattedValue = `(${truncated.slice(0, 3)}) ${truncated.slice(3, 6)} ${truncated.slice(6, 8)} ${truncated.slice(8, 10)}`;
         }
       }
-      setFormData(prev => ({ ...prev, [field]: formattedValue }));
+      
+      setFormData(prev => ({
+        ...prev,
+        [field]: formattedValue
+      }));
+      return;
+    }
+    
+    // İl değiştiğinde ilçeleri yükle (mock data)
+    if (field === 'city' && typeof value === 'string') {
+      setFormData(prev => ({
+        ...prev,
+        [field]: value,
+        district: ''
+      }));
       return;
     }
     
@@ -370,17 +357,20 @@ const KamyonAdForm = () => {
   const handleFeatureChange = (feature: string, checked: boolean) => {
     setFormData(prev => ({
       ...prev,
-      features: { ...prev.features, [feature]: checked }
+      features: {
+        ...prev.features,
+        [feature]: checked
+      }
     }));
   };
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
     if (files.length > 0) {
-      setUploadedImages(prev => [...prev, ...files].slice(0, 15)); // Max 15 foto
+      setUploadedImages(prev => [...prev, ...files].slice(0, 10));
       setFormData(prev => ({
         ...prev,
-        images: [...prev.images, ...files.map(file => URL.createObjectURL(file))].slice(0, 15)
+        images: [...prev.images, ...files.map(file => URL.createObjectURL(file))].slice(0, 10)
       }));
     }
   };
@@ -461,7 +451,7 @@ const KamyonAdForm = () => {
       setError(validation.message || 'Lütfen tüm zorunlu alanları doldurun');
       return;
     }
-    setError(''); // Önceki hataları temizle
+    setError('');
     setActiveStep(prev => prev + 1);
   };
 
@@ -480,18 +470,79 @@ const KamyonAdForm = () => {
         return;
       }
 
-      console.log('KamyonAdForm: İlan gönderiliyor...', formData);
+      // Real API call to create listing using form data
+      console.log('İlan oluşturuluyor:', formData);
       
-      // Burada API çağrısı yapılacak
-      // const response = await adAPI.createListing(listingData);
-      
-      // Geçici olarak başarılı mesaj göster
-      alert('Kamyon ilanı başarıyla oluşturuldu!');
-      navigate('/dashboard');
+      // Convert uploaded images to data URLs for backend
+      const imageUrls = await Promise.all(
+        uploadedImages.map(file => {
+          return new Promise<string>((resolve) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result as string);
+            reader.readAsDataURL(file);
+          });
+        })
+      );
 
-    } catch (error) {
+      const listingData = {
+        title: formData.title,
+        description: formData.description,
+        price: Number(formData.price.replace(/\./g, '')), // Remove dots from price
+        year: Number(formData.year),
+        km: Number(formData.km.replace(/\./g, '')) || 0, // Remove dots from km
+        category_id: selectedBrand?.vehicle_types?.categories?.id || "vehicle-category-001", // Real category ID from selection chain
+        vehicle_type_id: selectedBrand?.vehicle_type_id || selectedModel?.brands?.vehicle_type_id || "cme633w8v0001981ksnpl6dj8", // Real vehicle type ID from brand
+        brand_id: selectedBrand?.id || "brand-minibus-fiat", // Real brand ID from selection
+        model_id: selectedModel?.id || "fiat-ulysse-1755240605513", // Real model ID from selection
+        variant_id: selectedVariant?.id || null, // Real variant ID from selection
+        city_id: cities.find(city => city.name === formData.city)?.id || "city-01", // Real city ID from form
+        district_id: districts.find(district => district.name === formData.district)?.id || "district-01-1219", // Real district ID from form
+        seller_name: formData.sellerName,
+        seller_phone: formData.sellerPhone.replace(/[^\d]/g, ''), // Remove formatting from phone
+        seller_email: formData.sellerEmail,
+        color: formData.color || "Belirtilmemiş",
+        fuel_type: formData.fuelType,
+        transmission: formData.transmission,
+        vehicle_condition: formData.vehicleCondition,
+        is_exchangeable: formData.exchange === 'Evet',
+        images: imageUrls // Send actual image data URLs
+      };
+
+      console.log('Gönderilecek veri:', listingData);
+      console.log('Selection context:', {
+        selectedBrand,
+        selectedModel, 
+        selectedVariant
+      });
+      console.log('İstek URL:', `${api.defaults.baseURL}/listings`);
+      console.log('İstek başlıyor...');
+
+      const response = await api.post('/listings', listingData);
+      console.log('API Response:', response.data);
+      console.log('İstek başarılı!');
+      
+      if (response.data.success) {
+        alert('İlanınız başarıyla oluşturuldu! Admin onayından sonra yayınlanacaktır.');
+        navigate('/');
+      }
+
+    } catch (error: any) {
       console.error('İlan oluşturma hatası:', error);
-      setError('İlan oluşturulurken bir hata oluştu');
+      console.error('Error response:', error.response?.data);
+      console.error('Error status:', error.response?.status);
+      console.error('Error headers:', error.response?.headers);
+      console.error('Request config:', error.config);
+      
+      if (error.code === 'ECONNREFUSED') {
+        setError('Sunucuya bağlanılamıyor. Lütfen backend\'in çalıştığından emin olun.');
+      } else if (error.response?.status === 404) {
+        setError('API endpoint bulunamadı. URL\'yi kontrol edin.');
+      } else if (error.response?.status === 401) {
+        setError('Yetkilendirme hatası. Lütfen giriş yapın.');
+      } else {
+        const errorMessage = error.response?.data?.message || 'İlan oluşturulurken bir hata oluştu';
+        setError(errorMessage);
+      }
     } finally {
       setLoading(false);
     }
@@ -503,7 +554,7 @@ const KamyonAdForm = () => {
         return (
           <Stack spacing={3}>
             <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <LocalShipping color="primary" />
+              <DirectionsBus color="primary" />
               Araç Bilgileri
             </Typography>
             
@@ -512,7 +563,7 @@ const KamyonAdForm = () => {
               label="İlan Başlığı"
               value={formData.title}
               onChange={(e) => handleInputChange('title', e.target.value)}
-              placeholder="Örn: Satılık Ford Cargo Kamyon"
+              placeholder="Örn: Satılık Ford Transit 17+1 Koltuk Minibüs"
               required
             />
 
@@ -521,16 +572,16 @@ const KamyonAdForm = () => {
                 sx={{ flex: 1, minWidth: 200 }}
                 label="Marka"
                 value={formData.brand}
+                InputProps={{ readOnly: true }}
                 disabled
-                placeholder="Ford, Mercedes, vb."
               />
 
               <TextField
                 sx={{ flex: 1, minWidth: 200 }}
                 label="Model"
                 value={formData.model}
+                InputProps={{ readOnly: true }}
                 disabled
-                placeholder="Cargo, Atego, vb."
               />
             </Box>
 
@@ -539,8 +590,8 @@ const KamyonAdForm = () => {
                 sx={{ flex: 1, minWidth: 200 }}
                 label="Varyant"
                 value={formData.variant}
+                InputProps={{ readOnly: true }}
                 disabled
-                placeholder="2530 D, 1833, vb."
               />
 
               <TextField
@@ -587,7 +638,7 @@ const KamyonAdForm = () => {
               label="Açıklama (Opsiyonel)"
               value={formData.description}
               onChange={(e) => handleInputChange('description', e.target.value)}
-              placeholder="Kamyonunuz hakkında detaylı bilgi verin..."
+              placeholder="Aracınız hakkında detaylı bilgi verin..."
             />
           </Stack>
         );
@@ -602,92 +653,68 @@ const KamyonAdForm = () => {
 
             <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
               <FormControl sx={{ flex: 1, minWidth: 200 }}>
-                <InputLabel>Motor Gücü</InputLabel>
+                <InputLabel>Koltuk Sayısı</InputLabel>
                 <Select
-                  value={formData.motorPower}
-                  onChange={(e) => handleInputChange('motorPower', e.target.value)}
+                  value={formData.seatCount}
+                  onChange={(e) => handleInputChange('seatCount', e.target.value)}
                 >
-                  {motorPowerOptions.map((option) => (
-                    <MenuItem key={option} value={option}>{option}</MenuItem>
-                  ))}
+                  <MenuItem value="8+1">8+1</MenuItem>
+                  <MenuItem value="9+1">9+1</MenuItem>
+                  <MenuItem value="10+1">10+1</MenuItem>
+                  <MenuItem value="11+1">11+1</MenuItem>
+                  <MenuItem value="12+1">12+1</MenuItem>
+                  <MenuItem value="13+1">13+1</MenuItem>
+                  <MenuItem value="14+1">14+1</MenuItem>
+                  <MenuItem value="15+1">15+1</MenuItem>
+                  <MenuItem value="16+1">16+1</MenuItem>
+                  <MenuItem value="17+1">17+1</MenuItem>
+                  <MenuItem value="19+1">19+1</MenuItem>
+                  <MenuItem value="20+1">20+1</MenuItem>
+                  <MenuItem value="21+1">21+1</MenuItem>
+                  <MenuItem value="23+1">23+1</MenuItem>
                 </Select>
               </FormControl>
 
               <FormControl sx={{ flex: 1, minWidth: 200 }}>
-                <InputLabel>Üst Yapı</InputLabel>
+                <InputLabel>Çekiş</InputLabel>
                 <Select
-                  value={formData.bodyType}
-                  onChange={(e) => handleInputChange('bodyType', e.target.value)}
+                  value={formData.pullType}
+                  onChange={(e) => handleInputChange('pullType', e.target.value)}
                 >
-                  {bodyTypeOptions.map((option) => (
-                    <MenuItem key={option} value={option}>{option}</MenuItem>
-                  ))}
+                  <MenuItem value="Önden">Önden</MenuItem>
+                  <MenuItem value="Arkadan">Arkadan</MenuItem>
+                  <MenuItem value="4x4">4x4</MenuItem>
                 </Select>
               </FormControl>
             </Box>
 
             <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
               <FormControl sx={{ flex: 1, minWidth: 200 }}>
-                <InputLabel>Taşıma Kapasitesi (KG)</InputLabel>
+                <InputLabel>Şasi Tipi</InputLabel>
                 <Select
-                  value={formData.carryingCapacity}
-                  onChange={(e) => handleInputChange('carryingCapacity', e.target.value)}
+                  value={formData.chassisType}
+                  onChange={(e) => handleInputChange('chassisType', e.target.value)}
                 >
-                  {carryingCapacityOptions.map((option) => (
-                    <MenuItem key={option} value={option}>{option}</MenuItem>
-                  ))}
+                  <MenuItem value="Kısa">Kısa</MenuItem>
+                  <MenuItem value="Orta">Orta</MenuItem>
+                  <MenuItem value="Uzun">Uzun</MenuItem>
+                  <MenuItem value="Ekstra Uzun">Ekstra Uzun</MenuItem>
                 </Select>
               </FormControl>
 
               <FormControl sx={{ flex: 1, minWidth: 200 }}>
-                <InputLabel>Kabin</InputLabel>
+                <InputLabel>Tavan Tipi</InputLabel>
                 <Select
-                  value={formData.cabinType}
-                  onChange={(e) => handleInputChange('cabinType', e.target.value)}
+                  value={formData.roofType}
+                  onChange={(e) => handleInputChange('roofType', e.target.value)}
                 >
-                  {cabinTypeOptions.map((option) => (
-                    <MenuItem key={option} value={option}>{option}</MenuItem>
-                  ))}
+                  <MenuItem value="Normal Tavan">Normal Tavan</MenuItem>
+                  <MenuItem value="Yüksek Tavan">Yüksek Tavan</MenuItem>
                 </Select>
               </FormControl>
             </Box>
 
             <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-              <TextField
-                sx={{ flex: 1, minWidth: 200 }}
-                label="Lastik Durumu (%)"
-                value={formData.tireCondition}
-                onChange={(e) => handleInputChange('tireCondition', e.target.value)}
-                placeholder="Örn: 85"
-                type="number"
-              />
-
-              <FormControl sx={{ flex: 1, minWidth: 200 }}>
-                <InputLabel>Çekiş Türü</InputLabel>
-                <Select
-                  value={formData.driveType}
-                  onChange={(e) => handleInputChange('driveType', e.target.value)}
-                >
-                  {driveTypeOptions.map((option) => (
-                    <MenuItem key={option} value={option}>{option}</MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Box>
-
-            <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-              <FormControl sx={{ flex: 1, minWidth: 200 }}>
-                <InputLabel>Vites</InputLabel>
-                <Select
-                  value={formData.transmission}
-                  onChange={(e) => handleInputChange('transmission', e.target.value)}
-                >
-                  <MenuItem value="Manuel">Manuel</MenuItem>
-                  <MenuItem value="Otomatik">Otomatik</MenuItem>
-                  <MenuItem value="Yarı Otomatik">Yarı Otomatik</MenuItem>
-                </Select>
-              </FormControl>
-
               <FormControl sx={{ flex: 1, minWidth: 200 }}>
                 <InputLabel>Yakıt Tipi</InputLabel>
                 <Select
@@ -702,50 +729,67 @@ const KamyonAdForm = () => {
                   <MenuItem value="Elektrik">Elektrik</MenuItem>
                 </Select>
               </FormControl>
+
+              <FormControl sx={{ flex: 1, minWidth: 200 }}>
+                <InputLabel>Vites</InputLabel>
+                <Select
+                  value={formData.transmission}
+                  onChange={(e) => handleInputChange('transmission', e.target.value)}
+                >
+                  <MenuItem value="Manuel">Manuel</MenuItem>
+                  <MenuItem value="Otomatik">Otomatik</MenuItem>
+                  <MenuItem value="Yarı Otomatik">Yarı Otomatik</MenuItem>
+                </Select>
+              </FormControl>
             </Box>
 
             <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
               <FormControl sx={{ flex: 1, minWidth: 200 }}>
-                <InputLabel>Renk</InputLabel>
+                <InputLabel>Motor Gücü</InputLabel>
                 <Select
-                  value={formData.color}
-                  onChange={(e) => handleInputChange('color', e.target.value)}
-                  startAdornment={<InputAdornment position="start"><Palette /></InputAdornment>}
+                  value={formData.enginePower}
+                  onChange={(e) => handleInputChange('enginePower', e.target.value)}
                 >
-                  {colorOptions.map((color) => (
-                    <MenuItem key={color} value={color}>{color}</MenuItem>
+                  {enginePowerOptions.map((option) => (
+                    <MenuItem key={option} value={option}>{option}</MenuItem>
                   ))}
                 </Select>
               </FormControl>
 
               <FormControl sx={{ flex: 1, minWidth: 200 }}>
-                <InputLabel>Plaka/Uyruk</InputLabel>
+                <InputLabel>Motor Hacmi</InputLabel>
                 <Select
-                  value={formData.plateOrigin}
-                  onChange={(e) => handleInputChange('plateOrigin', e.target.value)}
+                  value={formData.engineCapacity}
+                  onChange={(e) => handleInputChange('engineCapacity', e.target.value)}
                 >
-                  <MenuItem value="Türk Plakası">Türk Plakası</MenuItem>
-                  <MenuItem value="Yabancı Plaka">Yabancı Plaka</MenuItem>
+                  {engineCapacityOptions.map((option) => (
+                    <MenuItem key={option} value={option}>{option}</MenuItem>
+                  ))}
                 </Select>
               </FormControl>
             </Box>
 
-            <TextField
-              fullWidth
-              label="Araç Plakası"
-              value={formData.vehiclePlate}
-              onChange={(e) => handleInputChange('vehiclePlate', e.target.value)}
-              placeholder="Örn: 34 ABC 123"
-            />
+            <FormControl fullWidth>
+              <InputLabel>Renk</InputLabel>
+              <Select
+                value={formData.color}
+                onChange={(e) => handleInputChange('color', e.target.value)}
+                startAdornment={<InputAdornment position="start"><Palette /></InputAdornment>}
+              >
+                {colorOptions.map((color) => (
+                  <MenuItem key={color} value={color}>{color}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
 
             <FormControlLabel
               control={
                 <Checkbox
-                  checked={formData.exchange === 'Evet'}
-                  onChange={(e) => handleInputChange('exchange', e.target.checked ? 'Evet' : 'Hayır')}
+                  checked={formData.airConditioning}
+                  onChange={(e) => handleInputChange('airConditioning', e.target.checked)}
                 />
               }
-              label="Takaslı"
+              label="Klima Var"
             />
           </Stack>
         );
@@ -757,10 +801,10 @@ const KamyonAdForm = () => {
               Konfor ve Güvenlik Özellikleri
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Kamyonunuzda bulunan özellikleri seçin
+              Aracınızda bulunan özellikleri seçin
             </Typography>
 
-            {/* Güvenlik */}
+            {/* Güvenlik Özellikleri */}
             <Box>
               <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>
                 🛡️ Güvenlik
@@ -768,18 +812,14 @@ const KamyonAdForm = () => {
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
                 {[
                   { key: 'abs', label: 'ABS' },
-                  { key: 'adr', label: 'ADR' },
+                  { key: 'esp', label: 'ESP' },
+                  { key: 'airBag', label: 'Hava Yastığı (Sürücü)' },
+                  { key: 'airBagPassenger', label: 'Hava Yastığı (Yolcu)' },
+                  { key: 'sideAirBag', label: 'Yan Hava Yastığı' },
+                  { key: 'centralLock', label: 'Merkezi Kilit' },
                   { key: 'alarm', label: 'Alarm' },
                   { key: 'asr', label: 'ASR' },
-                  { key: 'ebv', label: 'EBV' },
-                  { key: 'esp', label: 'ESP' },
-                  { key: 'havaPastigiSurucu', label: 'Hava Yastığı (Sürücü)' },
-                  { key: 'havaPastigiYolcu', label: 'Hava Yastığı (Yolcu)' },
-                  { key: 'immobilizer', label: 'Immobilizer' },
-                  { key: 'merkeziKilit', label: 'Merkezi Kilit' },
-                  { key: 'retarder', label: 'Retarder' },
-                  { key: 'yokusKalkisDestegi', label: 'Yokuş Kalkış Desteği' },
-                  { key: 'yanHavaYastigi', label: 'Yan Hava Yastığı' },
+                  { key: 'immobilizer', label: 'İmmobilizer' },
                 ].map((feature) => (
                   <FormControlLabel
                     key={feature.key}
@@ -795,28 +835,25 @@ const KamyonAdForm = () => {
               </Box>
             </Box>
 
-            {/* İç Donanım */}
+            {/* Konfor Özellikleri */}
             <Box>
               <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>
-                🏠 İç Donanım
+                🏠 Konfor
               </Typography>
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
                 {[
-                  { key: 'cdCalar', label: 'CD Çalar' },
-                  { key: 'deriDoseme', label: 'Deri Döşeme' },
-                  { key: 'elektrikliAynalar', label: 'Elektrikli Aynalar' },
-                  { key: 'elektrikliCam', label: 'Elektrikli Cam' },
-                  { key: 'esnekOkumaLambasi', label: 'Esnek Okuma Lambası' },
-                  { key: 'havaliKoltuk', label: 'Havalı Koltuk' },
-                  { key: 'hizSabitleyici', label: 'Hız Sabitleyici' },
-                  { key: 'hidrotikDireksiyon', label: 'Hidrotik Direksiyon' },
-                  { key: 'isitmalıKoltuklar', label: 'Isıtmalı Koltuklar' },
-                  { key: 'klima', label: 'Klima' },
-                  { key: 'masa', label: 'Masa' },
-                  { key: 'radioTeyp', label: 'Radio - Teyp' },
-                  { key: 'startStop', label: 'Start & Stop' },
-                  { key: 'tvNavigasyon', label: 'TV / Navigasyon' },
-                  { key: 'yolBilgisayari', label: 'Yol Bilgisayarı' },
+                  { key: 'electricWindow', label: 'Elektrikli Cam' },
+                  { key: 'electricMirrors', label: 'Elektrikli Aynalar' },
+                  { key: 'powerSteering', label: 'Hidrolik Direksiyon' },
+                  { key: 'airCondition', label: 'Klima' },
+                  { key: 'heater', label: 'Kalorifer' },
+                  { key: 'leatherSeat', label: 'Deri Koltuk' },
+                  { key: 'leatherUpholstery', label: 'Deri Döşeme' },
+                  { key: 'heatedSeats', label: 'Isıtmalı Koltuklar' },
+                  { key: 'automaticGlass', label: 'Otomatik Cam' },
+                  { key: 'automaticDoor', label: 'Otomatik Kapı' },
+                  { key: 'speedControl', label: 'Hız Sabitleyici' },
+                  { key: 'readingLamp', label: 'Okul Aracı' },
                 ].map((feature) => (
                   <FormControlLabel
                     key={feature.key}
@@ -832,25 +869,77 @@ const KamyonAdForm = () => {
               </Box>
             </Box>
 
-            {/* Dış Donanım */}
+            {/* Multimedya */}
             <Box>
               <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>
-                🌟 Dış Donanım
+                📻 Multimedya
               </Typography>
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
                 {[
-                  { key: 'alasimJant', label: 'Alaşım Jant' },
-                  { key: 'camRuzgarligi', label: 'Cam Rüzgarlığı' },
-                  { key: 'cekiDemiri', label: 'Çeki Demiri' },
-                  { key: 'far', label: 'Far (Sis)' },
-                  { key: 'farSensoru', label: 'Far Sensörü' },
-                  { key: 'farYikamaSistemi', label: 'Far Yıkama Sistemi' },
-                  { key: 'aynalarElektrikli', label: 'Aynalar (Elektrikli)' },
-                  { key: 'aynalarKatlanir', label: 'Aynalar (Katlanır)' },
-                  { key: 'spoyler', label: 'Spoyler' },
-                  { key: 'sunroof', label: 'Sunroof' },
-                  { key: 'xenonFar', label: 'Xenon Far' },
-                  { key: 'yagmurSensoru', label: 'Yağmur Sensörü' },
+                  { key: 'radio', label: 'Radyo' },
+                  { key: 'cdPlayer', label: 'CD Çalar' },
+                  { key: 'radioTape', label: 'Radio - Teyp' },
+                  { key: 'bluetooth', label: 'Bluetooth' },
+                  { key: 'gps', label: 'GPS Navigasyon' },
+                  { key: 'tvNavigation', label: 'TV / Navigasyon' },
+                ].map((feature) => (
+                  <FormControlLabel
+                    key={feature.key}
+                    control={
+                      <Checkbox
+                        checked={formData.features[feature.key as keyof typeof formData.features]}
+                        onChange={(e) => handleFeatureChange(feature.key, e.target.checked)}
+                      />
+                    }
+                    label={feature.label}
+                  />
+                ))}
+              </Box>
+            </Box>
+
+            {/* Dış Görünüm */}
+            <Box>
+              <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>
+                🚗 Dış Görünüm
+              </Typography>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                {[
+                  { key: 'headlightJant', label: 'Alaşım Jant' },
+                  { key: 'farSensor', label: 'Far Sensörü' },
+                  { key: 'headlight', label: 'Far (Sis)' },
+                  { key: 'xenonHeadlight2', label: 'Xenon Far' },
+                  { key: 'farWashingSystem', label: 'Far Yıkama Sistemi' },
+                  { key: 'spoiler', label: 'Spoyler' },
+                  { key: 'sunroof2', label: 'Sunroof' },
+                  { key: 'tourismPackage', label: 'Turizm Paketli' },
+                  { key: 'rainSensor', label: 'Yağmur Sensörü' },
+                ].map((feature) => (
+                  <FormControlLabel
+                    key={feature.key}
+                    control={
+                      <Checkbox
+                        checked={formData.features[feature.key as keyof typeof formData.features]}
+                        onChange={(e) => handleFeatureChange(feature.key, e.target.checked)}
+                      />
+                    }
+                    label={feature.label}
+                  />
+                ))}
+              </Box>
+            </Box>
+
+            {/* Diğer */}
+            <Box>
+              <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>
+                🔧 Diğer
+              </Typography>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                {[
+                  { key: 'parkSensor', label: 'Park Sensörü' },
+                  { key: 'camera', label: 'Yokış Kalkış Desteği' },
+                  { key: 'fuelConsumptionComputer', label: 'Yol Bilgisayarı' },
+                  { key: 'hotColdSupport', label: 'Soğutucu / Frigo' },
+                  { key: 'chainIron', label: 'Çeki Demiri' },
                 ].map((feature) => (
                   <FormControlLabel
                     key={feature.key}
@@ -893,6 +982,18 @@ const KamyonAdForm = () => {
                     <MenuItem value="Evet">Evet</MenuItem>
                   </Select>
                 </FormControl>
+
+                <FormControl sx={{ flex: 1, minWidth: 150 }}>
+                  <InputLabel>Takas</InputLabel>
+                  <Select
+                    value={formData.exchange}
+                    onChange={(e) => handleInputChange('exchange', e.target.value)}
+                  >
+                    <MenuItem value="Evet">Evet</MenuItem>
+                    <MenuItem value="Hayır">Hayır</MenuItem>
+                    <MenuItem value="Olabilir">Olabilir</MenuItem>
+                  </Select>
+                </FormControl>
               </Box>
 
               <FormControlLabel
@@ -917,7 +1018,7 @@ const KamyonAdForm = () => {
               Fotoğraf Yükleme
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Kamyonunuzun fotoğraflarını yükleyin (Maksimum 15 adet)
+              Aracınızın fotoğraflarını yükleyin (Maksimum 10 adet)
             </Typography>
 
             <Card sx={{ border: '2px dashed #ddd', textAlign: 'center', p: 4 }}>
@@ -949,7 +1050,7 @@ const KamyonAdForm = () => {
             {uploadedImages.length > 0 && (
               <Box>
                 <Typography variant="subtitle1" sx={{ mb: 2 }}>
-                  Yüklenen Fotoğraflar ({uploadedImages.length}/15)
+                  Yüklenen Fotoğraflar ({uploadedImages.length}/10)
                 </Typography>
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
                   {uploadedImages.map((file, index) => (
@@ -1016,7 +1117,7 @@ const KamyonAdForm = () => {
                 label="Fiyat"
                 value={formData.price}
                 onChange={(e) => handleInputChange('price', e.target.value)}
-                placeholder="Örn: 850.000"
+                placeholder="Örn: 450.000"
                 InputProps={{
                   startAdornment: <InputAdornment position="start">₺</InputAdornment>,
                 }}
@@ -1087,7 +1188,8 @@ const KamyonAdForm = () => {
                 InputProps={{
                   startAdornment: <InputAdornment position="start"><Person /></InputAdornment>,
                 }}
-                required
+                disabled
+                helperText="Kullanıcı profilinden otomatik dolduruldu"
               />
 
               <TextField
@@ -1100,6 +1202,8 @@ const KamyonAdForm = () => {
                   startAdornment: <InputAdornment position="start"><Phone /></InputAdornment>,
                 }}
                 required
+                error={!formData.sellerPhone}
+                helperText={!formData.sellerPhone ? "Telefon numarası zorunludur" : ""}
               />
             </Box>
 
@@ -1108,6 +1212,8 @@ const KamyonAdForm = () => {
               label="E-posta"
               value={formData.sellerEmail}
               onChange={(e) => handleInputChange('sellerEmail', e.target.value)}
+              disabled
+              helperText="Kullanıcı profilinden otomatik dolduruldu"
               InputProps={{
                 startAdornment: <InputAdornment position="start"><Email /></InputAdornment>,
               }}
@@ -1132,81 +1238,82 @@ const KamyonAdForm = () => {
       <UserHeader />
       
       {/* Main Content */}
-      <Container maxWidth="lg" sx={{ py: 4, mt: 8 }}>
+      <Container maxWidth="lg" sx={{ py: 4, mt: 4 }}>
         {/* Header */}
         <Box sx={{ mb: 4, textAlign: 'center' }}>
           <Typography variant="h4" component="h1" gutterBottom>
-            🚛 Kamyon & Kamyonet İlanı Oluştur
+             Minibüs & Midibüs İlanı Oluştur
           </Typography>
-          
-          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', justifyContent: 'center' }}>
-            <Chip label="Kamyon & Kamyonet" color="primary" variant="outlined" />
-            {formData.brand && <Chip label={formData.brand} variant="outlined" />}
-            {formData.model && <Chip label={formData.model} variant="outlined" />}
-            {formData.variant && <Chip label={formData.variant} variant="outlined" />}
-          </Box>
+          {selectedVariant && (
+            <Typography variant="h6" color="primary" sx={{ mb: 2 }}>
+              {selectedBrand?.name} {selectedModel?.name} {selectedVariant?.name}
+            </Typography>
+          )}
         </Box>
 
-        {/* Stepper */}
-        <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
-          <Stepper activeStep={activeStep} alternativeLabel>
-            {steps.map((label) => (
-              <Step key={label}>
-                <StepLabel>{label}</StepLabel>
-              </Step>
-            ))}
-          </Stepper>
-        </Paper>
+      {/* Stepper */}
+      <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
+        <Stepper activeStep={activeStep} alternativeLabel>
+          {steps.map((label) => (
+            <Step key={label}>
+              <StepLabel>{label}</StepLabel>
+            </Step>
+          ))}
+        </Stepper>
+      </Paper>
 
-        {/* Form Content */}
-        <Paper elevation={2} sx={{ p: 3 }}>
-          {error && (
-            <Alert severity="error" sx={{ mb: 3 }}>
-              {error}
-            </Alert>
+      {/* Form Content */}
+      <Paper elevation={2} sx={{ p: 3 }}>
+        {error && (
+          <Alert severity="error" sx={{ mb: 3 }}>
+            {error}
+          </Alert>
+        )}
+
+        {loading && <LinearProgress sx={{ mb: 3 }} />}
+
+        {renderStepContent(activeStep)}
+
+        {/* Navigation Buttons */}
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
+          {activeStep > 0 && (
+            <Button
+              type="button"
+              onClick={handleBack}
+              disabled={loading}
+            >
+              Geri
+            </Button>
           )}
 
-          {loading && <LinearProgress sx={{ mb: 3 }} />}
-
-          {renderStepContent(activeStep)}
-
-          {/* Navigation Buttons */}
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
-            {activeStep > 0 && (
-              <Button
-                onClick={handleBack}
-                disabled={loading}
-              >
-                Geri
-              </Button>
-            )}
-
-            {activeStep === steps.length - 1 ? (
-              <Button
-                variant="contained"
-                onClick={handleSubmit}
-                disabled={loading}
-                size="large"
-                sx={{ minWidth: 200, ml: 'auto' }}
-              >
-                {loading ? 'İlan Oluşturuluyor...' : 'İlanı Yayınla'}
-              </Button>
-            ) : (
-              <Button
-                variant="contained"
-                onClick={handleNext}
-                disabled={loading}
-                endIcon={<ArrowForward />}
-                sx={{ ml: 'auto' }}
-              >
-                İleri
-              </Button>
-            )}
-          </Box>
-        </Paper>
-      </Container>
+          {activeStep === steps.length - 1 ? (
+            <Button
+              type="button"
+              variant="contained"
+              onClick={handleSubmit}
+              disabled={loading}
+              size="large"
+              sx={{ minWidth: 200, ml: 'auto' }}
+            >
+              {loading ? 'İlan Oluşturuluyor...' : 'İlanı Yayınla'}
+            </Button>
+          ) : (
+            <Button
+              type="button"
+              variant="contained"
+              onClick={handleNext}
+              disabled={loading}
+              endIcon={<ArrowForward />}
+              sx={{ ml: 'auto' }}
+            >
+              İleri
+            </Button>
+          )}
+        </Box>
+      </Paper>
+    </Container>
     </Box>
   );
 };
 
-export default KamyonAdForm;
+export default MinibusAdForm;

@@ -1,7 +1,5 @@
-import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-
-// Material-UI Bileşenleri
+import React, { useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 import {
   Box,
   List,
@@ -12,177 +10,235 @@ import {
   IconButton,
   Tooltip,
   Typography,
-} from '@mui/material';
+} from "@mui/material";
+import { alpha } from "@mui/material/styles";
 
-// Material-UI İkonları
-import MenuIcon from '@mui/icons-material/Menu';
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import HomeIcon from '@mui/icons-material/Home';
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
-import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
-import GroupWorkIcon from '@mui/icons-material/GroupWork';
-import RvHookupIcon from '@mui/icons-material/RvHookup';
-import CarCrashIcon from '@mui/icons-material/CarCrash';
+import MenuIcon from "@mui/icons-material/Menu";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import HomeIcon from "@mui/icons-material/Home";
+import LocalShippingIcon from "@mui/icons-material/LocalShipping";
+import DirectionsBusIcon from "@mui/icons-material/DirectionsBus";
+import GroupWorkIcon from "@mui/icons-material/GroupWork";
+import RvHookupIcon from "@mui/icons-material/RvHookup";
+import CarCrashIcon from "@mui/icons-material/CarCrash";
 
-// Sidebar'daki her bir öğeyi ve ikonunu tanımlayan dizi
-const sidebarItems = [
-  { text: 'Tüm İlanlar', icon: <HomeIcon />, path: '/', color: '#3b82f6' },
-  { text: 'Çekici', icon: <LocalShippingIcon />, path: '/category/cekici', color: '#ef4444' },
-  { text: 'Dorse', icon: <RvHookupIcon />, path: '/category/dorse', color: '#f59e0b' },
-  { text: 'Kamyon & Kamyonet', icon: <LocalShippingIcon />, path: '/category/kamyon', color: '#10b981' },
-  { text: 'Karoser & Üst Yapı', icon: <GroupWorkIcon />, path: '/category/karoser', color: '#8b5cf6' },
-  { text: 'Minibüs & Midibüs', icon: <DirectionsBusIcon />, path: '/category/minibus', color: '#06b6d4' },
-  { text: 'Oto Kurtarıcı & Taşıyıcı', icon: <CarCrashIcon />, path: '/category/kurtarici', color: '#f97316' },
-  { text: 'Otobüs', icon: <DirectionsBusIcon />, path: '/category/otobus', color: '#84cc16' },
-  { text: 'Römork', icon: <RvHookupIcon />, path: '/category/romork', color: '#ec4899' },
+/** 🎨 Renkler */
+const PRIMARY_DARK = "#2D3748";
+const LOGO_RED = "#E14D43";
+const BORDER = "#E2E8F0";
+const TEXT_PRIMARY = "#111827";
+const TEXT_SECONDARY = "#6B7280";
+
+/** Gruplar ve başlıklar */
+const GROUP_TITLES: Record<string, string> = {
+  "agir-ticari": "AĞIR TİCARİ",
+  "yolcu-tasima": "YOLCU TAŞIMA",
+  "ozel-araclar": "ÖZEL ARAÇLAR",
+};
+
+type Item = {
+  text: string;
+  icon: React.ReactNode;
+  path: string;
+  group: keyof typeof GROUP_TITLES;
+};
+
+const sidebarItems: Item[] = [
+  { text: "Tüm İlanlar", icon: <HomeIcon sx={{ fontSize: 22 }} />, path: "/", group: "ana" },
+
+  { text: "Çekici", icon: <LocalShippingIcon sx={{ fontSize: 22 }} />, path: "/category/cekici", group: "agir-ticari" },
+  { text: "Dorse", icon: <RvHookupIcon sx={{ fontSize: 22 }} />, path: "/category/dorse", group: "agir-ticari" },
+  { text: "Kamyon & Kamyonet", icon: <LocalShippingIcon sx={{ fontSize: 22 }} />, path: "/category/kamyon", group: "agir-ticari" },
+  { text: "Römork", icon: <RvHookupIcon sx={{ fontSize: 22 }} />, path: "/category/romork", group: "agir-ticari" },
+
+  { text: "Minibüs & Midibüs", icon: <DirectionsBusIcon sx={{ fontSize: 22 }} />, path: "/category/minibus", group: "yolcu-tasima" },
+  { text: "Otobüs", icon: <DirectionsBusIcon sx={{ fontSize: 22 }} />, path: "/category/otobus", group: "yolcu-tasima" },
+
+  { text: "Karoser & Üst Yapı", icon: <GroupWorkIcon sx={{ fontSize: 22 }} />, path: "/category/karoser", group: "ozel-araclar" },
+  { text: "Oto Kurtarıcı & Taşıyıcı", icon: <CarCrashIcon sx={{ fontSize: 22 }} />, path: "/category/kurtarici", group: "ozel-araclar" },
 ];
 
 const Sidebar: React.FC = () => {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(true);
+  const toggleSidebar = () => setIsOpen((p) => !p);
 
-  const toggleSidebar = () => {
-    setIsOpen(!isOpen);
-  };
+  const isRouteActive = (path: string) =>
+    path === "/" ? location.pathname === "/" : location.pathname.startsWith(path);
 
   return (
     <Box
       component="aside"
       sx={{
-        width: isOpen ? 280 : 72,
-        height: '100%',
-        bgcolor: 'white',
-        borderRadius: '12px',
-        boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
-        display: 'flex',
-        flexDirection: 'column',
-        overflow: 'hidden',
-        transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-        border: '1px solid #f1f5f9',
+        position: "sticky", // ✅ sticky
+        top: 76, // ✅ header yüksekliği
+        width: isOpen ? 280 : 88, // ✅ 300 → 280
+        height: "calc(100vh - 76px)", // ✅ sticky için yükseklik
+        bgcolor: "white",
+        border: `1px solid ${BORDER}`,
+        boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden",               // ✅ taşmaları kes
+        boxSizing: "border-box",
+        transition: "width .3s cubic-bezier(0.4, 0, 0.2, 1)",
+        // Scrollbar'ları gizle
+        '&::-webkit-scrollbar': {
+          display: 'none',
+        },
+        '&': {
+          scrollbarWidth: 'none', // Firefox için
+          msOverflowStyle: 'none', // IE/Edge için
+        },
       }}
     >
       {/* Header */}
-      <Box sx={{ 
-        p: 3, 
-        borderBottom: '1px solid #f1f5f9',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        minHeight: 72,
-      }}>
+      <Box
+        sx={{
+          px: 2,
+          py: 2,
+          borderBottom: `1px solid ${BORDER}`,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: isOpen ? "space-between" : "center",
+          minHeight: 72,
+        }}
+      >
         {isOpen && (
-          <Typography 
-            variant="h6" 
-            sx={{ 
-              fontWeight: 700,
-              color: '#0f172a',
-              fontSize: '1.125rem',
-            }}
-          >
+          <Typography variant="h6" sx={{ fontWeight: 800, color: TEXT_PRIMARY, letterSpacing: "-.01em" }}>
             Kategoriler
           </Typography>
         )}
-        <IconButton 
+        <IconButton
           onClick={toggleSidebar}
-          sx={{ 
-            color: '#64748b',
-            '&:hover': { 
-              bgcolor: '#f8fafc',
-              color: '#334155',
-            },
-            transition: 'all 0.2s ease',
-            ...(isOpen ? {} : { mx: 'auto' })
-          }}
+          sx={{ color: TEXT_SECONDARY, "&:hover": { bgcolor: alpha(TEXT_SECONDARY, 0.08) } }}
         >
           {isOpen ? <ChevronLeftIcon /> : <MenuIcon />}
         </IconButton>
       </Box>
 
-      {/* Navigasyon Listesi */}
-      <List sx={{ flex: 1, p: 2, pt: 1 }}>
-        {sidebarItems.map((item) => {
-          const isActive = location.pathname === item.path;
-          return (
-            <ListItem key={item.text} disablePadding sx={{ mb: 1 }}>
-              <Tooltip title={!isOpen ? item.text : ""} placement="right">
-                <ListItemButton
-                  component={Link}
-                  to={item.path}
-                  selected={isActive}
+      {/* Liste (scroll güvenli) */}
+      <List
+        sx={{
+          flex: 1,
+          px: 1.5,                         // ✅ yan güvenlik payı
+          py: 2,
+          overflowY: "auto",               // ✅ dikey taşma olursa kaydır
+          maxHeight: "calc(100vh - 140px)", // header yüksekliğine göre ayarla
+          // Scrollbar'ları gizle
+          '&::-webkit-scrollbar': {
+            display: 'none',
+          },
+          '&': {
+            scrollbarWidth: 'none', // Firefox için
+            msOverflowStyle: 'none', // IE/Edge için
+          },
+        }}
+      >
+        {sidebarItems.map((item, i) => {
+          const isActive = isRouteActive(item.path);
+          const prev = sidebarItems[i - 1];
+          const showGroupHeader = isOpen && (i === 0 || !prev || prev.group !== item.group);
+
+          const button = (
+            <ListItemButton
+              component={Link}
+              to={item.path}
+              selected={isActive}
+              sx={{
+                position: "relative",
+                height: 48,
+                borderRadius: 12,           // yuvarlak istemiyorsan 12 ideal
+                mx: 0,                      // ✅ genişliği taşırma
+                pl: isOpen ? 4 : 3,         // 32px / 24px
+                pr: isOpen ? 2.5 : 2,
+                alignItems: "center",
+                justifyContent: isOpen ? "flex-start" : "center",
+                color: isActive ? LOGO_RED : TEXT_SECONDARY,
+
+                ...(isActive && {
+                  bgcolor: alpha(LOGO_RED, 0.10),
+                  "&::before": {            // ✅ şerit tamamen içeride
+                    content: '""',
+                    position: "absolute",
+                    left: 8,
+                    top: 10,
+                    bottom: 10,
+                    width: 3,
+                    backgroundColor: LOGO_RED,
+                    borderRadius: 999,
+                  },
+                  "& .MuiListItemText-primary": { color: PRIMARY_DARK, fontWeight: 700 },
+                  boxShadow: "0 2px 8px rgba(225,77,67,0.08)", // ✅ hafif shadow
+                }),
+
+                "&:hover": {
+                  bgcolor: isActive ? alpha(LOGO_RED, 0.14) : alpha(LOGO_RED, 0.05),
+                  color: LOGO_RED,
+                  "& .MuiListItemIcon-root": { transform: "scale(1.06)" },
+                },
+
+                transition: "background-color .2s ease, color .2s ease",
+              }}
+            >
+              <ListItemIcon
+                sx={{
+                  minWidth: isOpen ? 40 : 0,
+                  mr: isOpen ? 1.5 : 0,
+                  color: "inherit",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  transition: "transform .2s ease",
+                }}
+              >
+                {item.icon}
+              </ListItemIcon>
+
+              {isOpen && (
+                <ListItemText
+                  primary={item.text}
                   sx={{
-                    borderRadius: '10px',
-                    minHeight: 48,
-                    px: isOpen ? 2 : 1.5,
-                    py: 1.5,
-                    position: 'relative',
-                    overflow: 'hidden',
-                    // Modern gradient background for active state
-                    background: isActive 
-                      ? `linear-gradient(135deg, ${item.color}15, ${item.color}08)`
-                      : 'transparent',
-                    border: isActive ? `1px solid ${item.color}30` : '1px solid transparent',
-                    
-                    '&:hover': {
-                      bgcolor: isActive ? 'transparent' : '#f8fafc',
-                      background: isActive 
-                        ? `linear-gradient(135deg, ${item.color}20, ${item.color}10)`
-                        : '#f8fafc',
-                      transform: 'translateX(2px)',
+                    "& .MuiListItemText-primary": {
+                      fontSize: 14,
+                      fontWeight: isActive ? 700 : 600,
+                      color: isActive ? PRIMARY_DARK : TEXT_PRIMARY,
                     },
-                    
-                    '&.Mui-selected': {
-                      bgcolor: 'transparent',
-                    },
-                    
-                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                  }}
+                />
+              )}
+            </ListItemButton>
+          );
+
+          return (
+            <React.Fragment key={`${item.group}-${item.text}`}>
+              {showGroupHeader && (
+                <Typography
+                  variant="overline"
+                  sx={{
+                    display: "block",
+                    color: TEXT_SECONDARY,
+                    px: 1,
+                    pt: i === 0 ? 0 : 1.25,
+                    pb: 0.5,
+                    letterSpacing: ".08em",
+                    fontWeight: 700,
                   }}
                 >
-                  <ListItemIcon
-                    sx={{
-                      minWidth: 0,
-                      mr: isOpen ? 2.5 : 0,
-                      justifyContent: 'center',
-                      color: isActive ? item.color : '#64748b',
-                      fontSize: '1.25rem',
-                      transition: 'color 0.2s ease',
-                    }}
-                  >
-                    {item.icon}
-                  </ListItemIcon>
-                  
-                  {isOpen && (
-                    <ListItemText 
-                      primary={item.text} 
-                      sx={{ 
-                        '& .MuiListItemText-primary': {
-                          fontSize: '0.875rem',
-                          fontWeight: isActive ? 600 : 500,
-                          color: isActive ? '#0f172a' : '#475569',
-                          transition: 'color 0.2s ease',
-                          lineHeight: 1.4,
-                        }
-                      }} 
-                    />
-                  )}
-                  
-                  {/* Active indicator */}
-                  {isActive && (
-                    <Box
-                      sx={{
-                        position: 'absolute',
-                        right: 8,
-                        width: 4,
-                        height: 20,
-                        bgcolor: item.color,
-                        borderRadius: '2px',
-                        opacity: isOpen ? 1 : 0,
-                        transition: 'opacity 0.2s ease',
-                      }}
-                    />
-                  )}
-                </ListItemButton>
-              </Tooltip>
-            </ListItem>
+                  {GROUP_TITLES[item.group]}
+                </Typography>
+              )}
+
+              <ListItem disablePadding sx={{ mb: 0.5 }}>
+                {!isOpen ? (
+                  <Tooltip title={item.text} placement="right" arrow>
+                    <Box sx={{ width: "100%" }}>{button}</Box>
+                  </Tooltip>
+                ) : (
+                  button
+                )}
+              </ListItem>
+            </React.Fragment>
           );
         })}
       </List>

@@ -1,404 +1,462 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import {
-  Container,
-  Typography,
   Box,
-  Paper,
+  Grid,
+  Container,
   Card,
   CardContent,
-  IconButton,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Chip,
-  Button,
+  Typography,
   Avatar,
   LinearProgress,
+  Chip,
+  IconButton,
+  Button,
+  Alert,
+  Stack,
+  Paper,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemAvatar,
+  Divider,
 } from '@mui/material';
 import {
   TrendingUp,
+  TrendingDown,
   People,
-  Business,
+  Assignment,
   Report,
+  Message,
   Visibility,
+  MoreVert,
+  NotificationImportant,
   CheckCircle,
-  Cancel,
+  ErrorOutline,
   Schedule,
 } from '@mui/icons-material';
-import { formatDistanceToNow } from 'date-fns';
-import { tr } from 'date-fns/locale';
 
-interface DashboardStats {
-  totalUsers: number;
-  totalListings: number;
-  pendingListings: number;
-  totalReports: number;
-  todayRegistrations: number;
-  todayListings: number;
+// Mock data - gerçekte API'den gelecek
+const dashboardStats = {
+  totalUsers: 1247,
+  usersChange: 12.5,
+  totalListings: 3892,
+  listingsChange: -2.3,
+  pendingListings: 24,
+  pendingChange: 15.8,
+  totalComplaints: 8,
+  complaintsChange: -25.0,
+  unreadMessages: 12,
+  messagesChange: 33.3,
+  todayViews: 15673,
+  viewsChange: 8.7,
+};
+
+const recentActivities = [
+  {
+    id: 1,
+    type: 'listing',
+    title: 'Yeni Mercedes Actros ilanı',
+    user: 'Ahmet Yılmaz',
+    time: '5 dakika önce',
+    status: 'pending',
+  },
+  {
+    id: 2,
+    type: 'complaint',
+    title: 'Sahte ilan şikayeti',
+    user: 'Ayşe Demir',
+    time: '15 dakika önce',
+    status: 'urgent',
+  },
+  {
+    id: 3,
+    type: 'user',
+    title: 'Yeni kullanıcı kaydı',
+    user: 'Mehmet Kaya',
+    time: '1 saat önce',
+    status: 'completed',
+  },
+  {
+    id: 4,
+    type: 'message',
+    title: 'Özel mesaj',
+    user: 'Fatma Öztürk',
+    time: '2 saat önce',
+    status: 'unread',
+  },
+];
+
+const quickActions = [
+  {
+    title: 'Onay Bekleyen İlanlar',
+    count: 24,
+    action: 'İncele',
+    color: 'warning',
+    path: '/admin/pending-listings',
+  },
+  {
+    title: 'Şikayetler',
+    count: 8,
+    action: 'Görüntüle',
+    color: 'error',
+    path: '/admin/complaints',
+  },
+  {
+    title: 'Okunmamış Mesajlar',
+    count: 12,
+    action: 'Yanıtla',
+    color: 'info',
+    path: '/admin/messages',
+  },
+];
+
+interface StatCardProps {
+  title: string;
+  value: number;
+  change: number;
+  icon: React.ReactNode;
+  color: string;
+  format?: 'number' | 'currency';
 }
 
-interface RecentActivity {
-  id: string;
-  type: 'user_registration' | 'listing_created' | 'listing_approved' | 'report_created';
-  user: string;
-  description: string;
-  createdAt: Date;
-}
+const StatCard: React.FC<StatCardProps> = ({ title, value, change, icon, color, format = 'number' }) => {
+  const formatValue = (val: number) => {
+    if (format === 'currency') {
+      return new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(val);
+    }
+    return new Intl.NumberFormat('tr-TR').format(val);
+  };
+
+  return (
+    <Card 
+      sx={{ 
+        height: '100%', 
+        position: 'relative', 
+        overflow: 'hidden',
+        background: `linear-gradient(135deg, ${color}.main 0%, ${color}.dark 100%)`,
+        color: 'white',
+        transition: 'all 0.3s ease',
+        '&:hover': {
+          transform: 'translateY(-4px)',
+          boxShadow: '0 8px 25px rgba(0,0,0,0.15)',
+        }
+      }}
+    >
+      <CardContent sx={{ position: 'relative', zIndex: 1 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+          <Avatar 
+            sx={{ 
+              bgcolor: 'rgba(255, 255, 255, 0.2)', 
+              width: 56, 
+              height: 56,
+              color: 'white',
+              backdropFilter: 'blur(10px)',
+            }}
+          >
+            {icon}
+          </Avatar>
+          <IconButton size="small" sx={{ color: 'rgba(255, 255, 255, 0.8)' }}>
+            <MoreVert />
+          </IconButton>
+        </Box>
+        
+        <Typography variant="h4" component="div" sx={{ fontWeight: 'bold', mb: 1, color: 'white' }}>
+          {formatValue(value)}
+        </Typography>
+        
+        <Typography variant="body2" sx={{ mb: 2, color: 'rgba(255, 255, 255, 0.9)' }}>
+          {title}
+        </Typography>
+        
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          {change > 0 ? (
+            <TrendingUp sx={{ color: '#4caf50', fontSize: 20 }} />
+          ) : (
+            <TrendingDown sx={{ color: '#f44336', fontSize: 20 }} />
+          )}
+          <Typography
+            variant="body2"
+            sx={{
+              color: change > 0 ? '#4caf50' : '#f44336',
+              fontWeight: 'medium',
+            }}
+          >
+            {change > 0 ? '+' : ''}{change}%
+          </Typography>
+          <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.8)' }}>
+            bu ay
+          </Typography>
+        </Box>
+      </CardContent>
+      
+      {/* Decorative background elements */}
+      <Box
+        sx={{
+          position: 'absolute',
+          top: -20,
+          right: -20,
+          width: 80,
+          height: 80,
+          borderRadius: '50%',
+          bgcolor: 'rgba(255, 255, 255, 0.1)',
+          zIndex: 0,
+        }}
+      />
+      <Box
+        sx={{
+          position: 'absolute',
+          bottom: -30,
+          left: -30,
+          width: 100,
+          height: 100,
+          borderRadius: '50%',
+          bgcolor: 'rgba(255, 255, 255, 0.05)',
+          zIndex: 0,
+        }}
+      />
+    </Card>
+  );
+};
 
 const AdminDashboard: React.FC = () => {
-  const [stats, setStats] = useState<DashboardStats>({
-    totalUsers: 0,
-    totalListings: 0,
-    pendingListings: 0,
-    totalReports: 0,
-    todayRegistrations: 0,
-    todayListings: 0,
-  });
-
-  const [recentActivities, setRecentActivities] = useState<RecentActivity[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    // Mock data loading
-    setTimeout(() => {
-      setStats({
-        totalUsers: 1245,
-        totalListings: 856,
-        pendingListings: 23,
-        totalReports: 12,
-        todayRegistrations: 8,
-        todayListings: 15,
-      });
-
-      setRecentActivities([
-        {
-          id: '1',
-          type: 'user_registration',
-          user: 'Ahmet Yılmaz',
-          description: 'Yeni kullanıcı kaydı',
-          createdAt: new Date(Date.now() - 5 * 60 * 1000),
-        },
-        {
-          id: '2',
-          type: 'listing_created',
-          user: 'Mehmet Kaya',
-          description: '2018 Mercedes Actros ilanı oluşturdu',
-          createdAt: new Date(Date.now() - 15 * 60 * 1000),
-        },
-        {
-          id: '3',
-          type: 'listing_approved',
-          user: 'Admin',
-          description: 'Volvo FH16 ilanını onayladı',
-          createdAt: new Date(Date.now() - 30 * 60 * 1000),
-        },
-        {
-          id: '4',
-          type: 'report_created',
-          user: 'Fatma Demir',
-          description: 'İlan için şikayetçi oldu',
-          createdAt: new Date(Date.now() - 45 * 60 * 1000),
-        },
-      ]);
-
-      setLoading(false);
-    }, 1000);
-  }, []);
-
   const getActivityIcon = (type: string) => {
     switch (type) {
-      case 'user_registration':
-        return <People color="primary" />;
-      case 'listing_created':
-        return <Business color="info" />;
-      case 'listing_approved':
-        return <CheckCircle color="success" />;
-      case 'report_created':
-        return <Report color="error" />;
+      case 'listing':
+        return <Assignment />;
+      case 'complaint':
+        return <Report />;
+      case 'user':
+        return <People />;
+      case 'message':
+        return <Message />;
       default:
-        return <Schedule />;
+        return <NotificationImportant />;
     }
   };
 
-  const getActivityColor = (type: string): 'primary' | 'info' | 'success' | 'error' | 'default' => {
-    switch (type) {
-      case 'user_registration':
-        return 'primary';
-      case 'listing_created':
-        return 'info';
-      case 'listing_approved':
-        return 'success';
-      case 'report_created':
+  const getActivityColor = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return 'warning';
+      case 'urgent':
         return 'error';
+      case 'completed':
+        return 'success';
+      case 'unread':
+        return 'info';
       default:
         return 'default';
     }
   };
 
-  if (loading) {
-    return (
-      <Container maxWidth="xl" sx={{ py: 4 }}>
-        <Typography variant="h4" gutterBottom>
-          Yönetim Paneli
-        </Typography>
-        <LinearProgress />
-      </Container>
-    );
-  }
-
   return (
-    <Container maxWidth="xl" sx={{ py: 4 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
-        <Typography variant="h4" component="h1" fontWeight="bold">
-          Yönetim Paneli
+    <Box>
+      {/* Header */}
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 'bold' }}>
+          📊 Dashboard
         </Typography>
-        <Button variant="outlined" startIcon={<TrendingUp />}>
-          Raporları Görüntüle
-        </Button>
+        <Typography variant="body1" color="text.secondary">
+          TruckBus admin paneline hoş geldiniz. Sisteminizin genel durumunu buradan takip edebilirsiniz.
+        </Typography>
       </Box>
+
+      {/* Alerts */}
+      <Stack spacing={2} sx={{ mb: 4 }}>
+        <Alert severity="warning" action={
+          <Button color="inherit" size="small">
+            İNCELE
+          </Button>
+        }>
+          <strong>24 ilan</strong> onay bekliyor. Lütfen inceleyiniz.
+        </Alert>
+        <Alert severity="error" action={
+          <Button color="inherit" size="small">
+            GÖRÜNTÜLE
+          </Button>
+        }>
+          <strong>3 acil şikayet</strong> var. Hemen müdahale gerekiyor.
+        </Alert>
+      </Stack>
 
       {/* Stats Cards */}
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', lg: 'repeat(4, 1fr)' }, gap: 3, mb: 4 }}>
-        <Card>
-          <CardContent>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <Box>
-                <Typography color="text.secondary" gutterBottom>
-                  Toplam Kullanıcı
-                </Typography>
-                <Typography variant="h4" fontWeight="bold">
-                  {stats.totalUsers.toLocaleString()}
-                </Typography>
-                <Typography variant="body2" color="success.main">
-                  +{stats.todayRegistrations} bugün
-                </Typography>
-              </Box>
-              <Avatar sx={{ bgcolor: 'primary.main', width: 56, height: 56 }}>
-                <People />
-              </Avatar>
-            </Box>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <Box>
-                <Typography color="text.secondary" gutterBottom>
-                  Toplam İlan
-                </Typography>
-                <Typography variant="h4" fontWeight="bold">
-                  {stats.totalListings.toLocaleString()}
-                </Typography>
-                <Typography variant="body2" color="success.main">
-                  +{stats.todayListings} bugün
-                </Typography>
-              </Box>
-              <Avatar sx={{ bgcolor: 'info.main', width: 56, height: 56 }}>
-                <Business />
-              </Avatar>
-            </Box>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <Box>
-                <Typography color="text.secondary" gutterBottom>
-                  Bekleyen İlanlar
-                </Typography>
-                <Typography variant="h4" fontWeight="bold">
-                  {stats.pendingListings}
-                </Typography>
-                <Typography variant="body2" color="warning.main">
-                  Onay bekliyor
-                </Typography>
-              </Box>
-              <Avatar sx={{ bgcolor: 'warning.main', width: 56, height: 56 }}>
-                <Schedule />
-              </Avatar>
-            </Box>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <Box>
-                <Typography color="text.secondary" gutterBottom>
-                  Toplam Şikayet
-                </Typography>
-                <Typography variant="h4" fontWeight="bold">
-                  {stats.totalReports}
-                </Typography>
-                <Typography variant="body2" color="error.main">
-                  İnceleme gerekli
-                </Typography>
-              </Box>
-              <Avatar sx={{ bgcolor: 'error.main', width: 56, height: 56 }}>
-                <Report />
-              </Avatar>
-            </Box>
-          </CardContent>
-        </Card>
+      <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 3, mb: 4 }}>
+        <StatCard
+          title="Toplam Kullanıcı"
+          value={dashboardStats.totalUsers}
+          change={dashboardStats.usersChange}
+          icon={<People />}
+          color="primary"
+        />
+        <StatCard
+          title="Toplam İlan"
+          value={dashboardStats.totalListings}
+          change={dashboardStats.listingsChange}
+          icon={<Assignment />}
+          color="success"
+        />
+        <StatCard
+          title="Onay Bekleyen"
+          value={dashboardStats.pendingListings}
+          change={dashboardStats.pendingChange}
+          icon={<Schedule />}
+          color="warning"
+        />
+        <StatCard
+          title="Şikayetler"
+          value={dashboardStats.totalComplaints}
+          change={dashboardStats.complaintsChange}
+          icon={<Report />}
+          color="error"
+        />
+        <StatCard
+          title="Okunmamış Mesaj"
+          value={dashboardStats.unreadMessages}
+          change={dashboardStats.messagesChange}
+          icon={<Message />}
+          color="info"
+        />
+        <StatCard
+          title="Bugünkü Görüntüleme"
+          value={dashboardStats.todayViews}
+          change={dashboardStats.viewsChange}
+          icon={<Visibility />}
+          color="secondary"
+        />
       </Box>
 
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', lg: '2fr 1fr' }, gap: 3 }}>
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 2fr' }, gap: 3 }}>
+        {/* Quick Actions */}
+        <Paper sx={{ p: 3, height: 'fit-content' }}>
+          <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: 1 }}>
+            ⚡ Hızlı İşlemler
+          </Typography>
+          <Stack spacing={2}>
+            {quickActions.map((action, index) => (
+              <Card key={index} variant="outlined" sx={{ p: 2 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 'medium' }}>
+                    {action.title}
+                  </Typography>
+                  <Chip
+                    label={action.count}
+                    color={action.color as any}
+                    size="small"
+                    sx={{ fontWeight: 'bold' }}
+                  />
+                </Box>
+                <Button 
+                  variant="contained" 
+                  size="small" 
+                  fullWidth
+                  color={action.color as any}
+                >
+                  {action.action}
+                </Button>
+              </Card>
+            ))}
+          </Stack>
+        </Paper>
+
         {/* Recent Activities */}
         <Paper sx={{ p: 3 }}>
-          <Typography variant="h6" gutterBottom fontWeight="bold">
-            Son Aktiviteler
+          <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: 1 }}>
+            🔔 Son Aktiviteler
           </Typography>
-          <TableContainer>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Aktivite</TableCell>
-                  <TableCell>Kullanıcı</TableCell>
-                  <TableCell>Zaman</TableCell>
-                  <TableCell>İşlem</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {recentActivities.map((activity) => (
-                  <TableRow key={activity.id}>
-                    <TableCell>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                        {getActivityIcon(activity.type)}
-                        <Box>
-                          <Typography variant="body2" fontWeight="medium">
-                            {activity.description}
-                          </Typography>
-                          <Chip 
-                            label={activity.type.replace('_', ' ')} 
-                            size="small" 
-                            color={getActivityColor(activity.type)}
-                            sx={{ mt: 0.5 }}
-                          />
-                        </Box>
+          <List>
+            {recentActivities.map((activity, index) => (
+              <React.Fragment key={activity.id}>
+                <ListItem alignItems="flex-start">
+                  <ListItemAvatar>
+                    <Avatar sx={{ bgcolor: `${getActivityColor(activity.status)}.main` }}>
+                      {getActivityIcon(activity.type)}
+                    </Avatar>
+                  </ListItemAvatar>
+                  <ListItemText
+                    primary={
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 'medium' }}>
+                          {activity.title}
+                        </Typography>
+                        <Chip
+                          label={activity.status === 'pending' ? 'Bekliyor' : 
+                                 activity.status === 'urgent' ? 'Acil' :
+                                 activity.status === 'completed' ? 'Tamamlandı' : 'Okunmadı'}
+                          color={getActivityColor(activity.status) as any}
+                          size="small"
+                        />
                       </Box>
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="body2">
-                        {activity.user}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="body2" color="text.secondary">
-                        {formatDistanceToNow(activity.createdAt, { addSuffix: true, locale: tr })}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <IconButton size="small">
-                        <Visibility />
-                      </IconButton>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </Paper>
-
-        {/* Quick Actions */}
-        <Paper sx={{ p: 3 }}>
-          <Typography variant="h6" gutterBottom fontWeight="bold">
-            Hızlı İşlemler
-          </Typography>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <Button
-              variant="outlined"
-              fullWidth
-              startIcon={<Schedule />}
-              sx={{ justifyContent: 'flex-start' }}
-            >
-              Bekleyen İlanları Görüntüle ({stats.pendingListings})
-            </Button>
-            
-            <Button
-              variant="outlined"
-              fullWidth
-              startIcon={<Report />}
-              sx={{ justifyContent: 'flex-start' }}
-            >
-              Şikayetleri İncele ({stats.totalReports})
-            </Button>
-            
-            <Button
-              variant="outlined"
-              fullWidth
-              startIcon={<People />}
-              sx={{ justifyContent: 'flex-start' }}
-            >
-              Kullanıcı Yönetimi
-            </Button>
-            
-            <Button
-              variant="outlined"
-              fullWidth
-              startIcon={<Business />}
-              sx={{ justifyContent: 'flex-start' }}
-            >
-              İlan Yönetimi
-            </Button>
-            
-            <Button
-              variant="contained"
-              fullWidth
-              startIcon={<TrendingUp />}
-              sx={{ mt: 2 }}
-            >
-              Detaylı Raporlar
+                    }
+                    secondary={
+                      <Box>
+                        <Typography variant="body2" color="text.secondary" component="div">
+                          {activity.user}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary" component="div">
+                          {activity.time}
+                        </Typography>
+                      </Box>
+                    }
+                  />
+                </ListItem>
+                {index < recentActivities.length - 1 && <Divider variant="inset" component="li" />}
+              </React.Fragment>
+            ))}
+          </List>
+          <Box sx={{ textAlign: 'center', mt: 2 }}>
+            <Button variant="outlined">
+              Tüm Aktiviteleri Görüntüle
             </Button>
           </Box>
         </Paper>
       </Box>
 
-      {/* Quick Stats */}
+      {/* System Status */}
       <Paper sx={{ p: 3, mt: 3 }}>
-        <Typography variant="h6" gutterBottom fontWeight="bold">
-          Bu Ay Özet
+        <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: 1 }}>
+          🔧 Sistem Durumu
         </Typography>
-        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', lg: 'repeat(4, 1fr)' }, gap: 3 }}>
-          <Box>
-            <Typography variant="h3" fontWeight="bold" color="primary.main">
-              156
+        <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 3 }}>
+          <Box sx={{ textAlign: 'center' }}>
+            <CheckCircle sx={{ fontSize: 48, color: 'success.main', mb: 1 }} />
+            <Typography variant="subtitle2" sx={{ fontWeight: 'medium' }}>
+              Sunucu Durumu
             </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Yeni Kullanıcı
-            </Typography>
-          </Box>
-          <Box>
-            <Typography variant="h3" fontWeight="bold" color="info.main">
-              234
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Yeni İlan
+            <Typography variant="body2" color="success.main">
+              Çevrimiçi
             </Typography>
           </Box>
-          <Box>
-            <Typography variant="h3" fontWeight="bold" color="success.main">
-              189
+          <Box sx={{ textAlign: 'center' }}>
+            <CheckCircle sx={{ fontSize: 48, color: 'success.main', mb: 1 }} />
+            <Typography variant="subtitle2" sx={{ fontWeight: 'medium' }}>
+              Veritabanı
             </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Onaylanan İlan
+            <Typography variant="body2" color="success.main">
+              Bağlı
             </Typography>
           </Box>
-          <Box>
-            <Typography variant="h3" fontWeight="bold" color="error.main">
-              12
+          <Box sx={{ textAlign: 'center' }}>
+            <ErrorOutline sx={{ fontSize: 48, color: 'warning.main', mb: 1 }} />
+            <Typography variant="subtitle2" sx={{ fontWeight: 'medium' }}>
+              Disk Alanı
             </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Reddedilen İlan
+            <Typography variant="body2" color="warning.main">
+              %78 Dolu
+            </Typography>
+            <LinearProgress variant="determinate" value={78} sx={{ mt: 1 }} />
+          </Box>
+          <Box sx={{ textAlign: 'center' }}>
+            <CheckCircle sx={{ fontSize: 48, color: 'success.main', mb: 1 }} />
+            <Typography variant="subtitle2" sx={{ fontWeight: 'medium' }}>
+              Son Yedekleme
+            </Typography>
+            <Typography variant="body2" color="success.main">
+              2 saat önce
             </Typography>
           </Box>
         </Box>
       </Paper>
-    </Container>
+    </Box>
   );
 };
 

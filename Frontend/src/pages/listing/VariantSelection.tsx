@@ -69,15 +69,20 @@ const VariantSelection: React.FC = () => {
   const fetchVariants = async () => {
     try {
       setError(null);
-      const response = await fetch(`http://localhost:3005/api/categories/models/${modelId}/variants`);
+      const response = await fetch(`http://localhost:3005/api/categories/variants?model_id=${modelId}`);
       
       if (!response.ok) {
         throw new Error('Varyantlar alınamadı');
       }
       
-      const data: ApiResponse = await response.json();
+      const data = await response.json();
+      console.log('Variants API Response:', data);
       
-      if (data.success && data.data) {
+      // Backend direkt array dönüyor
+      if (Array.isArray(data)) {
+        setVariants(data);
+        setFilteredVariants(data);
+      } else if (data.success && data.data) {
         setVariants(data.data);
         setFilteredVariants(data.data);
       } else {
@@ -93,6 +98,68 @@ const VariantSelection: React.FC = () => {
 
   const handleVariantSelect = (variant: Variant) => {
     const vehicleType = location.state?.vehicleType;
+    
+    console.log('🚛 VariantSelect Debug:', {
+      modelName: model?.name,
+      variantName: variant.name,
+      vehicleTypeName: vehicleType?.name,
+      variantId: variant.id,
+      brandName: brand?.name
+    });
+    
+    // Damperli Dorse için özel yönlendirme - Dorse kategorisi kontrolü
+    const isDamperliDorse = model?.name === 'Damperli' || 
+                           variant.name.toLowerCase().includes('damperli') ||
+                           vehicleType?.name?.toLowerCase().includes('dorse') ||
+                           model?.name?.toLowerCase().includes('dorse') ||
+                           brand?.name?.toLowerCase().includes('damper') ||
+                           // URL'de damperli varsa
+                           window.location.href.includes('damperli');
+    
+    if (isDamperliDorse) {
+      let variantType = '';
+      
+      // Variant ismine göre tip belirleme - gerçek variant isimlerini kullan
+      const variantNameLower = variant.name.toLowerCase();
+      
+      if (variantNameLower.includes('kapaklı') || variantNameLower.includes('kapakli') || 
+          variantNameLower.includes('kapak') || variantNameLower === 'kapaklı tip') {
+        variantType = 'kapakli-tip';
+      } else if (variantNameLower.includes('kaya') || variantNameLower === 'kaya tipi') {
+        variantType = 'kaya-tipi';
+      } else if (variantNameLower.includes('hafriyat') || variantNameLower === 'hafriyat tipi') {
+        variantType = 'hafriyat-tipi';
+      } else if (variantNameLower.includes('havuz') || variantNameLower.includes('hardox') || 
+                 variantNameLower === 'havuz (hardox) tipi') {
+        variantType = 'havuz-hardox-tipi';
+      } else {
+        // Variant ID'sine göre de kontrol edelim
+        if (variant.id === 'cme6bt060000f40qa8syjxrwu') {
+          variantType = 'kapakli-tip'; // İlk variant Kapaklı Tip olsun
+        } else {
+          variantType = 'kapakli-tip'; // Default
+        }
+      }
+      
+      console.log('🚛 Damperli Dorse yönlendirme:', variantType);
+      
+      navigate(`/create-ad/dorse/damperli/${variantType}`, {
+        state: { 
+          variant,
+          model,
+          brand,
+          vehicleType,
+          variantType,
+          selection: {
+            vehicleType,
+            brand,
+            model,
+            variant
+          }
+        }
+      });
+      return;
+    }
     
     // Vehicle type'a göre doğru form sayfasına yönlendir
     if (vehicleType?.name === 'Minibüs & Midibüs') {
@@ -112,6 +179,36 @@ const VariantSelection: React.FC = () => {
       });
     } else if (vehicleType?.name === 'Kamyon & Kamyonet') {
       navigate(`/create-ad/kamyon/${variant.id}`, {
+        state: { 
+          variant,
+          model,
+          brand,
+          vehicleType,
+          selection: {
+            vehicleType,
+            brand,
+            model,
+            variant
+          }
+        }
+      });
+    } else if (vehicleType?.name === 'Otobüs') {
+      navigate(`/create-ad/otobus/${variant.id}`, {
+        state: { 
+          variant,
+          model,
+          brand,
+          vehicleType,
+          selection: {
+            vehicleType,
+            brand,
+            model,
+            variant
+          }
+        }
+      });
+    } else if (vehicleType?.name === 'Çekici') {
+      navigate(`/create-ad/cekici/${variant.id}`, {
         state: { 
           variant,
           model,

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Outlet, useNavigate,  useLocation } from 'react-router-dom';
+import { Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import {
   Box,
   Drawer,
@@ -7,90 +8,110 @@ import {
   Toolbar,
   List,
   Typography,
-  Divider,
-  IconButton,
   ListItem,
   ListItemButton,
   ListItemIcon,
   ListItemText,
+  IconButton,
   Avatar,
   Menu,
   MenuItem,
 } from '@mui/material';
 import {
-  Menu as MenuIcon,
   Dashboard,
-  Article,
-  People,
+  Assignment,
+  HourglassEmpty,
   Report,
-  Settings,
+  People,
+  Message,
+  Menu as MenuIcon,
   Logout,
-  Notifications,
+  Settings,
+  AccountCircle,
 } from '@mui/icons-material';
-import { useAuth } from '../../context/AuthContext';
 
 const drawerWidth = 240;
 
-const AdminLayout: React.FC = () => {
+const AdminLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, logout } = useAuth();
+  const { logout } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [profileAnchorEl, setProfileAnchorEl] = useState<null | HTMLElement>(null);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
 
-  const handleProfileClick = (event: React.MouseEvent<HTMLElement>) => {
-    setProfileAnchorEl(event.currentTarget);
+  const handleProfileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
   };
 
-  const handleProfileClose = () => {
-    setProfileAnchorEl(null);
+  const handleProfileMenuClose = () => {
+    setAnchorEl(null);
   };
 
   const handleLogout = () => {
     logout();
-    handleProfileClose();
     navigate('/');
+    handleProfileMenuClose();
   };
 
   const menuItems = [
     { text: 'Dashboard', icon: <Dashboard />, path: '/admin' },
-    { text: 'İlanlar', icon: <Article />, path: '/admin/listings' },
+    { text: 'Tüm İlanlar', icon: <Assignment />, path: '/admin/all-listings' },
+    { text: 'Onay Bekleyen İlanlar', icon: <HourglassEmpty />, path: '/admin/pending-listings' },
+    { text: 'Şikayet Kutusu', icon: <Report />, path: '/admin/complaints' },
+    { text: 'Şikayet Yönetimi', icon: <Report />, path: '/admin/reports' },
     { text: 'Kullanıcılar', icon: <People />, path: '/admin/users' },
-    { text: 'Şikayetler', icon: <Report />, path: '/admin/reports' },
-    { text: 'Ayarlar', icon: <Settings />, path: '/admin/settings' },
+    { text: 'Mesajlaşma', icon: <Message />, path: '/admin/messages' },
   ];
 
   const drawer = (
-    <Box>
-      <Toolbar>
-        <Typography variant="h6" noWrap component="div" color="primary">
-          TruckBus Admin
+    <Box sx={{ height: '100%', bgcolor: '#0F2027' }}>
+      <Toolbar sx={{ bgcolor: '#203A43', borderBottom: '1px solid rgba(255, 255, 255, 0.12)' }}>
+        <Typography variant="h6" noWrap component="div" sx={{ color: 'white', fontWeight: 600 }}>
+          Admin Panel
         </Typography>
       </Toolbar>
-      <Divider />
-      <List>
+      <List sx={{ pt: 2 }}>
         {menuItems.map((item) => (
-          <ListItem key={item.text} disablePadding>
+          <ListItem key={item.text} disablePadding sx={{ px: 2, mb: 1 }}>
             <ListItemButton
               selected={location.pathname === item.path}
               onClick={() => navigate(item.path)}
               sx={{
+                borderRadius: '12px',
+                color: 'white',
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  bgcolor: 'rgba(255, 255, 255, 0.1)',
+                  transform: 'translateX(4px)',
+                },
                 '&.Mui-selected': {
-                  bgcolor: 'primary.light',
+                  bgcolor: 'rgba(255, 255, 255, 0.15)',
+                  borderLeft: '4px solid #4fc3f7',
                   '&:hover': {
-                    bgcolor: 'primary.main',
+                    bgcolor: 'rgba(255, 255, 255, 0.2)',
                   },
+                },
+                '& .MuiListItemIcon-root': {
+                  color: 'inherit',
                 },
               }}
             >
-              <ListItemIcon sx={{ color: location.pathname === item.path ? 'primary.main' : 'inherit' }}>
+              <ListItemIcon sx={{ minWidth: 40 }}>
                 {item.icon}
               </ListItemIcon>
-              <ListItemText primary={item.text} />
+              <ListItemText 
+                primary={item.text} 
+                sx={{ 
+                  '& .MuiTypography-root': { 
+                    fontWeight: 500,
+                    fontSize: '0.95rem'
+                  } 
+                }} 
+              />
             </ListItemButton>
           </ListItem>
         ))}
@@ -105,53 +126,111 @@ const AdminLayout: React.FC = () => {
         sx={{
           width: { sm: `calc(100% - ${drawerWidth}px)` },
           ml: { sm: `${drawerWidth}px` },
+          bgcolor: '#0F2027',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.12)',
+          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
         }}
       >
-        <Toolbar>
+        <Toolbar sx={{ minHeight: '72px' }}>
           <IconButton
             color="inherit"
             aria-label="open drawer"
             edge="start"
             onClick={handleDrawerToggle}
-            sx={{ mr: 2, display: { sm: 'none' } }}
+            sx={{ 
+              mr: 2, 
+              display: { sm: 'none' },
+              '&:hover': {
+                bgcolor: 'rgba(255, 255, 255, 0.1)',
+              }
+            }}
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
-            Admin Panel
+          <Typography 
+            variant="h6" 
+            noWrap 
+            component="div" 
+            sx={{ 
+              flexGrow: 1,
+              color: 'white',
+              fontWeight: 600,
+              fontSize: '1.3rem'
+            }}
+          >
+            TruckBus Admin
           </Typography>
-          
-          <IconButton color="inherit" sx={{ mr: 1 }}>
-            <Notifications />
-          </IconButton>
-          
-          <IconButton onClick={handleProfileClick}>
-            <Avatar
-              src={user?.avatar}
-              sx={{ width: 32, height: 32 }}
+          <IconButton
+            size="large"
+            edge="end"
+            aria-label="account of current user"
+            aria-controls="profile-menu"
+            aria-haspopup="true"
+            onClick={handleProfileMenuOpen}
+            sx={{
+              color: 'white',
+              '&:hover': {
+                bgcolor: 'rgba(255, 255, 255, 0.1)',
+              }
+            }}
+          >
+            <Avatar 
+              sx={{ 
+                width: 40, 
+                height: 40,
+                bgcolor: '#4fc3f7',
+                color: '#0F2027',
+                fontWeight: 'bold',
+                border: '2px solid rgba(255, 255, 255, 0.2)'
+              }}
             >
-              {user?.firstName?.[0]?.toUpperCase()}
+              <AccountCircle />
             </Avatar>
           </IconButton>
-          
           <Menu
-            anchorEl={profileAnchorEl}
-            open={Boolean(profileAnchorEl)}
-            onClose={handleProfileClose}
-            transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-            anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+            id="profile-menu"
+            anchorEl={anchorEl}
+            open={Boolean(anchorEl)}
+            onClose={handleProfileMenuClose}
+            sx={{
+              '& .MuiPaper-root': {
+                bgcolor: '#0F2027',
+                color: 'white',
+                border: '1px solid rgba(255, 255, 255, 0.12)',
+                borderRadius: '12px',
+                mt: 1,
+              }
+            }}
           >
-            <MenuItem onClick={() => { navigate('/'); handleProfileClose(); }}>
-              Ana Siteye Dön
+            <MenuItem 
+              onClick={handleProfileMenuClose}
+              sx={{
+                '&:hover': {
+                  bgcolor: 'rgba(255, 255, 255, 0.1)',
+                }
+              }}
+            >
+              <ListItemIcon sx={{ color: 'white' }}>
+                <Settings fontSize="small" />
+              </ListItemIcon>
+              Ayarlar
             </MenuItem>
-            <MenuItem onClick={handleLogout}>
-              <Logout sx={{ mr: 1 }} />
+            <MenuItem 
+              onClick={handleLogout}
+              sx={{
+                '&:hover': {
+                  bgcolor: 'rgba(255, 255, 255, 0.1)',
+                }
+              }}
+            >
+              <ListItemIcon sx={{ color: 'white' }}>
+                <Logout fontSize="small" />
+              </ListItemIcon>
               Çıkış Yap
             </MenuItem>
           </Menu>
         </Toolbar>
       </AppBar>
-
       <Box
         component="nav"
         sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
@@ -165,7 +244,12 @@ const AdminLayout: React.FC = () => {
           }}
           sx={{
             display: { xs: 'block', sm: 'none' },
-            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
+            '& .MuiDrawer-paper': { 
+              boxSizing: 'border-box', 
+              width: drawerWidth,
+              bgcolor: '#0F2027',
+              border: 'none',
+            },
           }}
         >
           {drawer}
@@ -174,23 +258,30 @@ const AdminLayout: React.FC = () => {
           variant="permanent"
           sx={{
             display: { xs: 'none', sm: 'block' },
-            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
+            '& .MuiDrawer-paper': { 
+              boxSizing: 'border-box', 
+              width: drawerWidth,
+              bgcolor: '#0F2027',
+              border: 'none',
+              borderRight: '1px solid rgba(255, 255, 255, 0.12)',
+            },
           }}
           open
         >
           {drawer}
         </Drawer>
       </Box>
-
       <Box
         component="main"
         sx={{
           flexGrow: 1,
           p: 3,
           width: { sm: `calc(100% - ${drawerWidth}px)` },
+          mt: '72px',
+          bgcolor: '#f8fafc',
+          minHeight: 'calc(100vh - 72px)',
         }}
       >
-        <Toolbar />
         <Outlet />
       </Box>
     </Box>

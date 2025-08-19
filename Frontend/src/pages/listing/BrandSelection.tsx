@@ -76,15 +76,20 @@ const BrandSelection: React.FC = () => {
   const fetchBrands = async () => {
     try {
       setError(null);
-      const response = await fetch(`http://localhost:3005/api/categories/vehicle-types/${vehicleTypeId}/brands`);
+      const response = await fetch(`http://localhost:3005/api/categories/brands?vehicle_type_id=${vehicleTypeId}`);
       
       if (!response.ok) {
         throw new Error('Markalar alınamadı');
       }
       
-      const data: ApiResponse = await response.json();
+      const data = await response.json();
+      console.log('Brands API Response:', data);
       
-      if (data.success && data.data && data.data.length > 0) {
+      // Backend direkt array dönüyor
+      if (Array.isArray(data) && data.length > 0) {
+        setBrands(data);
+        setFilteredBrands(data);
+      } else if (data.success && data.data && data.data.length > 0) {
         setBrands(data.data);
         setFilteredBrands(data.data);
       } else {
@@ -103,7 +108,73 @@ const BrandSelection: React.FC = () => {
     }
   };
 
-  const handleBrandSelect = (brand: Brand) => {
+  const handleBrandSelect = async (brand: Brand) => {
+    // Dorse kategorisi için özel yönlendirme
+    if (vehicleType?.name === 'Dorse') {
+      // Dorse kategorisinde marka seçilince direkt variant seçim sayfasına git
+      try {
+        // Önce markanın modelini al (Dorse'de marka adıyla aynı isimde tek model var)
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/category/models?brand_id=${brand.id}`);
+        if (response.ok) {
+          const models = await response.json();
+          if (models.length > 0) {
+            // İlk modeli al (zaten tek model var)
+            const model = models[0];
+            navigate(`/variant-selection/${model.id}`, {
+              state: { model, brand, vehicleType }
+            });
+            return;
+          }
+        }
+      } catch (error) {
+        console.error('Model alınırken hata:', error);
+      }
+    }
+
+    // Römork kategorisi için özel yönlendirme
+    if (vehicleType?.name === 'Römork') {
+      // Kamyon Römorkları ve Özel Amaçlı Römorklar direkt variant'a git (tek model var)
+      if (brand.name === 'Kamyon Römorkları' || brand.name === 'Özel Amaçlı Römorklar') {
+        try {
+          const response = await fetch(`${import.meta.env.VITE_API_URL}/api/category/models?brand_id=${brand.id}`);
+          if (response.ok) {
+            const models = await response.json();
+            if (models.length > 0) {
+              const model = models[0];
+              navigate(`/variant-selection/${model.id}`, {
+                state: { model, brand, vehicleType }
+              });
+              return;
+            }
+          }
+        } catch (error) {
+          console.error('Model alınırken hata:', error);
+        }
+      }
+      // Tarım ve Taşıma Römorkları normal model seçimine git (çoklu model var)
+    }
+
+    // Oto Kurtarıcı & Taşıyıcı kategorisi için özel yönlendirme
+    if (vehicleType?.name === 'Oto Kurtarıcı & Taşıyıcı') {
+      // Tüm markalar direkt variant'a git (tek model var, marka adıyla aynı)
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/category/models?brand_id=${brand.id}`);
+        if (response.ok) {
+          const models = await response.json();
+          if (models.length > 0) {
+            const model = models[0];
+            navigate(`/variant-selection/${model.id}`, {
+              state: { model, brand, vehicleType }
+            });
+            return;
+          }
+        }
+      } catch (error) {
+        console.error('Model alınırken hata:', error);
+      }
+    }
+    
+    // Diğer kategoriler için normal akış
     navigate(`/model-selection/${brand.id}`, {
       state: { brand, vehicleType }
     });
@@ -251,21 +322,25 @@ const BrandSelection: React.FC = () => {
               onClick={() => handleBrandSelect(brand)}
               sx={{
                 cursor: 'pointer',
-                height: 120,
+                height: 140,
                 position: 'relative',
-                borderRadius: '12px',
+                borderRadius: '16px',
                 overflow: 'hidden',
                 transition: 'all 0.3s ease',
-                border: '2px solid transparent',
+                border: '2px solid #e0e0e0',
                 backgroundColor: 'white',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                p: 2,
+                p: 3,
+                boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
                 '&:hover': {
-                  transform: 'translateY(-4px)',
-                  boxShadow: '0 8px 20px rgba(0,0,0,0.12)',
+                  transform: 'translateY(-6px) scale(1.02)',
+                  boxShadow: '0 12px 24px rgba(0,0,0,0.15)',
                   border: '2px solid #1976d2',
+                  '& img': {
+                    transform: 'scale(1.05)',
+                  },
                 },
               }}
             >
@@ -276,9 +351,10 @@ const BrandSelection: React.FC = () => {
                   alt={brand.name}
                   sx={{
                     width: '100%',
-                    height: '70px',
+                    height: '80%',
                     objectFit: 'contain',
                     filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))',
+                    transition: 'transform 0.2s ease',
                   }}
                 />
               ) : (

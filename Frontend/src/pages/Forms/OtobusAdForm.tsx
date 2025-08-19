@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../context/AuthContext';
 import {
   Box,
   Container,
@@ -16,16 +17,17 @@ import {
   FormControlLabel,
   Checkbox,
   Alert,
+  Chip,
   InputAdornment,
   Card,
   CardContent,
   LinearProgress,
   Autocomplete,
   Stack,
-  Chip,
 } from '@mui/material';
 import {
   ArrowForward,
+  ArrowBack,
   Upload,
   LocationOn,
   DirectionsBus,
@@ -39,8 +41,8 @@ import {
   Email,
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
-import UserHeader from '../../components/layout/UserHeader';
 import { locationService, City, District } from '../../services/locationService';
+import UserHeader from '../../components/layout/UserHeader';
 
 // Renk seçenekleri
 const colorOptions = [
@@ -48,21 +50,14 @@ const colorOptions = [
   'Lacivert', 'Mavi', 'Mor', 'Pembe', 'Sarı', 'Siyah', 'Turkuaz', 'Turuncu', 'Yeşil'
 ];
 
-// Motor gücü seçenekleri (HP)
-const enginePowerOptions = [
-  '100 hp\'ye kadar', '101 - 125 hp', '126 - 150 hp', '151 - 175 hp',
-  '176 - 200 hp', '201 - 225 hp', '226 - 250 hp', '251 - 275 hp',
-  '276 - 300 hp', '301 - 325 hp', '326 - 350 hp', '351 - 375 hp',
-  '376 - 400 hp', '401 - 425 hp', '426 - 450 hp', '451 - 475 hp',
-  '476 - 500 hp', '501 hp ve üzeri'
-];
+// Koltuk düzeni seçenekleri
+const seatLayoutOptions = ['2+1', '2+2'];
 
-// Motor hacmi seçenekleri (cm³)
-const engineCapacityOptions = [
-  '1300 cm³\'e kadar', '1301 - 1600 cm³', '1601 - 1800 cm³', '1801 - 2000 cm³',
-  '2001 - 2500 cm³', '2501 - 3000 cm³', '3001 - 3500 cm³', '3501 - 4000 cm³',
-  '4001 - 4500 cm³', '4501 - 5000 cm³', '5001 cm³ ve üzeri'
-];
+// Koltuk arkası ekran seçenekleri
+const screenOptions = ['Yok', '7', '9', '10'];
+
+// Vites sayısı seçenekleri
+const gearCountOptions = ['6+1', '8+1', '12+1', 'Diğer'];
 
 const steps = [
   'Araç Bilgileri',
@@ -72,18 +67,18 @@ const steps = [
   'İletişim & Fiyat'
 ];
 
-const MinibusAdForm: React.FC = () => {
+const OtobusAdForm = () => {
+  const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [activeStep, setActiveStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [uploadedImages, setUploadedImages] = useState<File[]>([]);
   const [error, setError] = useState('');
-  
-  // Brand/Model/Variant states - location.state'den gelecek
-  const selectedVariant = location.state?.variant;
-  const selectedModel = location.state?.model;
-  const selectedBrand = location.state?.brand;
+  const [cities, setCities] = useState<City[]>([]);
+  const [districts, setDistricts] = useState<District[]>([]);
+  const [loadingCities, setLoadingCities] = useState(false);
+  const [loadingDistricts, setLoadingDistricts] = useState(false);
   
   // Ana form verisi
   const [formData, setFormData] = useState({
@@ -95,80 +90,45 @@ const MinibusAdForm: React.FC = () => {
     district: '',
     
     // Araç Bilgileri  
-    brand: selectedBrand?.name || '',
-    model: selectedModel?.name || '',
-    variant: selectedVariant?.name || '',
+    brand: '',
+    model: '',
+    variant: '',
     year: new Date().getFullYear(),
     vehicleCondition: 'İkinci El',
     km: '',
     fuelType: 'Dizel',
     transmission: 'Manuel',
-    enginePower: '',
-    engineCapacity: '',
     color: '',
     
-    // Minibüs Özel Alanları
-    seatCount: '17+1', // Koltuk sayısı
-    pullType: 'Arkadan', // Çekiş
-    airConditioning: false, // Klima
-    chassisType: 'Orta', // Şasi tipi
-    roofType: 'Normal Tavan', // Tavan tipi
+    // Otobüs Özel Alanları
+    passengerCapacity: '', // Yolcu Kapasitesi
+    seatLayout: '2+1', // Koltuk Düzeni
+    seatBackScreen: 'Yok', // Koltuk Arkası Ekran
+    gearType: 'Manuel', // Vites
+    gearCount: '6+1', // Vites Sayısı
+    tireCondition: '', // Lastik Durumu (%)
+    fuelCapacity: '', // Yakıt Hacmi (Litre)
+    plateOrigin: 'Türk Plakası', // Plaka/Uyruk
+    vehiclePlate: '', // Araç Plakası
     
     // Konfor Özellikleri
     features: {
-      abs: false,
-      esp: false,
-      airBag: false,
-      centralLock: false,
-      electricWindow: false,
-      electricMirror: false,
-      powerSteering: false,
-      airCondition: false,
-      heater: false,
-      radio: false,
-      cd: false,
-      bluetooth: false,
-      gps: false,
-      camera: false,
-      parkingSensor: false,
-      xenonHeadlight: false,
-      fogLight: false,
-      sunroof: false,
-      alloyWheel: false,
-      leatherSeat: false,
-      alarm: false,
-      headlightJant: false,
-      asr: false,
-      cdPlayer: false,
-      chainIron: false,
-      leatherUpholstery: false,
-      electricMirrors: false,
-      headlight: false,
-      farSensor: false,
-      farWashingSystem: false,
-      airBagDriver: false,
-      airBagPassenger: false,
-      speedControl: false,
-      hydrolic: false,
-      immobilizer: false,
-      heatedSeats: false,
-      climate: false,
-      centralLock2: false,
-      readingLamp: false,
-      automaticGlass: false,
-      automaticDoor: false,
-      parkSensor: false,
-      radioTape: false,
-      spoiler: false,
-      sunroof2: false,
-      tourismPackage: false,
-      tvNavigation: false,
-      xenonHeadlight2: false,
-      rainSensor: false,
-      sideAirBag: false,
-      hotColdSupport: false,
-      fuelConsumptionComputer: false,
-      refrigerator: false,
+      // Detaylı Bilgi
+      threeG: false, // 3G
+      abs: false, // ABS
+      vehiclePhone: false, // Araç Telefonu
+      asr: false, // ASR
+      refrigerator: false, // Buzdolabı
+      heatedDriverGlass: false, // Isıtmalı Sürücü Camı
+      personalSoundSystem: false, // Kişisel Ses Sistemi
+      airCondition: false, // Klima
+      kitchen: false, // Mutfak
+      retarder: false, // Retarder
+      driverCabin: false, // Sürücü Kabini
+      television: false, // Televizyon
+      toilet: false, // Tuvalet
+      satellite: false, // Uydu
+      wifi: false, // Wi-fi
     },
     
     // Diğer
@@ -186,118 +146,91 @@ const MinibusAdForm: React.FC = () => {
     sellerEmail: '',
   });
 
-  // State for cities and districts from API
-  const [cities, setCities] = useState<City[]>([]);
-  const [districts, setDistricts] = useState<District[]>([]);
-  const [loadingCities, setLoadingCities] = useState(true);
-  const [loadingDistricts, setLoadingDistricts] = useState(false);
-
-  // Load cities on component mount
+  // İlleri yükle
   useEffect(() => {
     const loadCities = async () => {
       try {
         setLoadingCities(true);
         const citiesData = await locationService.getCities();
         setCities(citiesData);
-        console.log('🏙️ MinibusAdForm: Şehirler yüklendi:', citiesData.length);
       } catch (error) {
-        console.error('❌ MinibusAdForm: Şehirler yüklenemedi:', error);
+        console.error('Şehirler yüklenemedi:', error);
+        setError('Şehirler yüklenirken bir hata oluştu');
       } finally {
         setLoadingCities(false);
       }
     };
-    
+
     loadCities();
   }, []);
 
-  // Load districts when city changes
-  const handleCityChange = async (cityId: string, cityName: string) => {
-    try {
-      setLoadingDistricts(true);
-      setFormData(prev => ({ ...prev, city: cityName, district: '' }));
-      
-      const districtsData = await locationService.getDistrictsByCity(cityId);
-      setDistricts(districtsData);
-      console.log('🏘️ MinibusAdForm: İlçeler yüklendi:', districtsData.length);
-    } catch (error) {
-      console.error('❌ MinibusAdForm: İlçeler yüklenemedi:', error);
-    } finally {
-      setLoadingDistricts(false);
-    }
-  };
-
+  // URL'den gelen araç seçim bilgilerini yükle
   useEffect(() => {
-    // Location state'den gelen varyant bilgilerini kontrol et
-    if (selectedVariant && selectedModel && selectedBrand) {
-      console.log('Variant bilgileri alındı:', {
-        brand: selectedBrand,
-        model: selectedModel,
-        variant: selectedVariant
-      });
+    if (location.state) {
+      const { selection, brand, model, variant } = location.state;
       
-      // Brand, model, variant bilgilerini form'a aktar
+      // Her iki yapıyı da destekle (selection object veya direkt brand/model/variant)
+      const brandName = selection?.brand?.name || brand?.name;
+      const modelName = selection?.model?.name || model?.name;
+      const variantName = selection?.variant?.name || variant?.name;
+
+      if (brandName && modelName && variantName) {
+        setFormData(prev => ({
+          ...prev,
+          brand: brandName,
+          model: modelName,
+          variant: variantName,
+        }));
+      }
+    }
+  }, [location.state]);
+
+  // Kullanıcı bilgilerini yükle
+  useEffect(() => {
+    if (user) {
       setFormData(prev => ({
         ...prev,
-        brand: selectedBrand.name,
-        model: selectedModel.name,
-        variant: selectedVariant.name
+        sellerName: `${user.first_name} ${user.last_name}`,
+        sellerPhone: user.phone || '',
+        sellerEmail: user.email,
+        city: user.city || '',
+        district: user.district || '',
       }));
     }
-  }, [selectedVariant, selectedModel, selectedBrand]);
+  }, [user]);
 
   const handleInputChange = (field: string, value: string | number | boolean) => {
     // Kilometre formatını düzelt
     if (field === 'km' && typeof value === 'string') {
       const numericValue = value.replace(/[^\d]/g, '');
-      
       if (numericValue === '') {
-        setFormData(prev => ({
-          ...prev,
-          [field]: ''
-        }));
+        setFormData(prev => ({ ...prev, [field]: '' }));
         return;
       }
-      
       const formattedValue = numericValue.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-      setFormData(prev => ({
-        ...prev,
-        [field]: formattedValue
-      }));
+      setFormData(prev => ({ ...prev, [field]: formattedValue }));
       return;
     }
 
     // Fiyat formatını düzelt
     if (field === 'price' && typeof value === 'string') {
       const numericValue = value.replace(/[^\d]/g, '');
-      
       if (numericValue === '') {
-        setFormData(prev => ({
-          ...prev,
-          [field]: ''
-        }));
+        setFormData(prev => ({ ...prev, [field]: '' }));
         return;
       }
-      
       const formattedValue = numericValue.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-      setFormData(prev => ({
-        ...prev,
-        [field]: formattedValue
-      }));
+      setFormData(prev => ({ ...prev, [field]: formattedValue }));
       return;
     }
 
     // Telefon formatını düzelt
     if (field === 'sellerPhone' && typeof value === 'string') {
       const numericValue = value.replace(/[^\d]/g, '');
-      
       if (numericValue === '') {
-        setFormData(prev => ({
-          ...prev,
-          [field]: ''
-        }));
+        setFormData(prev => ({ ...prev, [field]: '' }));
         return;
       }
-      
       let formattedValue = numericValue;
       if (numericValue.length >= 1) {
         if (numericValue.length <= 3) {
@@ -313,47 +246,48 @@ const MinibusAdForm: React.FC = () => {
           formattedValue = `(${truncated.slice(0, 3)}) ${truncated.slice(3, 6)} ${truncated.slice(6, 8)} ${truncated.slice(8, 10)}`;
         }
       }
-      
-      setFormData(prev => ({
-        ...prev,
-        [field]: formattedValue
-      }));
+      setFormData(prev => ({ ...prev, [field]: formattedValue }));
       return;
     }
     
-    // İl değiştiğinde ilçeleri yükle (mock data)
-    if (field === 'city' && typeof value === 'string') {
-      setFormData(prev => ({
-        ...prev,
-        [field]: value,
-        district: ''
-      }));
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleCityChange = async (city: City | null) => {
+    if (!city) {
+      setFormData(prev => ({ ...prev, city: '', district: '' }));
+      setDistricts([]);
       return;
     }
+
+    setFormData(prev => ({ ...prev, city: city.name, district: '' }));
     
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    try {
+      setLoadingDistricts(true);
+      const districtsData = await locationService.getDistrictsByCity(city.id);
+      setDistricts(districtsData);
+    } catch (error) {
+      console.error('İlçeler yüklenemedi:', error);
+      setError('İlçeler yüklenirken bir hata oluştu');
+    } finally {
+      setLoadingDistricts(false);
+    }
   };
 
   const handleFeatureChange = (feature: string, checked: boolean) => {
     setFormData(prev => ({
       ...prev,
-      features: {
-        ...prev.features,
-        [feature]: checked
-      }
+      features: { ...prev.features, [feature]: checked }
     }));
   };
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
     if (files.length > 0) {
-      setUploadedImages(prev => [...prev, ...files].slice(0, 10));
+      setUploadedImages(prev => [...prev, ...files].slice(0, 15)); // Max 15 foto
       setFormData(prev => ({
         ...prev,
-        images: [...prev.images, ...files.map(file => URL.createObjectURL(file))].slice(0, 10)
+        images: [...prev.images, ...files.map(file => URL.createObjectURL(file))].slice(0, 15)
       }));
     }
   };
@@ -366,103 +300,72 @@ const MinibusAdForm: React.FC = () => {
     }));
   };
 
-  // Form adımı validation'u
-  const validateStep = (step: number): { isValid: boolean; message?: string } => {
+  const validateStep = (step: number): boolean => {
+    let message = '';
+    
     switch (step) {
       case 0: // Araç Bilgileri
-        if (!formData.title.trim()) {
-          return { isValid: false, message: 'İlan başlığı gerekli' };
+        if (!formData.brand || !formData.model || !formData.variant || !formData.year) {
+          message = 'Lütfen marka, model, varyant ve yıl bilgilerini doldurun.';
         }
-        if (!formData.brand) {
-          return { isValid: false, message: 'Marka seçimi gerekli' };
-        }
-        if (!formData.model) {
-          return { isValid: false, message: 'Model seçimi gerekli' };
-        }
-        if (!formData.year) {
-          return { isValid: false, message: 'Model yılı gerekli' };
-        }
-        if (!formData.vehicleCondition) {
-          return { isValid: false, message: 'Araç durumu seçimi gerekli' };
-        }
-        return { isValid: true };
-      
-      case 1: // Teknik Özellikler
-        if (!formData.fuelType) {
-          return { isValid: false, message: 'Yakıt türü seçimi gerekli' };
-        }
-        if (!formData.transmission) {
-          return { isValid: false, message: 'Vites türü seçimi gerekli' };
-        }
-        return { isValid: true };
-      
-      case 2: // Konfor & Güvenlik - Opsiyonel adım
-        return { isValid: true };
-      
+        break;
       case 3: // Fotoğraflar
         if (uploadedImages.length === 0) {
-          return { isValid: false, message: 'En az 1 fotoğraf yüklenmeli' };
+          message = 'En az 1 fotoğraf yüklemelisiniz.';
         }
-        return { isValid: true };
-      
+        break;
       case 4: // İletişim & Fiyat
-        if (!formData.price.trim()) {
-          return { isValid: false, message: 'Fiyat gerekli' };
+        if (!formData.price.trim() || !formData.city.trim() || !formData.district.trim() || 
+            !formData.sellerName.trim() || !formData.sellerPhone.trim()) {
+          message = 'Fiyat, konum ve iletişim bilgileri zorunludur.';
         }
-        if (!formData.city.trim()) {
-          return { isValid: false, message: 'İl seçimi gerekli' };
-        }
-        if (!formData.district.trim()) {
-          return { isValid: false, message: 'İlçe seçimi gerekli' };
-        }
-        if (!formData.sellerName.trim()) {
-          return { isValid: false, message: 'Ad soyad gerekli' };
-        }
-        if (!formData.sellerPhone.trim()) {
-          return { isValid: false, message: 'Telefon numarası gerekli' };
-        }
-        return { isValid: true };
-      
+        break;
       default:
-        return { isValid: true };
+        return true;
     }
+
+    if (message) {
+      setError(message);
+      return false;
+    }
+    
+    setError('');
+    return true;
   };
 
   const handleNext = () => {
-    const validation = validateStep(activeStep);
-    if (!validation.isValid) {
-      setError(validation.message || 'Lütfen tüm zorunlu alanları doldurun');
-      return;
+    if (validateStep(activeStep)) {
+      setActiveStep(prev => prev + 1);
     }
-    setError('');
-    setActiveStep(prev => prev + 1);
   };
 
   const handleBack = () => {
     setActiveStep(prev => prev - 1);
+    setError('');
   };
 
   const handleSubmit = async () => {
+    if (!validateStep(activeStep)) {
+      return;
+    }
+
     try {
       setLoading(true);
       setError('');
 
-      // Form validasyonu
-      if (!formData.title || !formData.price || !formData.city) {
-        setError('Zorunlu alanları doldurunuz');
-        return;
-      }
-
-      // Mock API call - gerçek projede API service kullanılacak
-      console.log('İlan oluşturuluyor:', formData);
+      // Form verisini hazırla
+      console.log('Otobüs ilanı oluşturuluyor:', formData);
       
-      // Simulate API delay
+      // Burada API çağrısı yapılacak
+      // await adAPI.createListing(formData);
+      
+      // Simülasyon için bekle
       await new Promise(resolve => setTimeout(resolve, 2000));
-
-      // Başarılı mesajı ve yönlendirme
-      alert('İlanınız başarıyla oluşturuldu! Onay sürecinden sonra yayınlanacaktır.');
-      navigate('/');
-
+      
+      // Başarılı olursa dashboard'a yönlendir
+      alert('İlanınız başarıyla oluşturuldu ve incelenmek üzere gönderildi!');
+      navigate('/dashboard');
+      
     } catch (error) {
       console.error('İlan oluşturma hatası:', error);
       setError('İlan oluşturulurken bir hata oluştu');
@@ -486,8 +389,7 @@ const MinibusAdForm: React.FC = () => {
               label="İlan Başlığı"
               value={formData.title}
               onChange={(e) => handleInputChange('title', e.target.value)}
-              placeholder="Örn: Satılık Ford Transit 17+1 Koltuk Minibüs"
-              required
+              placeholder="Örn: Satılık Mercedes Travego Otobüs"
             />
 
             <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
@@ -495,28 +397,34 @@ const MinibusAdForm: React.FC = () => {
                 sx={{ flex: 1, minWidth: 200 }}
                 label="Marka"
                 value={formData.brand}
-                InputProps={{ readOnly: true }}
                 disabled
+                InputProps={{
+                  startAdornment: <InputAdornment position="start"><DirectionsBus /></InputAdornment>,
+                }}
               />
 
               <TextField
                 sx={{ flex: 1, minWidth: 200 }}
                 label="Model"
                 value={formData.model}
-                InputProps={{ readOnly: true }}
                 disabled
+                InputProps={{
+                  startAdornment: <InputAdornment position="start"><DirectionsBus /></InputAdornment>,
+                }}
               />
-            </Box>
 
-            <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
               <TextField
                 sx={{ flex: 1, minWidth: 200 }}
                 label="Varyant"
                 value={formData.variant}
-                InputProps={{ readOnly: true }}
                 disabled
+                InputProps={{
+                  startAdornment: <InputAdornment position="start"><DirectionsBus /></InputAdornment>,
+                }}
               />
+            </Box>
 
+            <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
               <TextField
                 sx={{ flex: 1, minWidth: 200 }}
                 type="number"
@@ -526,6 +434,7 @@ const MinibusAdForm: React.FC = () => {
                 InputProps={{
                   startAdornment: <InputAdornment position="start"><DateRange /></InputAdornment>,
                 }}
+                required
               />
             </Box>
 
@@ -561,7 +470,7 @@ const MinibusAdForm: React.FC = () => {
               label="Açıklama (Opsiyonel)"
               value={formData.description}
               onChange={(e) => handleInputChange('description', e.target.value)}
-              placeholder="Aracınız hakkında detaylı bilgi verin..."
+              placeholder="Otobüsünüz hakkında detaylı bilgi verin..."
             />
           </Stack>
         );
@@ -575,69 +484,87 @@ const MinibusAdForm: React.FC = () => {
             </Typography>
 
             <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-              <FormControl sx={{ flex: 1, minWidth: 200 }}>
-                <InputLabel>Koltuk Sayısı</InputLabel>
-                <Select
-                  value={formData.seatCount}
-                  onChange={(e) => handleInputChange('seatCount', e.target.value)}
-                >
-                  <MenuItem value="8+1">8+1</MenuItem>
-                  <MenuItem value="9+1">9+1</MenuItem>
-                  <MenuItem value="10+1">10+1</MenuItem>
-                  <MenuItem value="11+1">11+1</MenuItem>
-                  <MenuItem value="12+1">12+1</MenuItem>
-                  <MenuItem value="13+1">13+1</MenuItem>
-                  <MenuItem value="14+1">14+1</MenuItem>
-                  <MenuItem value="15+1">15+1</MenuItem>
-                  <MenuItem value="16+1">16+1</MenuItem>
-                  <MenuItem value="17+1">17+1</MenuItem>
-                  <MenuItem value="19+1">19+1</MenuItem>
-                  <MenuItem value="20+1">20+1</MenuItem>
-                  <MenuItem value="21+1">21+1</MenuItem>
-                  <MenuItem value="23+1">23+1</MenuItem>
-                </Select>
-              </FormControl>
+              <TextField
+                sx={{ flex: 1, minWidth: 200 }}
+                label="Yolcu Kapasitesi"
+                value={formData.passengerCapacity}
+                onChange={(e) => handleInputChange('passengerCapacity', e.target.value)}
+                placeholder="Örn: 50"
+                type="number"
+              />
 
               <FormControl sx={{ flex: 1, minWidth: 200 }}>
-                <InputLabel>Çekiş</InputLabel>
+                <InputLabel>Koltuk Düzeni</InputLabel>
                 <Select
-                  value={formData.pullType}
-                  onChange={(e) => handleInputChange('pullType', e.target.value)}
+                  value={formData.seatLayout}
+                  onChange={(e) => handleInputChange('seatLayout', e.target.value)}
                 >
-                  <MenuItem value="Önden">Önden</MenuItem>
-                  <MenuItem value="Arkadan">Arkadan</MenuItem>
-                  <MenuItem value="4x4">4x4</MenuItem>
+                  {seatLayoutOptions.map((option) => (
+                    <MenuItem key={option} value={option}>{option}</MenuItem>
+                  ))}
                 </Select>
               </FormControl>
             </Box>
 
             <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
               <FormControl sx={{ flex: 1, minWidth: 200 }}>
-                <InputLabel>Şasi Tipi</InputLabel>
+                <InputLabel>Koltuk Arkası Ekran</InputLabel>
                 <Select
-                  value={formData.chassisType}
-                  onChange={(e) => handleInputChange('chassisType', e.target.value)}
+                  value={formData.seatBackScreen}
+                  onChange={(e) => handleInputChange('seatBackScreen', e.target.value)}
                 >
-                  <MenuItem value="Kısa">Kısa</MenuItem>
-                  <MenuItem value="Orta">Orta</MenuItem>
-                  <MenuItem value="Uzun">Uzun</MenuItem>
-                  <MenuItem value="Ekstra Uzun">Ekstra Uzun</MenuItem>
+                  {screenOptions.map((option) => (
+                    <MenuItem key={option} value={option}>{option}</MenuItem>
+                  ))}
                 </Select>
               </FormControl>
 
               <FormControl sx={{ flex: 1, minWidth: 200 }}>
-                <InputLabel>Tavan Tipi</InputLabel>
+                <InputLabel>Vites</InputLabel>
                 <Select
-                  value={formData.roofType}
-                  onChange={(e) => handleInputChange('roofType', e.target.value)}
+                  value={formData.gearType}
+                  onChange={(e) => handleInputChange('gearType', e.target.value)}
                 >
-                  <MenuItem value="Normal Tavan">Normal Tavan</MenuItem>
-                  <MenuItem value="Yüksek Tavan">Yüksek Tavan</MenuItem>
+                  <MenuItem value="Manuel">Manuel</MenuItem>
+                  <MenuItem value="Otomatik">Otomatik</MenuItem>
+                  <MenuItem value="Yarı Otomatik">Yarı Otomatik</MenuItem>
                 </Select>
               </FormControl>
             </Box>
 
             <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+              <FormControl sx={{ flex: 1, minWidth: 200 }}>
+                <InputLabel>Vites Sayısı</InputLabel>
+                <Select
+                  value={formData.gearCount}
+                  onChange={(e) => handleInputChange('gearCount', e.target.value)}
+                >
+                  {gearCountOptions.map((option) => (
+                    <MenuItem key={option} value={option}>{option}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
+              <TextField
+                sx={{ flex: 1, minWidth: 200 }}
+                label="Lastik Durumu (%)"
+                value={formData.tireCondition}
+                onChange={(e) => handleInputChange('tireCondition', e.target.value)}
+                placeholder="Örn: 85"
+                type="number"
+              />
+            </Box>
+
+            <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+              <TextField
+                sx={{ flex: 1, minWidth: 200 }}
+                label="Yakıt Hacmi (Litre)"
+                value={formData.fuelCapacity}
+                onChange={(e) => handleInputChange('fuelCapacity', e.target.value)}
+                placeholder="Örn: 300"
+                type="number"
+              />
+
               <FormControl sx={{ flex: 1, minWidth: 200 }}>
                 <InputLabel>Yakıt Tipi</InputLabel>
                 <Select
@@ -652,67 +579,40 @@ const MinibusAdForm: React.FC = () => {
                   <MenuItem value="Elektrik">Elektrik</MenuItem>
                 </Select>
               </FormControl>
-
-              <FormControl sx={{ flex: 1, minWidth: 200 }}>
-                <InputLabel>Vites</InputLabel>
-                <Select
-                  value={formData.transmission}
-                  onChange={(e) => handleInputChange('transmission', e.target.value)}
-                >
-                  <MenuItem value="Manuel">Manuel</MenuItem>
-                  <MenuItem value="Otomatik">Otomatik</MenuItem>
-                  <MenuItem value="Yarı Otomatik">Yarı Otomatik</MenuItem>
-                </Select>
-              </FormControl>
             </Box>
 
             <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
               <FormControl sx={{ flex: 1, minWidth: 200 }}>
-                <InputLabel>Motor Gücü</InputLabel>
+                <InputLabel>Renk</InputLabel>
                 <Select
-                  value={formData.enginePower}
-                  onChange={(e) => handleInputChange('enginePower', e.target.value)}
+                  value={formData.color}
+                  onChange={(e) => handleInputChange('color', e.target.value)}
+                  startAdornment={<InputAdornment position="start"><Palette /></InputAdornment>}
                 >
-                  {enginePowerOptions.map((option) => (
-                    <MenuItem key={option} value={option}>{option}</MenuItem>
+                  {colorOptions.map((color) => (
+                    <MenuItem key={color} value={color}>{color}</MenuItem>
                   ))}
                 </Select>
               </FormControl>
 
               <FormControl sx={{ flex: 1, minWidth: 200 }}>
-                <InputLabel>Motor Hacmi</InputLabel>
+                <InputLabel>Plaka/Uyruk</InputLabel>
                 <Select
-                  value={formData.engineCapacity}
-                  onChange={(e) => handleInputChange('engineCapacity', e.target.value)}
+                  value={formData.plateOrigin}
+                  onChange={(e) => handleInputChange('plateOrigin', e.target.value)}
                 >
-                  {engineCapacityOptions.map((option) => (
-                    <MenuItem key={option} value={option}>{option}</MenuItem>
-                  ))}
+                  <MenuItem value="Türk Plakası">Türk Plakası</MenuItem>
+                  <MenuItem value="Yabancı Plaka">Yabancı Plaka</MenuItem>
                 </Select>
               </FormControl>
             </Box>
 
-            <FormControl fullWidth>
-              <InputLabel>Renk</InputLabel>
-              <Select
-                value={formData.color}
-                onChange={(e) => handleInputChange('color', e.target.value)}
-                startAdornment={<InputAdornment position="start"><Palette /></InputAdornment>}
-              >
-                {colorOptions.map((color) => (
-                  <MenuItem key={color} value={color}>{color}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={formData.airConditioning}
-                  onChange={(e) => handleInputChange('airConditioning', e.target.checked)}
-                />
-              }
-              label="Klima Var"
+            <TextField
+              fullWidth
+              label="Araç Plakası"
+              value={formData.vehiclePlate}
+              onChange={(e) => handleInputChange('vehiclePlate', e.target.value)}
+              placeholder="Örn: 34 ABC 123"
             />
           </Stack>
         );
@@ -724,145 +624,31 @@ const MinibusAdForm: React.FC = () => {
               Konfor ve Güvenlik Özellikleri
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Aracınızda bulunan özellikleri seçin
+              Otobüsünüzde bulunan özellikleri seçin
             </Typography>
 
-            {/* Güvenlik Özellikleri */}
+            {/* Detaylı Bilgi */}
             <Box>
               <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>
-                🛡️ Güvenlik
+                📋 Detaylı Bilgi
               </Typography>
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
                 {[
+                  { key: 'threeG', label: '3G' },
                   { key: 'abs', label: 'ABS' },
-                  { key: 'esp', label: 'ESP' },
-                  { key: 'airBag', label: 'Hava Yastığı (Sürücü)' },
-                  { key: 'airBagPassenger', label: 'Hava Yastığı (Yolcu)' },
-                  { key: 'sideAirBag', label: 'Yan Hava Yastığı' },
-                  { key: 'centralLock', label: 'Merkezi Kilit' },
-                  { key: 'alarm', label: 'Alarm' },
+                  { key: 'vehiclePhone', label: 'Araç Telefonu' },
                   { key: 'asr', label: 'ASR' },
-                  { key: 'immobilizer', label: 'İmmobilizer' },
-                ].map((feature) => (
-                  <FormControlLabel
-                    key={feature.key}
-                    control={
-                      <Checkbox
-                        checked={formData.features[feature.key as keyof typeof formData.features]}
-                        onChange={(e) => handleFeatureChange(feature.key, e.target.checked)}
-                      />
-                    }
-                    label={feature.label}
-                  />
-                ))}
-              </Box>
-            </Box>
-
-            {/* Konfor Özellikleri */}
-            <Box>
-              <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>
-                🏠 Konfor
-              </Typography>
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                {[
-                  { key: 'electricWindow', label: 'Elektrikli Cam' },
-                  { key: 'electricMirrors', label: 'Elektrikli Aynalar' },
-                  { key: 'powerSteering', label: 'Hidrolik Direksiyon' },
+                  { key: 'refrigerator', label: 'Buzdolabı' },
+                  { key: 'heatedDriverGlass', label: 'Isıtmalı Sürücü Camı' },
+                  { key: 'personalSoundSystem', label: 'Kişisel Ses Sistemi' },
                   { key: 'airCondition', label: 'Klima' },
-                  { key: 'heater', label: 'Kalorifer' },
-                  { key: 'leatherSeat', label: 'Deri Koltuk' },
-                  { key: 'leatherUpholstery', label: 'Deri Döşeme' },
-                  { key: 'heatedSeats', label: 'Isıtmalı Koltuklar' },
-                  { key: 'automaticGlass', label: 'Otomatik Cam' },
-                  { key: 'automaticDoor', label: 'Otomatik Kapı' },
-                  { key: 'speedControl', label: 'Hız Sabitleyici' },
-                  { key: 'readingLamp', label: 'Okul Aracı' },
-                ].map((feature) => (
-                  <FormControlLabel
-                    key={feature.key}
-                    control={
-                      <Checkbox
-                        checked={formData.features[feature.key as keyof typeof formData.features]}
-                        onChange={(e) => handleFeatureChange(feature.key, e.target.checked)}
-                      />
-                    }
-                    label={feature.label}
-                  />
-                ))}
-              </Box>
-            </Box>
-
-            {/* Multimedya */}
-            <Box>
-              <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>
-                📻 Multimedya
-              </Typography>
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                {[
-                  { key: 'radio', label: 'Radyo' },
-                  { key: 'cdPlayer', label: 'CD Çalar' },
-                  { key: 'radioTape', label: 'Radio - Teyp' },
-                  { key: 'bluetooth', label: 'Bluetooth' },
-                  { key: 'gps', label: 'GPS Navigasyon' },
-                  { key: 'tvNavigation', label: 'TV / Navigasyon' },
-                ].map((feature) => (
-                  <FormControlLabel
-                    key={feature.key}
-                    control={
-                      <Checkbox
-                        checked={formData.features[feature.key as keyof typeof formData.features]}
-                        onChange={(e) => handleFeatureChange(feature.key, e.target.checked)}
-                      />
-                    }
-                    label={feature.label}
-                  />
-                ))}
-              </Box>
-            </Box>
-
-            {/* Dış Görünüm */}
-            <Box>
-              <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>
-                🚗 Dış Görünüm
-              </Typography>
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                {[
-                  { key: 'headlightJant', label: 'Alaşım Jant' },
-                  { key: 'farSensor', label: 'Far Sensörü' },
-                  { key: 'headlight', label: 'Far (Sis)' },
-                  { key: 'xenonHeadlight2', label: 'Xenon Far' },
-                  { key: 'farWashingSystem', label: 'Far Yıkama Sistemi' },
-                  { key: 'spoiler', label: 'Spoyler' },
-                  { key: 'sunroof2', label: 'Sunroof' },
-                  { key: 'tourismPackage', label: 'Turizm Paketli' },
-                  { key: 'rainSensor', label: 'Yağmur Sensörü' },
-                ].map((feature) => (
-                  <FormControlLabel
-                    key={feature.key}
-                    control={
-                      <Checkbox
-                        checked={formData.features[feature.key as keyof typeof formData.features]}
-                        onChange={(e) => handleFeatureChange(feature.key, e.target.checked)}
-                      />
-                    }
-                    label={feature.label}
-                  />
-                ))}
-              </Box>
-            </Box>
-
-            {/* Diğer */}
-            <Box>
-              <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>
-                🔧 Diğer
-              </Typography>
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                {[
-                  { key: 'parkSensor', label: 'Park Sensörü' },
-                  { key: 'camera', label: 'Yokış Kalkış Desteği' },
-                  { key: 'fuelConsumptionComputer', label: 'Yol Bilgisayarı' },
-                  { key: 'hotColdSupport', label: 'Soğutucu / Frigo' },
-                  { key: 'chainIron', label: 'Çeki Demiri' },
+                  { key: 'kitchen', label: 'Mutfak' },
+                  { key: 'retarder', label: 'Retarder' },
+                  { key: 'driverCabin', label: 'Sürücü Kabini' },
+                  { key: 'television', label: 'Televizyon' },
+                  { key: 'toilet', label: 'Tuvalet' },
+                  { key: 'satellite', label: 'Uydu' },
+                  { key: 'wifi', label: 'Wi-fi' },
                 ].map((feature) => (
                   <FormControlLabel
                     key={feature.key}
@@ -941,7 +727,7 @@ const MinibusAdForm: React.FC = () => {
               Fotoğraf Yükleme
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Aracınızın fotoğraflarını yükleyin (Maksimum 10 adet)
+              Otobüsünüzün fotoğraflarını yükleyin (Maksimum 15 adet)
             </Typography>
 
             <Card sx={{ border: '2px dashed #ddd', textAlign: 'center', p: 4 }}>
@@ -973,7 +759,7 @@ const MinibusAdForm: React.FC = () => {
             {uploadedImages.length > 0 && (
               <Box>
                 <Typography variant="subtitle1" sx={{ mb: 2 }}>
-                  Yüklenen Fotoğraflar ({uploadedImages.length}/10)
+                  Yüklenen Fotoğraflar ({uploadedImages.length}/15)
                 </Typography>
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
                   {uploadedImages.map((file, index) => (
@@ -1040,7 +826,7 @@ const MinibusAdForm: React.FC = () => {
                 label="Fiyat"
                 value={formData.price}
                 onChange={(e) => handleInputChange('price', e.target.value)}
-                placeholder="Örn: 450.000"
+                placeholder="Örn: 850.000"
                 InputProps={{
                   startAdornment: <InputAdornment position="start">₺</InputAdornment>,
                 }}
@@ -1052,14 +838,7 @@ const MinibusAdForm: React.FC = () => {
                 options={cities}
                 getOptionLabel={(option) => option.name}
                 value={cities.find(city => city.name === formData.city) || null}
-                onChange={(_, value) => {
-                  if (value) {
-                    handleCityChange(value.id, value.name);
-                  } else {
-                    setFormData(prev => ({ ...prev, city: '', district: '' }));
-                    setDistricts([]);
-                  }
-                }}
+                onChange={(_, value) => handleCityChange(value)}
                 loading={loadingCities}
                 renderInput={(params) => (
                   <TextField
@@ -1080,10 +859,8 @@ const MinibusAdForm: React.FC = () => {
               options={districts}
               getOptionLabel={(option) => option.name}
               value={districts.find(district => district.name === formData.district) || null}
-              onChange={(_, value) => {
-                handleInputChange('district', value ? value.name : '');
-              }}
-              disabled={!formData.city}
+              onChange={(_, value) => handleInputChange('district', value?.name || '')}
+              disabled={!formData.city || loadingDistricts}
               loading={loadingDistricts}
               renderInput={(params) => (
                 <TextField
@@ -1111,7 +888,8 @@ const MinibusAdForm: React.FC = () => {
                 InputProps={{
                   startAdornment: <InputAdornment position="start"><Person /></InputAdornment>,
                 }}
-                required
+                disabled
+                helperText="Kullanıcı profilinden otomatik dolduruldu"
               />
 
               <TextField
@@ -1124,6 +902,8 @@ const MinibusAdForm: React.FC = () => {
                   startAdornment: <InputAdornment position="start"><Phone /></InputAdornment>,
                 }}
                 required
+                error={!formData.sellerPhone}
+                helperText={!formData.sellerPhone ? "Telefon numarası zorunludur" : ""}
               />
             </Box>
 
@@ -1136,6 +916,8 @@ const MinibusAdForm: React.FC = () => {
                 startAdornment: <InputAdornment position="start"><Email /></InputAdornment>,
               }}
               type="email"
+              disabled
+              helperText="Kullanıcı profilinden otomatik dolduruldu"
             />
 
             <Alert severity="info">
@@ -1152,86 +934,79 @@ const MinibusAdForm: React.FC = () => {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', backgroundColor: '#f8f9fa' }}>
-      {/* Header */}
       <UserHeader />
       
-      {/* Main Content */}
-      <Container maxWidth="lg" sx={{ py: 4, mt: 8 }}>
+      <Container maxWidth="lg" sx={{ py: 4, mt: 4 }}>
         {/* Header */}
         <Box sx={{ mb: 4, textAlign: 'center' }}>
           <Typography variant="h4" component="h1" gutterBottom>
-             Minibüs & Midibüs İlanı Oluştur
+            🚌 Otobüs İlanı Oluştur
           </Typography>
-          {selectedVariant && (
-            <Typography variant="h6" color="primary" sx={{ mb: 2 }}>
-              {selectedBrand?.name} {selectedModel?.name} {selectedVariant?.name}
-            </Typography>
-          )}
+          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', justifyContent: 'center' }}>
+            <Chip label="Otobüs" color="primary" variant="outlined" />
+            {formData.brand && <Chip label={formData.brand} variant="outlined" />}
+            {formData.model && <Chip label={formData.model} variant="outlined" />}
+            {formData.variant && <Chip label={formData.variant} variant="outlined" />}
+          </Box>
         </Box>
 
-      {/* Stepper */}
-      <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
-        <Stepper activeStep={activeStep} alternativeLabel>
-          {steps.map((label) => (
-            <Step key={label}>
-              <StepLabel>{label}</StepLabel>
-            </Step>
-          ))}
-        </Stepper>
-      </Paper>
+        {/* Stepper */}
+        <Paper elevation={2} sx={{ p: { xs: 2, md: 3 }, mb: 3 }}>
+          <Stepper activeStep={activeStep} alternativeLabel>
+            {steps.map((label) => (
+              <Step key={label}>
+                <StepLabel>{label}</StepLabel>
+              </Step>
+            ))}
+          </Stepper>
+        </Paper>
 
-      {/* Form Content */}
-      <Paper elevation={2} sx={{ p: 3 }}>
-        {error && (
-          <Alert severity="error" sx={{ mb: 3 }}>
-            {error}
-          </Alert>
-        )}
+        {/* Form Content */}
+        <Paper elevation={2} sx={{ p: { xs: 2, md: 3 } }}>
+          {error && (
+            <Alert severity="error" sx={{ mb: 3 }}>
+              {error}
+            </Alert>
+          )}
 
-        {loading && <LinearProgress sx={{ mb: 3 }} />}
+          {loading && <LinearProgress sx={{ mb: 3 }} />}
 
-        {renderStepContent(activeStep)}
+          {renderStepContent(activeStep)}
 
-        {/* Navigation Buttons */}
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
-          {activeStep > 0 && (
+          {/* Navigation Buttons */}
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
             <Button
-              type="button"
               onClick={handleBack}
-              disabled={loading}
+              disabled={activeStep === 0 || loading}
+              startIcon={<ArrowBack />}
             >
               Geri
             </Button>
-          )}
 
-          {activeStep === steps.length - 1 ? (
-            <Button
-              type="button"
-              variant="contained"
-              onClick={handleSubmit}
-              disabled={loading}
-              size="large"
-              sx={{ minWidth: 200, ml: 'auto' }}
-            >
-              {loading ? 'İlan Oluşturuluyor...' : 'İlanı Yayınla'}
-            </Button>
-          ) : (
-            <Button
-              type="button"
-              variant="contained"
-              onClick={handleNext}
-              disabled={loading}
-              endIcon={<ArrowForward />}
-              sx={{ ml: 'auto' }}
-            >
-              İleri
-            </Button>
-          )}
-        </Box>
-      </Paper>
-    </Container>
+            {activeStep === steps.length - 1 ? (
+              <Button
+                variant="contained"
+                onClick={handleSubmit}
+                disabled={loading}
+                size="large"
+              >
+                {loading ? 'Yayınlanıyor...' : 'İlanı Yayınla'}
+              </Button>
+            ) : (
+              <Button
+                variant="contained"
+                onClick={handleNext}
+                disabled={loading}
+                endIcon={<ArrowForward />}
+              >
+                İleri
+              </Button>
+            )}
+          </Box>
+        </Paper>
+      </Container>
     </Box>
   );
 };
 
-export default MinibusAdForm;
+export default OtobusAdForm;

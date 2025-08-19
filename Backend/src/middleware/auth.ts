@@ -16,9 +16,13 @@ interface AuthRequest extends Request {
 
 export const authMiddleware = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
+    console.log('=== AUTH MIDDLEWARE ===');
+    console.log('Headers:', req.headers.authorization);
+    
     const authHeader = req.headers.authorization;
     
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      console.log('No valid auth header found');
       res.status(401).json({
         success: false,
         message: 'Access denied. No token provided.',
@@ -27,13 +31,15 @@ export const authMiddleware = async (req: AuthRequest, res: Response, next: Next
     }
 
     const token = authHeader.substring(7); // Remove 'Bearer ' prefix
+    console.log('Token found:', token.substring(0, 20) + '...');
 
     try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { userId: string };
+      const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { id: string };
+      console.log('Token decoded, userId:', decoded.id);
       
       // Get user from database
-      const user = await prisma.user.findUnique({
-        where: { id: decoded.userId },
+      const user = await prisma.users.findUnique({
+        where: { id: decoded.id },
         select: {
           id: true,
           email: true,
@@ -46,7 +52,10 @@ export const authMiddleware = async (req: AuthRequest, res: Response, next: Next
         }
       });
 
+      console.log('User found:', user ? user.email : 'Not found');
+
       if (!user) {
+        console.log('User not found in database');
         res.status(401).json({
           success: false,
           message: 'Access denied. User not found.',
@@ -62,7 +71,14 @@ export const authMiddleware = async (req: AuthRequest, res: Response, next: Next
         return;
       }
 
-      req.user = user;
+      // Normalize role to uppercase for consistency
+      const normalizedUser = {
+        ...user,
+        role: String(user.role).toUpperCase()
+      };
+      console.log('User role normalized:', normalizedUser.role);
+
+      req.user = normalizedUser;
       next();
     } catch (jwtError) {
       logger.error('JWT verification error:', jwtError);
@@ -153,7 +169,7 @@ export const optionalAuthMiddleware = async (req: AuthRequest, res: Response, ne
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { userId: string };
       
-      const user = await prisma.user.findUnique({
+      const user = await prisma.users.findUnique({
         where: { id: decoded.userId },
         select: {
           id: true,
@@ -183,3 +199,6 @@ export const optionalAuthMiddleware = async (req: AuthRequest, res: Response, ne
 };
 
 export type { AuthRequest };
+
+// Alias for backward compatibility
+export const authenticateToken = authMiddleware;

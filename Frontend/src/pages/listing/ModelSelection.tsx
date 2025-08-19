@@ -62,15 +62,20 @@ const ModelSelection: React.FC = () => {
   const fetchModels = async () => {
     try {
       setError(null);
-      const response = await fetch(`http://localhost:3005/api/categories/brands/${brandId}/models`);
+      const response = await fetch(`http://localhost:3005/api/categories/models?brand_id=${brandId}`);
       
       if (!response.ok) {
         throw new Error('Modeller alınamadı');
       }
       
-      const data: ApiResponse = await response.json();
+      const data = await response.json();
+      console.log('Models API Response:', data);
       
-      if (data.success && data.data) {
+      // Backend direkt array dönüyor
+      if (Array.isArray(data)) {
+        setModels(data);
+        setFilteredModels(data);
+      } else if (data.success && data.data) {
         setModels(data.data);
         setFilteredModels(data.data);
       } else {

@@ -1,7 +1,7 @@
 import axios, { AxiosResponse } from 'axios';
 import { User, LoginRequest, RegisterRequest, AuthResponse, ApiResponse } from '../types';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3005/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -23,9 +23,10 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    // Token'ları temizle ama yönlendirmeyi AuthContext'e bırak
     if (error.response?.status === 401) {
       localStorage.removeItem('token');
-      window.location.href = '/auth/login';
+      localStorage.removeItem('user');
     }
     return Promise.reject(error);
   }
@@ -46,7 +47,16 @@ export const authService = {
 
   register: async (userData: RegisterRequest): Promise<AuthResponse> => {
     try {
-      const response: AxiosResponse<ApiResponse<AuthResponse>> = await api.post('/auth/register', userData);
+      // Frontend'den gelen userData'yı backend formatına dönüştür
+      const backendData = {
+        email: userData.email,
+        password: userData.password,
+        first_name: userData.firstName,
+        last_name: userData.lastName,
+        phone: userData.phone,
+      };
+      
+      const response: AxiosResponse<ApiResponse<AuthResponse>> = await api.post('/auth/register', backendData);
       if (response.data.success && response.data.data) {
         return response.data.data;
       }

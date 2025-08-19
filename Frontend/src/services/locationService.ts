@@ -33,11 +33,11 @@ class LocationService {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       
-      const data: LocationApiResponse = await response.json();
-      console.log('🏙️ LocationService: API yanıtı:', data);
+      const data: City[] = await response.json();
+      console.log('🏙️ LocationService: API yanıtı:', data.length, 'şehir');
       
-      if (data.success && Array.isArray(data.data)) {
-        return data.data as City[];
+      if (Array.isArray(data)) {
+        return data;
       }
       
       console.warn('⚠️ LocationService: Beklenmeyen API yanıtı formatı');
@@ -57,11 +57,11 @@ class LocationService {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       
-      const data: LocationApiResponse = await response.json();
-      console.log('🏘️ LocationService: API yanıtı:', data);
+      const data: District[] = await response.json();
+      console.log('🏘️ LocationService: API yanıtı:', data.length, 'ilçe');
       
-      if (data.success && Array.isArray(data.data)) {
-        return data.data as District[];
+      if (Array.isArray(data)) {
+        return data;
       }
       
       console.warn('⚠️ LocationService: Beklenmeyen API yanıtı formatı');

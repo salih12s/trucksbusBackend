@@ -5,6 +5,10 @@ import compression from 'compression';
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
+import { createServer } from 'http';
+import { Server as SocketIOServer } from 'socket.io';
+import { setupSocketIO } from './middleware/socket';
+import { initSocket } from './utils/socket';
 
 // Import routes
 import authRoutes from './routes/authRoutes';
@@ -12,6 +16,12 @@ import listingRoutes from './routes/listingRoutes';
 import adminRoutes from './routes/adminRoutes';
 import categoryRoutes from './routes/categoryRoutes';
 import locationRoutes from './routes/locationRoutes';
+import conversationRoutes from './routes/conversationRoutes';
+import conversationsRoutes from './routes/conversationsRoutes';
+import userRoutes from './routes/userRoutes';
+import reportRoutes from './routes/reportRoutes';
+import notificationRoutes from './routes/notificationRoutes';
+import favoritesRoutes from './routes/favorites';
 
 // Import utils
 import { logger } from './utils/logger';
@@ -21,6 +31,15 @@ import { prisma } from './utils/database';
 dotenv.config();
 
 const app = express();
+const server = createServer(app);
+
+// Socket.IO setup
+const io = new SocketIOServer(server, {
+  cors: {
+    origin: ["http://localhost:5173", "http://localhost:5174"],
+    methods: ["GET", "POST"]
+  }
+});
 
 const PORT = process.env.PORT || 3001;
 
@@ -34,7 +53,7 @@ const limiter = rateLimit({
 // Security middleware
 app.use(helmet());
 app.use(cors({
-  origin: process.env.FRONTEND_URL || "http://localhost:5173",
+  origin: ["http://localhost:5173", "http://localhost:5174"],
   credentials: true
 }));
 app.use(compression());
@@ -44,6 +63,12 @@ app.use(limiter);
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Socket.IO middleware - req'e io instance ekle
+app.use((req: any, res, next) => {
+  req.io = io;
+  next();
+});
 
 // Health check
 app.get('/health', (req, res) => {
@@ -59,8 +84,21 @@ app.get('/health', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/locations', locationRoutes);
-app.use('/api', listingRoutes);
+app.use('/api/listings', listingRoutes);
 app.use('/api/admin', adminRoutes);
+
+// Yeni Mesajlaşma Sistemi Routes
+app.use('/api/conversations', conversationsRoutes);
+app.use('/api/me', userRoutes);
+
+// Favorites Routes - BEFORE reports to avoid conflict
+app.use('/api/favorites', favoritesRoutes);
+
+// Reports Routes - Specific path instead of broad /api
+app.use('/api/reports', reportRoutes);
+
+// Notifications Routes
+app.use('/api/notifications', notificationRoutes);
 
 // Error handling middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -108,10 +146,14 @@ async function startServer() {
   try {
     await connectDatabase();
     
-    app.listen(PORT, () => {
+    // Initialize room-based Socket.IO
+    initSocket(io);
+    
+    server.listen(PORT, () => {
       logger.info(`🚀 Server running on port ${PORT}`);
       logger.info(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
       logger.info(`🌐 Frontend URL: ${process.env.FRONTEND_URL || 'http://localhost:5173'}`);
+      logger.info(`💬 Socket.IO enabled with room management`);
     });
   } catch (error) {
     logger.error('Failed to start server:', error);

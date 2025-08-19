@@ -6,26 +6,29 @@ import {
   updateListing,
   deleteListing,
   getUserListings,
-  getCategories,
-  getVehicleTypes,
-  getBrands
+  toggleFavorite,
+  getFavorites,
+  debugListingData,
+  debugListingImages
 } from '../controllers/listingController';
 import { authMiddleware } from '../middleware/auth';
 
 const router = Router();
 
 // Public routes
-router.get('/listings', getListings);
-router.get('/listings/:id', getListingById);
-router.get('/categories', getCategories);
-router.get('/vehicle-types', getVehicleTypes);
-router.get('/brands', getBrands);
+router.get('/', getListings);  // GET /api/listings
+router.get('/debug', debugListingData);  // GET /api/listings/debug - Debug endpoint
+router.get('/debug-images', debugListingImages);  // GET /api/listings/debug-images - Debug images
 
-// Protected routes
+// Protected routes - authentication required
 router.use(authMiddleware);
-router.post('/listings', createListing);
-router.put('/listings/:id', updateListing);
-router.delete('/listings/:id', deleteListing);
-router.get('/my-listings', getUserListings);
+router.post('/', createListing);  // POST /api/listings - Now requires authentication
+router.get('/my-listings', getUserListings);  // GET /api/listings/my-listings
+router.get('/favorites', getFavorites);  // GET /api/listings/favorites
+router.get('/user/:userId', getUserListings);  // GET /api/listings/user/:userId (same as my-listings but with explicit user id)
+router.post('/:id/favorite', toggleFavorite);  // POST /api/listings/:id/favorite
+router.get('/:id', getListingById);  // GET /api/listings/:id - Must be after specific routes
+router.put('/:id', updateListing);  // PUT /api/listings/:id
+router.delete('/:id', deleteListing);  // DELETE /api/listings/:id
 
 export default router;

@@ -24,8 +24,8 @@ interface VehicleType {
 }
 
 interface ApiResponse {
-  success: boolean;
-  data: VehicleType[];
+  success?: boolean;
+  data?: VehicleType[];
 }
 
 // Kategori isimleri ve resim dosyalarının eşleşmesi
@@ -53,16 +53,19 @@ const CategorySelection: React.FC = () => {
   const fetchVehicleTypes = async () => {
     try {
       setError(null);
-      const response = await fetch('http://localhost:3005/api/categories/vehicle-types/all');
+      const response = await fetch('http://localhost:3005/api/categories/vehicle-types?category_id=vehicle-category-001');
       
       if (!response.ok) {
         throw new Error('Araç türleri alınamadı');
       }
       
-      const data: ApiResponse = await response.json();
+      const data = await response.json();
+      console.log('API Response:', data);
       
-      // API response formatını kontrol et
-      if (data.success && data.data) {
+      // API response formatını kontrol et - backend direkt array dönüyor
+      if (Array.isArray(data)) {
+        setVehicleTypes(data);
+      } else if (data.success && data.data) {
         setVehicleTypes(data.data);
       } else {
         throw new Error('Veri formatı hatalı');
@@ -261,18 +264,7 @@ const CategorySelection: React.FC = () => {
                   >
                     {vehicleType.name}
                   </Typography>
-                  {vehicleType.categories && (
-                    <Typography 
-                      variant="body2" 
-                      sx={{ 
-                        opacity: 0.9,
-                        fontSize: '0.85rem',
-                        textShadow: '0 1px 2px rgba(0,0,0,0.5)',
-                      }}
-                    >
-                      {vehicleType.categories.name}
-                    </Typography>
-                  )}
+                
                 </CardContent>
               </Card>
             </Box>

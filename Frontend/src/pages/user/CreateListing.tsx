@@ -30,6 +30,7 @@ import {
   PhotoCamera,
 } from '@mui/icons-material';
 import { Category } from '../../types';
+import { api } from '../../services/api';
 
 const steps = ['Kategori Seçimi', 'İlan Bilgileri', 'Fotoğraflar', 'Önizleme'];
 
@@ -55,20 +56,28 @@ const CreateListing: React.FC = () => {
     transmission: '',
     condition: '',
     features: [] as string[],
+    contactPhone: '', // Telefon numarası alanı eklendi
+    contactName: '',  // İletişim ismi alanı eklendi
   });
 
   const [errors, setErrors] = useState<{[key: string]: string}>({});
 
   useEffect(() => {
-    // Mock categories
-    const mockCategories: Category[] = [
-      { id: '1', name: 'Kamyon', slug: 'kamyon', createdAt: new Date() },
-      { id: '2', name: 'Otobüs', slug: 'otobus', createdAt: new Date() },
-      { id: '3', name: 'Minibüs', slug: 'minibus', createdAt: new Date() },
-      { id: '4', name: 'Çekici', slug: 'cekici', createdAt: new Date() },
-      { id: '5', name: 'Dorse', slug: 'dorse', createdAt: new Date() },
-    ];
-    setCategories(mockCategories);
+    // Load categories from API
+    const loadCategories = async () => {
+      try {
+        const response = await api.get('/categories');
+        if (response.data.success) {
+          setCategories(response.data.data.categories);
+        }
+      } catch (error) {
+        console.error('Kategoriler yüklenemedi:', error);
+        // Fallback to empty array if API fails
+        setCategories([]);
+      }
+    };
+
+    loadCategories();
   }, []);
 
   const handleInputChange = (field: string, value: any) => {
@@ -136,14 +145,72 @@ const CreateListing: React.FC = () => {
 
   const handleSubmit = async () => {
     setLoading(true);
+    console.log('İlan gönderiliyor...');
+    console.log('Form Data:', formData);
+    console.log('Token:', localStorage.getItem('token'));
+    console.log('API Base URL:', api.defaults.baseURL);
+    
     try {
-      // Mock API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Real API call to create listing
+      // Use real IDs from database
+      const listingData = {
+        title: formData.title,
+        description: formData.description,
+        price: Number(formData.price),
+        year: Number(formData.year),
+        km: Number(formData.kilometer) || 0,
+        category_id: formData.categoryId, // This should match vehicle_type_id from frontend form
+        vehicle_type_id: formData.categoryId, // Using same ID since categories map to vehicle types
+        brand_id: "cme63joza00058jr35kfzpxii", // Fiat (Minibüs) from database
+        model_id: "cme6433k50001a81vx38fdgpl", // Starcraft from database
+        city_id: "cme60jun600008vo1eh282nt0", // Adana from database
+        district_id: "cme60juo900018vo1mzhremag", // Aladağ from database
+        // Dinamik seller bilgileri - form verilerini kullan
+        seller_name: formData.contactName.trim() || undefined, // boşsa undefined gönder ki backend user bilgisini alsın
+        seller_phone: formData.contactPhone.trim() || undefined, // boşsa undefined gönder
+        seller_email: "ilan@example.com",
+        color: "Belirtilmemiş",
+        fuel_type: formData.fuelType || "Dizel",
+        transmission: formData.transmission || "Manuel",
+        vehicle_condition: formData.condition || "İyi",
+        is_exchangeable: false,
+        images: []
+      };
+
+      console.log('🚀 Gönderilecek seller verileri:', {
+        seller_name: listingData.seller_name,
+        seller_phone: listingData.seller_phone,
+        contactName: formData.contactName,
+        contactPhone: formData.contactPhone
+      });
+
+      console.log('Gönderilecek veri:', listingData);
+      console.log('İstek URL:', `${api.defaults.baseURL}/listings`);
+      console.log('İstek başlıyor...');
+
+      const response = await api.post('/listings', listingData);
+      console.log('API Response:', response.data);
+      console.log('İstek başarılı!');
       
-      alert('İlanınız başarıyla oluşturuldu! Onay için admin paneline gönderildi.');
-      navigate('/');
-    } catch (error) {
-      alert('Bir hata oluştu. Lütfen tekrar deneyin.');
+      if (response.data.success) {
+        alert('İlanınız başarıyla oluşturuldu! Admin onayından sonra yayınlanacaktır.');
+        navigate('/');
+      }
+    } catch (error: any) {
+      console.error('İlan oluşturulamadı:', error);
+      console.error('Error response:', error.response?.data);
+      console.error('Error status:', error.response?.status);
+      console.error('Error headers:', error.response?.headers);
+      console.error('Request config:', error.config);
+      
+      if (error.code === 'ECONNREFUSED') {
+        alert('Sunucuya bağlanılamıyor. Lütfen backend\'in çalıştığından emin olun.');
+      } else if (error.response?.status === 404) {
+        alert('API endpoint bulunamadı. URL\'yi kontrol edin.');
+      } else {
+        const errorMessage = error.response?.data?.message || 'Bir hata oluştu. Lütfen tekrar deneyin.';
+        alert(errorMessage);
+      }
     } finally {
       setLoading(false);
     }
@@ -266,6 +333,30 @@ const CreateListing: React.FC = () => {
                 <MenuItem value="lpg">LPG</MenuItem>
                 <MenuItem value="elektrik">Elektrik</MenuItem>
               </TextField>
+            </Box>
+
+            {/* İletişim Bilgileri */}
+            <Box sx={{ mt: 2 }}>
+              <Typography variant="h6" gutterBottom color="primary">
+                İletişim Bilgileri
+              </Typography>
+              <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
+                <TextField
+                  label="İletişim Adı Soyadı"
+                  value={formData.contactName}
+                  onChange={(e) => handleInputChange('contactName', e.target.value)}
+                  placeholder="İlan sahibi adı soyadı"
+                  helperText="İlanda görünecek isim"
+                />
+                
+                <TextField
+                  label="Telefon Numarası"
+                  value={formData.contactPhone}
+                  onChange={(e) => handleInputChange('contactPhone', e.target.value)}
+                  placeholder="05XX XXX XX XX"
+                  helperText="İlanda görünecek telefon numarası"
+                />
+              </Box>
             </Box>
           </Box>
         );

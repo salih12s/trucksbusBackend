@@ -6,6 +6,7 @@ export interface User {
   first_name: string;
   last_name: string;
   phone?: string;
+  avatar?: string;
   city?: string;
   district?: string;
   role: 'USER' | 'ADMIN';
@@ -54,26 +55,55 @@ export interface Category {
   createdAt: Date;
 }
 
-// Message Types
+// 🔧 Message Types - messageService ile aynı şema (content field, backend compatible)
 export interface Message {
   id: string;
-  senderId: string;
-  receiverId: string;
-  listingId?: string;
+  conversation_id: string;
+  sender_id: string;
   content: string;
-  isRead: boolean;
-  createdAt: Date;
+  is_read: boolean;
+  is_edited: boolean;
+  created_at: string;
+  updated_at: string;
+  users: {
+    id: string;
+    first_name: string;
+    last_name: string;
+    username?: string;
+  };
 }
 
 export interface Conversation {
   id: string;
-  participantIds: string[];
-  participants: User[];
-  lastMessage?: Message;
+  participant1_id: string;
+  participant2_id: string;
+  listing_id?: string;
+  last_message_at?: string;
+  created_at: string;
+  updated_at: string;
+  listing?: {
+    id: string;
+    title: string;
+    price?: number;
+    images?: string[];
+  };
+  otherParticipant: {
+    id: string;
+    first_name: string;
+    last_name: string;
+    email?: string;
+  };
+  lastMessage?: {
+    content: string;
+    created_at: string;
+    sender_id: string;
+    sender_name: string;
+  };
   unreadCount: number;
-  createdAt: Date;
-  updatedAt: Date;
 }
+
+
+
 
 // Notification Types
 export interface Notification {

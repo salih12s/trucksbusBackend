@@ -1,206 +1,212 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { ulid } from 'ulid';
 import { prisma } from '../utils/database';
 import { logger } from '../utils/logger';
-import { AuthRequest } from '../middleware/auth';
 
-// Generate JWT token
-const generateToken = (userId: string): string => {
-  const secret = process.env.JWT_SECRET || 'default-secret';
-  return jwt.sign({ userId }, secret, {
-    expiresIn: process.env.JWT_EXPIRES_IN || '7d',
-  } as jwt.SignOptions);
-};
-
-// Register user
 export const register = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { email, password, firstName, lastName, phone } = req.body;
-
-    // Generate username from email if not provided
-    const username = req.body.username || email.split('@')[0] + Math.floor(Math.random() * 1000);
+    const { email, password, first_name, last_name, phone, city, district } = req.body;
 
     // Check if user already exists
-    const existingUser = await prisma.user.findFirst({
-      where: {
-        OR: [
-          { email },
-          { username }
-        ]
-      }
+    const existingUser = await prisma.users.findUnique({
+      where: { email }
     });
 
     if (existingUser) {
-      res.status(400).json({
-        success: false,
-        message: existingUser.email === email ? 'Bu e-posta adresi zaten kayıtlı' : 'Bu kullanıcı adı zaten alınmış',
-      });
-      return;
-    }
-
-    // Validate required fields
-    if (!email || !password || !firstName || !lastName) {
-      res.status(400).json({
-        success: false,
-        message: 'E-posta, şifre, ad ve soyad gerekli',
+      res.status(409).json({ 
+        success: false, 
+        message: 'Bu e-posta adresi ile zaten kayıtlı bir kullanıcı bulunmaktadır.' 
       });
       return;
     }
 
     // Hash password
-    const salt = await bcrypt.genSalt(12);
-    const hashedPassword = await bcrypt.hash(password, salt);
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
 
     // Create user
-    const user = await prisma.user.create({
+    const user = await prisma.users.create({
       data: {
+        id: ulid(),
         email,
-        username,
-        first_name: firstName,
-        last_name: lastName,
         password: hashedPassword,
-        phone: phone || null,
+        first_name,
+        last_name,
+        phone,
+        city,
+        district,
+        role: 'USER',
         is_active: true,
         is_email_verified: false,
-        role: 'USER',
-        updated_at: new Date(),
-      },
-      select: {
-        id: true,
-        email: true,
-        username: true,
-        first_name: true,
-        last_name: true,
-        phone: true,
-        role: true,
-        is_email_verified: true,
-        created_at: true,
+        updated_at: new Date()
       }
     });
 
-    // Generate token
-    const token = generateToken(user.id);
-
-    logger.info(`User registered: ${user.email}`);
+    // Generate JWT token
+    const token = jwt.sign(
+      { 
+        id: user.id, 
+        email: user.email, 
+        role: user.role 
+      },
+      process.env.JWT_SECRET || 'your-secret-key',
+      { expiresIn: '24h' }
+    );
 
     res.status(201).json({
       success: true,
-      message: 'Kullanıcı başarıyla kaydedildi',
+      message: 'Kayıt başarıyla tamamlandı.',
       data: {
-        user,
-        token,
-      },
+        user: {
+          id: user.id,
+          email: user.email,
+          first_name: user.first_name,
+          last_name: user.last_name,
+          avatar: user.avatar,
+          role: user.role
+        },
+        token
+      }
     });
   } catch (error) {
-    logger.error('Register error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Internal server error',
+    logger.error('Error in register:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Kayıt işlemi sırasında bir hata oluştu.' 
     });
   }
 };
 
-// Login user
 export const login = async (req: Request, res: Response): Promise<void> => {
   try {
     const { email, password } = req.body;
 
-    // Validate required fields
+    // Validate input
     if (!email || !password) {
-      res.status(400).json({
-        success: false,
-        message: 'E-posta ve şifre gerekli',
+      res.status(400).json({ 
+        success: false, 
+        message: 'E-posta ve şifre alanları zorunludur.' 
       });
       return;
     }
 
-    // Find user
-    const user = await prisma.user.findUnique({
-      where: { email },
+    // Find user by email
+    const user = await prisma.users.findUnique({
+      where: { email }
     });
 
     if (!user) {
-      res.status(401).json({
-        success: false,
-        message: 'E-posta veya şifre hatalı',
-      });
-      return;
-    }
-
-    // Check password
-    if (!user.password) {
-      res.status(401).json({
-        success: false,
-        message: 'E-posta veya şifre hatalı',
-      });
-      return;
-    }
-
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-
-    if (!isPasswordValid) {
-      res.status(401).json({
-        success: false,
-        message: 'E-posta veya şifre hatalı',
+      res.status(401).json({ 
+        success: false, 
+        message: 'Geçersiz e-posta veya şifre.' 
       });
       return;
     }
 
     // Check if user is active
     if (!user.is_active) {
-      res.status(401).json({
-        success: false,
-        message: 'Hesabınız deaktive edilmiş',
+      res.status(403).json({ 
+        success: false, 
+        message: 'Hesabınız devre dışı bırakılmıştır.' 
+      });
+      return;
+    }
+
+    // Verify password
+    const isValidPassword = await bcrypt.compare(password, user.password || '');
+
+    if (!isValidPassword) {
+      res.status(401).json({ 
+        success: false, 
+        message: 'Geçersiz e-posta veya şifre.' 
       });
       return;
     }
 
     // Update last login
-    await prisma.user.update({
+    await prisma.users.update({
       where: { id: user.id },
-      data: { last_login: new Date() },
+      data: { 
+        last_login: new Date(),
+        login_attempts: 0,
+        updated_at: new Date()
+      }
     });
 
-    // Generate token
-    const token = generateToken(user.id);
-
-    // Remove password from response
-    const { password: _, ...userWithoutPassword } = user;
-
-    logger.info(`User logged in: ${user.email}`);
+    // Generate JWT token
+    const token = jwt.sign(
+      { 
+        id: user.id, 
+        email: user.email, 
+        role: user.role,
+        first_name: user.first_name,
+        last_name: user.last_name
+      },
+      process.env.JWT_SECRET || 'your-secret-key',
+      { expiresIn: '24h' }
+    );
 
     res.status(200).json({
       success: true,
-      message: 'Giriş başarılı',
+      message: 'Giriş başarılı.',
       data: {
-        user: userWithoutPassword,
-        token,
-      },
+        user: {
+          id: user.id,
+          email: user.email,
+          first_name: user.first_name,
+          last_name: user.last_name,
+          username: user.username,
+          phone: user.phone,
+          avatar: user.avatar,
+          city: user.city,
+          district: user.district,
+          role: user.role,
+          is_email_verified: user.is_email_verified
+        },
+        token
+      }
     });
   } catch (error) {
-    logger.error('Login error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Internal server error',
+    logger.error('Error in login:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Giriş işlemi sırasında bir hata oluştu.' 
     });
   }
 };
 
-// Get current user
-export const getMe = async (req: AuthRequest, res: Response): Promise<void> => {
+export const logout = async (req: Request, res: Response): Promise<void> => {
   try {
-    const userId = req.user?.id;
+    // For JWT-based authentication, logout is handled client-side
+    // But we can add token blacklisting if needed in the future
+    res.status(200).json({
+      success: true,
+      message: 'Çıkış başarılı.'
+    });
+  } catch (error) {
+    logger.error('Error in logout:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Çıkış işlemi sırasında bir hata oluştu.' 
+    });
+  }
+};
+
+export const getMe = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = (req as any).user?.id;
 
     if (!userId) {
-      res.status(401).json({
-        success: false,
-        message: 'Unauthorized',
+      res.status(401).json({ 
+        success: false, 
+        message: 'Yetkisiz erişim.' 
       });
       return;
     }
 
-    const user = await prisma.user.findUnique({
+    const user = await prisma.users.findUnique({
       where: { id: userId },
       select: {
         id: true,
@@ -209,167 +215,306 @@ export const getMe = async (req: AuthRequest, res: Response): Promise<void> => {
         last_name: true,
         username: true,
         phone: true,
+        avatar: true,
         city: true,
         district: true,
         role: true,
         is_active: true,
         is_email_verified: true,
-        created_at: true,
-        updated_at: true,
+        created_at: true
       }
     });
 
     if (!user) {
-      res.status(404).json({
-        success: false,
-        message: 'User not found',
+      res.status(404).json({ 
+        success: false, 
+        message: 'Kullanıcı bulunamadı.' 
       });
       return;
     }
 
     res.status(200).json({
       success: true,
-      data: { user },
+      data: { user }
     });
   } catch (error) {
-    logger.error('Get me error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Internal server error',
+    logger.error('Error in getMe:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Kullanıcı bilgileri alınırken bir hata oluştu.' 
     });
   }
 };
 
-// Refresh token
 export const refreshToken = async (req: Request, res: Response): Promise<void> => {
   try {
     const { refreshToken } = req.body;
 
     if (!refreshToken) {
-      res.status(401).json({
-        success: false,
-        message: 'Refresh token is required',
+      res.status(400).json({ 
+        success: false, 
+        message: 'Refresh token gereklidir.' 
       });
       return;
     }
 
-    // Verify the refresh token
-    const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET || 'default-secret') as any;
-
-    // Check if user exists and is active
-    const user = await prisma.user.findUnique({
-      where: { id: decoded.userId },
-      select: { id: true, is_active: true }
-    });
-
-    if (!user || !user.is_active) {
-      res.status(401).json({
-        success: false,
-        message: 'Invalid refresh token',
+    // For now, just verify the token and issue a new one
+    // In production, you might want to store refresh tokens in database
+    try {
+      const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET || 'your-secret-key') as any;
+      
+      const user = await prisma.users.findUnique({
+        where: { id: decoded.id }
       });
-      return;
+
+      if (!user || !user.is_active) {
+        res.status(401).json({ 
+          success: false, 
+          message: 'Geçersiz token.' 
+        });
+        return;
+      }
+
+      const newToken = jwt.sign(
+        { 
+          id: user.id, 
+          email: user.email, 
+          role: user.role,
+          first_name: user.first_name,
+          last_name: user.last_name
+        },
+        process.env.JWT_SECRET || 'your-secret-key',
+        { expiresIn: '24h' }
+      );
+
+      res.status(200).json({
+        success: true,
+        data: { token: newToken }
+      });
+    } catch (jwtError) {
+      res.status(401).json({ 
+        success: false, 
+        message: 'Geçersiz veya süresi dolmuş token.' 
+      });
     }
-
-    // Generate new access token
-    const token = generateToken(user.id);
-
-    res.status(200).json({
-      success: true,
-      data: { token },
-    });
   } catch (error) {
-    logger.error('Refresh token error:', error);
-    res.status(401).json({
-      success: false,
-      message: 'Invalid refresh token',
+    logger.error('Error in refreshToken:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Token yenileme sırasında bir hata oluştu.' 
     });
   }
 };
 
-// Forgot password
 export const forgotPassword = async (req: Request, res: Response): Promise<void> => {
   try {
     const { email } = req.body;
 
-    const user = await prisma.user.findUnique({
+    if (!email) {
+      res.status(400).json({ 
+        success: false, 
+        message: 'E-posta adresi gereklidir.' 
+      });
+      return;
+    }
+
+    const user = await prisma.users.findUnique({
       where: { email }
     });
 
     if (!user) {
       // Don't reveal if user exists or not for security
-      res.status(200).json({
-        success: true,
-        message: 'If email exists, password reset instructions have been sent',
+      res.status(200).json({ 
+        success: true, 
+        message: 'Eğer bu e-posta adresi sistemde kayıtlı ise, şifre sıfırlama bağlantısı gönderilecektir.' 
       });
       return;
     }
 
-    // In a real app, you would:
-    // 1. Generate a reset token
-    // 2. Store it in the database with expiration
-    // 3. Send email with reset link
+    // Generate reset token (in production, send this via email)
+    const resetToken = jwt.sign(
+      { id: user.id, email: user.email, type: 'password_reset' },
+      process.env.JWT_SECRET || 'your-secret-key',
+      { expiresIn: '1h' }
+    );
 
-    logger.info(`Password reset requested for: ${email}`);
+    // Store reset token in database
+    await prisma.users.update({
+      where: { id: user.id },
+      data: {
+        reset_password_token: resetToken,
+        reset_password_expires: new Date(Date.now() + 3600000), // 1 hour
+        updated_at: new Date()
+      }
+    });
 
-    res.status(200).json({
-      success: true,
-      message: 'If email exists, password reset instructions have been sent',
+    // TODO: Send email with reset link
+    logger.info(`Password reset requested for ${email}, token: ${resetToken}`);
+
+    res.status(200).json({ 
+      success: true, 
+      message: 'Şifre sıfırlama bağlantısı e-posta adresinize gönderildi.',
+      // In development, return the token for testing
+      ...(process.env.NODE_ENV === 'development' && { resetToken })
     });
   } catch (error) {
-    logger.error('Forgot password error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Internal server error',
+    logger.error('Error in forgotPassword:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Şifre sıfırlama işlemi sırasında bir hata oluştu.' 
     });
   }
 };
 
-// Reset password
 export const resetPassword = async (req: Request, res: Response): Promise<void> => {
   try {
     const { token, newPassword } = req.body;
 
-    // In a real app, you would:
-    // 1. Validate the reset token
-    // 2. Check if it's not expired
-    // 3. Update the user's password
-    // 4. Invalidate the reset token
+    if (!token || !newPassword) {
+      res.status(400).json({ 
+        success: false, 
+        message: 'Token ve yeni şifre gereklidir.' 
+      });
+      return;
+    }
 
-    // For now, just return an error since we don't have token validation implemented
-    res.status(400).json({
-      success: false,
-      message: 'Invalid or expired reset token',
-    });
+    if (newPassword.length < 6) {
+      res.status(400).json({ 
+        success: false, 
+        message: 'Şifre en az 6 karakter olmalıdır.' 
+      });
+      return;
+    }
+
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key') as any;
+
+      if (decoded.type !== 'password_reset') {
+        res.status(400).json({ 
+          success: false, 
+          message: 'Geçersiz token türü.' 
+        });
+        return;
+      }
+
+      const user = await prisma.users.findFirst({
+        where: {
+          id: decoded.id,
+          reset_password_token: token,
+          reset_password_expires: {
+            gt: new Date()
+          }
+        }
+      });
+
+      if (!user) {
+        res.status(400).json({ 
+          success: false, 
+          message: 'Geçersiz veya süresi dolmuş token.' 
+        });
+        return;
+      }
+
+      // Hash new password
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+      // Update password and clear reset token
+      await prisma.users.update({
+        where: { id: user.id },
+        data: {
+          password: hashedPassword,
+          reset_password_token: null,
+          reset_password_expires: null,
+          updated_at: new Date()
+        }
+      });
+
+      res.status(200).json({ 
+        success: true, 
+        message: 'Şifreniz başarıyla sıfırlandı.' 
+      });
+    } catch (jwtError) {
+      res.status(400).json({ 
+        success: false, 
+        message: 'Geçersiz veya süresi dolmuş token.' 
+      });
+    }
   } catch (error) {
-    logger.error('Reset password error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Internal server error',
+    logger.error('Error in resetPassword:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Şifre sıfırlama işlemi sırasında bir hata oluştu.' 
     });
   }
 };
 
-// Verify email
 export const verifyEmail = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { token } = req.params;
+    const { token } = req.query;
 
-    // In a real app, you would:
-    // 1. Validate the verification token
-    // 2. Check if it's not expired
-    // 3. Update the user's verification status
-    // 4. Invalidate the verification token
+    if (!token) {
+      res.status(400).json({ 
+        success: false, 
+        message: 'Doğrulama token\'ı gereklidir.' 
+      });
+      return;
+    }
 
-    // For now, just return an error since we don't have token validation implemented
-    res.status(400).json({
-      success: false,
-      message: 'Invalid or expired verification token',
-    });
+    try {
+      const decoded = jwt.verify(token as string, process.env.JWT_SECRET || 'your-secret-key') as any;
+
+      if (decoded.type !== 'email_verification') {
+        res.status(400).json({ 
+          success: false, 
+          message: 'Geçersiz token türü.' 
+        });
+        return;
+      }
+
+      const user = await prisma.users.findFirst({
+        where: {
+          id: decoded.id,
+          email_verification_token: token as string,
+          email_verification_expires: {
+            gt: new Date()
+          }
+        }
+      });
+
+      if (!user) {
+        res.status(400).json({ 
+          success: false, 
+          message: 'Geçersiz veya süresi dolmuş doğrulama token\'ı.' 
+        });
+        return;
+      }
+
+      // Verify email
+      await prisma.users.update({
+        where: { id: user.id },
+        data: {
+          is_email_verified: true,
+          email_verification_token: null,
+          email_verification_expires: null,
+          updated_at: new Date()
+        }
+      });
+
+      res.status(200).json({ 
+        success: true, 
+        message: 'E-posta adresiniz başarıyla doğrulandı.' 
+      });
+    } catch (jwtError) {
+      res.status(400).json({ 
+        success: false, 
+        message: 'Geçersiz veya süresi dolmuş doğrulama token\'ı.' 
+      });
+    }
   } catch (error) {
-    logger.error('Verify email error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Internal server error',
+    logger.error('Error in verifyEmail:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'E-posta doğrulama işlemi sırasında bir hata oluştu.' 
     });
   }
 };
