@@ -6,12 +6,12 @@ export interface User {
   first_name: string;
   last_name: string;
   phone?: string;
-  avatar?: string;
   city?: string;
   district?: string;
   role: 'USER' | 'ADMIN';
   is_active: boolean;
   is_email_verified: boolean;
+  avatar?: string; // Added for profile picture
   created_at: Date;
   updated_at: Date;
 }
@@ -35,6 +35,14 @@ export interface Listing {
   features?: string[]; // Added for compatibility
   createdAt: Date;
   updatedAt: Date;
+  // Vehicle specific fields
+  year?: number;
+  mileage?: number;
+  fuelType?: string;
+  transmission?: string;
+  brand?: string;
+  model?: string;
+  variant?: string;
 }
 
 export enum ListingStatus {
@@ -180,4 +188,25 @@ export interface AuthResponse {
   user: User;
   token: string;
   refreshToken: string;
+}
+
+// Listing Form Types
+export interface CreateListingData {
+  title: string;
+  description: string;
+  price: number;
+  categoryId: string;
+  location: string;
+  images?: File[];
+  features?: string[];
+}
+
+export interface UpdateListingData {
+  title?: string;
+  description?: string;
+  price?: number;
+  categoryId?: string;
+  location?: string;
+  features?: string[];
+  status?: ListingStatus;
 }

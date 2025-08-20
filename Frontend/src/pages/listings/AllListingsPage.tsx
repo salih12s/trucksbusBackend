@@ -254,7 +254,7 @@ const AllListingsPage: React.FC = () => {
   };
 
   const handleViewDetails = (id: string) => {
-    navigate(`/listings/${id}`);
+    navigate(`/listing/${id}`);
   };
 
   const handleSendMessage = (listingId: string) => {

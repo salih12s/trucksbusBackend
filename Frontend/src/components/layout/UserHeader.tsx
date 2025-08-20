@@ -142,6 +142,9 @@ const UserHeader: React.FC = () => {
   };
   const menuItems = [
     { label: "Ana Sayfa", path: "/" },
+    { label: "Profil", path: "/profile" },
+    { label: "İlanlarım", path: "/my-listings" },
+    { label: "Favorilerim", path: "/favorites" },
     { label: "Kategoriler", path: "/categories" },
   ];
 
@@ -193,8 +196,8 @@ const UserHeader: React.FC = () => {
 >
   <Box
     component="img"
-    src="/xad.png"
-    alt="Truck-Bus"
+    src="/TruckBus.png"
+    alt="TruckBus"
     className="logo-img"
     sx={{
       position: "absolute",
@@ -448,7 +451,6 @@ const UserHeader: React.FC = () => {
                     }}
                   >
                     <Avatar
-                      src={user?.avatar || undefined}
                       sx={{
                         width: 36,
                         height: 36,
@@ -458,6 +460,7 @@ const UserHeader: React.FC = () => {
                         border: `2px solid ${alpha("#ffffff", 0.8)}`,
                         boxShadow: `0 2px 8px rgba(0,0,0,0.15)`,
                       }}
+                      src={user?.avatar}
                     >
                       {user?.first_name?.charAt(0)}
                       {user?.last_name?.charAt(0)}
@@ -468,14 +471,13 @@ const UserHeader: React.FC = () => {
             ) : (
               <>
                 <Button
-                
+                  color="inherit"
                   onClick={() => navigate("/auth/login")}
                   sx={{ 
-                    color: "#fff",
                     fontWeight: 700, 
                     minWidth: { xs: 60, sm: 80 }, 
                     "&:hover": { 
-                      color: "#fff",
+                      bgcolor: alpha("#fff", 0.1),
                       transform: 'translateY(-1px)',
                     },
                     transition: 'all 0.2s ease',
@@ -510,8 +512,76 @@ const UserHeader: React.FC = () => {
         </Toolbar>
       </Container>
       
-      {/* ... (Açılır menüler aynı kalıyor) ... */}
-      <Menu anchorEl={anchorElUser} open={Boolean(anchorElUser)} onClose={handleUserMenuClose} PaperProps={{ elevation: 4, sx: { overflow: "visible", mt: 1.5, minWidth: 290, borderRadius: 2, filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.15))", "&:before": { content: '""', display: "block", position: "absolute", top: 0, right: 16, width: 10, height: 10, bgcolor: "background.paper", transform: "translateY(-50%) rotate(45deg)", zIndex: 0, }, }, }} transformOrigin={{ horizontal: "right", vertical: "top" }} anchorOrigin={{ horizontal: "right", vertical: "bottom" }} onClick={handleUserMenuClose} > <Box sx={{ p: 2, pb: 1.5, borderBottom: "1px solid #eee" }}> <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}> <Avatar sx={{ bgcolor: LOGO_RED, width: 42, height: 42 }}> {user?.first_name?.charAt(0)}{user?.last_name?.charAt(0)} </Avatar> <Box> <Typography variant="subtitle1" sx={{ fontWeight: 800 }}> {user?.first_name} {user?.last_name} </Typography> <Typography variant="body2" color="text.secondary"> {user?.email} </Typography> </Box> </Box> </Box> <MenuItem onClick={() => navigate("/profile")}><PersonOutlineRounded sx={{ mr: 1.5 }} /> Profil</MenuItem> <MenuItem onClick={() => navigate("/my-listings")}><StorefrontRounded sx={{ mr: 1.5 }} /> İlanlarım</MenuItem> <MenuItem onClick={() => navigate("/real-time-messages")}><ChatBubbleRounded sx={{ mr: 1.5 }} /> Mesajlarım</MenuItem> <MenuItem onClick={() => navigate("/my-reports")}><ReportGmailerrorredRounded sx={{ mr: 1.5 }} /> Şikayetlerim</MenuItem> <MenuItem onClick={() => navigate("/settings")}><SettingsRounded sx={{ mr: 1.5 }} /> Ayarlar</MenuItem> <Divider /> <MenuItem onClick={handleLogout}><LogoutRounded sx={{ mr: 1.5 }} /> Çıkış Yap</MenuItem> </Menu>
+      {/* User Menu */}
+      <Menu 
+        anchorEl={anchorElUser} 
+        open={Boolean(anchorElUser)} 
+        onClose={handleUserMenuClose}
+        PaperProps={{
+          elevation: 4,
+          sx: {
+            overflow: "visible",
+            mt: 1.5,
+            minWidth: 290,
+            borderRadius: 2,
+            filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.15))",
+            "&:before": {
+              content: '""',
+              display: "block",
+              position: "absolute",
+              top: 0,
+              right: 16,
+              width: 10,
+              height: 10,
+              bgcolor: "background.paper",
+              transform: "translateY(-50%) rotate(45deg)",
+              zIndex: 0,
+            },
+          },
+        }}
+        transformOrigin={{ horizontal: "right", vertical: "top" }}
+        anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+        onClick={handleUserMenuClose}
+      >
+        <Box sx={{ p: 2, pb: 1.5, borderBottom: "1px solid #eee" }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+            <Avatar 
+              sx={{ bgcolor: LOGO_RED, width: 42, height: 42 }}
+              src={user?.avatar}
+            >
+              {user?.first_name?.charAt(0)}{user?.last_name?.charAt(0)}
+            </Avatar>
+            <Box>
+              <Typography variant="subtitle1" sx={{ fontWeight: 800 }}>
+                {user?.first_name} {user?.last_name}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {user?.email}
+              </Typography>
+            </Box>
+          </Box>
+        </Box>
+        
+        <MenuItem onClick={() => navigate("/profile")}>
+          <PersonOutlineRounded sx={{ mr: 1.5 }} /> Profil
+        </MenuItem>
+        <MenuItem onClick={() => navigate("/my-listings")}>
+          <StorefrontRounded sx={{ mr: 1.5 }} /> İlanlarım
+        </MenuItem>
+        <MenuItem onClick={() => navigate("/real-time-messages")}>
+          <ChatBubbleRounded sx={{ mr: 1.5 }} /> Mesajlarım
+        </MenuItem>
+        <MenuItem onClick={() => navigate("/my-reports")}>
+          <ReportGmailerrorredRounded sx={{ mr: 1.5 }} /> Şikayetlerim
+        </MenuItem>
+        <MenuItem onClick={() => navigate("/settings")}>
+          <SettingsRounded sx={{ mr: 1.5 }} /> Ayarlar
+        </MenuItem>
+        <Divider />
+        <MenuItem onClick={handleLogout}>
+          <LogoutRounded sx={{ mr: 1.5 }} /> Çıkış Yap
+        </MenuItem>
+      </Menu>
       <Menu anchorEl={anchorElMobile} open={Boolean(anchorElMobile)} onClose={handleMobileMenuClose} PaperProps={{ elevation: 3, sx: { mt: 1.5, minWidth: 220, borderRadius: 2 } }} > {menuItems.map((m) => ( <MenuItem key={m.path} onClick={() => { navigate(m.path); handleMobileMenuClose(); }}> {m.label} </MenuItem> ))} </Menu>
       
       {/* Notifications Popover */}

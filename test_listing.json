@@ -1,0 +1,22 @@
+{
+  "title": "Test Minibüs İlanı",
+  "description": "Test açıklaması",
+  "price": 100000,
+  "year": 2015,
+  "km": 50000,
+  "category_id": "cme633w5t00018jr3eqsv7a8r",
+  "vehicle_type_id": "cme633w8v0001981ksnpl6dj4",
+  "brand_id": "cme63joza00058jr35kfzpxii",
+  "model_id": "cme6433k50001a81vx38fdgpl",
+  "city_id": "city-06",
+  "district_id": "district-06-1130",
+  "seller_name": "Test Satıcı",
+  "seller_phone": "05551234567",
+  "seller_email": "test@test.com",
+  "color": "Beyaz",
+  "fuel_type": "Dizel",
+  "transmission": "Manuel",
+  "vehicle_condition": "İkinci El",
+  "is_exchangeable": false,
+  "images": []
+}

@@ -42,6 +42,7 @@ import {
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { locationService, City, District } from '../../services/locationService';
+import { api } from '../../services/api';
 import UserHeader from '../../components/layout/UserHeader';
 
 // Renk seçenekleri
@@ -345,6 +346,17 @@ const OtobusAdForm = () => {
   };
 
   const handleSubmit = async () => {
+    // Basit validation - gerekli alanları kontrol et
+    if (!formData.title?.trim()) {
+      setError('İlan başlığı gereklidir.');
+      return;
+    }
+    
+    if (!formData.price?.trim()) {
+      setError('Fiyat bilgisi gereklidir.');
+      return;
+    }
+
     if (!validateStep(activeStep)) {
       return;
     }
@@ -353,22 +365,96 @@ const OtobusAdForm = () => {
       setLoading(true);
       setError('');
 
-      // Form verisini hazırla
-      console.log('Otobüs ilanı oluşturuluyor:', formData);
+      // Convert uploaded images to data URLs for backend (KamyonAdForm'daki gibi)
+      const imageUrls = await Promise.all(
+        uploadedImages.map(file => {
+          return new Promise<string>((resolve) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result as string);
+            reader.readAsDataURL(file);
+          });
+        })
+      );
+
+      const listingData = {
+        title: formData.title,
+        description: formData.description,
+        price: Number(formData.price?.replace(/\./g, '')) || 0,
+        year: Number(formData.year),
+        km: Number(formData.km?.replace(/\./g, '')) || 0,
+        category_id: 'vehicle-category-001', // Vasıta category
+        vehicle_type_id: 'cme633w8v0001981ksnpl6dj9', // Otobüs vehicle_type_id
+        brand_id: null, // Brand seçimi basit string olarak yapılmış
+        model_id: null, // Model seçimi basit string olarak yapılmış
+        variant_id: null,
+        city_id: null,
+        district_id: null,
+        seller_name: formData.sellerName,
+        seller_phone: formData.sellerPhone?.replace(/[^\d]/g, '') || '',
+        seller_email: formData.sellerEmail,
+        color: formData.color || 'Belirtilmemiş',
+        fuel_type: formData.fuelType,
+        transmission: formData.transmission,
+        vehicle_condition: formData.vehicleCondition,
+        is_exchangeable: formData.exchange === 'Evet',
+        
+        // Motor ve teknik özellikler
+        engine_volume: null,
+        engine_power: null,
+        motor_power: null,
+        body_type: null,
+        cabin_type: null,
+        
+        // Otobüs'e özel alanlar
+        passenger_capacity: formData.passengerCapacity,
+        seat_layout: formData.seatLayout,
+        seat_back_screen: formData.seatBackScreen,
+        gear_type: formData.gearType,
+        gear_count: formData.gearCount,
+        fuel_capacity: formData.fuelCapacity,
+        front_axle: null,
+        rear_axle: null,
+        max_trailer_weight: null,
+        wheelbase: null,
+        carrying_capacity: null,
+        tire_condition: formData.tireCondition,
+        drive_type: null,
+        plate_origin: formData.plateOrigin,
+        vehicle_plate: formData.vehiclePlate,
+        
+        // Özellikler JSON olarak
+        features: formData.features,
+        
+        // Diğer alanlar
+        damage_record: formData.damageRecord,
+        paint_change: formData.paintChange,
+        tramer_record: null,
+        warranty: formData.warranty,
+        
+        images: imageUrls // Send actual image data URLs (KamyonAdForm'daki gibi)
+      };
+
+      console.log('Otobüs ilanı oluşturuluyor:', listingData);
+      console.log('Form validation - Required fields:', {
+        title: formData.title,
+        price: formData.price,
+        category_id: 'vehicle-category-001',
+        vehicle_type_id: 'cme633w8v0001981ksnpl6dj9'
+      });
+
+      // API çağrısı yap (JSON olarak, KamyonAdForm'daki gibi)
+      const response = await api.post('/listings', listingData);
+
+      if (response.data.success) {
+        alert('İlanınız başarıyla oluşturuldu! Admin onayından sonra yayınlanacaktır.');
+        navigate('/profile');
+      } else {
+        throw new Error(response.data.message || 'İlan oluşturulamadı');
+      }
       
-      // Burada API çağrısı yapılacak
-      // await adAPI.createListing(formData);
-      
-      // Simülasyon için bekle
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Başarılı olursa dashboard'a yönlendir
-      alert('İlanınız başarıyla oluşturuldu ve incelenmek üzere gönderildi!');
-      navigate('/dashboard');
-      
-    } catch (error) {
+    } catch (error: any) {
       console.error('İlan oluşturma hatası:', error);
-      setError('İlan oluşturulurken bir hata oluştu');
+      setError(error.response?.data?.message || 'İlan oluşturulurken bir hata oluştu');
     } finally {
       setLoading(false);
     }

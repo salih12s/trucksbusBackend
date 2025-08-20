@@ -19,7 +19,6 @@ const router = Router();
 router.get('/', getListings);  // GET /api/listings
 router.get('/debug', debugListingData);  // GET /api/listings/debug - Debug endpoint
 router.get('/debug-images', debugListingImages);  // GET /api/listings/debug-images - Debug images
-router.get('/:id', getListingById);  // GET /api/listings/:id - Public listing detail view
 
 // Protected routes - authentication required
 router.use(authMiddleware);
@@ -30,5 +29,8 @@ router.get('/user/:userId', getUserListings);  // GET /api/listings/user/:userId
 router.post('/:id/favorite', toggleFavorite);  // POST /api/listings/:id/favorite
 router.put('/:id', updateListing);  // PUT /api/listings/:id
 router.delete('/:id', deleteListing);  // DELETE /api/listings/:id
+
+// ID-based routes must be LAST to avoid conflicts with named routes
+router.get('/:id', getListingById);  // GET /api/listings/:id - Public listing detail view
 
 export default router;

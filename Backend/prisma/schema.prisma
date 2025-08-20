@@ -239,6 +239,19 @@ model listings {
   neighborhood_id    String?
   transmission       String?
   vehicle_condition  String?
+  
+  // Kamyon özel alanları
+  body_type          String?              // Üst Yapı
+  carrying_capacity  String?              // Taşıma Kapasitesi (KG)
+  cabin_type         String?              // Kabin Türü  
+  tire_condition     String?              // Lastik Durumu (%)
+  drive_type         String?              // Çekiş Türü
+  plate_origin       String?              // Plaka/Uyruk
+  features           Json?                @default("{}") // Konfor özellikleri
+  damage_record      String?              // Hasar Kaydı
+  paint_change       String?              // Boya Değişimi
+  tramer_record      String?              // Tramer Kaydı
+  
   images             Json?                @default("[]")
   complaints         complaints[]
   conversations      conversations[]

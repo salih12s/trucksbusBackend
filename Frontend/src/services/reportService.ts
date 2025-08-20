@@ -66,7 +66,7 @@ export const reportService = {
 
   // Kullanıcının şikayetleri
   async getUserReports(params?: { status?: ReportStatus; page?: number; limit?: number }) {
-    const response = await api.get('/reports/me', { params });
+    const response = await api.get('/me/reports', { params });
     return response.data;
   },
 

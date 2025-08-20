@@ -5,6 +5,7 @@ import {
   approveListing,
   rejectListing,
   getDashboardStats,
+  getRecentActivities,
   getUsers,
   updateUser,
   deleteUser
@@ -18,7 +19,11 @@ const router = Router();
 router.use(authMiddleware);
 router.use(adminMiddleware);
 
+// Dashboard routes
 router.get('/dashboard/stats', getDashboardStats);
+router.get('/dashboard/activities', getRecentActivities);
+
+// Admin management routes
 router.get('/listings', getListings);
 router.get('/listings/pending', getPendingListings);
 router.get('/users', getUsers);

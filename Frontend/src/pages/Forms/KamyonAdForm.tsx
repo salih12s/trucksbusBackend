@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { api } from '../../services/api';
 import {
   Box,
   Container,
@@ -65,6 +66,22 @@ const bodyTypeOptions = [
   'Kapalı Kasa', 'Lowbed', 'Merdivenli İtfaiye Aracı', 'Meşrubat Kasası',
   'Saç Damper', 'Saç Kasa', 'Şasi', 'Tanker', 'Temizlik Kamyonu', 'Tenteli Kasa'
 ];
+
+const EngineVoluma = [
+  '1300 cm³\'e kadar',
+  '1301 - 1600 cm³',
+  '1601 - 1800 cm³',
+  '1801 - 2000 cm³',
+  '2001 - 2500 cm³',
+  '2501 - 3000 cm³',
+  '3001 - 3500 cm³',
+  '3501 - 4000 cm³',
+  '4001 - 4500 cm³',
+  '4501 - 5000 cm³',
+  '5001 cm³ ve üzeri'
+];
+
+
 
 // Taşıma Kapasitesi seçenekleri
 const carryingCapacityOptions = [
@@ -133,6 +150,7 @@ const KamyonAdForm = () => {
     
     // Kamyon Özel Alanları
     motorPower: '', // Motor Gücü
+    engineVolume: '', // Motor Hacmi
     bodyType: '', // Üst Yapı
     carryingCapacity: '', // Taşıma Kapasitesi (KG)
     cabinType: '', // Kabin Türü
@@ -193,6 +211,7 @@ const KamyonAdForm = () => {
     // Diğer
     damageRecord: 'Hayır',
     paintChange: 'Hayır',
+    tramerRecord: 'Hayır', // Tramer Kaydı
     exchange: 'Olabilir',
     warranty: false,
     
@@ -496,18 +515,99 @@ const KamyonAdForm = () => {
         return;
       }
 
-      console.log('KamyonAdForm: İlan gönderiliyor...', formData);
+      // Real API call to create listing using form data
+      console.log('Kamyon ilanı oluşturuluyor:', formData);
       
-      // Burada API çağrısı yapılacak
-      // const response = await adAPI.createListing(listingData);
-      
-      // Geçici olarak başarılı mesaj göster
-      alert('Kamyon ilanı başarıyla oluşturuldu!');
-      navigate('/dashboard');
+      // Convert uploaded images to data URLs for backend
+      const imageUrls = await Promise.all(
+        uploadedImages.map(file => {
+          return new Promise<string>((resolve) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result as string);
+            reader.readAsDataURL(file);
+          });
+        })
+      );
 
-    } catch (error) {
+      const listingData = {
+        title: formData.title,
+        description: formData.description,
+        price: Number(formData.price.replace(/\./g, '')), // Remove dots from price
+        year: Number(formData.year),
+        km: Number(formData.km.replace(/\./g, '')) || 0, // Remove dots from km
+        category_id: selectedBrand?.vehicle_types?.categories?.id || "vehicle-category-001", // Vasıta category
+        vehicle_type_id: selectedBrand?.vehicle_type_id || selectedModel?.brands?.vehicle_type_id || "cme633w8v0001981ksnpl6dj6", // Kamyon & Kamyonet
+        brand_id: selectedBrand?.id || null, // Gerçek brand ID - varsayılan değer yok
+        model_id: selectedModel?.id || null, // Gerçek model ID - varsayılan değer yok
+        variant_id: selectedVariant?.id || null, // Gerçek variant ID
+        city_id: cities.find(city => city.name === formData.city)?.id || null, // Gerçek city ID
+        district_id: districts.find(district => district.name === formData.district)?.id || null, // Gerçek district ID
+        seller_name: formData.sellerName,
+        seller_phone: formData.sellerPhone.replace(/[^\d]/g, ''), // Remove formatting from phone
+        seller_email: formData.sellerEmail,
+        color: formData.color || "Belirtilmemiş",
+        fuel_type: formData.fuelType,
+        transmission: formData.transmission,
+        vehicle_condition: formData.vehicleCondition,
+        is_exchangeable: formData.exchange === 'Evet',
+        
+        // Kamyon özel alanları
+        motor_power: formData.motorPower,
+        engine_volume: formData.engineVolume,
+        body_type: formData.bodyType,
+        carrying_capacity: formData.carryingCapacity,
+        cabin_type: formData.cabinType,
+        tire_condition: formData.tireCondition,
+        drive_type: formData.driveType,
+        plate_origin: formData.plateOrigin,
+        vehicle_plate: formData.vehiclePlate,
+        
+        // Özellikler
+        features: formData.features,
+        damage_record: formData.damageRecord,
+        paint_change: formData.paintChange,
+        tramer_record: formData.tramerRecord,
+        
+        images: imageUrls // Send actual image data URLs
+      };
+
+      console.log('Gönderilecek veri:', listingData);
+      console.log('Selection context:', {
+        selectedBrand,
+        selectedModel, 
+        selectedVariant
+      });
+      console.log('Selected brand vehicle_types:', selectedBrand?.vehicle_types);
+      console.log('Category from brand:', selectedBrand?.vehicle_types?.categories);
+      console.log('İstek URL:', `${api.defaults.baseURL}/listings`);
+      console.log('İstek başlıyor...');
+
+      const response = await api.post('/listings', listingData);
+      console.log('API Response:', response.data);
+      console.log('İstek başarılı!');
+      
+      if (response.data.success) {
+        alert('Kamyon ilanınız başarıyla oluşturuldu! Admin onayından sonra yayınlanacaktır.');
+        navigate('/');
+      }
+
+    } catch (error: any) {
       console.error('İlan oluşturma hatası:', error);
-      setError('İlan oluşturulurken bir hata oluştu');
+      console.error('Error response:', error.response?.data);
+      console.error('Error status:', error.response?.status);
+      console.error('Error headers:', error.response?.headers);
+      console.error('Request config:', error.config);
+      
+      if (error.code === 'ECONNREFUSED') {
+        setError('Sunucuya bağlanılamıyor. Lütfen backend\'in çalıştığından emin olun.');
+      } else if (error.response?.status === 404) {
+        setError('API endpoint bulunamadı. URL\'yi kontrol edin.');
+      } else if (error.response?.status === 401) {
+        setError('Yetkilendirme hatası. Lütfen giriş yapın.');
+      } else {
+        const errorMessage = error.response?.data?.message || 'İlan oluşturulurken bir hata oluştu';
+        setError(errorMessage);
+      }
     } finally {
       setLoading(false);
     }
@@ -745,24 +845,31 @@ const KamyonAdForm = () => {
                 </Select>
               </FormControl>
             </Box>
+            
+            <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+              <TextField
+                sx={{ flex: 1, minWidth: 200 }}
+                label="Araç Plakası"
+                value={formData.vehiclePlate}
+                onChange={(e) => handleInputChange('vehiclePlate', e.target.value)}
+                placeholder="Örn: 34 ABC 123"
+              />
 
-            <TextField
-              fullWidth
-              label="Araç Plakası"
-              value={formData.vehiclePlate}
-              onChange={(e) => handleInputChange('vehiclePlate', e.target.value)}
-              placeholder="Örn: 34 ABC 123"
-            />
+              <FormControl sx={{ flex: 1, minWidth: 200 }}>
+                <InputLabel>Motor Hacmi</InputLabel>
+                <Select
+                  value={formData.engineVolume}
+                  onChange={(e) => handleInputChange('engineVolume', e.target.value)}
+                >
+                  {EngineVoluma.map((option) => (
+                    <MenuItem key={option} value={option}>{option}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Box>
 
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={formData.exchange === 'Evet'}
-                  onChange={(e) => handleInputChange('exchange', e.target.checked ? 'Evet' : 'Hayır')}
-                />
-              }
-              label="Takaslı"
-            />
+     
+
           </Stack>
         );
 
@@ -911,16 +1018,7 @@ const KamyonAdForm = () => {
                 </FormControl>
               </Box>
 
-              <FormControlLabel
-                sx={{ mt: 2 }}
-                control={
-                  <Checkbox
-                    checked={formData.warranty}
-                    onChange={(e) => handleInputChange('warranty', e.target.checked)}
-                  />
-                }
-                label="Garanti Kapsamında"
-              />
+              
             </Box>
           </Stack>
         );

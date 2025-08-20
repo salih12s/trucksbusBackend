@@ -5,16 +5,25 @@ import { logger } from '../utils/logger';
 export const createListing = async (req: Request, res: Response): Promise<void> => {
   try {
     console.log('🔄 Creating listing with data:', req.body);
+    console.log('🔍 Brand related data:', {
+      brand_id: req.body.brand_id,
+      selectedBrand: req.body.selectedBrand,
+      brandInfo: req.body.brand_id ? 'has brand_id' : 'no brand_id'
+    });
     
     const {
       title,
       description,
       price,
       year,
-      mileage,
+      km,
       fuel_type,
-      transmission_type,
-      engine_size,
+      transmission,
+      engine_volume,
+      engine_power,
+      color,
+      vehicle_condition,
+      is_exchangeable,
       category_id,
       vehicle_type_id,
       brand_id,
@@ -22,21 +31,59 @@ export const createListing = async (req: Request, res: Response): Promise<void> 
       variant_id,
       city_id,
       district_id,
+      city,
+      district,
       images,
-      contact_phone,
-      contact_email,
       seller_name,
       seller_phone,
-      seller_email
+      seller_email,
+      properties, // Dorse özel bilgileri için
+      
+      // Kamyon özel alanları
+      motor_power,
+      body_type,
+      carrying_capacity,
+      cabin_type,
+      tire_condition,
+      drive_type,
+      plate_origin,
+      vehicle_plate,
+      features,
+      damage_record,
+      paint_change,
+      tramer_record,
+      
+      // Eski alanlar (backward compatibility)
+      mileage,
+      transmission_type,
+      engine_size,
+      contact_phone,
+      contact_email
     } = req.body;
 
     // Gerekli alanları kontrol et
-    if (!title || !description || !price || !category_id || !vehicle_type_id || !brand_id) {
+    if (!title || !price || !category_id || !vehicle_type_id) {
       res.status(400).json({ 
         success: false, 
-        message: 'Gerekli alanlar eksik: title, description, price, category_id, vehicle_type_id, brand_id' 
+        message: 'Gerekli alanlar eksik: title, price, category_id, vehicle_type_id' 
       });
       return;
+    }
+
+    // Brand validation - eğer brand_id gönderildiyse geçerli olmalı
+    if (brand_id && typeof brand_id === 'string') {
+      const brandExists = await prisma.brands.findUnique({
+        where: { id: brand_id }
+      });
+      
+      if (!brandExists) {
+        console.log(`❌ Invalid brand_id: ${brand_id}`);
+        res.status(400).json({ 
+          success: false, 
+          message: 'Geçersiz marka ID\'si. Lütfen geçerli bir marka seçin.' 
+        });
+        return;
+      }
     }
 
     // Authenticated user ID'sini al (middleware'den gelir)
@@ -63,6 +110,24 @@ export const createListing = async (req: Request, res: Response): Promise<void> 
       return;
     }
 
+    // City ve district string olarak gelmişse ID'lerine çevir
+    let resolved_city_id = city_id;
+    let resolved_district_id = district_id;
+    
+    if (city && typeof city === 'string') {
+      const cityRecord = await prisma.cities.findFirst({
+        where: { name: { contains: city, mode: 'insensitive' } }
+      });
+      if (cityRecord) resolved_city_id = cityRecord.id;
+    }
+    
+    if (district && typeof district === 'string') {
+      const districtRecord = await prisma.districts.findFirst({
+        where: { name: { contains: district, mode: 'insensitive' } }
+      });
+      if (districtRecord) resolved_district_id = districtRecord.id;
+    }
+
     // Ilan oluştur
     const listing = await prisma.listings.create({
       data: {
@@ -70,24 +135,45 @@ export const createListing = async (req: Request, res: Response): Promise<void> 
         title,
         description,
         price: Number(price),
-        year: year ? Number(year) : 2000, // Default year if not provided
-        km: mileage ? Number(mileage) : null,
+        year: year ? Number(year) : 2000,
+        km: km ? Number(km) : (mileage ? Number(mileage) : null),
         fuel_type,
-        transmission: transmission_type,
-        engine_volume: engine_size,
+        transmission: transmission || transmission_type,
+        engine_volume: engine_volume || engine_size,
+        engine_power: engine_power || motor_power,
+        color,
+        vehicle_condition,
+        is_exchangeable: is_exchangeable || false,
+        license_plate: vehicle_plate,
+        
+        // Kamyon özel alanları
+        body_type,
+        carrying_capacity,
+        cabin_type,
+        tire_condition,
+        drive_type,
+        plate_origin,
+        features: features || {},
+        damage_record,
+        paint_change,
+        tramer_record,
+        
         seller_name: seller_name || `${user.first_name} ${user.last_name}`,
         seller_phone: seller_phone || contact_phone || user.phone || '',
         seller_email: seller_email || contact_email || user.email || '',
-        // Scalar field'leri kullan (relation field'ler değil)
+        
+        // Relations
         category_id: category_id,
         vehicle_type_id: vehicle_type_id,
         user_id: userId,
         brand_id: brand_id || null,
         model_id: model_id || null,
         variant_id: variant_id || null,
-        city_id: city_id || null,
-        district_id: district_id || null,
+        city_id: resolved_city_id || null,
+        district_id: resolved_district_id || null,
         images: images || [],
+        
+        // Status
         status: "PENDING", // İlan pending durumunda başlar
         is_active: true,
         is_approved: false, // Admin onayı bekliyor
@@ -113,6 +199,29 @@ export const createListing = async (req: Request, res: Response): Promise<void> 
         }
       }
     });
+
+    // Properties varsa kaydet (Dorse özel bilgileri için)
+    if (properties && typeof properties === 'object') {
+      const propertyPromises = Object.entries(properties).map(([key, value]) => {
+        if (value !== undefined && value !== null && value !== '') {
+          return prisma.listing_properties.create({
+            data: {
+              id: `prop_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+              listing_id: listing.id,
+              key: key,
+              value: String(value),
+              type: 'STRING' // Default type
+            }
+          });
+        }
+        return null;
+      }).filter(Boolean);
+
+      if (propertyPromises.length > 0) {
+        await Promise.all(propertyPromises);
+        console.log('✅ Properties saved:', Object.keys(properties));
+      }
+    }
 
     console.log('✅ Created listing:', listing);
     logger.info(`New listing created: ${listing.id} by user: ${userId}`);
@@ -489,21 +598,60 @@ export const getListingById = async (req: Request, res: Response): Promise<void>
         created_at: listing.users?.created_at || new Date(),
         updated_at: listing.users?.updated_at || new Date()
       },
-      images: listing.listing_images?.map((img: any) => img.url) || listing.images || [],
+      images: (() => {
+        // First try listing_images relation
+        if (listing.listing_images && listing.listing_images.length > 0) {
+          return listing.listing_images.map((img: any) => img.url);
+        }
+        // Then try JSON images field
+        if (listing.images) {
+          try {
+            const parsedImages = typeof listing.images === 'string' 
+              ? JSON.parse(listing.images) 
+              : listing.images;
+            return Array.isArray(parsedImages) ? parsedImages : [];
+          } catch (e) {
+            console.warn('Failed to parse images JSON:', listing.images);
+            return [];
+          }
+        }
+        return [];
+      })(),
       location: `${listing.districts?.name || ''}, ${listing.cities?.name || ''}`.replace(/^, |, $/, '') || 'Konum belirtilmemiş',
       status: listing.status,
       isApproved: listing.is_approved || false,
       views: listing.view_count || 0,
       createdAt: listing.created_at,
       updatedAt: listing.updated_at,
-      // Additional vehicle details
+      
+      // Comprehensive vehicle details from database
       year: listing.year,
+      km: listing.km,
+      fuel_type: listing.fuel_type,
+      transmission: listing.transmission,
+      engine_power: listing.engine_power,
+      engine_volume: listing.engine_volume,
+      color: listing.color,
+      vehicle_condition: listing.vehicle_condition,
+      license_plate: listing.license_plate,
+      is_exchangeable: listing.is_exchangeable,
+      
+      // Relations with full details
+      brands: listing.brands,
+      models: listing.models,
+      variants: listing.variants,
+      categories: listing.categories,
+      vehicle_types: listing.vehicle_types,
+      cities: listing.cities,
+      districts: listing.districts,
+      
+      // Legacy fields for backward compatibility
       mileage: listing.km,
       fuelType: listing.fuel_type,
-      transmission: listing.transmission,
       brand: listing.brands?.name,
       model: listing.models?.name,
-      variant: listing.variants?.name
+      variant: listing.variants?.name,
+      view_count: listing.view_count
     };
 
     res.json(response);

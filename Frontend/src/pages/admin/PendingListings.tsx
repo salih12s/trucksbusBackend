@@ -90,17 +90,16 @@ const PendingListings: React.FC = () => {
   const loadPendingListings = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/admin/listings', {
+      const response = await api.get('/admin/listings/pending', {
         params: {
           page: currentPage,
-          limit: itemsPerPage,
-          status: 'pending'
+          limit: itemsPerPage
         }
       });
       
       if (response.data.success) {
-        setListings(response.data.data);
-        setTotalPages(response.data.pagination.pages);
+        setListings(response.data.data.listings);
+        setTotalPages(response.data.data.pagination.total_pages);
       }
     } catch (error) {
       console.error('Onay bekleyen ilanlar yüklenemedi:', error);

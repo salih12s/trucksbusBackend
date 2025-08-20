@@ -41,33 +41,10 @@ import {
 } from '@mui/icons-material';
 import UserHeader from '../../../../components/layout/UserHeader';
 import { locationService, City, District } from '../../../../services/locationService';
+import { api } from '../../../../services/api';
+import { formatPhoneNumber } from '../../../../utils/phoneUtils';
 
 // Havuz Hardox Tipi Damperli Dorse Üreticileri
-const HAVUZ_HARDOX_TIPI_MANUFACTURERS = [
-  'Adakon Treyler', 'ADB Treyler', 'Adem Usta Proohauss', 'AGS Treyler', 'Akar Cihat',
-  'Akmanlar Damper', 'Akyel Treyler', 'Alamen', 'Alim Dorse', 'Alpaslan Dorse', 'Alp-Kar',
-  'Alpsan', 'Altınel', 'Anıl Damper', 'ART Trailer', 'Askan Treyler', 'ASY Treyler',
-  'Aydeniz Dorse', 'Aygrup', 'Beyfem Dorse', 'Bio Treyler', 'Can Damper Karoser',
-  'Cangüller Treyler', 'Carrier Trailer', 'Caselli', 'CastroMax Trailers', 'Cey Treyler',
-  'Coşkunlar', 'Çarsan', 'Çavdaroğlu', 'Çavuşoğlu', 'Çobanoğlu', 'Doruk Treyler',
-  'Dosa Treyler', 'ELM Treysan Trailer', 'EMK Treyler', 'Esatech Trailer', 'Fesan',
-  'Fors Treyler', 'FSM Treyler', 'Global City', 'Global City Treyler', 'Gökhanlar',
-  'Gülüstan', 'Güneysan Treyler Dorse', 'Hidrosan', 'Iskar Treyler', 'İkikardeş',
-  'İkon Treyler', 'İKT Treyler', 'İNC Seçkinler', 'Kaim Kardeşler', 'Kalkan Treyler',
-  'Karalar Treyler', 'Kartallar Damper', 'KKT Trailer', 'Konza Trailer', 'Kögel Trailer',
-  'Kössbohrer', 'Lider Trailer', 'M. Seymak Treyler', 'Marrka Treyler', 'MAS Trailer',
-  'Mas Treyler', 'Maxtır Trailer', 'MEC Dorse', 'Mega Treyler', 'Mehsan Treyler',
-  'Meshaus Treyler', 'Mobil Treyler', 'MRC Treyler', 'Özsan Treyler', 'Öztfn Treyler',
-  'Özünlü', 'Paşalar Mehmet Treyler', 'Paşalar Treyler', 'Paşaoğlu Dorse Treyler',
-  'Ram-Kar', 'Ram Treyler', 'Reis Treyler', 'SAF Treyler', 'Sağlamiş', 'Sancak Treyler',
-  'Self Frigo', 'Semiturk', 'Sena Treyler', 'Serin Treyler', 'Serra Treyler', 'Set Treyler',
-  'Seyit Usta', 'Simboxx', 'Sim Treyler', 'Sistem Damper Treyler', 'Star Yağcılar',
-  'Takdir Dorse', 'Tanı Tır', 'Tecno Tır Treyler', 'Tekin Treyler', 'Tırsan', 'Traco',
-  'Transfer Treyler', 'Uğur ES', 'Warkas', 'Wielton', 'Yalımsan Treyler', 'Yasin Ateş Damper',
-  'Yelsan Treyler', 'Yıldızlar Damper', 'Zafer', 'Zafer Treyler', 'Zak-San Trailer',
-  'Özel Üretim', 'Diğer'
-];
-
 // Devrilme Yönleri
 const DEVRILME_YONLERI = [
   'Arkaya',
@@ -86,7 +63,6 @@ interface HavuzHardoxTipiDorseFormData {
   genislik: number; // metre
   uzunluk: number; // metre
   lastikDurumu: number; // yüzde
-  ureticiFirma: string;
   devrilmeYonu: string;
   
   // Konum
@@ -121,6 +97,8 @@ const HavuzHardoxTipiDorseAdForm: React.FC = () => {
   const [activeStep, setActiveStep] = useState(0);
   const [cities, setCities] = useState<City[]>([]);
   const [districts, setDistricts] = useState<District[]>([]);
+  const [loadingCities, setLoadingCities] = useState(false);
+  const [loadingDistricts, setLoadingDistricts] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [photos, setPhotos] = useState<File[]>([]);
@@ -133,7 +111,6 @@ const HavuzHardoxTipiDorseAdForm: React.FC = () => {
     genislik: 0,
     uzunluk: 0,
     lastikDurumu: 100,
-    ureticiFirma: '',
     devrilmeYonu: '',
     city: '',
     district: '',
@@ -150,30 +127,20 @@ const HavuzHardoxTipiDorseAdForm: React.FC = () => {
   // Şehirler yükle
   useEffect(() => {
     const loadCities = async () => {
+      setLoadingCities(true);
       try {
         const cityData = await locationService.getCities();
+        console.log('Cities loaded:', cityData.length);
         setCities(cityData);
       } catch (err) {
         console.error('Şehirler yüklenirken hata:', err);
+        setError('Şehirler yüklenirken hata oluştu');
+      } finally {
+        setLoadingCities(false);
       }
     };
     loadCities();
   }, []);
-
-  // İlçeler yükle
-  useEffect(() => {
-    const loadDistricts = async () => {
-      if (formData.city) {
-        try {
-          const districtData = await locationService.getDistrictsByCity(formData.city);
-          setDistricts(districtData);
-        } catch (err) {
-          console.error('İlçeler yüklenirken hata:', err);
-        }
-      }
-    };
-    loadDistricts();
-  }, [formData.city]);
 
   // Kullanıcı bilgilerini yükle
   useEffect(() => {
@@ -214,15 +181,26 @@ const HavuzHardoxTipiDorseAdForm: React.FC = () => {
   };
 
   const handleCityChange = async (cityId: string, cityName: string) => {
+    console.log('City changed:', { cityId, cityName });
     setFormData(prev => ({ ...prev, city: cityName, district: '' }));
+    setLoadingDistricts(true);
     
     try {
       const districtData = await locationService.getDistrictsByCity(cityId);
+      console.log('Districts loaded:', districtData);
       setDistricts(districtData);
     } catch (err) {
       console.error('İlçeler yüklenirken hata:', err);
       setDistricts([]);
+      setError('İlçeler yüklenirken hata oluştu');
+    } finally {
+      setLoadingDistricts(false);
     }
+  };
+
+  const handlePhoneChange = (value: string) => {
+    const formattedPhone = formatPhoneNumber(value);
+    handleInputChange('phone', formattedPhone);
   };
 
   const handleInputChange = (field: string, value: any) => {
@@ -267,10 +245,6 @@ const HavuzHardoxTipiDorseAdForm: React.FC = () => {
           setError('Uzunluk bilgisi gerekli');
           return false;
         }
-        if (!formData.ureticiFirma) {
-          setError('Üretici firma seçimi gerekli');
-          return false;
-        }
         if (!formData.devrilmeYonu) {
           setError('Devrilme yönü seçimi gerekli');
           return false;
@@ -310,11 +284,56 @@ const HavuzHardoxTipiDorseAdForm: React.FC = () => {
     
     setLoading(true);
     try {
-      // API çağrısı burada olacak
-      console.log('Form Data:', formData);
-      // navigate('/my-ads');
-    } catch (err) {
-      setError('İlan oluşturulurken hata oluştu');
+      // Fotoğrafları base64'e çevir
+      const imageDataUrls = await Promise.all(
+        photos.map((file) => {
+          return new Promise<string>((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (e) => resolve(e.target?.result as string);
+            reader.readAsDataURL(file);
+          });
+        })
+      );
+
+      // API için veri hazırlığı
+      const listingData = {
+        title: formData.title,
+        description: formData.description,
+        price: parseFloat(formData.price),
+        year: formData.year,
+        category_id: 'vehicle-category-001', // Dorse kategorisi
+        vehicle_type_id: 'cme633w8v0001981ksnpl6dj5', // Dorse vehicle_type_id
+        seller_name: formData.sellerName,
+        seller_phone: formData.phone,
+        seller_email: formData.email,
+        city: formData.city,
+        district: formData.district,
+        is_exchangeable: formData.exchange,
+        images: imageDataUrls,
+        // Dorse'ye özel bilgileri properties olarak gönder
+        properties: {
+          genislik: formData.genislik.toString(),
+          uzunluk: formData.uzunluk.toString(),
+          lastikDurumu: formData.lastikDurumu.toString(),
+          devrilmeYonu: formData.devrilmeYonu,
+          warranty: formData.warranty ? 'Evet' : 'Hayır',
+          negotiable: formData.negotiable ? 'Evet' : 'Hayır'
+        }
+      };
+
+      console.log('🚀 Havuz Hardox Tipi Dorse ilanı oluşturuluyor...', listingData);
+
+      // API çağrısı
+      const response = await api.post('/listings', listingData);
+      
+      if (response.data) {
+        console.log('✅ Havuz Hardox Tipi Dorse ilanı başarıyla oluşturuldu:', response.data);
+        alert('İlanınız başarıyla oluşturuldu! Moderatör onayından sonra yayınlanacaktır.');
+        // navigate('/my-ads');
+      }
+    } catch (err: any) {
+      console.error('❌ Havuz Hardox Tipi Dorse ilanı oluşturma hatası:', err);
+      setError(err.response?.data?.message || 'İlan oluşturulurken hata oluştu');
     } finally {
       setLoading(false);
     }
@@ -421,20 +440,6 @@ const HavuzHardoxTipiDorseAdForm: React.FC = () => {
             />
 
             <FormControl fullWidth required>
-              <InputLabel>Üretici Firma</InputLabel>
-              <Select
-                value={formData.ureticiFirma}
-                onChange={(e) => handleInputChange('ureticiFirma', e.target.value)}
-              >
-                {HAVUZ_HARDOX_TIPI_MANUFACTURERS.map((manufacturer) => (
-                  <MenuItem key={manufacturer} value={manufacturer}>
-                    {manufacturer}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-
-            <FormControl fullWidth required>
               <InputLabel>Devrilme Yönü</InputLabel>
               <Select
                 value={formData.devrilmeYonu}
@@ -447,6 +452,37 @@ const HavuzHardoxTipiDorseAdForm: React.FC = () => {
                 ))}
               </Select>
             </FormControl>
+
+
+             <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={formData.negotiable}
+                    onChange={(e) => handleInputChange('negotiable', e.target.checked)}
+                  />
+                }
+                label="Pazarlık Kabul Edilir"
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={formData.exchange}
+                    onChange={(e) => handleInputChange('exchange', e.target.checked)}
+                  />
+                }
+                label="Takas Kabul Edilir"
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={formData.warranty}
+                    onChange={(e) => handleInputChange('warranty', e.target.checked)}
+                  />
+                }
+                label="Garanti var"
+              />
+            </Box>
           </Stack>
         );
 
@@ -553,35 +589,7 @@ const HavuzHardoxTipiDorseAdForm: React.FC = () => {
               required
             />
 
-            <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={formData.negotiable}
-                    onChange={(e) => handleInputChange('negotiable', e.target.checked)}
-                  />
-                }
-                label="Pazarlık Kabul Edilir"
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={formData.exchange}
-                    onChange={(e) => handleInputChange('exchange', e.target.checked)}
-                  />
-                }
-                label="Takas Kabul Edilir"
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={formData.warranty}
-                    onChange={(e) => handleInputChange('warranty', e.target.checked)}
-                  />
-                }
-                label="Garanti var"
-              />
-            </Box>
+           
 
             <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
               📍 Konum Bilgileri
@@ -593,6 +601,7 @@ const HavuzHardoxTipiDorseAdForm: React.FC = () => {
                 options={cities}
                 getOptionLabel={(option) => option.name}
                 value={cities.find(city => city.name === formData.city) || null}
+                loading={loadingCities}
                 onChange={(_, value) => {
                   if (value) {
                     handleCityChange(value.id, value.name);
@@ -620,15 +629,16 @@ const HavuzHardoxTipiDorseAdForm: React.FC = () => {
               options={districts}
               getOptionLabel={(option) => option.name}
               value={districts.find(district => district.name === formData.district) || null}
+              loading={loadingDistricts}
               onChange={(_, value) => {
                 handleInputChange('district', value ? value.name : '');
               }}
-              disabled={!formData.city}
+              disabled={!formData.city || loadingDistricts}
               renderInput={(params) => (
                 <TextField
                   {...params}
                   label="İlçe"
-                  placeholder={formData.city ? "İlçe seçin" : "Önce il seçin"}
+                  placeholder={formData.city ? (loadingDistricts ? "Yükleniyor..." : "İlçe seçin") : "Önce il seçin"}
                   InputProps={{
                     ...params.InputProps,
                     startAdornment: <InputAdornment position="start"><LocationOn /></InputAdornment>,
@@ -658,8 +668,8 @@ const HavuzHardoxTipiDorseAdForm: React.FC = () => {
                 sx={{ flex: 1, minWidth: 200 }}
                 label="Telefon"
                 value={formData.phone}
-                onChange={(e) => handleInputChange('phone', e.target.value)}
-                placeholder="(5XX) XXX XX XX"
+                onChange={(e) => handlePhoneChange(e.target.value)}
+                placeholder="0xxx xxx xx xx"
                 InputProps={{
                   startAdornment: <InputAdornment position="start"><Phone /></InputAdornment>,
                 }}

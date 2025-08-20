@@ -1,6 +1,7 @@
 import express, { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { authMiddleware } from '../middleware/auth';
+import { ReportsController } from '../controllers/reportsController';
 
 interface AuthRequest extends Request {
   user?: {
@@ -283,5 +284,8 @@ router.put('/change-password', authMiddleware, async (req: AuthRequest, res: Res
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
+// GET /api/me/reports - Get user's reports
+router.get('/reports', authMiddleware, ReportsController.getMyReports);
 
 export default router;

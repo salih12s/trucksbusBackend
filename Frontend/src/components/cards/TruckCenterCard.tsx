@@ -1,6 +1,6 @@
 import { Card, CardContent, Typography, Box, Chip } from '@mui/material';
 import { alpha, useTheme } from '@mui/material/styles';
-import { Person, Phone, CalendarToday, Visibility, Chat, Flag, Bookmark, Check, Close, Delete } from '@mui/icons-material';
+import { Person, Phone, CalendarToday, Visibility, Chat, Flag, Bookmark, Check, Close } from '@mui/icons-material';
 import { SimpleListing } from '../../context/ListingContext';
 import { useAuth } from '../../context/AuthContext';
 import { useNotification } from '../../context/NotificationContext';
@@ -28,7 +28,6 @@ interface TruckCenterCardProps {
   onViewDetails?: (id: string) => void;
   onSendMessage?: (id: string) => void;
   onReport?: (id: string) => void;
-  onDelete?: (id: string) => void;
   isAdminView?: boolean;
   onApprove?: (id: string) => void;
   onReject?: (id: string) => void;
@@ -135,7 +134,6 @@ const TruckCenterCard: React.FC<TruckCenterCardProps> = ({
   onViewDetails,
   onSendMessage,
   onReport,
-  onDelete,
   isAdminView = false,
   onApprove,
   onReject,
@@ -188,7 +186,7 @@ const TruckCenterCard: React.FC<TruckCenterCardProps> = ({
         // Premium kart stili - yeni gölge sistemi
         width: '100%',
         maxWidth: 420,
-        height: 240, // ✅ 260'tan 240'a düşürdük
+        height: 280, // ✅ 260'tan 280'e yükselttik
         display: 'flex',
         borderRadius: 0, // ✅ border radius kaldırıldı (düz kare)
         border: `1px solid #EEF2F7`, // ✅ yeni bölücü rengi
@@ -237,37 +235,6 @@ const TruckCenterCard: React.FC<TruckCenterCardProps> = ({
               '&:hover': { transform: 'scale(1.05)' } // ✅ daha yumuşak zoom
             }}
           />
-          
-          {/* Silme Butonu - Sadece isOwn true ise göster */}
-          {isOwn && onDelete && (
-            <Box
-              onClick={(e) => {
-                e.stopPropagation();
-                onDelete(String(listing.id));
-              }}
-              sx={{
-                position: 'absolute',
-                top: 8,
-                right: 8,
-                width: 32,
-                height: 32,
-                borderRadius: '50%',
-                bgcolor: 'rgba(255, 255, 255, 0.9)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-                '&:hover': {
-                  bgcolor: 'rgba(244, 67, 54, 0.9)',
-                  color: 'white',
-                  transform: 'scale(1.1)'
-                }
-              }}
-            >
-              <Delete sx={{ fontSize: 18 }} />
-            </Box>
-          )}
         </Box>
 
         <Box sx={{ 
@@ -325,9 +292,9 @@ const TruckCenterCard: React.FC<TruckCenterCardProps> = ({
       }}>
         <Box>
           <Typography 
-            component="h4" 
+            component="h3" 
             sx={{ 
-              fontSize: 13, // ✅ 15'ten 14'e düşürdük
+              fontSize: 14, // ✅ 15'ten 14'e düşürdük
               fontWeight: 700, 
               color: theme.palette.text.primary, 
               mb: 0.75, // ✅ margin'i 1'den 0.75'e düşürdük
@@ -343,10 +310,10 @@ const TruckCenterCard: React.FC<TruckCenterCardProps> = ({
           
           {/* Fiyat stili - daha yumuşak renk */}
           <Typography sx={{ 
-            fontSize: 18, 
+            fontSize: 22, 
             fontWeight: 800, 
             color: theme.palette.text.primary, // ✅ kırmızı yerine koyu gri
-            mb: 0.3, // ✅ 12px (fiyat → meta)
+            mb: 1.5, // ✅ 12px (fiyat → meta)
           }}>
             {formatPrice(listing.price)}
           </Typography>

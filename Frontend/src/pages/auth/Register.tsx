@@ -32,7 +32,7 @@ const Register: React.FC = () => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
 
-  const logoSrc = '/xad.png';
+  const logoSrc = '/TruckBus.png';
 
   return (
     <div className="min-h-screen flex bg-slate-900">

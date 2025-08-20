@@ -16,6 +16,10 @@ import {
   Button,
   TextField,
   MenuItem,
+  List,
+  ListItem,
+  ListItemText,
+  Divider,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -260,206 +264,129 @@ const MyReportsPage: React.FC = () => {
       <Dialog 
         open={detailDialog.open} 
         onClose={() => setDetailDialog({ open: false })} 
-        maxWidth="lg" 
+        maxWidth="md" 
         fullWidth
-        PaperProps={{
-          sx: {
-            borderRadius: 3,
-            boxShadow: '0 20px 40px rgba(0,0,0,0.1)'
-          }
-        }}
       >
-        <DialogTitle sx={{ 
-          pb: 1, 
-          backgroundColor: 'primary.main', 
-          color: 'white',
-          borderRadius: '12px 12px 0 0'
-        }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Typography variant="h5" component="div">
-              Şikayet Detayı
-            </Typography>
-            {detailDialog.report && (
-              <StatusChip status={detailDialog.report.status} />
-            )}
-          </Box>
-        </DialogTitle>
-        <DialogContent dividers sx={{ p: 3, backgroundColor: 'grey.50' }}>
+        <DialogTitle>Şikayet Detayı</DialogTitle>
+        <DialogContent dividers>
           {detailDialog.report && (
-            <Stack spacing={3}>
-              {/* Üst Kısım - İlan ve Şikayet Bilgileri */}
-              <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 3 }}>
-                {/* Sol: İlan Bilgileri */}
-                <Card sx={{ borderRadius: 2, boxShadow: 2 }}>
-                  <CardContent sx={{ p: 3 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-                      <Box sx={{ 
-                        width: 40, 
-                        height: 40, 
-                        borderRadius: '50%', 
-                        backgroundColor: 'primary.main',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        color: 'white'
-                      }}>
-                        📄
-                      </Box>
-                      <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                        İlan Bilgileri
-                      </Typography>
-                    </Box>
-                    <Stack spacing={2}>
-                      <Box>
-                        <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
-                          Başlık
-                        </Typography>
-                        <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                          {detailDialog.report.listing?.title || 'Bilinmiyor'}
-                        </Typography>
-                      </Box>
-                      <Box>
-                        <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
-                          İlan ID
-                        </Typography>
-                        <Typography variant="body2" sx={{ 
-                          fontFamily: 'monospace', 
-                          backgroundColor: 'grey.100', 
-                          px: 1, 
-                          py: 0.5, 
-                          borderRadius: 1,
-                          display: 'inline-block'
-                        }}>
-                          {detailDialog.report.listing_id}
-                        </Typography>
-                      </Box>
-                      {detailDialog.report.listing?.price && (
-                        <Box>
-                          <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
-                            Fiyat
-                          </Typography>
-                          <Typography variant="h6" color="primary.main" sx={{ fontWeight: 600 }}>
-                            ₺{detailDialog.report.listing.price.toLocaleString('tr-TR')}
-                          </Typography>
-                        </Box>
-                      )}
-                    </Stack>
-                  </CardContent>
-                </Card>
-
-                {/* Sağ: Şikayet Bilgileri */}
-                <Card sx={{ borderRadius: 2, boxShadow: 2 }}>
-                  <CardContent sx={{ p: 3 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-                      <Box sx={{ 
-                        width: 40, 
-                        height: 40, 
-                        borderRadius: '50%', 
-                        backgroundColor: 'warning.main',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        color: 'white'
-                      }}>
-                        ⚠️
-                      </Box>
-                      <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                        Şikayet Bilgileri
-                      </Typography>
-                    </Box>
-                    <Stack spacing={2}>
-                      <Box>
-                        <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
-                          Sebep
-                        </Typography>
-                        <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                          {getReasonLabel(detailDialog.report.reason)}
-                        </Typography>
-                      </Box>
-                      <Box>
-                        <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500, mb: 1 }}>
-                          İşlem Geçmişi
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          {new Date(detailDialog.report.created_at).toLocaleDateString('tr-TR', {
-                            year: 'numeric',
-                            month: 'long', 
-                            day: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })} • Oluşturuldu
-                        </Typography>
-                        <Typography variant="caption" color="primary.main" sx={{ fontStyle: 'italic' }}>
-                          Report created
-                        </Typography>
-                      </Box>
-                      <Box>
-                        <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500, mb: 1 }}>
-                          Açıklama
-                        </Typography>
-                        <Paper sx={{ 
-                          p: 2, 
-                          backgroundColor: 'grey.100', 
-                          border: '1px solid',
-                          borderColor: 'grey.200',
-                          borderRadius: 2,
-                          maxHeight: 120,
-                          overflow: 'auto'
-                        }}>
-                          <Typography variant="body2" sx={{ lineHeight: 1.6 }}>
-                            {detailDialog.report.description}
-                          </Typography>
-                        </Paper>
-                      </Box>
-                    </Stack>
+            <Stack direction={{ xs: 'column', md: 'row' }} spacing={3}>
+              {/* Sol: İlan Bilgileri */}
+              <Box sx={{ flex: 1 }}>
+                <Card>
+                  <CardContent>
+                    <Typography variant="h6" gutterBottom>İlan Bilgileri</Typography>
+                    <Typography><strong>Başlık:</strong> {detailDialog.report.listing?.title}</Typography>
+                    <Typography><strong>ID:</strong> {detailDialog.report.listing_id}</Typography>
+                    {detailDialog.report.listing?.price && (
+                      <Typography><strong>Fiyat:</strong> ₺{detailDialog.report.listing.price.toLocaleString()}</Typography>
+                    )}
                   </CardContent>
                 </Card>
               </Box>
 
-              {/* Admin Değerlendirmesi */}
-              {detailDialog.report.resolution_note && (
-                <Card sx={{ borderRadius: 2, boxShadow: 2 }}>
-                  <CardContent sx={{ p: 3 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-                      <Box sx={{ 
-                        width: 40, 
-                        height: 40, 
-                        borderRadius: '50%', 
-                        backgroundColor: detailDialog.report.status === 'ACCEPTED' ? 'success.main' : 'error.main',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        color: 'white'
-                      }}>
-                        {detailDialog.report.status === 'ACCEPTED' ? '✅' : '❌'}
-                      </Box>
-                      <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                        Admin Değerlendirmesi
-                      </Typography>
+              {/* Sağ: Şikayet Bilgileri */}
+              <Box sx={{ flex: 1 }}>
+                <Card>
+                  <CardContent>
+                    <Typography variant="h6" gutterBottom>Şikayet Bilgileri</Typography>
+                    <Typography><strong>Sebep:</strong> {getReasonLabel(detailDialog.report.reason)}</Typography>
+                    <Typography><strong>Durum:</strong></Typography>
+                    <Box sx={{ mb: 1 }}>
+                      <StatusChip status={detailDialog.report.status} />
                     </Box>
-                    <Paper sx={{ 
-                      p: 2, 
-                      backgroundColor: detailDialog.report.status === 'ACCEPTED' ? 'success.light' : 'error.light',
-                      border: '1px solid',
-                      borderColor: detailDialog.report.status === 'ACCEPTED' ? 'success.main' : 'error.main',
-                      borderRadius: 2
+                    <Typography><strong>Açıklama:</strong></Typography>
+                    <Typography variant="body2" sx={{ 
+                      backgroundColor: 'grey.100', 
+                      p: 1, 
+                      borderRadius: 1, 
+                      mt: 0.5,
+                      maxHeight: 100,
+                      overflow: 'auto'
                     }}>
-                      <Typography variant="body2" sx={{ lineHeight: 1.6 }}>
-                        {detailDialog.report.resolution_note}
-                      </Typography>
-                    </Paper>
+                      {detailDialog.report.description}
+                    </Typography>
+                    
+                    {detailDialog.report.resolution_note && (
+                      <>
+                        <Typography sx={{ mt: 2 }}><strong>Admin Değerlendirmesi:</strong></Typography>
+                        <Typography variant="body2" sx={{ 
+                          backgroundColor: detailDialog.report.status === 'ACCEPTED' ? 'success.light' : 'error.light', 
+                          p: 1, 
+                          borderRadius: 1, 
+                          mt: 0.5 
+                        }}>
+                          {detailDialog.report.resolution_note}
+                        </Typography>
+                      </>
+                    )}
                   </CardContent>
                 </Card>
+              </Box>
+
+              {/* Alt: İşlem Geçmişi */}
+              {detailDialog.report.history && detailDialog.report.history.length > 0 && (
+                <Box sx={{ width: '100%' }}>
+                  <Card>
+                    <CardContent>
+                      <Typography variant="h6" gutterBottom>İşlem Geçmişi</Typography>
+                      <List dense>
+                        {detailDialog.report.history.map((historyItem, index) => (
+                          <React.Fragment key={historyItem.id}>
+                            <ListItem>
+                              <ListItemText
+                                disableTypography
+                                primary={
+                                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                    <Typography variant="body2" component="span" color="text.secondary">
+                                      {new Date(historyItem.created_at).toLocaleString('tr-TR')}
+                                    </Typography>
+                                    <Chip 
+                                      size="small"
+                                      label={
+                                        historyItem.action === 'CREATE' ? 'Oluşturuldu' :
+                                        historyItem.action === 'STATUS_CHANGE' ? 'Durum Değişti' :
+                                        historyItem.action === 'LISTING_REMOVED' ? 'İlan Kaldırıldı' :
+                                        historyItem.action === 'NOTE_ADDED' ? 'Not Eklendi' : historyItem.action
+                                      }
+                                      variant="outlined"
+                                    />
+                                  </Box>
+                                }
+                                secondary={
+                                  <Box sx={{ mt: 0.5 }}>
+                                    {historyItem.action === 'STATUS_CHANGE' && (
+                                      <Typography variant="body2" component="span">
+                                        {historyItem.from_status} → {historyItem.to_status}
+                                      </Typography>
+                                    )}
+                                    {historyItem.note && (
+                                      <Typography variant="body2" component="span" sx={{ fontStyle: 'italic', ml: 1 }}>
+                                        {historyItem.note}
+                                      </Typography>
+                                    )}
+                                    {historyItem.actor && (
+                                      <Typography variant="caption" component="span" color="text.secondary" sx={{ ml: 1 }}>
+                                        {`${historyItem.actor.first_name} ${historyItem.actor.last_name}`}
+                                      </Typography>
+                                    )}
+                                  </Box>
+                                }
+                              />
+                            </ListItem>
+                            {index < (detailDialog.report?.history?.length ?? 0) - 1 && <Divider />}
+                          </React.Fragment>
+                        ))}
+                      </List>
+                    </CardContent>
+                  </Card>
+                </Box>
               )}
             </Stack>
           )}
         </DialogContent>
-        <DialogActions sx={{ p: 3, backgroundColor: 'white' }}>
-          <Button 
-            onClick={() => setDetailDialog({ open: false })}
-            variant="contained"
-            sx={{ borderRadius: 2, px: 4 }}
-          >
+        <DialogActions>
+          <Button onClick={() => setDetailDialog({ open: false })}>
             Kapat
           </Button>
         </DialogActions>

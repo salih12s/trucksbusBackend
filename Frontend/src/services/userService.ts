@@ -1,7 +1,7 @@
 import api from './api';
 
 export interface UserProfile {
-  id: number;
+  id: string; // Changed from number to string to match backend
   first_name: string;
   last_name: string;
   email: string;

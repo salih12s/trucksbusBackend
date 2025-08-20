@@ -22,14 +22,14 @@ router.use(authenticateToken);
 router.use(sanitizeInput);
 
 // POST /api/reports - Şikayet oluştur (Rate limited + Validated)
-router.post('/', 
+router.post('/reports', 
   reportRateLimit, 
   validateCreateReport, 
   handleValidationErrors, 
   ReportsController.createReport
 );
 
-// GET /api/reports/me - Kullanıcının şikayetleri (Rate limited)
-router.get('/me', reportViewRateLimit, ReportsController.getMyReports);
+// GET /api/me/reports - Kullanıcının şikayetleri (Rate limited)
+router.get('/me/reports', reportViewRateLimit, ReportsController.getMyReports);
 
 export default router;

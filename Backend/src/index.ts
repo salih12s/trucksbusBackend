@@ -21,6 +21,7 @@ import userRoutes from './routes/userRoutes';
 import reportRoutes from './routes/reportRoutes';
 import notificationRoutes from './routes/notificationRoutes';
 import favoritesRoutes from './routes/favorites';
+import meRoutes from './routes/meRoutes';
 
 // Import utils
 import { logger } from './utils/logger';
@@ -88,7 +89,7 @@ app.use('/api/admin', adminRoutes);
 
 // Yeni Mesajlaşma Sistemi Routes
 app.use('/api/conversations', conversationsRoutes);
-app.use('/api/me', userRoutes);
+app.use('/api/me', meRoutes);
 
 // Favorites Routes - BEFORE reports to avoid conflict
 app.use('/api/favorites', favoritesRoutes);

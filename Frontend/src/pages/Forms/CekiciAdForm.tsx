@@ -44,6 +44,7 @@ import {
 import { useNavigate, useLocation } from 'react-router-dom';
 import { locationService, City, District } from '../../services/locationService';
 import UserHeader from '../../components/layout/UserHeader';
+import api from '../../services/api';
 
 // Renk seçenekleri
 const colorOptions = [
@@ -76,7 +77,7 @@ const enginePowerOptions = [
 
 // Motor hacmi seçenekleri (çekiciler için)
 const engineCapacityOptions = [
-  '1300 cm3\' e kadar',
+  "1300 cm3' e kadar",
   '1301 - 1600 cm3',
   '1601 - 1800 cm3',
   '1801 - 2000 cm3',
@@ -98,27 +99,27 @@ const cabinTypeOptions = [
 
 const steps = [
   'Araç Bilgileri',
-  'Teknik Özellikler', 
+  'Teknik Özellikler',
   'Özellikler',
   'Fotoğraflar',
   'İletişim & Fiyat'
 ];
 
-const CekiciAdForm = () => {
+const CekiciAdForm: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  
+
   const [activeStep, setActiveStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  
+
   // Şehir ve ilçe state'leri
   const [cities, setCities] = useState<City[]>([]);
   const [districts, setDistricts] = useState<District[]>([]);
   const [loadingCities, setLoadingCities] = useState(false);
   const [loadingDistricts, setLoadingDistricts] = useState(false);
-  
+
   // Fotoğraf yükleme
   const [uploadedImages, setUploadedImages] = useState<File[]>([]);
 
@@ -135,7 +136,7 @@ const CekiciAdForm = () => {
     color: '',
     fuelType: 'Dizel',
     transmission: 'Manuel',
-    
+
     // Çekici spesifik alanlar
     enginePower: '',
     engineCapacity: '',
@@ -148,47 +149,74 @@ const CekiciAdForm = () => {
     damageRecord: 'Hayır',
     paintChange: 'Hayır',
     exchange: 'Olabilir',
-    
+
     // Konum
     city: '',
     district: '',
-    
-    // Özellikler
+
+    // Özellikler (listeye göre defaultlar)
     features: {
-      abs: false,
-      esp: false,
-      airBag: false,
-      centralLock: false,
-      electricWindow: false,
-      electricMirror: false,
-      powerSteering: false,
-      airCondition: false,
-      radio: false,
-      cd: false,
+      // Güvenlik
+      abs: true,
+      esp: true,
+      asr: false,                 // ASR (çekiş kontrol)
+      ebv: false,                 // EBV (fren gücü dağıtımı)
+      airBag: true,               // Hava Yastığı (sürücü)
+      sideAirbag: false,          // Hava Yastığı (Yan)
+      passengerAirbag: false,     // Hava Yastığı (Yolcu)
+      centralLock: true,
+      alarm: true,
+      immobilizer: true,
+      laneKeepAssist: false,      // Şerit Koruma Desteği
+      cruiseControl: false,       // Hız Sabitleyici
+      hillStartAssist: false,     // Yokuş Kalkış Desteği
+      adr: true,
+      retarder: true,
+      pto: true,
+
+      // Sensör & Aydınlatma
+      headlightSensor: false,     // Far Sensörü
+      headlightWasher: false,     // Far Yıkama Sistemi
+      rainSensor: false,          // Yağmur Sensörü
+      xenonHeadlight: true,
+      fogLight: true,
+
+      // Konfor & İç Mekân
+      airCondition: true,         // Klima
+      electricWindow: true,
+      electricMirror: true,       // Elektrikli Ayna
+      powerSteering: true,        // Hidrolik Direksiyon
+      leatherSeat: false,         // Deri Döşeme
+      heatedSeats: false,         // Isıtmalı Koltuklar
+      memorySeats: false,         // Hafızalı Koltuklar
+      sunroof: true,
+      alloyWheel: true,
+      towHook: false,             // Çeki Demiri
+      spoiler: false,             // Spoyler
+      windDeflector: false,       // Cam rüzgarlığı
+      table: false,               // Masa
+      flexibleReadingLight: false,// Esnek Okuma Lambası
+
+      // Multimedya & Sürüş Bilgi
+      radio: true,                // Radio - Teyp
+      cd: true,                   // CD Çalar
       bluetooth: false,
-      gps: false,
+      gps: false,                 // TV / Navigasyon
+      tripComputer: false,        // Yol Bilgisayarı
+
+      // Park & Görüntüleme
       camera: false,
       parkingSensor: false,
-      xenonHeadlight: false,
-      fogLight: false,
-      sunroof: false,
-      alloyWheel: false,
-      leatherSeat: false,
-      alarm: false,
-      adr: false,
-      immobilizer: false,
-      retarder: false,
-      pto: false,
     },
-    
+
     warranty: false,
-    
+
     // İletişim ve fiyat
     price: '',
     sellerName: '',
     sellerPhone: '',
     sellerEmail: '',
-    
+
     // Görseller
     images: [] as string[]
   });
@@ -214,8 +242,8 @@ const CekiciAdForm = () => {
   // URL'den gelen araç seçim bilgilerini yükle
   useEffect(() => {
     if (location.state) {
-      const { selection, brand, model, variant } = location.state;
-      
+      const { selection, brand, model, variant } = location.state as any;
+
       // Her iki yapıyı da destekle (selection object veya direkt brand/model/variant)
       const brandName = selection?.brand?.name || brand?.name;
       const modelName = selection?.model?.name || model?.name;
@@ -238,10 +266,10 @@ const CekiciAdForm = () => {
       setFormData(prev => ({
         ...prev,
         sellerName: `${user.first_name} ${user.last_name}`,
-        sellerPhone: user.phone || '',
-        sellerEmail: user.email,
-        city: user.city || '',
-        district: user.district || '',
+        sellerPhone: (user as any).phone || '',
+        sellerEmail: (user as any).email || '',
+        city: (user as any).city || '',
+        district: (user as any).district || '',
       }));
     }
   }, [user]);
@@ -278,26 +306,24 @@ const CekiciAdForm = () => {
         setFormData(prev => ({ ...prev, [field]: '' }));
         return;
       }
-      
+
       let formattedValue = numericValue;
-      if (numericValue.length >= 1) {
-        if (numericValue.length <= 3) {
-          formattedValue = `(${numericValue}`;
-        } else if (numericValue.length <= 6) {
-          formattedValue = `(${numericValue.slice(0, 3)}) ${numericValue.slice(3)}`;
-        } else if (numericValue.length <= 8) {
-          formattedValue = `(${numericValue.slice(0, 3)}) ${numericValue.slice(3, 6)} ${numericValue.slice(6)}`;
-        } else if (numericValue.length <= 10) {
-          formattedValue = `(${numericValue.slice(0, 3)}) ${numericValue.slice(3, 6)} ${numericValue.slice(6, 8)} ${numericValue.slice(8)}`;
-        } else {
-          formattedValue = `(${numericValue.slice(0, 3)}) ${numericValue.slice(3, 6)} ${numericValue.slice(6, 8)} ${numericValue.slice(8, 10)}`;
-        }
+      if (numericValue.length <= 3) {
+        formattedValue = `(${numericValue}`;
+      } else if (numericValue.length <= 6) {
+        formattedValue = `(${numericValue.slice(0, 3)}) ${numericValue.slice(3)}`;
+      } else if (numericValue.length <= 8) {
+        formattedValue = `(${numericValue.slice(0, 3)}) ${numericValue.slice(3, 6)} ${numericValue.slice(6)}`;
+      } else if (numericValue.length <= 10) {
+        formattedValue = `(${numericValue.slice(0, 3)}) ${numericValue.slice(3, 6)} ${numericValue.slice(6, 8)} ${numericValue.slice(8)}`;
+      } else {
+        formattedValue = `(${numericValue.slice(0, 3)}) ${numericValue.slice(3, 6)} ${numericValue.slice(6, 8)} ${numericValue.slice(8, 10)}`;
       }
-      
+
       setFormData(prev => ({ ...prev, [field]: formattedValue }));
       return;
     }
-    
+
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -309,7 +335,7 @@ const CekiciAdForm = () => {
     }
 
     setFormData(prev => ({ ...prev, city: city.name, district: '' }));
-    
+
     try {
       setLoadingDistricts(true);
       const districtsData = await locationService.getDistrictsByCity(city.id);
@@ -353,7 +379,7 @@ const CekiciAdForm = () => {
 
   const validateStep = (step: number): boolean => {
     let message = '';
-    
+
     switch (step) {
       case 0: // Araç Bilgileri
         if (!formData.brand || !formData.model || !formData.variant || !formData.year) {
@@ -366,8 +392,13 @@ const CekiciAdForm = () => {
         }
         break;
       case 4: // İletişim & Fiyat
-        if (!formData.price.trim() || !formData.city.trim() || !formData.district.trim() || 
-            !formData.sellerName.trim() || !formData.sellerPhone.trim()) {
+        if (
+          !formData.price.trim() ||
+          !formData.city.trim() ||
+          !formData.district.trim() ||
+          !formData.sellerName.trim() ||
+          !formData.sellerPhone.trim()
+        ) {
           message = 'Fiyat, konum ve iletişim bilgileri zorunludur.';
         }
         break;
@@ -379,7 +410,7 @@ const CekiciAdForm = () => {
       setError(message);
       return false;
     }
-    
+
     setError('');
     return true;
   };
@@ -396,6 +427,17 @@ const CekiciAdForm = () => {
   };
 
   const handleSubmit = async () => {
+    // Basit validation - gerekli alanları kontrol et
+    if (!formData.title?.trim()) {
+      setError('İlan başlığı gereklidir.');
+      return;
+    }
+    
+    if (!formData.price?.trim()) {
+      setError('Fiyat bilgisi gereklidir.');
+      return;
+    }
+
     if (!validateStep(activeStep)) {
       return;
     }
@@ -404,22 +446,90 @@ const CekiciAdForm = () => {
       setLoading(true);
       setError('');
 
-      // Form verisini hazırla
-      console.log('Çekici ilanı oluşturuluyor:', formData);
-      
-      // Burada API çağrısı yapılacak
-      // await adAPI.createListing(formData);
-      
-      // Simülasyon için bekle
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Başarılı olursa dashboard'a yönlendir
-      alert('İlanınız başarıyla oluşturuldu ve incelenmek üzere gönderildi!');
-      navigate('/dashboard');
-      
-    } catch (error) {
+      // Convert uploaded images to data URLs for backend (KamyonAdForm'daki gibi)
+      const imageUrls = await Promise.all(
+        uploadedImages.map(file => {
+          return new Promise<string>((resolve) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result as string);
+            reader.readAsDataURL(file);
+          });
+        })
+      );
+
+      const listingData = {
+        title: formData.title,
+        description: formData.description,
+        price: Number(formData.price?.replace(/\./g, '')) || 0,
+        year: Number(formData.year),
+        km: Number(formData.km?.replace(/\./g, '')) || 0,
+        category_id: 'vehicle-category-001', // Vasıta category
+        vehicle_type_id: 'cme633w8v0001981ksnpl6dj4', // Çekici vehicle_type_id
+        brand_id: null, // Brand seçimi basit string olarak yapılmış
+        model_id: null, // Model seçimi basit string olarak yapılmış
+        variant_id: null,
+        city_id: null,
+        district_id: null,
+        seller_name: formData.sellerName,
+        seller_phone: formData.sellerPhone?.replace(/[^\d]/g, '') || '',
+        seller_email: formData.sellerEmail,
+        color: formData.color || 'Belirtilmemiş',
+        fuel_type: formData.fuelType,
+        transmission: formData.transmission,
+        vehicle_condition: formData.vehicleCondition,
+        is_exchangeable: formData.exchange === 'Evet',
+        
+        // Motor ve teknik özellikler
+        engine_volume: formData.engineCapacity,
+        engine_power: formData.enginePower,
+        motor_power: formData.enginePower,
+        body_type: formData.cabinType,
+        cabin_type: formData.cabinType,
+        
+        // Çekici'ye özel alanlar
+        front_axle: null,
+        rear_axle: null,
+        max_trailer_weight: null,
+        wheelbase: null,
+        carrying_capacity: null,
+        tire_condition: formData.tireCondition,
+        drive_type: null,
+        plate_origin: formData.plateType,
+        vehicle_plate: formData.plateNumber,
+        
+        // Özellikler JSON olarak
+        features: formData.features,
+        
+        // Diğer alanlar
+        damage_record: formData.damageRecord,
+        paint_change: formData.paintChange,
+        tramer_record: null,
+        warranty: formData.warranty,
+        
+        images: imageUrls // Send actual image data URLs (KamyonAdForm'daki gibi)
+      };
+
+      console.log('Çekici ilanı oluşturuluyor:', listingData);
+      console.log('Form validation - Required fields:', {
+        title: formData.title,
+        price: formData.price,
+        category_id: 'vehicle-category-001',
+        vehicle_type_id: 'cme633w8v0001981ksnpl6dj4'
+      });
+
+      // API çağrısı yap (JSON olarak, KamyonAdForm'daki gibi)
+      const response = await api.post('/listings', listingData);
+
+      if (response.data.success) {
+        alert('İlanınız başarıyla oluşturuldu! Admin onayından sonra yayınlanacaktır.');
+        navigate('/profile');
+      } else {
+        throw new Error(response.data.message || 'İlan oluşturulamadı');
+      }
+
+    } catch (error: any) {
       console.error('İlan oluşturma hatası:', error);
-      setError('İlan oluşturulurken bir hata oluştu');
+      setError(error.response?.data?.message || 'İlan oluşturulurken bir hata oluştu');
     } finally {
       setLoading(false);
     }
@@ -706,7 +816,93 @@ const CekiciAdForm = () => {
           </Stack>
         );
 
-      case 2: // Konfor & Güvenlik
+      case 2: {
+        // Özellikler (Güvenlik & Konfor) — YENİLENEN BÖLÜM
+        const countSelected = (keys: string[]) =>
+          keys.reduce(
+            (acc, k) => acc + (formData.features[k as keyof typeof formData.features] ? 1 : 0),
+            0
+          );
+
+        const GROUPS: {
+          title: string;
+          color?: 'primary' | 'secondary' | 'error' | 'warning' | 'info' | 'success';
+          keys: { key: keyof typeof formData.features; label: string }[];
+        }[] = [
+          {
+            title: '🛡️ Güvenlik',
+            color: 'error',
+            keys: [
+              { key: 'abs', label: 'ABS' },
+              { key: 'esp', label: 'ESP' },
+              { key: 'asr', label: 'ASR (Çekiş Kontrol)' },
+              { key: 'ebv', label: 'EBV (Fren Gücü Dağıtımı)' },
+              { key: 'airBag', label: 'Hava Yastığı (Sürücü)' },
+              { key: 'sideAirbag', label: 'Hava Yastığı (Yan)' },
+              { key: 'passengerAirbag', label: 'Hava Yastığı (Yolcu)' },
+              { key: 'centralLock', label: 'Merkezi Kilit' },
+              { key: 'alarm', label: 'Alarm' },
+              { key: 'immobilizer', label: 'Immobilizer' },
+              { key: 'laneKeepAssist', label: 'Şerit Koruma Desteği' },
+              { key: 'cruiseControl', label: 'Hız Sabitleyici' },
+              { key: 'hillStartAssist', label: 'Yokuş Kalkış Desteği' },
+              { key: 'adr', label: 'ADR' },
+              { key: 'retarder', label: 'Retarder' },
+              { key: 'pto', label: 'PTO (Güç Aktarma)' },
+            ],
+          },
+          {
+            title: '💡 Sensör & Aydınlatma',
+            color: 'warning',
+            keys: [
+              { key: 'headlightSensor', label: 'Far Sensörü' },
+              { key: 'headlightWasher', label: 'Far Yıkama Sistemi' },
+              { key: 'rainSensor', label: 'Yağmur Sensörü' },
+              { key: 'xenonHeadlight', label: 'Xenon Far' },
+              { key: 'fogLight', label: 'Sis Farı' },
+            ],
+          },
+          {
+            title: '🏠 Konfor',
+            color: 'success',
+            keys: [
+              { key: 'airCondition', label: 'Klima' },
+              { key: 'electricWindow', label: 'Elektrikli Cam' },
+              { key: 'electricMirror', label: 'Elektrikli Ayna' },
+              { key: 'powerSteering', label: 'Hidrolik Direksiyon' },
+              { key: 'leatherSeat', label: 'Deri Döşeme' },
+              { key: 'heatedSeats', label: 'Isıtmalı Koltuklar' },
+              { key: 'memorySeats', label: 'Hafızalı Koltuklar' },
+              { key: 'sunroof', label: 'Sunroof' },
+              { key: 'alloyWheel', label: 'Alaşım Jant' },
+              { key: 'towHook', label: 'Çeki Demiri' },
+              { key: 'spoiler', label: 'Spoyler' },
+              { key: 'windDeflector', label: 'Cam Rüzgarlığı' },
+              { key: 'table', label: 'Masa' },
+              { key: 'flexibleReadingLight', label: 'Esnek Okuma Lambası' },
+            ],
+          },
+          {
+            title: '📱 Multimedya & Bilgi',
+            color: 'info',
+            keys: [
+              { key: 'radio', label: 'Radyo / Teyp' },
+              { key: 'cd', label: 'CD Çalar' },
+              { key: 'bluetooth', label: 'Bluetooth' },
+              { key: 'gps', label: 'TV / Navigasyon' },
+              { key: 'tripComputer', label: 'Yol Bilgisayarı' },
+            ],
+          },
+          {
+            title: '🅿️ Park & Görüntüleme',
+            color: 'secondary',
+            keys: [
+              { key: 'camera', label: 'Geri Görüş Kamerası' },
+              { key: 'parkingSensor', label: 'Park Sensörü' },
+            ],
+          },
+        ];
+
         return (
           <Stack spacing={3}>
             <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -714,191 +910,59 @@ const CekiciAdForm = () => {
               Güvenlik & Konfor Özellikleri
             </Typography>
 
-            {/* Güvenlik Özellikleri */}
-            <Card>
-              <CardContent>
-                <Typography variant="h6" gutterBottom sx={{ color: 'error.main', display: 'flex', alignItems: 'center', gap: 1 }}>
-                  🛡️ Güvenlik Özellikleri
-                </Typography>
-                <FormGroup>
-                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                    {[
-                      { key: 'abs', label: 'ABS' },
-                      { key: 'esp', label: 'ESP' },
-                      { key: 'airBag', label: 'Hava Yastığı' },
-                      { key: 'centralLock', label: 'Merkezi Kilit' },
-                      { key: 'alarm', label: 'Alarm' },
-                      { key: 'immobilizer', label: 'Immobilizer' },
-                      { key: 'adr', label: 'ADR' },
-                      { key: 'retarder', label: 'Retarder' },
-                    ].map((feature) => (
-                      <FormControlLabel
-                        key={feature.key}
-                        control={
-                          <Checkbox
-                            checked={formData.features[feature.key as keyof typeof formData.features]}
-                            onChange={(e) => handleFeatureChange(feature.key, e.target.checked)}
-                          />
-                        }
-                        label={feature.label}
-                        sx={{ width: 'calc(50% - 8px)', minWidth: 150 }}
+            {/* Kart Grid: 1 / 2 / 3 sütun */}
+            <Box
+              sx={{
+                display: 'grid',
+                gap: 2,
+                gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr' },
+              }}
+            >
+              {GROUPS.map((group) => (
+                <Card key={group.title} elevation={1}>
+                  <CardContent>
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+                      <Typography
+                        variant="subtitle1"
+                        sx={{ display: 'flex', alignItems: 'center', gap: 1, fontWeight: 700 }}
+                        color={group.color}
+                      >
+                        {group.title}
+                      </Typography>
+                      <Chip
+                        size="small"
+                        label={`${countSelected(group.keys.map(k => k.key as string))}/${group.keys.length}`}
+                        color={group.color}
+                        variant="outlined"
                       />
-                    ))}
-                  </Box>
-                </FormGroup>
-              </CardContent>
-            </Card>
+                    </Box>
 
-            {/* Konfor Özellikleri */}
-            <Card>
-              <CardContent>
-                <Typography variant="h6" gutterBottom sx={{ color: 'success.main', display: 'flex', alignItems: 'center', gap: 1 }}>
-                  🏠 Konfor Özellikleri
-                </Typography>
-                <FormGroup>
-                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                    {[
-                      { key: 'airCondition', label: 'Klima' },
-                      { key: 'powerSteering', label: 'Hidrolik Direksiyon' },
-                      { key: 'leatherSeat', label: 'Deri Koltuk' },
-                      { key: 'sunroof', label: 'Sunroof' },
-                    ].map((feature) => (
-                      <FormControlLabel
-                        key={feature.key}
-                        control={
-                          <Checkbox
-                            checked={formData.features[feature.key as keyof typeof formData.features]}
-                            onChange={(e) => handleFeatureChange(feature.key, e.target.checked)}
-                          />
-                        }
-                        label={feature.label}
-                        sx={{ width: 'calc(50% - 8px)', minWidth: 150 }}
-                      />
-                    ))}
-                  </Box>
-                </FormGroup>
-              </CardContent>
-            </Card>
-
-            {/* Elektronik Özellikleri */}
-            <Card>
-              <CardContent>
-                <Typography variant="h6" gutterBottom sx={{ color: 'info.main', display: 'flex', alignItems: 'center', gap: 1 }}>
-                  📱 Elektronik & Multimedya
-                </Typography>
-                <FormGroup>
-                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                    {[
-                      { key: 'electricWindow', label: 'Elektrikli Cam' },
-                      { key: 'electricMirror', label: 'Elektrikli Ayna' },
-                      { key: 'radio', label: 'Radyo' },
-                      { key: 'cd', label: 'CD Çalar' },
-                      { key: 'bluetooth', label: 'Bluetooth' },
-                      { key: 'gps', label: 'GPS Navigasyon' },
-                    ].map((feature) => (
-                      <FormControlLabel
-                        key={feature.key}
-                        control={
-                          <Checkbox
-                            checked={formData.features[feature.key as keyof typeof formData.features]}
-                            onChange={(e) => handleFeatureChange(feature.key, e.target.checked)}
-                          />
-                        }
-                        label={feature.label}
-                        sx={{ width: 'calc(50% - 8px)', minWidth: 150 }}
-                      />
-                    ))}
-                  </Box>
-                </FormGroup>
-              </CardContent>
-            </Card>
-
-            {/* Görsel & Dış Aksesuar */}
-            <Card>
-              <CardContent>
-                <Typography variant="h6" gutterBottom sx={{ color: 'warning.main', display: 'flex', alignItems: 'center', gap: 1 }}>
-                  💡 Görsel & Dış Aksesuar
-                </Typography>
-                <FormGroup>
-                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                    {[
-                      { key: 'xenonHeadlight', label: 'Xenon Far' },
-                      { key: 'fogLight', label: 'Sis Farı' },
-                      { key: 'alloyWheel', label: 'Alaşım Jant' },
-                    ].map((feature) => (
-                      <FormControlLabel
-                        key={feature.key}
-                        control={
-                          <Checkbox
-                            checked={formData.features[feature.key as keyof typeof formData.features]}
-                            onChange={(e) => handleFeatureChange(feature.key, e.target.checked)}
-                          />
-                        }
-                        label={feature.label}
-                        sx={{ width: 'calc(50% - 8px)', minWidth: 150 }}
-                      />
-                    ))}
-                  </Box>
-                </FormGroup>
-              </CardContent>
-            </Card>
-
-            {/* Park Yardımcısı */}
-            <Card>
-              <CardContent>
-                <Typography variant="h6" gutterBottom sx={{ color: 'secondary.main', display: 'flex', alignItems: 'center', gap: 1 }}>
-                  🚗 Park Yardımcısı
-                </Typography>
-                <FormGroup>
-                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                    {[
-                      { key: 'camera', label: 'Geri Görüş Kamerası' },
-                      { key: 'parkingSensor', label: 'Park Sensörü' },
-                    ].map((feature) => (
-                      <FormControlLabel
-                        key={feature.key}
-                        control={
-                          <Checkbox
-                            checked={formData.features[feature.key as keyof typeof formData.features]}
-                            onChange={(e) => handleFeatureChange(feature.key, e.target.checked)}
-                          />
-                        }
-                        label={feature.label}
-                        sx={{ width: 'calc(50% - 8px)', minWidth: 150 }}
-                      />
-                    ))}
-                  </Box>
-                </FormGroup>
-              </CardContent>
-            </Card>
-
-            {/* Teknik Özellikler */}
-            <Card>
-              <CardContent>
-                <Typography variant="h6" gutterBottom sx={{ color: 'text.primary', display: 'flex', alignItems: 'center', gap: 1 }}>
-                  ⚙️ Teknik Özellikler
-                </Typography>
-                <FormGroup>
-                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                    {[
-                      { key: 'pto', label: 'PTO (Güç Aktarma)' },
-                    ].map((feature) => (
-                      <FormControlLabel
-                        key={feature.key}
-                        control={
-                          <Checkbox
-                            checked={formData.features[feature.key as keyof typeof formData.features]}
-                            onChange={(e) => handleFeatureChange(feature.key, e.target.checked)}
-                          />
-                        }
-                        label={feature.label}
-                        sx={{ width: 'calc(50% - 8px)', minWidth: 150 }}
-                      />
-                    ))}
-                  </Box>
-                </FormGroup>
-              </CardContent>
-            </Card>
+                    <FormGroup
+                      sx={{
+                        display: 'grid',
+                        gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' },
+                        columnGap: 1,
+                      }}
+                    >
+                      {group.keys.map(({ key, label }) => (
+                        <FormControlLabel
+                          key={String(key)}
+                          control={
+                            <Checkbox
+                              size="small"
+                              checked={Boolean(formData.features[key])}
+                              onChange={(e) => handleFeatureChange(String(key), e.target.checked)}
+                            />
+                          }
+                          label={label}
+                          sx={{ m: 0, py: 0.5 }}
+                        />
+                      ))}
+                    </FormGroup>
+                  </CardContent>
+                </Card>
+              ))}
+            </Box>
 
             <FormControlLabel
               control={
@@ -911,6 +975,7 @@ const CekiciAdForm = () => {
             />
           </Stack>
         );
+      }
 
       case 3: // Fotoğraflar
         return (
@@ -1114,7 +1179,7 @@ const CekiciAdForm = () => {
             />
 
             <Alert severity="info">
-              <strong>Önemli:</strong> İlanınız yayına alınmadan önce moderatörlerimiz tarafından incelenecektir. 
+              <strong>Önemli:</strong> İlanınız yayına alınmadan önce moderatörlerimiz tarafından incelenecektir.
               Onay sürecinde e-posta veya telefon ile bilgilendirileceksiniz.
             </Alert>
           </Stack>
@@ -1128,7 +1193,7 @@ const CekiciAdForm = () => {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', backgroundColor: '#f8f9fa' }}>
       <UserHeader />
-      
+
       <Container maxWidth="lg" sx={{ py: 4, mt: 4 }}>
         {/* Header */}
         <Box sx={{ mb: 4, textAlign: 'center' }}>

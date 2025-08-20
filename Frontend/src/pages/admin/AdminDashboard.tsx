@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Grid,
@@ -19,6 +19,21 @@ import {
   ListItemText,
   ListItemAvatar,
   Divider,
+  Skeleton,
+  Tooltip,
+  CircularProgress,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Checkbox,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
 } from '@mui/material';
 import {
   TrendingUp,
@@ -33,99 +48,57 @@ import {
   CheckCircle,
   ErrorOutline,
   Schedule,
+  Refresh,
+  Category,
+  LocationCity,
+  Computer,
+  Memory,
+  Speed,
+  Check,
+  Close,
+  HourglassEmpty,
 } from '@mui/icons-material';
 
-// Mock data - gerçekte API'den gelecek
-const dashboardStats = {
-  totalUsers: 1247,
-  usersChange: 12.5,
-  totalListings: 3892,
-  listingsChange: -2.3,
-  pendingListings: 24,
-  pendingChange: 15.8,
-  totalComplaints: 8,
-  complaintsChange: -25.0,
-  unreadMessages: 12,
-  messagesChange: 33.3,
-  todayViews: 15673,
-  viewsChange: 8.7,
-};
-
-const recentActivities = [
-  {
-    id: 1,
-    type: 'listing',
-    title: 'Yeni Mercedes Actros ilanı',
-    user: 'Ahmet Yılmaz',
-    time: '5 dakika önce',
-    status: 'pending',
-  },
-  {
-    id: 2,
-    type: 'complaint',
-    title: 'Sahte ilan şikayeti',
-    user: 'Ayşe Demir',
-    time: '15 dakika önce',
-    status: 'urgent',
-  },
-  {
-    id: 3,
-    type: 'user',
-    title: 'Yeni kullanıcı kaydı',
-    user: 'Mehmet Kaya',
-    time: '1 saat önce',
-    status: 'completed',
-  },
-  {
-    id: 4,
-    type: 'message',
-    title: 'Özel mesaj',
-    user: 'Fatma Öztürk',
-    time: '2 saat önce',
-    status: 'unread',
-  },
-];
-
-const quickActions = [
-  {
-    title: 'Onay Bekleyen İlanlar',
-    count: 24,
-    action: 'İncele',
-    color: 'warning',
-    path: '/admin/pending-listings',
-  },
-  {
-    title: 'Şikayetler',
-    count: 8,
-    action: 'Görüntüle',
-    color: 'error',
-    path: '/admin/complaints',
-  },
-  {
-    title: 'Okunmamış Mesajlar',
-    count: 12,
-    action: 'Yanıtla',
-    color: 'info',
-    path: '/admin/messages',
-  },
-];
+import { adminService, DashboardData, RecentActivity } from '../../services/adminService';
 
 interface StatCardProps {
   title: string;
   value: number;
-  change: number;
+  change?: number;
   icon: React.ReactNode;
-  color: string;
+  color: 'primary' | 'secondary' | 'success' | 'warning' | 'error' | 'info';
   format?: 'number' | 'currency';
+  loading?: boolean;
 }
 
-const StatCard: React.FC<StatCardProps> = ({ title, value, change, icon, color, format = 'number' }) => {
+const StatCard: React.FC<StatCardProps> = ({ 
+  title, 
+  value, 
+  change, 
+  icon, 
+  color, 
+  format = 'number',
+  loading = false 
+}) => {
   const formatValue = (val: number) => {
     if (format === 'currency') {
-      return new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(val);
+      return adminService.formatCurrency(val);
     }
-    return new Intl.NumberFormat('tr-TR').format(val);
+    return adminService.formatNumber(val);
   };
+
+  if (loading) {
+    return (
+      <Card sx={{ height: '100%' }}>
+        <CardContent>
+          <Skeleton variant="circular" width={56} height={56} />
+          <Skeleton variant="text" height={40} sx={{ mt: 2 }} />
+          <Skeleton variant="text" height={20} />
+          <Skeleton variant="text" height={20} width="60%" />
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card 
@@ -155,9 +128,6 @@ const StatCard: React.FC<StatCardProps> = ({ title, value, change, icon, color, 
           >
             {icon}
           </Avatar>
-          <IconButton size="small" sx={{ color: 'rgba(255, 255, 255, 0.8)' }}>
-            <MoreVert />
-          </IconButton>
         </Box>
         
         <Typography variant="h4" component="div" sx={{ fontWeight: 'bold', mb: 1, color: 'white' }}>
@@ -168,25 +138,27 @@ const StatCard: React.FC<StatCardProps> = ({ title, value, change, icon, color, 
           {title}
         </Typography>
         
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          {change > 0 ? (
-            <TrendingUp sx={{ color: '#4caf50', fontSize: 20 }} />
-          ) : (
-            <TrendingDown sx={{ color: '#f44336', fontSize: 20 }} />
-          )}
-          <Typography
-            variant="body2"
-            sx={{
-              color: change > 0 ? '#4caf50' : '#f44336',
-              fontWeight: 'medium',
-            }}
-          >
-            {change > 0 ? '+' : ''}{change}%
-          </Typography>
-          <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.8)' }}>
-            bu ay
-          </Typography>
-        </Box>
+        {change !== undefined && (
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            {change > 0 ? (
+              <TrendingUp sx={{ color: '#4caf50', fontSize: 20 }} />
+            ) : change < 0 ? (
+              <TrendingDown sx={{ color: '#f44336', fontSize: 20 }} />
+            ) : null}
+            <Typography
+              variant="body2"
+              sx={{
+                color: change > 0 ? '#4caf50' : change < 0 ? '#f44336' : 'rgba(255, 255, 255, 0.8)',
+                fontWeight: 'medium',
+              }}
+            >
+              {change > 0 ? '+' : ''}{change}%
+            </Typography>
+            <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.8)' }}>
+              bu ay
+            </Typography>
+          </Box>
+        )}
       </CardContent>
       
       {/* Decorative background elements */}
@@ -219,12 +191,96 @@ const StatCard: React.FC<StatCardProps> = ({ title, value, change, icon, color, 
 };
 
 const AdminDashboard: React.FC = () => {
+  const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
+  const [recentActivities, setRecentActivities] = useState<RecentActivity[]>([]);
+  const [pendingListings, setPendingListings] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [selectedListings, setSelectedListings] = useState<string[]>([]);
+  const [rejectDialog, setRejectDialog] = useState(false);
+  const [rejectReason, setRejectReason] = useState('');
+  const [actionLoading, setActionLoading] = useState(false);
+
+  const loadDashboardData = async () => {
+    try {
+      const [stats, activities, pending] = await Promise.all([
+        adminService.getDashboardStats(),
+        adminService.getRecentActivities(15),
+        adminService.getPendingListings(1, 20)
+      ]);
+      
+      setDashboardData(stats);
+      setRecentActivities(activities);
+      setPendingListings(pending.listings || []);
+    } catch (error: any) {
+      console.error('Dashboard verileri yüklenirken hata:', error);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
+    loadDashboardData();
+  }, []);
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await loadDashboardData();
+  };
+
+  const handleSelectAll = () => {
+    if (selectedListings.length === pendingListings.length) {
+      setSelectedListings([]);
+    } else {
+      setSelectedListings(pendingListings.map(listing => listing.id));
+    }
+  };
+
+  const handleSelectListing = (listingId: string) => {
+    setSelectedListings(prev => 
+      prev.includes(listingId)
+        ? prev.filter(id => id !== listingId)
+        : [...prev, listingId]
+    );
+  };
+
+  const handleApproveSelected = async () => {
+    if (selectedListings.length === 0) return;
+    
+    setActionLoading(true);
+    try {
+      await adminService.approveListings(selectedListings);
+      await loadDashboardData();
+      setSelectedListings([]);
+    } catch (error: any) {
+      console.error('İlanları onaylarken hata:', error);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleRejectSelected = async () => {
+    if (selectedListings.length === 0 || !rejectReason.trim()) return;
+    
+    setActionLoading(true);
+    try {
+      await adminService.rejectListings(selectedListings, rejectReason);
+      await loadDashboardData();
+      setSelectedListings([]);
+      setRejectDialog(false);
+      setRejectReason('');
+    } catch (error: any) {
+      console.error('İlanları reddederken hata:', error);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   const getActivityIcon = (type: string) => {
     switch (type) {
       case 'listing':
         return <Assignment />;
-      case 'complaint':
-        return <Report />;
       case 'user':
         return <People />;
       case 'message':
@@ -238,224 +294,363 @@ const AdminDashboard: React.FC = () => {
     switch (status) {
       case 'pending':
         return 'warning';
-      case 'urgent':
-        return 'error';
+      case 'active':
+        return 'success';
       case 'completed':
         return 'success';
-      case 'unread':
+      case 'sent':
         return 'info';
       default:
         return 'default';
     }
   };
 
+  if (loading) {
+    return (
+      <Box sx={{ p: 3 }}>
+        <Box sx={{ mb: 4 }}>
+          <Skeleton variant="text" height={48} width={300} />
+          <Skeleton variant="text" height={24} width={600} />
+        </Box>
+        <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 3, mb: 4 }}>
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <StatCard
+              key={i}
+              title=""
+              value={0}
+              icon={<Schedule />}
+              color="primary"
+              loading={true}
+            />
+          ))}
+        </Box>
+      </Box>
+    );
+  }
+
   return (
     <Box>
       {/* Header */}
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 'bold' }}>
-          📊 Dashboard
-        </Typography>
-        <Typography variant="body1" color="text.secondary">
-          TruckBus admin paneline hoş geldiniz. Sisteminizin genel durumunu buradan takip edebilirsiniz.
-        </Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+        <Box>
+          <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 'bold' }}>
+            📊 Admin Dashboard
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
+            TruckBus yönetim paneli - Sistem durumu ve son aktiviteler
+          </Typography>
+        </Box>
+        <Button
+          variant="outlined"
+          startIcon={refreshing ? <CircularProgress size={20} /> : <Refresh />}
+          onClick={handleRefresh}
+          disabled={refreshing}
+        >
+          {refreshing ? 'Yenileniyor...' : 'Yenile'}
+        </Button>
       </Box>
 
-      {/* Alerts */}
-      <Stack spacing={2} sx={{ mb: 4 }}>
-        <Alert severity="warning" action={
-          <Button color="inherit" size="small">
-            İNCELE
-          </Button>
-        }>
-          <strong>24 ilan</strong> onay bekliyor. Lütfen inceleyiniz.
-        </Alert>
-        <Alert severity="error" action={
-          <Button color="inherit" size="small">
-            GÖRÜNTÜLE
-          </Button>
-        }>
-          <strong>3 acil şikayet</strong> var. Hemen müdahale gerekiyor.
-        </Alert>
-      </Stack>
+      {/* Quick Alerts */}
+      {dashboardData && (
+        <Stack spacing={2} sx={{ mb: 4 }}>
+          {dashboardData.stats.pendingListings.value > 0 && (
+            <Alert 
+              severity="warning" 
+              action={
+                <Button color="inherit" size="small">
+                  İNCELE
+                </Button>
+              }
+            >
+              <strong>{dashboardData.stats.pendingListings.value} ilan</strong> onay bekliyor. Lütfen inceleyiniz.
+            </Alert>
+          )}
+        </Stack>
+      )}
 
       {/* Stats Cards */}
-      <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 3, mb: 4 }}>
-        <StatCard
-          title="Toplam Kullanıcı"
-          value={dashboardStats.totalUsers}
-          change={dashboardStats.usersChange}
-          icon={<People />}
-          color="primary"
-        />
-        <StatCard
-          title="Toplam İlan"
-          value={dashboardStats.totalListings}
-          change={dashboardStats.listingsChange}
-          icon={<Assignment />}
-          color="success"
-        />
-        <StatCard
-          title="Onay Bekleyen"
-          value={dashboardStats.pendingListings}
-          change={dashboardStats.pendingChange}
-          icon={<Schedule />}
-          color="warning"
-        />
-        <StatCard
-          title="Şikayetler"
-          value={dashboardStats.totalComplaints}
-          change={dashboardStats.complaintsChange}
-          icon={<Report />}
-          color="error"
-        />
-        <StatCard
-          title="Okunmamış Mesaj"
-          value={dashboardStats.unreadMessages}
-          change={dashboardStats.messagesChange}
-          icon={<Message />}
-          color="info"
-        />
-        <StatCard
-          title="Bugünkü Görüntüleme"
-          value={dashboardStats.todayViews}
-          change={dashboardStats.viewsChange}
-          icon={<Visibility />}
-          color="secondary"
-        />
-      </Box>
+      {dashboardData && (
+        <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 3, mb: 4 }}>
+          <StatCard
+            title="Toplam Kullanıcı"
+            value={dashboardData.stats.totalUsers.value}
+            change={dashboardData.stats.totalUsers.change}
+            icon={<People />}
+            color="primary"
+          />
+          <StatCard
+            title="Toplam İlan"
+            value={dashboardData.stats.totalListings.value}
+            change={dashboardData.stats.totalListings.change}
+            icon={<Assignment />}
+            color="success"
+          />
+          <StatCard
+            title="Onay Bekleyen İlan"
+            value={dashboardData.stats.pendingListings.value}
+            icon={<HourglassEmpty />}
+            color="warning"
+          />
+          <StatCard
+            title="Aktif İlan"
+            value={dashboardData.stats.pendingListings.active}
+            icon={<CheckCircle />}
+            color="success"
+          />
+          <StatCard
+            title="Toplam Mesaj"
+            value={dashboardData.stats.totalMessages.value}
+            change={dashboardData.stats.totalMessages.change}
+            icon={<Message />}
+            color="info"
+          />
+          <StatCard
+            title="Kategori Sayısı"
+            value={dashboardData.stats.totalCategories.value}
+            icon={<Category />}
+            color="secondary"
+          />
+        </Box>
+      )}
 
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 2fr' }, gap: 3 }}>
-        {/* Quick Actions */}
-        <Paper sx={{ p: 3, height: 'fit-content' }}>
-          <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: 1 }}>
-            ⚡ Hızlı İşlemler
-          </Typography>
-          <Stack spacing={2}>
-            {quickActions.map((action, index) => (
-              <Card key={index} variant="outlined" sx={{ p: 2 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                  <Typography variant="subtitle2" sx={{ fontWeight: 'medium' }}>
-                    {action.title}
-                  </Typography>
-                  <Chip
-                    label={action.count}
-                    color={action.color as any}
-                    size="small"
-                    sx={{ fontWeight: 'bold' }}
-                  />
-                </Box>
-                <Button 
-                  variant="contained" 
-                  size="small" 
-                  fullWidth
-                  color={action.color as any}
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', lg: '2fr 1fr' }, gap: 3, mb: 4 }}>
+        {/* Pending Listings Table */}
+        <Paper sx={{ p: 3 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+            <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+              ⏳ Onay Bekleyen İlanlar
+            </Typography>
+            {selectedListings.length > 0 && (
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                <Button
+                  size="small"
+                  variant="contained"
+                  color="success"
+                  startIcon={actionLoading ? <CircularProgress size={16} /> : <Check />}
+                  onClick={handleApproveSelected}
+                  disabled={actionLoading}
                 >
-                  {action.action}
+                  Onayla ({selectedListings.length})
                 </Button>
-              </Card>
-            ))}
-          </Stack>
+                <Button
+                  size="small"
+                  variant="contained"
+                  color="error"
+                  startIcon={<Close />}
+                  onClick={() => setRejectDialog(true)}
+                  disabled={actionLoading}
+                >
+                  Reddet ({selectedListings.length})
+                </Button>
+              </Box>
+            )}
+          </Box>
+          
+          <TableContainer>
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell padding="checkbox">
+                    <Checkbox
+                      checked={selectedListings.length === pendingListings.length && pendingListings.length > 0}
+                      indeterminate={selectedListings.length > 0 && selectedListings.length < pendingListings.length}
+                      onChange={handleSelectAll}
+                    />
+                  </TableCell>
+                  <TableCell>İlan</TableCell>
+                  <TableCell>Satıcı</TableCell>
+                  <TableCell>Fiyat</TableCell>
+                  <TableCell>Tarih</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {pendingListings.slice(0, 10).map((listing) => (
+                  <TableRow key={listing.id} hover>
+                    <TableCell padding="checkbox">
+                      <Checkbox
+                        checked={selectedListings.includes(listing.id)}
+                        onChange={() => handleSelectListing(listing.id)}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
+                        {listing.title}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {listing.categories?.name} - {listing.vehicle_types?.name}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body2">
+                        {listing.users?.first_name} {listing.users?.last_name}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {listing.users?.phone}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
+                        {adminService.formatCurrency(listing.price)}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="caption">
+                        {adminService.formatRelativeTime(listing.created_at)}
+                      </Typography>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+          
+          {pendingListings.length === 0 && (
+            <Box sx={{ textAlign: 'center', py: 4 }}>
+              <CheckCircle sx={{ fontSize: 48, color: 'success.main', mb: 2 }} />
+              <Typography variant="h6" color="text.secondary">
+                Onay bekleyen ilan bulunmuyor
+              </Typography>
+            </Box>
+          )}
         </Paper>
 
-        {/* Recent Activities */}
+        {/* System Info */}
         <Paper sx={{ p: 3 }}>
           <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: 1 }}>
-            🔔 Son Aktiviteler
+            🖥️ Sistem Durumu
           </Typography>
-          <List>
-            {recentActivities.map((activity, index) => (
-              <React.Fragment key={activity.id}>
-                <ListItem alignItems="flex-start">
-                  <ListItemAvatar>
-                    <Avatar sx={{ bgcolor: `${getActivityColor(activity.status)}.main` }}>
-                      {getActivityIcon(activity.type)}
-                    </Avatar>
-                  </ListItemAvatar>
-                  <ListItemText
-                    primary={
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-                        <Typography variant="subtitle2" sx={{ fontWeight: 'medium' }}>
-                          {activity.title}
-                        </Typography>
-                        <Chip
-                          label={activity.status === 'pending' ? 'Bekliyor' : 
-                                 activity.status === 'urgent' ? 'Acil' :
-                                 activity.status === 'completed' ? 'Tamamlandı' : 'Okunmadı'}
-                          color={getActivityColor(activity.status) as any}
-                          size="small"
-                        />
-                      </Box>
-                    }
-                    secondary={
-                      <Box>
-                        <Typography variant="body2" color="text.secondary" component="div">
-                          {activity.user}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary" component="div">
-                          {activity.time}
-                        </Typography>
-                      </Box>
-                    }
-                  />
-                </ListItem>
-                {index < recentActivities.length - 1 && <Divider variant="inset" component="li" />}
-              </React.Fragment>
-            ))}
-          </List>
-          <Box sx={{ textAlign: 'center', mt: 2 }}>
-            <Button variant="outlined">
-              Tüm Aktiviteleri Görüntüle
-            </Button>
-          </Box>
+          
+          {dashboardData && (
+            <Stack spacing={3}>
+              <Box sx={{ textAlign: 'center' }}>
+                <Computer sx={{ fontSize: 48, color: 'success.main', mb: 1 }} />
+                <Typography variant="subtitle2" sx={{ fontWeight: 'medium' }}>
+                  Sunucu Durumu
+                </Typography>
+                <Typography variant="body2" color="success.main">
+                  Aktif ({adminService.formatUptime(dashboardData.systemInfo.uptime)})
+                </Typography>
+              </Box>
+              
+              <Box sx={{ textAlign: 'center' }}>
+                <Memory sx={{ fontSize: 48, color: 'info.main', mb: 1 }} />
+                <Typography variant="subtitle2" sx={{ fontWeight: 'medium' }}>
+                  Bellek Kullanımı
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {adminService.formatMemoryUsage(dashboardData.systemInfo.memoryUsage.heapUsed)} / {adminService.formatMemoryUsage(dashboardData.systemInfo.memoryUsage.heapTotal)}
+                </Typography>
+                <LinearProgress 
+                  variant="determinate" 
+                  value={(dashboardData.systemInfo.memoryUsage.heapUsed / dashboardData.systemInfo.memoryUsage.heapTotal) * 100} 
+                  sx={{ mt: 1 }} 
+                />
+              </Box>
+              
+              <Box sx={{ textAlign: 'center' }}>
+                <Speed sx={{ fontSize: 48, color: 'secondary.main', mb: 1 }} />
+                <Typography variant="subtitle2" sx={{ fontWeight: 'medium' }}>
+                  Node.js Sürümü
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {dashboardData.systemInfo.nodeVersion}
+                </Typography>
+              </Box>
+            </Stack>
+          )}
         </Paper>
       </Box>
 
-      {/* System Status */}
-      <Paper sx={{ p: 3, mt: 3 }}>
+      {/* Recent Activities */}
+      <Paper sx={{ p: 3 }}>
         <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: 1 }}>
-          🔧 Sistem Durumu
+          🔔 Son Aktiviteler
         </Typography>
-        <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 3 }}>
-          <Box sx={{ textAlign: 'center' }}>
-            <CheckCircle sx={{ fontSize: 48, color: 'success.main', mb: 1 }} />
-            <Typography variant="subtitle2" sx={{ fontWeight: 'medium' }}>
-              Sunucu Durumu
-            </Typography>
-            <Typography variant="body2" color="success.main">
-              Çevrimiçi
+        <List>
+          {recentActivities.slice(0, 15).map((activity, index) => (
+            <React.Fragment key={activity.id}>
+              <ListItem alignItems="flex-start">
+                <ListItemAvatar>
+                  <Avatar sx={{ bgcolor: `${getActivityColor(activity.status)}.main` }}>
+                    {getActivityIcon(activity.type)}
+                  </Avatar>
+                </ListItemAvatar>
+                <ListItemText
+                  primary={
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 'medium' }}>
+                        {activity.title}
+                      </Typography>
+                      <Chip
+                        label={activity.status === 'pending' ? 'Bekliyor' : 
+                               activity.status === 'active' ? 'Aktif' :
+                               activity.status === 'completed' ? 'Tamamlandı' :
+                               activity.status === 'sent' ? 'Gönderildi' : activity.status}
+                        color={getActivityColor(activity.status) as any}
+                        size="small"
+                      />
+                    </Box>
+                  }
+                  secondary={
+                    <Box>
+                      <Typography variant="body2" color="text.secondary" component="div">
+                        {activity.description}
+                      </Typography>
+                      <Typography variant="body2" color="text.primary" component="div">
+                        {activity.user}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary" component="div">
+                        {adminService.formatRelativeTime(activity.time)}
+                      </Typography>
+                    </Box>
+                  }
+                />
+              </ListItem>
+              {index < recentActivities.length - 1 && <Divider variant="inset" component="li" />}
+            </React.Fragment>
+          ))}
+        </List>
+        
+        {recentActivities.length === 0 && (
+          <Box sx={{ textAlign: 'center', py: 4 }}>
+            <NotificationImportant sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }} />
+            <Typography variant="h6" color="text.secondary">
+              Son 24 saatte aktivite bulunmuyor
             </Typography>
           </Box>
-          <Box sx={{ textAlign: 'center' }}>
-            <CheckCircle sx={{ fontSize: 48, color: 'success.main', mb: 1 }} />
-            <Typography variant="subtitle2" sx={{ fontWeight: 'medium' }}>
-              Veritabanı
-            </Typography>
-            <Typography variant="body2" color="success.main">
-              Bağlı
-            </Typography>
-          </Box>
-          <Box sx={{ textAlign: 'center' }}>
-            <ErrorOutline sx={{ fontSize: 48, color: 'warning.main', mb: 1 }} />
-            <Typography variant="subtitle2" sx={{ fontWeight: 'medium' }}>
-              Disk Alanı
-            </Typography>
-            <Typography variant="body2" color="warning.main">
-              %78 Dolu
-            </Typography>
-            <LinearProgress variant="determinate" value={78} sx={{ mt: 1 }} />
-          </Box>
-          <Box sx={{ textAlign: 'center' }}>
-            <CheckCircle sx={{ fontSize: 48, color: 'success.main', mb: 1 }} />
-            <Typography variant="subtitle2" sx={{ fontWeight: 'medium' }}>
-              Son Yedekleme
-            </Typography>
-            <Typography variant="body2" color="success.main">
-              2 saat önce
-            </Typography>
-          </Box>
-        </Box>
+        )}
       </Paper>
+
+      {/* Reject Dialog */}
+      <Dialog open={rejectDialog} onClose={() => setRejectDialog(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>İlanları Reddet</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" sx={{ mb: 2 }}>
+            {selectedListings.length} ilan reddedilecek. Lütfen ret nedenini belirtin:
+          </Typography>
+          <TextField
+            fullWidth
+            multiline
+            rows={3}
+            label="Ret Nedeni"
+            value={rejectReason}
+            onChange={(e) => setRejectReason(e.target.value)}
+            placeholder="İlan reddedilme sebebini açıklayın..."
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setRejectDialog(false)}>İptal</Button>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={handleRejectSelected}
+            disabled={!rejectReason.trim() || actionLoading}
+            startIcon={actionLoading ? <CircularProgress size={16} /> : undefined}
+          >
+            Reddet
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

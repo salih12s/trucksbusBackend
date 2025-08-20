@@ -12,8 +12,6 @@ import AdminLayout from './components/layout/AdminLayout';
 import AdminRoute from './components/auth/AdminRoute';
 import NewHomePage from './pages/user/NewHomePage';
 import NewCategoryPage from './pages/user/NewCategoryPage';
-import Profile from './pages/user/Profile';
-import MyListings from './pages/user/MyListings';
 import CategorySelection from './pages/listing/CategorySelection';
 import BrandSelection from './pages/listing/BrandSelection';
 import ModelSelection from './pages/listing/ModelSelection';
@@ -28,7 +26,7 @@ import HafriyatTipiForm from './pages/Forms/Dorse/Damperli/HafriyatTipiForm';
 import HavuzHardoxTipiForm from './pages/Forms/Dorse/Damperli/HavuzHardoxTipiForm';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AllListings from './pages/admin/AllListings';
-import PendingListings from './pages/admin/PendingListingsNew';
+import PendingListings from './pages/admin/PendingListings';
 import Complaints from './pages/admin/Complaints';
 import AdminReportsPage from './pages/admin/AdminReportsPage';
 import Users from './pages/admin/Users';
@@ -36,6 +34,9 @@ import Users from './pages/admin/Users';
 import RealTimeMessagesPage from './pages/messages/RealTimeMessagesPage';
 import MyReportsPage from './pages/user/MyReportsPage';
 import FavoritesPage from './pages/user/FavoritesPage';
+import ListingDetail from './pages/user/ListingDetail';
+import Profile from './pages/user/Profile';
+import MyListings from './pages/user/MyListings';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 
@@ -80,11 +81,12 @@ const App: React.FC = () => {
                 <Route path="category/:id/vehicle-type/:vehicleTypeId" element={<NewCategoryPage />} />
                 <Route path="category/:id/vehicle-type/:vehicleTypeId/brand/:brandId" element={<NewCategoryPage />} />
                 <Route path="category/:id/vehicle-type/:vehicleTypeId/brand/:brandId/model/:modelId" element={<NewCategoryPage />} />
-                <Route path="profile" element={<Profile />} />
-                <Route path="my-listings" element={<MyListings />} />
+                <Route path="listing/:id" element={<ListingDetail />} />
                 <Route path="messages" element={<RealTimeMessagesPage />} />
                 <Route path="favorites" element={<FavoritesPage />} />
                 <Route path="my-reports" element={<MyReportsPage />} />
+                <Route path="profile" element={<Profile />} />
+                <Route path="my-listings" element={<MyListings />} />
                 {/* 🔧 Alias route for backward compatibility */}
                 <Route path="real-time-messages" element={<RealTimeMessagesPage />} />
               </Route>
