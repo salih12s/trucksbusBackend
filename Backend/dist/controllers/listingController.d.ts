@@ -1,12 +1,12 @@
 import { Request, Response } from 'express';
-import { AuthRequest } from '../middleware/auth';
+export declare const createListing: (req: Request, res: Response) => Promise<void>;
 export declare const getListings: (req: Request, res: Response) => Promise<void>;
+export declare const debugListingData: (req: Request, res: Response) => Promise<void>;
 export declare const getListingById: (req: Request, res: Response) => Promise<void>;
-export declare const createListing: (req: AuthRequest, res: Response) => Promise<void>;
-export declare const updateListing: (req: AuthRequest, res: Response) => Promise<void>;
-export declare const deleteListing: (req: AuthRequest, res: Response) => Promise<void>;
-export declare const getUserListings: (req: AuthRequest, res: Response) => Promise<void>;
-export declare const getCategories: (req: Request, res: Response) => Promise<void>;
-export declare const getVehicleTypes: (req: Request, res: Response) => Promise<void>;
-export declare const getBrands: (req: Request, res: Response) => Promise<void>;
+export declare const updateListing: (req: Request, res: Response) => Promise<void>;
+export declare const deleteListing: (req: Request, res: Response) => Promise<void>;
+export declare const debugListingImages: (req: Request, res: Response) => Promise<void>;
+export declare const getUserListings: (req: Request, res: Response) => Promise<void>;
+export declare const toggleFavorite: (req: Request, res: Response) => Promise<void>;
+export declare const getFavorites: (req: Request, res: Response) => Promise<void>;
 //# sourceMappingURL=listingController.d.ts.map

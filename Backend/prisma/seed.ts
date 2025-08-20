@@ -150,7 +150,56 @@ async function main() {
         updated_at: new Date()
       }
     });
-    console.log(`✅ Created variant: ${variant.name}`);
+    console.log('✅ Created variant: ${variant.name}');
+  }
+
+  // Cities oluştur
+  const cities = [
+    { id: 'istanbul', name: 'İstanbul' },
+    { id: 'ankara', name: 'Ankara' },
+    { id: 'izmir', name: 'İzmir' },
+    { id: 'bursa', name: 'Bursa' },
+    { id: 'antalya', name: 'Antalya' }
+  ];
+
+  console.log('🏙️ Creating cities...');
+  for (const city of cities) {
+    await prisma.cities.upsert({
+      where: { id: city.id },
+      update: {},
+      create: {
+        id: city.id,
+        name: city.name,
+        created_at: new Date(),
+        updated_at: new Date()
+      }
+    });
+    console.log(`✅ Created city: ${city.name}`);
+  }
+
+  // Districts oluştur
+  const districts = [
+    { id: 'kadikoy', name: 'Kadıköy', city_id: 'istanbul' },
+    { id: 'besiktas', name: 'Beşiktaş', city_id: 'istanbul' },
+    { id: 'cankaya', name: 'Çankaya', city_id: 'ankara' },
+    { id: 'kecioren', name: 'Keçiören', city_id: 'ankara' },
+    { id: 'konak', name: 'Konak', city_id: 'izmir' }
+  ];
+
+  console.log('🏘️ Creating districts...');
+  for (const district of districts) {
+    await prisma.districts.upsert({
+      where: { id: district.id },
+      update: {},
+      create: {
+        id: district.id,
+        name: district.name,
+        city_id: district.city_id,
+        created_at: new Date(),
+        updated_at: new Date()
+      }
+    });
+    console.log(`✅ Created district: ${district.name}`);
   }
 
   console.log('✨ Seed completed successfully!');

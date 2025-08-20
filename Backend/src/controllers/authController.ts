@@ -64,8 +64,8 @@ export const register = async (req: Request, res: Response): Promise<void> => {
           email: user.email,
           first_name: user.first_name,
           last_name: user.last_name,
-          avatar: user.avatar,
-          role: user.role
+          role: user.role,
+          avatar: user.avatar
         },
         token
       }
@@ -94,7 +94,26 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 
     // Find user by email
     const user = await prisma.users.findUnique({
-      where: { email }
+      where: { email },
+      select: {
+        id: true,
+        email: true,
+        first_name: true,
+        last_name: true,
+        username: true,
+        phone: true,
+        city: true,
+        district: true,
+        role: true,
+        is_email_verified: true,
+        is_active: true,
+        avatar: true,
+        password: true,
+        login_attempts: true,
+        last_login: true,
+        created_at: true,
+        updated_at: true
+      }
     });
 
     if (!user) {
@@ -159,11 +178,11 @@ export const login = async (req: Request, res: Response): Promise<void> => {
           last_name: user.last_name,
           username: user.username,
           phone: user.phone,
-          avatar: user.avatar,
           city: user.city,
           district: user.district,
           role: user.role,
-          is_email_verified: user.is_email_verified
+          is_email_verified: user.is_email_verified,
+          avatar: user.avatar
         },
         token
       }
@@ -215,7 +234,6 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
         last_name: true,
         username: true,
         phone: true,
-        avatar: true,
         city: true,
         district: true,
         role: true,

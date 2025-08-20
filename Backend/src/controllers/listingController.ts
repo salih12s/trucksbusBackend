@@ -378,21 +378,7 @@ export const getListingById = async (req: Request, res: Response): Promise<void>
 
     const listing = await prisma.listings.findUnique({
       where: { id },
-      select: {
-        id: true,
-        user_id: true,
-        title: true,
-        description: true,
-        price: true,
-        year: true,
-        km: true,
-        seller_name: true,
-        seller_phone: true,
-        seller_email: true,
-        created_at: true,
-        updated_at: true,
-        view_count: true,
-        status: true,
+      include: {
         categories: {
           select: {
             id: true,
@@ -408,7 +394,8 @@ export const getListingById = async (req: Request, res: Response): Promise<void>
         brands: {
           select: {
             id: true,
-            name: true
+            name: true,
+            image_url: true
           }
         },
         models: {
@@ -440,7 +427,14 @@ export const getListingById = async (req: Request, res: Response): Promise<void>
             id: true,
             first_name: true,
             last_name: true,
-            phone: true
+            username: true,
+            email: true,
+            phone: true,
+            role: true,
+            is_active: true,
+            is_email_verified: true,
+            created_at: true,
+            updated_at: true
           }
         },
         listing_images: {
@@ -449,6 +443,9 @@ export const getListingById = async (req: Request, res: Response): Promise<void>
             url: true,
             alt: true,
             sort_order: true
+          },
+          orderBy: {
+            sort_order: 'asc'
           }
         }
       }
@@ -465,7 +462,51 @@ export const getListingById = async (req: Request, res: Response): Promise<void>
       data: { view_count: { increment: 1 } }
     });
 
-    res.json(listing);
+    // Transform data to match frontend Listing interface
+    const response = {
+      id: listing.id,
+      title: listing.title,
+      description: listing.description,
+      price: Number(listing.price),
+      categoryId: listing.category_id,
+      category: {
+        id: listing.categories?.id || listing.category_id,
+        name: listing.categories?.name || 'Kategori Bulunamadı',
+        slug: 'kategori',
+        createdAt: new Date()
+      },
+      userId: listing.user_id,
+      user: {
+        id: listing.users?.id || listing.user_id,
+        email: listing.users?.email || '',
+        username: listing.users?.username || 'kullanici',
+        first_name: listing.users?.first_name || 'Ad',
+        last_name: listing.users?.last_name || 'Soyad',
+        phone: listing.users?.phone || '',
+        role: listing.users?.role || 'USER',
+        is_active: listing.users?.is_active ?? true,
+        is_email_verified: listing.users?.is_email_verified ?? false,
+        created_at: listing.users?.created_at || new Date(),
+        updated_at: listing.users?.updated_at || new Date()
+      },
+      images: listing.listing_images?.map((img: any) => img.url) || listing.images || [],
+      location: `${listing.districts?.name || ''}, ${listing.cities?.name || ''}`.replace(/^, |, $/, '') || 'Konum belirtilmemiş',
+      status: listing.status,
+      isApproved: listing.is_approved || false,
+      views: listing.view_count || 0,
+      createdAt: listing.created_at,
+      updatedAt: listing.updated_at,
+      // Additional vehicle details
+      year: listing.year,
+      mileage: listing.km,
+      fuelType: listing.fuel_type,
+      transmission: listing.transmission,
+      brand: listing.brands?.name,
+      model: listing.models?.name,
+      variant: listing.variants?.name
+    };
+
+    res.json(response);
   } catch (error) {
     logger.error('Error fetching listing:', error);
     res.status(500).json({ error: 'Internal server error' });

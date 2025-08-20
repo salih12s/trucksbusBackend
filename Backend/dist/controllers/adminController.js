@@ -1,50 +1,195 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getDashboardStats = exports.rejectListing = exports.approveListing = exports.getAdminListings = void 0;
-const database_1 = require("../utils/database");
+exports.getPendingListings = exports.getDashboardStats = exports.rejectListing = exports.approveListing = exports.getListings = exports.deleteUser = exports.updateUser = exports.getUser = exports.getUsers = void 0;
 const logger_1 = require("../utils/logger");
-const getAdminListings = async (req, res) => {
+const database_1 = require("../utils/database");
+const getUsers = async (req, res) => {
     try {
-        const { page = 1, limit = 20, status, search } = req.query;
-        const offset = (Number(page) - 1) * Number(limit);
+        const { page = 1, limit = 10, search } = req.query;
+        const skip = (Number(page) - 1) * Number(limit);
         const where = {};
-        if (status)
-            where.status = status;
+        if (search) {
+            where.OR = [
+                { first_name: { contains: search, mode: 'insensitive' } },
+                { last_name: { contains: search, mode: 'insensitive' } },
+                { email: { contains: search, mode: 'insensitive' } }
+            ];
+        }
+        const users = await database_1.prisma.users.findMany({
+            where,
+            skip,
+            take: Number(limit),
+            select: {
+                id: true,
+                first_name: true,
+                last_name: true,
+                email: true,
+                phone: true,
+                is_active: true,
+                created_at: true,
+                _count: {
+                    select: {
+                        listings: true
+                    }
+                }
+            },
+            orderBy: { created_at: 'desc' }
+        });
+        const total = await database_1.prisma.users.count({ where });
+        res.json({
+            success: true,
+            data: users,
+            pagination: {
+                page: Number(page),
+                limit: Number(limit),
+                total,
+                pages: Math.ceil(total / Number(limit))
+            }
+        });
+    }
+    catch (error) {
+        logger_1.logger.error('Error in getUsers:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+exports.getUsers = getUsers;
+const getUser = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const user = await database_1.prisma.users.findUnique({
+            where: { id },
+            select: {
+                id: true,
+                first_name: true,
+                last_name: true,
+                email: true,
+                phone: true,
+                is_active: true,
+                created_at: true,
+                listings: {
+                    select: {
+                        id: true,
+                        title: true,
+                        price: true,
+                        is_approved: true,
+                        is_active: true,
+                        created_at: true
+                    },
+                    orderBy: { created_at: 'desc' }
+                }
+            }
+        });
+        if (!user) {
+            res.status(404).json({ success: false, message: 'Kullanıcı bulunamadı' });
+            return;
+        }
+        res.json({ success: true, data: user });
+    }
+    catch (error) {
+        logger_1.logger.error('Error in getUser:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+exports.getUser = getUser;
+const updateUser = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { first_name, last_name, email, phone, is_active } = req.body;
+        const user = await database_1.prisma.users.update({
+            where: { id },
+            data: {
+                first_name,
+                last_name,
+                email,
+                phone,
+                is_active,
+                updated_at: new Date()
+            },
+            select: {
+                id: true,
+                first_name: true,
+                last_name: true,
+                email: true,
+                phone: true,
+                is_active: true
+            }
+        });
+        res.json({ success: true, data: user, message: 'Kullanıcı başarıyla güncellendi' });
+    }
+    catch (error) {
+        logger_1.logger.error('Error in updateUser:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+exports.updateUser = updateUser;
+const deleteUser = async (req, res) => {
+    try {
+        const { id } = req.params;
+        await database_1.prisma.users.delete({
+            where: { id }
+        });
+        res.json({ success: true, message: 'Kullanıcı başarıyla silindi' });
+    }
+    catch (error) {
+        logger_1.logger.error('Error in deleteUser:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+exports.deleteUser = deleteUser;
+const getListings = async (req, res) => {
+    try {
+        const { page = 1, limit = 10, status = 'pending', search } = req.query;
+        const skip = (Number(page) - 1) * Number(limit);
+        const where = {};
+        if (status === 'pending') {
+            where.is_approved = false;
+            where.is_active = true;
+        }
+        else if (status === 'approved') {
+            where.is_approved = true;
+            where.is_active = true;
+        }
+        else if (status === 'rejected') {
+            where.is_active = false;
+        }
         if (search) {
             where.OR = [
                 { title: { contains: search, mode: 'insensitive' } },
-                { description: { contains: search, mode: 'insensitive' } },
+                { description: { contains: search, mode: 'insensitive' } }
             ];
         }
-        const [listings, total] = await Promise.all([
-            database_1.prisma.listing.findMany({
-                where,
-                orderBy: { created_at: 'desc' },
-                skip: offset,
-                take: Number(limit),
-                include: {
-                    categories: true,
-                    users: {
-                        select: {
-                            id: true,
-                            first_name: true,
-                            last_name: true,
-                            email: true,
-                            phone: true
-                        }
+        const listings = await database_1.prisma.listings.findMany({
+            where,
+            skip,
+            take: Number(limit),
+            include: {
+                categories: true,
+                vehicle_types: true,
+                brands: true,
+                models: true,
+                variants: true,
+                cities: true,
+                districts: true,
+                users: {
+                    select: {
+                        id: true,
+                        first_name: true,
+                        last_name: true,
+                        email: true,
+                        phone: true
                     }
                 }
-            }),
-            database_1.prisma.listing.count({ where })
-        ]);
-        const totalPages = Math.ceil(total / Number(limit));
-        res.status(200).json({
+            },
+            orderBy: { created_at: 'desc' }
+        });
+        const total = await database_1.prisma.listings.count({ where });
+        res.json({
             success: true,
             data: {
                 listings,
                 pagination: {
                     current_page: Number(page),
-                    total_pages: totalPages,
+                    total_pages: Math.ceil(total / Number(limit)),
                     total_items: total,
                     items_per_page: Number(limit)
                 }
@@ -52,41 +197,62 @@ const getAdminListings = async (req, res) => {
         });
     }
     catch (error) {
-        logger_1.logger.error('Get admin listings error:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Internal server error'
-        });
+        logger_1.logger.error('Error in getListings:', error);
+        res.status(500).json({ error: 'Internal server error' });
     }
 };
-exports.getAdminListings = getAdminListings;
+exports.getListings = getListings;
 const approveListing = async (req, res) => {
     try {
         const { id } = req.params;
-        const listing = await database_1.prisma.listing.update({
+        const currentListing = await database_1.prisma.listings.findUnique({
             where: { id },
-            data: {
-                status: 'ACTIVE',
+            select: {
+                id: true,
+                title: true,
+                seller_name: true,
+                seller_phone: true,
+                seller_email: true,
                 is_approved: true,
-                is_pending: false,
-                approved_by: req.user.id,
-                approved_at: new Date(),
-                updated_at: new Date()
+                is_active: true
             }
         });
-        logger_1.logger.info(`Listing approved: ${listing.id} by admin: ${req.user.id}`);
-        res.status(200).json({
+        console.log('📋 Before approval - Current listing data:', currentListing);
+        const listing = await database_1.prisma.listings.update({
+            where: { id },
+            data: {
+                is_approved: true,
+                is_active: true,
+                updated_at: new Date()
+            },
+            select: {
+                id: true,
+                title: true,
+                seller_name: true,
+                seller_phone: true,
+                seller_email: true,
+                is_approved: true,
+                is_active: true,
+                users: {
+                    select: {
+                        first_name: true,
+                        last_name: true,
+                        email: true
+                    }
+                }
+            }
+        });
+        console.log('📋 After approval - Updated listing data:', listing);
+        logger_1.logger.info(`Listing approved: ${id}`);
+        res.json({
             success: true,
-            message: 'Listing approved successfully',
-            data: { listing }
+            data: listing,
+            message: 'İlan başarıyla onaylandı'
         });
     }
     catch (error) {
-        logger_1.logger.error('Approve listing error:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Internal server error'
-        });
+        logger_1.logger.error('Error in approveListing:', error);
+        res.status(500).json({ error: 'Internal server error' });
     }
 };
 exports.approveListing = approveListing;
@@ -94,58 +260,137 @@ const rejectListing = async (req, res) => {
     try {
         const { id } = req.params;
         const { reason } = req.body;
-        const listing = await database_1.prisma.listing.update({
+        const listing = await database_1.prisma.listings.update({
             where: { id },
             data: {
-                status: 'REJECTED',
                 is_approved: false,
-                is_pending: false,
-                reject_reason: reason,
-                rejected_at: new Date(),
+                is_active: false,
+                reject_reason: reason || 'İlan reddedildi',
                 updated_at: new Date()
+            },
+            include: {
+                users: {
+                    select: {
+                        first_name: true,
+                        last_name: true,
+                        email: true
+                    }
+                }
             }
         });
-        logger_1.logger.info(`Listing rejected: ${listing.id} by admin: ${req.user.id}`);
-        res.status(200).json({
+        logger_1.logger.info(`Listing rejected: ${id}, reason: ${reason || 'No reason provided'}`);
+        res.json({
             success: true,
-            message: 'Listing rejected successfully',
-            data: { listing }
+            data: listing,
+            message: 'İlan başarıyla reddedildi'
         });
     }
     catch (error) {
-        logger_1.logger.error('Reject listing error:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Internal server error'
-        });
+        logger_1.logger.error('Error in rejectListing:', error);
+        res.status(500).json({ error: 'Internal server error' });
     }
 };
 exports.rejectListing = rejectListing;
 const getDashboardStats = async (req, res) => {
     try {
-        const [totalListings, pendingListings, activeListings, totalUsers] = await Promise.all([
-            database_1.prisma.listing.count(),
-            database_1.prisma.listing.count({ where: { status: 'PENDING' } }),
-            database_1.prisma.listing.count({ where: { status: 'ACTIVE' } }),
-            database_1.prisma.user.count()
+        const [totalUsers, totalListings, pendingListings, approvedListings, rejectedListings, todayListings] = await Promise.all([
+            database_1.prisma.users.count(),
+            database_1.prisma.listings.count(),
+            database_1.prisma.listings.count({ where: { is_approved: false, is_active: true } }),
+            database_1.prisma.listings.count({ where: { is_approved: true, is_active: true } }),
+            database_1.prisma.listings.count({ where: { is_active: false } }),
+            database_1.prisma.listings.count({
+                where: {
+                    created_at: {
+                        gte: new Date(new Date().setHours(0, 0, 0, 0))
+                    }
+                }
+            })
         ]);
-        res.status(200).json({
+        const stats = {
+            totalUsers,
+            totalListings,
+            pendingListings,
+            approvedListings,
+            rejectedListings,
+            todayListings
+        };
+        res.json({ success: true, data: stats });
+    }
+    catch (error) {
+        logger_1.logger.error('Error in getDashboardStats:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+exports.getDashboardStats = getDashboardStats;
+const getPendingListings = async (req, res) => {
+    try {
+        const { page = 1, limit = 10 } = req.query;
+        const skip = (Number(page) - 1) * Number(limit);
+        const listings = await database_1.prisma.listings.findMany({
+            where: {
+                is_approved: false,
+                is_active: true
+            },
+            include: {
+                categories: {
+                    select: { name: true }
+                },
+                vehicle_types: {
+                    select: { name: true }
+                },
+                brands: {
+                    select: { name: true }
+                },
+                models: {
+                    select: { name: true }
+                },
+                variants: {
+                    select: { name: true }
+                },
+                cities: {
+                    select: { name: true }
+                },
+                districts: {
+                    select: { name: true }
+                },
+                users: {
+                    select: {
+                        id: true,
+                        first_name: true,
+                        last_name: true,
+                        email: true,
+                        phone: true
+                    }
+                }
+            },
+            skip,
+            take: Number(limit),
+            orderBy: { created_at: 'desc' }
+        });
+        const total = await database_1.prisma.listings.count({
+            where: {
+                is_approved: false,
+                is_active: true
+            }
+        });
+        res.json({
             success: true,
             data: {
-                totalListings,
-                pendingListings,
-                activeListings,
-                totalUsers
+                listings,
+                pagination: {
+                    current_page: Number(page),
+                    total_pages: Math.ceil(total / Number(limit)),
+                    total_items: total,
+                    items_per_page: Number(limit)
+                }
             }
         });
     }
     catch (error) {
-        logger_1.logger.error('Get dashboard stats error:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Internal server error'
-        });
+        logger_1.logger.error('Error in getPendingListings:', error);
+        res.status(500).json({ error: 'Internal server error' });
     }
 };
-exports.getDashboardStats = getDashboardStats;
+exports.getPendingListings = getPendingListings;
 //# sourceMappingURL=adminController.js.map

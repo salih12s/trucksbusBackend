@@ -10,18 +10,8 @@ import { ulid } from 'ulid';
 import { logger } from './utils/logger';
 import { prisma } from './utils/database';
 import { SocketService } from './services/socketService';
-
-// Route imports
-import categoryRoutes from './routes/categoryRoutes';
-import authRoutes from './routes/authRoutes';
-import locationRoutes from './routes/locationRoutes';
-import conversationsRoutes from './routes/conversationsRoutes';
-import adminRoutes from './routes/adminRoutes';
-import listingRoutes from './routes/listingRoutes';
 import favoritesRoutes from './routes/favorites';
-import userRoutes from './routes/userRoutes';
-import reportRoutes from './routes/reportRoutes';
-import notificationRoutes from './routes/notificationRoutes';
+import meRoutes from './routes/meRoutes';
 
 // Load environment variables  
 dotenv.config();
@@ -38,7 +28,12 @@ app.set('socketService', socketService);
 
 // Middleware
 app.use(helmet());
-app.use(cors());
+app.use(cors({
+  origin: ['http://localhost:3000', 'http://localhost:5173'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(compression());
 app.use(morgan('combined'));
 app.use(express.json({ limit: '10mb' }));
@@ -283,17 +278,25 @@ try {
 }
 
 try {
-  app.use('/api/favorites', favoritesRoutes);
-  logger.info('Favorites routes loaded');
+  if (!favoritesRoutes) {
+    logger.error('favorites routes is undefined - check export');
+  } else {
+    app.use('/api/favorites', favoritesRoutes);
+    logger.info('Favorites routes loaded');
+  }
 } catch (error) {
   logger.error('Failed to load favorites routes:', error);
 }
 
 try {
-  app.use('/api/me', userRoutes);
-  logger.info('User routes loaded');
+  if (!meRoutes) {
+    logger.error('me routes is undefined - check export');
+  } else {
+    app.use('/api/me', meRoutes);
+    logger.info('Me routes loaded');
+  }
 } catch (error) {
-  logger.error('Failed to load user routes:', error);
+  logger.error('Failed to load me routes:', error);
 }
 
 try {

@@ -16,7 +16,6 @@ import listingRoutes from './routes/listingRoutes';
 import adminRoutes from './routes/adminRoutes';
 import categoryRoutes from './routes/categoryRoutes';
 import locationRoutes from './routes/locationRoutes';
-import conversationRoutes from './routes/conversationRoutes';
 import conversationsRoutes from './routes/conversationsRoutes';
 import userRoutes from './routes/userRoutes';
 import reportRoutes from './routes/reportRoutes';

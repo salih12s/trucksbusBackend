@@ -1,4 +1,4 @@
-import { prisma } from '../utils/prisma';
+import { prisma } from '../utils/database';
 import { getIO, emitToAdmins, emitToUser } from '../utils/socket';
 import { NotificationService } from './notificationService';
 import { ReportReason, ModerationStatus } from '@prisma/client';

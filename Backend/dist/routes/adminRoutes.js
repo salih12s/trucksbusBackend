@@ -2,13 +2,21 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const adminController_1 = require("../controllers/adminController");
+const reportsController_1 = require("../controllers/reportsController");
 const auth_1 = require("../middleware/auth");
 const router = (0, express_1.Router)();
 router.use(auth_1.authMiddleware);
 router.use(auth_1.adminMiddleware);
 router.get('/dashboard/stats', adminController_1.getDashboardStats);
-router.get('/listings', adminController_1.getAdminListings);
+router.get('/listings', adminController_1.getListings);
+router.get('/listings/pending', adminController_1.getPendingListings);
+router.get('/users', adminController_1.getUsers);
+router.put('/users/:id', adminController_1.updateUser);
+router.delete('/users/:id', adminController_1.deleteUser);
 router.put('/listings/:id/approve', adminController_1.approveListing);
 router.put('/listings/:id/reject', adminController_1.rejectListing);
+router.get('/reports', reportsController_1.ReportsController.adminGetReports);
+router.get('/reports/:id', reportsController_1.ReportsController.adminGetReportDetail);
+router.patch('/reports/:id/status', reportsController_1.ReportsController.adminUpdateReportStatus);
 exports.default = router;
 //# sourceMappingURL=adminRoutes.js.map
