@@ -224,3 +224,150 @@
     at node:internal/modules/cjs/loader:1824:10
     at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
     at Module.load (node:internal/modules/cjs/loader:1427:32)
+2025-08-20 18:39:55 [error]: Database error: 
+Invalid `prisma.listings.create()` invocation in
+C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\listingController.ts:90:43
+
+  87 }
+  88 
+  89 // Ilan oluştur
+→ 90 const listing = await prisma.listings.create(
+Foreign key constraint violated on the constraint: `listings_brand_id_fkey`
+2025-08-20 18:39:55 [error]: PrismaClientKnownRequestError: 
+Invalid `prisma.listings.create()` invocation in
+C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\listingController.ts:90:43
+
+  87 }
+  88 
+  89 // Ilan oluştur
+→ 90 const listing = await prisma.listings.create(
+Foreign key constraint violated on the constraint: `listings_brand_id_fkey`
+    at ei.handleRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:228:13)
+    at ei.handleAndLogRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:174:12)
+    at ei.request (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:143:12)
+    at async a (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:833:24)
+    at async createListing (C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\listingController.ts:90:21)
+2025-08-20 21:25:15 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/adminController.ts[0m:[93m5[0m:[93m14[0m - [91merror[0m[90m TS2451: [0mCannot redeclare block-scoped variable 'getDashboardStats'.
+
+[7m5[0m export const getDashboardStats = async (req: Request, res: Response): Promise<void> => {
+[7m [0m [91m             ~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/adminController.ts[0m:[93m33[0m:[93m18[0m - [91merror[0m[90m TS2820: [0mType '"pending"' is not assignable to type 'EnumListingStatusFilter<"listings"> | ListingStatus | undefined'. Did you mean '"PENDING"'?
+
+[7m33[0m         where: { status: 'pending' }
+[7m  [0m [91m                 ~~~~~~[0m
+[96msrc/controllers/adminController.ts[0m:[93m38[0m:[93m18[0m - [91merror[0m[90m TS2820: [0mType '"active"' is not assignable to type 'EnumListingStatusFilter<"listings"> | ListingStatus | undefined'. Did you mean '"ACTIVE"'?
+
+[7m38[0m         where: { status: 'active' }
+[7m  [0m [91m                 ~~~~~~[0m
+[96msrc/controllers/adminController.ts[0m:[93m49[0m:[93m18[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'is_read' does not exist in type 'messagesWhereInput'.
+
+[7m49[0m         where: { is_read: false }
+[7m  [0m [91m                 ~~~~~~~[0m
+[96msrc/controllers/adminController.ts[0m:[93m147[0m:[93m15[0m - [91merror[0m[90m TS2322: [0mType '(string | null)[]' is not assignable to type 'string[] | FieldRef<"cities", "String[]"> | undefined'.
+  Type '(string | null)[]' is not assignable to type 'string[]'.
+    Type 'string | null' is not assignable to type 'string'.
+      Type 'null' is not assignable to type 'string'.
+
+[7m147[0m         id: { in: cityIds }
+[7m   [0m [91m              ~~[0m
+[96msrc/controllers/adminController.ts[0m:[93m363[0m:[93m11[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'sender' does not exist in type 'messagesInclude<DefaultArgs>'.
+
+[7m363[0m           sender: {
+[7m   [0m [91m          ~~~~~~[0m
+[96msrc/controllers/adminController.ts[0m:[93m396[0m:[93m30[0m - [91merror[0m[90m TS2367: [0mThis comparison appears to be unintentional because the types 'ListingStatus' and '"pending"' have no overlap.
+
+[7m396[0m         description: `Yeni ${listing.status === 'pending' ? 'onay bekleyen' : ''} ilan`,
+[7m   [0m [91m                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/adminController.ts[0m:[93m407[0m:[93m30[0m - [91merror[0m[90m TS2339: [0mProperty 'content' does not exist on type '{ status: MessageStatus; id: string; created_at: Date; conversation_id: string; sender_id: string; body: string; attachment_url: string | null; }'.
+
+[7m407[0m         description: message.content?.substring(0, 50) + '...' || 'Mesaj içeriği yok',
+[7m   [0m [91m                             ~~~~~~~[0m
+[96msrc/controllers/adminController.ts[0m:[93m408[0m:[93m23[0m - [91merror[0m[90m TS2339: [0mProperty 'sender' does not exist on type '{ status: MessageStatus; id: string; created_at: Date; conversation_id: string; sender_id: string; body: string; attachment_url: string | null; }'.
+
+[7m408[0m         user: message.sender ? `${message.sender.first_name} ${message.sender.last_name}` : 'Bilinmeyen',
+[7m   [0m [91m                      ~~~~~~[0m
+[96msrc/controllers/adminController.ts[0m:[93m408[0m:[93m43[0m - [91merror[0m[90m TS2339: [0mProperty 'sender' does not exist on type '{ status: MessageStatus; id: string; created_at: Date; conversation_id: string; sender_id: string; body: string; attachment_url: string | null; }'.
+
+[7m408[0m         user: message.sender ? `${message.sender.first_name} ${message.sender.last_name}` : 'Bilinmeyen',
+[7m   [0m [91m                                          ~~~~~~[0m
+[96msrc/controllers/adminController.ts[0m:[93m408[0m:[93m72[0m - [91merror[0m[90m TS2339: [0mProperty 'sender' does not exist on type '{ status: MessageStatus; id: string; created_at: Date; conversation_id: string; sender_id: string; body: string; attachment_url: string | null; }'.
+
+[7m408[0m         user: message.sender ? `${message.sender.first_name} ${message.sender.last_name}` : 'Bilinmeyen',
+[7m   [0m [91m                                                                       ~~~~~~[0m
+[96msrc/controllers/adminController.ts[0m:[93m409[0m:[93m27[0m - [91merror[0m[90m TS2339: [0mProperty 'receiver' does not exist on type '{ status: MessageStatus; id: string; created_at: Date; conversation_id: string; sender_id: string; body: string; attachment_url: string | null; }'.
+
+[7m409[0m         receiver: message.receiver ? `${message.receiver.first_name} ${message.receiver.last_name}` : 'Bilinmeyen',
+[7m   [0m [91m                          ~~~~~~~~[0m
+[96msrc/controllers/adminController.ts[0m:[93m409[0m:[93m49[0m - [91merror[0m[90m TS2339: [0mProperty 'receiver' does not exist on type '{ status: MessageStatus; id: string; created_at: Date; conversation_id: string; sender_id: string; body: string; attachment_url: string | null; }'.
+
+[7m409[0m         receiver: message.receiver ? `${message.receiver.first_name} ${message.receiver.last_name}` : 'Bilinmeyen',
+[7m   [0m [91m                                                ~~~~~~~~[0m
+[96msrc/controllers/adminController.ts[0m:[93m409[0m:[93m80[0m - [91merror[0m[90m TS2339: [0mProperty 'receiver' does not exist on type '{ status: MessageStatus; id: string; created_at: Date; conversation_id: string; sender_id: string; body: string; attachment_url: string | null; }'.
+
+[7m409[0m         receiver: message.receiver ? `${message.receiver.first_name} ${message.receiver.last_name}` : 'Bilinmeyen',
+[7m   [0m [91m                                                                               ~~~~~~~~[0m
+[96msrc/controllers/adminController.ts[0m:[93m411[0m:[93m25[0m - [91merror[0m[90m TS2339: [0mProperty 'is_read' does not exist on type '{ status: MessageStatus; id: string; created_at: Date; conversation_id: string; sender_id: string; body: string; attachment_url: string | null; }'.
+
+[7m411[0m         status: message.is_read ? 'read' : 'unread'
+[7m   [0m [91m                        ~~~~~~~[0m
+[96msrc/controllers/adminController.ts[0m:[93m747[0m:[93m14[0m - [91merror[0m[90m TS2451: [0mCannot redeclare block-scoped variable 'getDashboardStats'.
+
+[7m747[0m export const getDashboardStats = async (req: Request, res: Response) => {
+[7m   [0m [91m             ~~~~~~~~~~~~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-20 21:26:50 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/adminController.ts[0m:[93m5[0m:[93m14[0m - [91merror[0m[90m TS2451: [0mCannot redeclare block-scoped variable 'getDashboardStats'.
+
+[7m5[0m export const getDashboardStats = async (req: Request, res: Response): Promise<void> => {
+[7m [0m [91m             ~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/adminController.ts[0m:[93m736[0m:[93m14[0m - [91merror[0m[90m TS2451: [0mCannot redeclare block-scoped variable 'getDashboardStats'.
+
+[7m736[0m export const getDashboardStats = async (req: Request, res: Response) => {
+[7m   [0m [91m             ~~~~~~~~~~~~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-20 21:33:00 [error]: TypeError: Do not know how to serialize a BigInt
+    at JSON.stringify (<anonymous>)
+    at stringify (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\express\lib\response.js:1160:12)
+    at ServerResponse.json (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\express\lib\response.js:271:14)
+    at getDashboardStats (C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\adminController.ts:293:9)
+2025-08-20 21:33:05 [error]: TypeError: Do not know how to serialize a BigInt
+    at JSON.stringify (<anonymous>)
+    at stringify (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\express\lib\response.js:1160:12)
+    at ServerResponse.json (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\express\lib\response.js:271:14)
+    at getDashboardStats (C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\adminController.ts:293:9)
+2025-08-20 21:33:07 [error]: TypeError: Do not know how to serialize a BigInt
+    at JSON.stringify (<anonymous>)
+    at stringify (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\express\lib\response.js:1160:12)
+    at ServerResponse.json (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\express\lib\response.js:271:14)
+    at getDashboardStats (C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\adminController.ts:293:9)
+2025-08-20 21:33:08 [error]: TypeError: Do not know how to serialize a BigInt
+    at JSON.stringify (<anonymous>)
+    at stringify (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\express\lib\response.js:1160:12)
+    at ServerResponse.json (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\express\lib\response.js:271:14)
+    at getDashboardStats (C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\adminController.ts:293:9)
+2025-08-20 21:33:08 [error]: TypeError: Do not know how to serialize a BigInt
+    at JSON.stringify (<anonymous>)
+    at stringify (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\express\lib\response.js:1160:12)
+    at ServerResponse.json (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\express\lib\response.js:271:14)
+    at getDashboardStats (C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\adminController.ts:293:9)

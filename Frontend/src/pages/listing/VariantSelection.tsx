@@ -107,6 +107,169 @@ const VariantSelection: React.FC = () => {
       brandName: brand?.name
     });
     
+    // Debug bilgisi ekleyelim
+    console.log('🔍 Variant Selection Debug:', {
+      variantName: variant.name,
+      modelName: model?.name,
+      brandName: brand?.name,
+      vehicleTypeName: vehicleType?.name,
+      variantId: variant.id
+    });
+    
+    // Havuzlu Lowbed kontrolü - daha kapsamlı kontrol
+    const isHavuzluLowbed = variant.name.toLowerCase().includes('havuzlu') ||
+                           (vehicleType?.name?.toLowerCase().includes('dorse') && 
+                            variant.name.toLowerCase().includes('havuz'));
+    
+    // Öndekirmalı Lowbed kontrolü - daha kapsamlı
+    const isOndekirmalıLowbed = variant.name.toLowerCase().includes('öndekirmalı') ||
+                               variant.name.toLowerCase().includes('ondekirmalı') ||
+                               variant.name.toLowerCase().includes('önde kirmalı') ||
+                               variant.name.toLowerCase().includes('ondekirma') ||
+                               (variant.name.toLowerCase().includes('önde') && variant.name.toLowerCase().includes('kırmalı')) ||
+                               (vehicleType?.name?.toLowerCase().includes('dorse') && 
+                                variant.name.toLowerCase().includes('önde'));
+    
+    console.log('🏊 Lowbed Variant Kontrol Debug:', {
+      variantName: variant.name,
+      variantNameLower: variant.name.toLowerCase(),
+      vehicleTypeName: vehicleType?.name,
+      isHavuzluLowbed: isHavuzluLowbed,
+      isOndekirmalıLowbed: isOndekirmalıLowbed,
+      containsHavuzlu: variant.name.toLowerCase().includes('havuzlu'),
+      containsÖndekirmalı: variant.name.toLowerCase().includes('öndekirmalı'),
+      containsLowbed: variant.name.toLowerCase().includes('lowbed')
+    });
+    
+    if (isHavuzluLowbed) {
+      console.log('🏊 Havuzlu Lowbed YÖNLENDİRME - Route:', `/create-ad/dorse/lowbed/havuzlu/${variant.id}`);
+      
+      navigate(`/create-ad/dorse/lowbed/havuzlu/${variant.id}`, {
+        state: { 
+          variant,
+          model,
+          brand,
+          vehicleType,
+          selection: {
+            vehicleType,
+            brand,
+            model,
+            variant
+          }
+        }
+      });
+      return;
+    }
+    
+    if (isOndekirmalıLowbed) {
+      console.log('🚧 Öndekirmalı Lowbed YÖNLENDİRME - Route:', `/create-ad/dorse/lowbed/ondekirmalı/${variant.id}`);
+      
+      navigate(`/create-ad/dorse/lowbed/ondekirmalı/${variant.id}`, {
+        state: { 
+          variant,
+          model,
+          brand,
+          vehicleType,
+          selection: {
+            vehicleType,
+            brand,
+            model,
+            variant
+          }
+        }
+      });
+      return;
+    }
+
+    // Kuruyük kontrolleri - Türkçe karakter ve yazım farklarıyla
+    const lowerVariantName = variant.name.toLowerCase();
+    const isKuruyuk = lowerVariantName.includes('kuruyük') || lowerVariantName.includes('kuruyuk') || 
+                      lowerVariantName.includes('kapaklı') || lowerVariantName.includes('kapaksız') ||
+                      lowerVariantName.includes('platform') || lowerVariantName.includes('kaya');
+    
+    console.log('🚛 Kuruyük Variant Debug:', {
+      variantName: variant.name,
+      lowerVariantName,
+      isKuruyuk,
+      vehicleTypeName: vehicleType?.name,
+      containsKaya: lowerVariantName.includes('kaya') || lowerVariantName.includes('kaya tip'),
+      containsKapaksız: lowerVariantName.includes('kapaksız'),
+      containsPlatform: lowerVariantName.includes('platform'),
+      containsKapaklı: lowerVariantName.includes('kapaklı')
+    });
+
+    if (isKuruyuk) {
+      // Kaya tipi kontrolü - "kaya tip" de dahil
+      if (lowerVariantName.includes('kaya tip') || lowerVariantName.includes('kaya')) {
+        console.log('🗻 Kapaklı(Kaya Tipi) Kuruyük YÖNLENDİRME');
+        navigate(`/create-ad/dorse/kuruyuk/kapakli-kaya-tipi/${variant.id}`, {
+          state: { variant, model, brand, vehicleType, selection: { vehicleType, brand, model, variant }}
+        });
+        return;
+      }
+      
+      // Kapaksız/Platform kontrolü
+      if (lowerVariantName.includes('kapaksız') || lowerVariantName.includes('platform')) {
+        console.log('🏗️ Kapaksız(Platform) Kuruyük YÖNLENDİRME');
+        navigate(`/create-ad/dorse/kuruyuk/kapaksiz-platform/${variant.id}`, {
+          state: { variant, model, brand, vehicleType, selection: { vehicleType, brand, model, variant }}
+        });
+        return;
+      }
+      
+      // Genel Kapaklı (default)
+      console.log('📦 Kapaklı Kuruyük YÖNLENDİRME (default)');
+      navigate(`/create-ad/dorse/kuruyuk/kapakli/${variant.id}`, {
+        state: { variant, model, brand, vehicleType, selection: { vehicleType, brand, model, variant }}
+      });
+      return;
+    }
+
+    // Tenteli kontrolleri
+    const lowerVariantName2 = variant.name.toLowerCase();
+    const isTenteli = lowerVariantName2.includes('tenteli') || 
+                      lowerVariantName2.includes('pilot') || 
+                      lowerVariantName2.includes('midilli') ||
+                      lowerVariantName2.includes('yarı midilli') ||
+                      lowerVariantName2.includes('yari midilli');
+    
+    console.log('🏕️ Tenteli Variant Debug:', {
+      variantName: variant.name,
+      lowerVariantName: lowerVariantName2,
+      isTenteli,
+      vehicleTypeName: vehicleType?.name,
+      containsPilot: lowerVariantName2.includes('pilot'),
+      containsMidilli: lowerVariantName2.includes('midilli'),
+      containsYariMidilli: lowerVariantName2.includes('yarı') || lowerVariantName2.includes('yari')
+    });
+
+    if (isTenteli) {
+      // Yarı Midilli kontrolü önce (daha spesifik)
+      if (lowerVariantName2.includes('yarı midilli') || lowerVariantName2.includes('yari midilli')) {
+        console.log('🏕️ Yarı Midilli Tenteli YÖNLENDİRME');
+        navigate(`/create-ad/dorse/tenteli/yari-midilli/${variant.id}`, {
+          state: { variant, model, brand, vehicleType, selection: { vehicleType, brand, model, variant }}
+        });
+        return;
+      }
+      
+      // Pilot kontrolü
+      if (lowerVariantName2.includes('pilot')) {
+        console.log('🏕️ Pilot Tenteli YÖNLENDİRME');
+        navigate(`/create-ad/dorse/tenteli/pilot/${variant.id}`, {
+          state: { variant, model, brand, vehicleType, selection: { vehicleType, brand, model, variant }}
+        });
+        return;
+      }
+      
+      // Midilli kontrolü (default)
+      console.log('🏕️ Midilli Tenteli YÖNLENDİRME (default)');
+      navigate(`/create-ad/dorse/tenteli/midilli/${variant.id}`, {
+        state: { variant, model, brand, vehicleType, selection: { vehicleType, brand, model, variant }}
+      });
+      return;
+    }
+    
     // Damperli Dorse için özel yönlendirme - Dorse kategorisi kontrolü
     const isDamperliDorse = model?.name === 'Damperli' || 
                            variant.name.toLowerCase().includes('damperli') ||

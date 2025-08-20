@@ -24,6 +24,15 @@ import KayaTipiForm from './pages/Forms/Dorse/Damperli/KayaTipiForm';
 import KapakliTipForm from './pages/Forms/Dorse/Damperli/KapakliTipForm';
 import HafriyatTipiForm from './pages/Forms/Dorse/Damperli/HafriyatTipiForm';
 import HavuzHardoxTipiForm from './pages/Forms/Dorse/Damperli/HavuzHardoxTipiForm';
+import FrigofirikForm from './pages/Forms/FrigofirikForm';
+import HavuzluForm from './pages/Forms/Lowbed/HavuzluForm';
+import OndekirmalıForm from './pages/Forms/Lowbed/OndekirmalıForm';
+import KapakliForm from './pages/Forms/Kuruyuk/KapakliForm';
+import KapakliKayaTipiForm from './pages/Forms/Kuruyuk/KapakliKayaTipiForm';
+import KapaksızPlatformForm from './pages/Forms/Kuruyuk/KapaksızPlatformForm';
+import PilotForm from './pages/Forms/Tenteli/PilotForm';
+import MidilliForm from './pages/Forms/Tenteli/MidilliForm';
+import YariMidilliForm from './pages/Forms/Tenteli/YariMidilliForm';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AllListings from './pages/admin/AllListings';
 import PendingListings from './pages/admin/PendingListings';
@@ -72,6 +81,19 @@ const App: React.FC = () => {
               <Route path="/create-ad/dorse/damperli/kapakli-tip" element={<KapakliTipForm />} />
               <Route path="/create-ad/dorse/damperli/hafriyat-tipi" element={<HafriyatTipiForm />} />
               <Route path="/create-ad/dorse/damperli/havuz-hardox-tipi" element={<HavuzHardoxTipiForm />} />
+              <Route path="/create-ad/dorse/frigofirik/:variantId" element={<FrigofirikForm />} />
+              <Route path="/create-ad/dorse/lowbed/havuzlu/:variantId" element={<HavuzluForm />} />
+              <Route path="/create-ad/dorse/lowbed/ondekirmalı/:variantId" element={<OndekirmalıForm />} />
+              
+              {/* Kuruyük Routes */}
+              <Route path="/create-ad/dorse/kuruyuk/kapakli/:variantId" element={<KapakliForm />} />
+              <Route path="/create-ad/dorse/kuruyuk/kapakli-kaya-tipi/:variantId" element={<KapakliKayaTipiForm />} />
+              <Route path="/create-ad/dorse/kuruyuk/kapaksiz-platform/:variantId" element={<KapaksızPlatformForm />} />
+              
+              {/* Tenteli Routes */}
+              <Route path="/create-ad/dorse/tenteli/pilot/:variantId" element={<PilotForm />} />
+              <Route path="/create-ad/dorse/tenteli/midilli/:variantId" element={<MidilliForm />} />
+              <Route path="/create-ad/dorse/tenteli/yari-midilli/:variantId" element={<YariMidilliForm />} />
               
               {/* User Routes with Layout */}
               <Route path="/" element={<UserLayout />}>
