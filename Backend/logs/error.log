@@ -426,3 +426,13 @@ Foreign key constraint violated on the constraint: `listings_brand_id_fkey`
     at router.process_params (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\express\lib\router\index.js:346:12)
     at next (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\express\lib\router\index.js:280:10)
     at router.handle (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\express\lib\router\index.js:175:3)
+2025-08-21 21:56:55 [error]: TypeError: Do not know how to serialize a BigInt
+    at JSON.stringify (<anonymous>)
+    at stringify (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\express\lib\response.js:1160:12)
+    at ServerResponse.json (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\express\lib\response.js:271:14)
+    at getDashboardStats (C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\adminController.ts:293:9)
+2025-08-21 21:57:00 [error]: TypeError: Do not know how to serialize a BigInt
+    at JSON.stringify (<anonymous>)
+    at stringify (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\express\lib\response.js:1160:12)
+    at ServerResponse.json (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\express\lib\response.js:271:14)
+    at getDashboardStats (C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\adminController.ts:293:9)
