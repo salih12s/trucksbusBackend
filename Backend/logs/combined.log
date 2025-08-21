@@ -21384,3 +21384,213 @@ Foreign key constraint violated on the constraint: `listings_brand_id_fkey`
 2025-08-21 22:00:29 [info]: Duration: 0ms
 2025-08-21 22:00:29 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
 2025-08-21 22:00:29 [info]: Duration: 0ms
+2025-08-21 22:01:29 [info]: Query: SELECT 1
+2025-08-21 22:01:29 [info]: Duration: 0ms
+2025-08-21 22:01:29 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-21 22:01:29 [info]: Duration: 0ms
+2025-08-21 22:01:29 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-21 22:01:29 [info]: Duration: 0ms
+2025-08-21 22:02:29 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-21 22:02:29 [info]: Duration: 2ms
+2025-08-21 22:02:29 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-21 22:02:29 [info]: Duration: 1ms
+2025-08-21 22:03:29 [info]: Query: SELECT 1
+2025-08-21 22:03:29 [info]: Duration: 0ms
+2025-08-21 22:03:29 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-21 22:03:29 [info]: Duration: 0ms
+2025-08-21 22:03:29 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-21 22:03:29 [info]: Duration: 0ms
+2025-08-21 22:04:29 [info]: Query: SELECT 1
+2025-08-21 22:04:29 [info]: Duration: 0ms
+2025-08-21 22:04:29 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-21 22:04:29 [info]: Duration: 0ms
+2025-08-21 22:04:29 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-21 22:04:29 [info]: Duration: 0ms
+2025-08-21 22:05:29 [info]: Query: SELECT 1
+2025-08-21 22:05:29 [info]: Duration: 0ms
+2025-08-21 22:05:29 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-21 22:05:29 [info]: Duration: 0ms
+2025-08-21 22:05:29 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-21 22:05:29 [info]: Duration: 0ms
+2025-08-21 22:06:29 [info]: Query: SELECT 1
+2025-08-21 22:06:29 [info]: Duration: 0ms
+2025-08-21 22:06:29 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-21 22:06:29 [info]: Duration: 0ms
+2025-08-21 22:06:29 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-21 22:06:29 [info]: Duration: 0ms
+2025-08-21 22:07:29 [info]: Query: SELECT 1
+2025-08-21 22:07:29 [info]: Duration: 0ms
+2025-08-21 22:07:29 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-21 22:07:29 [info]: Duration: 0ms
+2025-08-21 22:07:29 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-21 22:07:29 [info]: Duration: 0ms
+2025-08-21 22:08:29 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-21 22:08:29 [info]: Duration: 1ms
+2025-08-21 22:08:29 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-21 22:08:29 [info]: Duration: 1ms
+2025-08-21 22:09:29 [info]: Query: SELECT 1
+2025-08-21 22:09:29 [info]: Duration: 0ms
+2025-08-21 22:09:29 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-21 22:09:29 [info]: Duration: 0ms
+2025-08-21 22:09:29 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-21 22:09:29 [info]: Duration: 0ms
+2025-08-21 22:10:08 [info]: Query: SELECT 1
+2025-08-21 22:10:08 [info]: Duration: 0ms
+2025-08-21 22:10:08 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-21 22:10:08 [info]: Duration: 1ms
+2025-08-21 22:10:21 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-21 22:10:21 [info]: Duration: 1ms
+2025-08-21 22:10:29 [info]: Query: SELECT 1
+2025-08-21 22:10:29 [info]: Duration: 0ms
+2025-08-21 22:10:29 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-21 22:10:29 [info]: Duration: 0ms
+2025-08-21 22:10:31 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-21 22:10:31 [info]: Duration: 0ms
+2025-08-21 22:10:31 [info]: Query: SELECT "public"."listings"."id", "public"."listings"."title", "public"."listings"."description", "public"."listings"."price", "public"."listings"."year", "public"."listings"."category_id", "public"."listings"."vehicle_type_id", "public"."listings"."brand_id", "public"."listings"."model_id", "public"."listings"."variant_id", "public"."listings"."status"::text, "public"."listings"."moderation_status"::text, "public"."listings"."is_active", "public"."listings"."is_approved", "public"."listings"."is_pending", "public"."listings"."view_count", "public"."listings"."is_promoted", "public"."listings"."approved_by", "public"."listings"."approved_at", "public"."listings"."rejected_at", "public"."listings"."reject_reason", "public"."listings"."seller_name", "public"."listings"."seller_phone", "public"."listings"."seller_email", "public"."listings"."city_id", "public"."listings"."district_id", "public"."listings"."created_at", "public"."listings"."updated_at", "public"."listings"."user_id", "public"."listings"."color", "public"."listings"."engine_power", "public"."listings"."engine_volume", "public"."listings"."fuel_type", "public"."listings"."is_exchangeable", "public"."listings"."km", "public"."listings"."license_plate", "public"."listings"."neighborhood_id", "public"."listings"."transmission", "public"."listings"."vehicle_condition", "public"."listings"."body_type", "public"."listings"."carrying_capacity", "public"."listings"."cabin_type", "public"."listings"."tire_condition", "public"."listings"."drive_type", "public"."listings"."plate_origin", "public"."listings"."features", "public"."listings"."damage_record", "public"."listings"."paint_change", "public"."listings"."tramer_record", "public"."listings"."images" FROM "public"."listings" WHERE ("public"."listings"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-21 22:10:31 [info]: Duration: 6ms
+2025-08-21 22:10:31 [info]: Query: SELECT "public"."categories"."id", "public"."categories"."name" FROM "public"."categories" WHERE "public"."categories"."id" IN ($1) OFFSET $2
+2025-08-21 22:10:31 [info]: Duration: 1ms
+2025-08-21 22:10:31 [info]: Query: SELECT "public"."vehicle_types"."id", "public"."vehicle_types"."name" FROM "public"."vehicle_types" WHERE "public"."vehicle_types"."id" IN ($1) OFFSET $2
+2025-08-21 22:10:31 [info]: Duration: 2ms
+2025-08-21 22:10:31 [info]: Query: SELECT "public"."cities"."id", "public"."cities"."name" FROM "public"."cities" WHERE "public"."cities"."id" IN ($1) OFFSET $2
+2025-08-21 22:10:31 [info]: Duration: 1ms
+2025-08-21 22:10:31 [info]: Query: SELECT "public"."districts"."id", "public"."districts"."name" FROM "public"."districts" WHERE "public"."districts"."id" IN ($1) OFFSET $2
+2025-08-21 22:10:31 [info]: Duration: 0ms
+2025-08-21 22:10:31 [info]: Query: SELECT "public"."users"."id", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."email", "public"."users"."phone", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified", "public"."users"."created_at", "public"."users"."updated_at" FROM "public"."users" WHERE "public"."users"."id" IN ($1) OFFSET $2
+2025-08-21 22:10:31 [info]: Duration: 0ms
+2025-08-21 22:10:31 [info]: Query: SELECT "public"."listing_images"."id", "public"."listing_images"."url", "public"."listing_images"."alt", "public"."listing_images"."sort_order", "public"."listing_images"."listing_id" FROM "public"."listing_images" WHERE "public"."listing_images"."listing_id" IN ($1) ORDER BY "public"."listing_images"."sort_order" ASC OFFSET $2
+2025-08-21 22:10:31 [info]: Duration: 1ms
+2025-08-21 22:10:31 [info]: Query: UPDATE "public"."listings" SET "view_count" = ("public"."listings"."view_count" + $1) WHERE ("public"."listings"."id" = $2 AND 1=1) RETURNING "public"."listings"."id", "public"."listings"."title", "public"."listings"."description", "public"."listings"."price", "public"."listings"."year", "public"."listings"."category_id", "public"."listings"."vehicle_type_id", "public"."listings"."brand_id", "public"."listings"."model_id", "public"."listings"."variant_id", "public"."listings"."status"::text, "public"."listings"."moderation_status"::text, "public"."listings"."is_active", "public"."listings"."is_approved", "public"."listings"."is_pending", "public"."listings"."view_count", "public"."listings"."is_promoted", "public"."listings"."approved_by", "public"."listings"."approved_at", "public"."listings"."rejected_at", "public"."listings"."reject_reason", "public"."listings"."seller_name", "public"."listings"."seller_phone", "public"."listings"."seller_email", "public"."listings"."city_id", "public"."listings"."district_id", "public"."listings"."created_at", "public"."listings"."updated_at", "public"."listings"."user_id", "public"."listings"."color", "public"."listings"."engine_power", "public"."listings"."engine_volume", "public"."listings"."fuel_type", "public"."listings"."is_exchangeable", "public"."listings"."km", "public"."listings"."license_plate", "public"."listings"."neighborhood_id", "public"."listings"."transmission", "public"."listings"."vehicle_condition", "public"."listings"."body_type", "public"."listings"."carrying_capacity", "public"."listings"."cabin_type", "public"."listings"."tire_condition", "public"."listings"."drive_type", "public"."listings"."plate_origin", "public"."listings"."features", "public"."listings"."damage_record", "public"."listings"."paint_change", "public"."listings"."tramer_record", "public"."listings"."images"
+2025-08-21 22:10:31 [info]: Duration: 4ms
+2025-08-21 22:10:34 [info]: Query: SELECT 1
+2025-08-21 22:10:34 [info]: Duration: 0ms
+2025-08-21 22:10:34 [info]: Query: SELECT COUNT(*) AS "_count._all" FROM (SELECT "public"."listings"."id" FROM "public"."listings" WHERE ("public"."listings"."is_active" = $1 AND "public"."listings"."is_approved" = $2) OFFSET $3) AS "sub"
+2025-08-21 22:10:34 [info]: Duration: 4ms
+2025-08-21 22:10:34 [info]: Query: SELECT "public"."listings"."id", "public"."listings"."title", "public"."listings"."description", "public"."listings"."price", "public"."listings"."year", "public"."listings"."km", "public"."listings"."seller_name", "public"."listings"."seller_phone", "public"."listings"."seller_email", "public"."listings"."created_at", "public"."listings"."updated_at", "public"."listings"."status"::text, "public"."listings"."is_active", "public"."listings"."is_approved", "public"."listings"."view_count", "public"."listings"."images", "public"."listings"."color", "public"."listings"."fuel_type", "public"."listings"."transmission", "public"."listings"."engine_power", "public"."listings"."engine_volume", "public"."listings"."vehicle_condition", "public"."listings"."is_exchangeable", "public"."listings"."license_plate", "public"."listings"."user_id", "public"."listings"."category_id", "public"."listings"."vehicle_type_id", "public"."listings"."brand_id", "public"."listings"."model_id", "public"."listings"."variant_id", "public"."listings"."city_id", "public"."listings"."district_id" FROM "public"."listings" WHERE ("public"."listings"."is_active" = $1 AND "public"."listings"."is_approved" = $2) ORDER BY "public"."listings"."created_at" DESC LIMIT $3 OFFSET $4
+2025-08-21 22:10:34 [info]: Duration: 60ms
+2025-08-21 22:10:34 [info]: Query: SELECT "public"."categories"."id", "public"."categories"."name" FROM "public"."categories" WHERE "public"."categories"."id" IN ($1) OFFSET $2
+2025-08-21 22:10:34 [info]: Duration: 1ms
+2025-08-21 22:10:34 [info]: Query: SELECT "public"."vehicle_types"."id", "public"."vehicle_types"."name" FROM "public"."vehicle_types" WHERE "public"."vehicle_types"."id" IN ($1,$2,$3,$4,$5) OFFSET $6
+2025-08-21 22:10:34 [info]: Duration: 1ms
+2025-08-21 22:10:34 [info]: Query: SELECT "public"."brands"."id", "public"."brands"."name" FROM "public"."brands" WHERE "public"."brands"."id" IN ($1) OFFSET $2
+2025-08-21 22:10:34 [info]: Duration: 1ms
+2025-08-21 22:10:34 [info]: Query: SELECT "public"."models"."id", "public"."models"."name" FROM "public"."models" WHERE "public"."models"."id" IN ($1) OFFSET $2
+2025-08-21 22:10:34 [info]: Duration: 1ms
+2025-08-21 22:10:34 [info]: Query: SELECT "public"."variants"."id", "public"."variants"."name" FROM "public"."variants" WHERE "public"."variants"."id" IN ($1) OFFSET $2
+2025-08-21 22:10:34 [info]: Duration: 1ms
+2025-08-21 22:10:34 [info]: Query: SELECT "public"."cities"."id", "public"."cities"."name" FROM "public"."cities" WHERE "public"."cities"."id" IN ($1,$2) OFFSET $3
+2025-08-21 22:10:34 [info]: Duration: 1ms
+2025-08-21 22:10:34 [info]: Query: SELECT "public"."districts"."id", "public"."districts"."name" FROM "public"."districts" WHERE "public"."districts"."id" IN ($1,$2,$3) OFFSET $4
+2025-08-21 22:10:34 [info]: Duration: 1ms
+2025-08-21 22:10:34 [info]: Query: SELECT "public"."listing_images"."id", "public"."listing_images"."url", "public"."listing_images"."alt", "public"."listing_images"."sort_order", "public"."listing_images"."listing_id" FROM "public"."listing_images" WHERE "public"."listing_images"."listing_id" IN ($1,$2,$3,$4,$5) OFFSET $6
+2025-08-21 22:10:34 [info]: Duration: 0ms
+2025-08-21 22:10:34 [info]: Query: SELECT "public"."users"."id", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."phone" FROM "public"."users" WHERE "public"."users"."id" IN ($1) OFFSET $2
+2025-08-21 22:10:34 [info]: Duration: 0ms
+2025-08-21 22:10:36 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-21 22:10:36 [info]: Duration: 0ms
+2025-08-21 22:10:51 [info]: Query: SELECT 1
+2025-08-21 22:10:51 [info]: Duration: 0ms
+2025-08-21 22:10:51 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-21 22:10:51 [info]: Duration: 0ms
+2025-08-21 22:11:07 [info]: Query: SELECT 1
+2025-08-21 22:11:07 [info]: Duration: 0ms
+2025-08-21 22:11:07 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-21 22:11:07 [info]: Duration: 1ms
+2025-08-21 22:11:13 [info]: Socket.IO service initialized
+2025-08-21 22:11:13 [info]: Category routes loaded
+2025-08-21 22:11:13 [info]: Auth routes loaded
+2025-08-21 22:11:13 [info]: Location routes loaded
+2025-08-21 22:11:13 [info]: Conversations routes loaded
+2025-08-21 22:11:13 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/adminController.ts[0m:[93m737[0m:[93m34[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m737[0m export const hardDeleteListing = async (req: Request, res: Response) => {
+[7m   [0m [91m                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-21 22:11:14 [info]: Listing routes loaded
+2025-08-21 22:11:14 [info]: Favorites routes loaded
+2025-08-21 22:11:14 [info]: Me routes loaded
+2025-08-21 22:11:14 [info]: Report routes loaded
+2025-08-21 22:11:14 [info]: Notification routes loaded
+2025-08-21 22:11:14 [info]: Database connected successfully
+2025-08-21 22:11:19 [info]: Socket.IO service initialized
+2025-08-21 22:11:19 [info]: Category routes loaded
+2025-08-21 22:11:20 [info]: Auth routes loaded
+2025-08-21 22:11:20 [info]: Location routes loaded
+2025-08-21 22:11:20 [info]: Conversations routes loaded
+2025-08-21 22:11:20 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/adminController.ts[0m:[93m760[0m:[93m7[0m - [91merror[0m[90m TS2322: [0mType 'Response<any, Record<string, any>>' is not assignable to type 'void'.
+
+[7m760[0m       return res.status(404).json({
+[7m   [0m [91m      ~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-21 22:11:20 [info]: Listing routes loaded
+2025-08-21 22:11:20 [info]: Favorites routes loaded
+2025-08-21 22:11:20 [info]: Me routes loaded
+2025-08-21 22:11:20 [info]: Report routes loaded
+2025-08-21 22:11:21 [info]: Notification routes loaded
+2025-08-21 22:11:21 [info]: Database connected successfully
+2025-08-21 22:11:22 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-21 22:11:22 [info]: Duration: 0ms
+2025-08-21 22:11:26 [info]: Socket.IO service initialized
+2025-08-21 22:11:26 [info]: Category routes loaded
+2025-08-21 22:11:26 [info]: Auth routes loaded
+2025-08-21 22:11:26 [info]: Location routes loaded
+2025-08-21 22:11:27 [info]: Conversations routes loaded
+2025-08-21 22:11:27 [info]: Admin routes loaded
+2025-08-21 22:11:27 [info]: Listing routes loaded
+2025-08-21 22:11:27 [info]: Favorites routes loaded
+2025-08-21 22:11:27 [info]: Me routes loaded
+2025-08-21 22:11:27 [info]: Report routes loaded
+2025-08-21 22:11:27 [info]: Notification routes loaded
+2025-08-21 22:11:27 [info]: Database connected successfully
+2025-08-21 22:11:29 [info]: Query: SELECT 1
+2025-08-21 22:11:29 [info]: Duration: 0ms
+2025-08-21 22:11:29 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-21 22:11:29 [info]: Duration: 0ms
+2025-08-21 22:11:34 [info]: Socket.IO service initialized
+2025-08-21 22:11:34 [info]: Category routes loaded
+2025-08-21 22:11:34 [info]: Auth routes loaded
+2025-08-21 22:11:34 [info]: Location routes loaded
+2025-08-21 22:11:34 [info]: Conversations routes loaded
+2025-08-21 22:11:35 [info]: Admin routes loaded
+2025-08-21 22:11:35 [info]: Listing routes loaded
+2025-08-21 22:11:35 [info]: Favorites routes loaded
+2025-08-21 22:11:35 [info]: Me routes loaded
+2025-08-21 22:11:35 [info]: Report routes loaded
+2025-08-21 22:11:35 [info]: Notification routes loaded
+2025-08-21 22:11:35 [info]: Database connected successfully
+2025-08-21 22:11:37 [info]: Query: SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."username", "public"."users"."role"::text, "public"."users"."is_active", "public"."users"."is_email_verified" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+2025-08-21 22:11:37 [info]: Duration: 0ms
+2025-08-21 22:11:40 [info]: Socket.IO service initialized
+2025-08-21 22:11:41 [info]: Category routes loaded
+2025-08-21 22:11:41 [info]: Auth routes loaded
+2025-08-21 22:11:41 [info]: Location routes loaded
+2025-08-21 22:11:41 [info]: Conversations routes loaded
+2025-08-21 22:11:42 [info]: Admin routes loaded
+2025-08-21 22:11:42 [info]: Listing routes loaded
+2025-08-21 22:11:42 [info]: Favorites routes loaded
+2025-08-21 22:11:42 [info]: Me routes loaded
+2025-08-21 22:11:42 [info]: Report routes loaded
+2025-08-21 22:11:42 [info]: Notification routes loaded
+2025-08-21 22:11:42 [info]: Database connected successfully

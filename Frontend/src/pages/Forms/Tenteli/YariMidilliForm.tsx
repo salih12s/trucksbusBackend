@@ -40,7 +40,6 @@ import {
   Close,
   Umbrella,
 } from '@mui/icons-material';
-import UserHeader from '../../../components/layout/UserHeader';
 import { locationService, City, District } from '../../../services/locationService';
 import { api } from '../../../services/api';
 import { formatPhoneNumber } from '../../../utils/phoneUtils';
@@ -238,7 +237,7 @@ const YariMidilliForm: React.FC = () => {
       const response = await api.post('/listings', listingData);
       
       if (response.data) {
-        alert('İlanınız başarıyla oluşturuldu! Moderatör onayından sonra yayınlanacaktır.');
+        alert('İlanınız başarıyla oluşturuldu! Admin onayından sonra yayınlanacaktır.');
         navigate('/');
       }
     } catch (err: any) {
@@ -560,7 +559,6 @@ const YariMidilliForm: React.FC = () => {
 
   return (
     <>
-      <UserHeader />
       <Container maxWidth="lg">
         <Box sx={{ py: 4 }}>
           <Paper sx={{ p: 4 }}>

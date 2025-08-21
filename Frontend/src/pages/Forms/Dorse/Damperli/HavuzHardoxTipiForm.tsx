@@ -39,7 +39,6 @@ import {
   CloudUpload,
   Close,
 } from '@mui/icons-material';
-import UserHeader from '../../../../components/layout/UserHeader';
 import { locationService, City, District } from '../../../../services/locationService';
 import { api } from '../../../../services/api';
 import { formatPhoneNumber } from '../../../../utils/phoneUtils';
@@ -328,7 +327,7 @@ const HavuzHardoxTipiDorseAdForm: React.FC = () => {
       
       if (response.data) {
         console.log('✅ Havuz Hardox Tipi Dorse ilanı başarıyla oluşturuldu:', response.data);
-        alert('İlanınız başarıyla oluşturuldu! Moderatör onayından sonra yayınlanacaktır.');
+        alert('İlanınız başarıyla oluşturuldu! Admin onayından sonra yayınlanacaktır.');
         // navigate('/my-ads');
       }
     } catch (err: any) {
@@ -707,7 +706,6 @@ const HavuzHardoxTipiDorseAdForm: React.FC = () => {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', backgroundColor: '#f8f9fa' }}>
       {/* Header */}
-      <UserHeader />
       
       {/* Main Content */}
       <Container maxWidth="lg" sx={{ py: 4, mt: 4 }}>

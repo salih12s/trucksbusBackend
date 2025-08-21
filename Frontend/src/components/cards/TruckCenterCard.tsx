@@ -1,11 +1,11 @@
-import { Card, CardContent, Typography, Box, Chip } from '@mui/material';
+import { Card, CardContent, Typography, Box } from '@mui/material';
 import { alpha, useTheme } from '@mui/material/styles';
 import { Person, Phone, CalendarToday, Visibility, Chat, Flag, Bookmark, Check, Close } from '@mui/icons-material';
 import { SimpleListing } from '../../context/ListingContext';
 import { useAuth } from '../../context/AuthContext';
-import { useNotification } from '../../context/NotificationContext';
 import { useFavorites } from '../../context/FavoritesContext';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
+import { isPositiveNumber, formatPhoneForDisplay, formatKMForDisplay, formatYearForDisplay } from '../../utils/present';
 
 // CSS animasyonu (Değişiklik yok)
 const pulseKeyframes = `
@@ -157,27 +157,6 @@ const TruckCenterCard: React.FC<TruckCenterCardProps> = ({
     const dateObj = typeof date === 'string' ? new Date(date) : date;
     return dateObj.toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' });
   };
-  
-  // ✅ Telefon formatı: 0xxx xxx xx xx (daha iyi format)
-  const formatPhone = (phone: string | null | undefined) => {
-    // Null/undefined kontrolü
-    if (!phone) return '';
-    
-    // Sadece rakamları al
-    const cleaned = phone.replace(/\D/g, '');
-    
-    // 11 haneli ve 0 ile başlıyorsa formatla
-    if (cleaned.length === 11 && cleaned.startsWith('0')) {
-      return `${cleaned.slice(0, 4)} ${cleaned.slice(4, 7)} ${cleaned.slice(7, 9)} ${cleaned.slice(9)}`;
-    }
-    
-    // 10 haneli ise başına 0 ekle
-    if (cleaned.length === 10 && cleaned.startsWith('5')) {
-      return `0${cleaned.slice(0, 3)} ${cleaned.slice(3, 6)} ${cleaned.slice(6, 8)} ${cleaned.slice(8)}`;
-    }
-    
-    return phone; // Fallback olarak orijinal
-  };
 
   return (
     <Card
@@ -317,34 +296,39 @@ const TruckCenterCard: React.FC<TruckCenterCardProps> = ({
           }}>
             {formatPrice(listing.price)}
           </Typography>
+          {/* Conditionally render KM only if it has a value */}
+          {isPositiveNumber(listing.km) && (
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
-            <KeyboardArrowRightIcon sx={{ 
-              fontSize: 13, 
-              mr: 0.75, 
-              color: theme.palette.text.secondary 
-            }} />
-            <Typography variant="caption" sx={{ 
-              color: theme.palette.text.secondary, 
-              fontSize: 12 
-            }}>
-              KM: {listing.km}
-            </Typography>            
-          </Box>
-       
+              <KeyboardArrowRightIcon sx={{ 
+                fontSize: 13, 
+                mr: 0.75, 
+                color: theme.palette.text.secondary 
+              }} />
+              <Typography variant="caption" sx={{ 
+                color: theme.palette.text.secondary, 
+                fontSize: 12 
+              }}>
+                KM: {formatKMForDisplay(listing.km)}
+              </Typography>            
+            </Box>
+          )}
 
-       <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
-            <KeyboardArrowRightIcon sx={{ 
-              fontSize: 13, 
-              mr: 0.75, 
-              color: theme.palette.text.secondary 
-            }} />
-            <Typography variant="caption" sx={{ 
-              color: theme.palette.text.secondary, 
-              fontSize: 12 
-            }}>
-              Model Yılı: {listing.year}
-            </Typography>
-          </Box>
+          {/* Conditionally render Model Year only if it has a value */}
+          {isPositiveNumber(listing.year) && (
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
+              <KeyboardArrowRightIcon sx={{ 
+                fontSize: 13, 
+                mr: 0.75, 
+                color: theme.palette.text.secondary 
+              }} />
+              <Typography variant="caption" sx={{ 
+                color: theme.palette.text.secondary, 
+                fontSize: 12 
+              }}>
+                Model Yılı: {formatYearForDisplay(listing.year)}
+              </Typography>
+            </Box>
+          )}
        
         </Box>
 
@@ -397,7 +381,7 @@ const TruckCenterCard: React.FC<TruckCenterCardProps> = ({
               fontFamily: 'monospace',
               letterSpacing: 0.5,
             }}>
-              {formatPhone(listing.owner.phone)}
+              {formatPhoneForDisplay(listing.owner.phone)}
             </Typography>
           </Box>
         </Box>

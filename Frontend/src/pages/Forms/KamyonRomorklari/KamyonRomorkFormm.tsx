@@ -85,7 +85,7 @@ const KamyonRomorkForm: React.FC = () => {
     }
   };
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+  useDropzone({
     onDrop,
     accept: {
       'image/*': ['.jpeg', '.jpg', '.png', '.webp']

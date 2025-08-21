@@ -327,7 +327,7 @@ const KapakliTipDorseAdForm: React.FC = () => {
       
       if (response.data) {
         console.log('✅ Dorse ilanı başarıyla oluşturuldu:', response.data);
-        alert('İlanınız başarıyla oluşturuldu! Moderatör onayından sonra yayınlanacaktır.');
+        alert('İlanınız başarıyla oluşturuldu! Admin onayından sonra yayınlanacaktır.');
         // navigate('/my-ads');
       }
     } catch (err: any) {

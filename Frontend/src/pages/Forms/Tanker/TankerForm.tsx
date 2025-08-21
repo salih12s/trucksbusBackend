@@ -235,7 +235,7 @@ const TankerForm: React.FC = () => {
       const response = await api.post('/listings', listingData);
       
       if (response.data) {
-        alert('İlanınız başarıyla oluşturuldu! Moderatör onayından sonra yayınlanacaktır.');
+        alert('İlanınız başarıyla oluşturuldu! Admin onayından sonra yayınlanacaktır.');
         navigate('/');
       }
     } catch (err: any) {

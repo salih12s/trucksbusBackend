@@ -42,7 +42,6 @@ import {
   AttachMoney,
   AcUnit,
 } from '@mui/icons-material';
-import UserHeader from '../../components/layout/UserHeader';
 import { locationService, City, District } from '../../services/locationService';
 import api from '../../services/api';
 import { formatPhoneNumber } from '../../utils/phoneUtils';
@@ -310,7 +309,7 @@ const FrigofirikForm: React.FC = () => {
       
       if (response.data) {
         console.log('✅ Frigofirik ilanı başarıyla oluşturuldu:', response.data);
-        alert('İlanınız başarıyla oluşturuldu! Moderatör onayından sonra yayınlanacaktır.');
+        alert('İlanınız başarıyla oluşturuldu! Admin onayından sonra yayınlanacaktır.');
         navigate('/profile');
       }
     } catch (err: any) {
@@ -646,7 +645,6 @@ const FrigofirikForm: React.FC = () => {
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: 'grey.50' }}>
-      <UserHeader />
       
       <Container maxWidth="md" sx={{ py: 4 }}>
         <Paper elevation={3} sx={{ p: 4, borderRadius: 2 }}>

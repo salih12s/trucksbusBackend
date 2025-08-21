@@ -323,7 +323,7 @@ const HavuzluForm: React.FC = () => {
       
       if (response.data) {
         console.log('✅ Havuzlu ilanı başarıyla oluşturuldu:', response.data);
-        alert('İlanınız başarıyla oluşturuldu! Moderatör onayından sonra yayınlanacaktır.');
+        alert('İlanınız başarıyla oluşturuldu! Admin onayından sonra yayınlanacaktır.');
         navigate('/');
       }
     } catch (err: any) {
@@ -727,7 +727,6 @@ const HavuzluForm: React.FC = () => {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', backgroundColor: '#f8f9fa' }}>
       {/* Header */}
-      <UserHeader />
       
       {/* Main Content */}
       <Container maxWidth="lg" sx={{ py: 4, mt: 4 }}>

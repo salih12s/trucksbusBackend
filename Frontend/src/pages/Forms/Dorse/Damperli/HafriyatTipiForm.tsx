@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../../context/AuthContext';
 import {
   Box,
@@ -50,7 +51,7 @@ const DEVRILME_YONLERI = [
   'Sola'
 ];
 
-interface KayaTipiDorseFormData {
+interface HafriyatTipiDorseFormData {
   // Temel Bilgiler
   title: string;
   description: string;
@@ -92,6 +93,7 @@ const steps = [
 
 const HafriyatTipiForm: React.FC = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [activeStep, setActiveStep] = useState(0);
   const [cities, setCities] = useState<City[]>([]);
   const [districts, setDistricts] = useState<District[]>([]);
@@ -101,7 +103,7 @@ const HafriyatTipiForm: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [photos, setPhotos] = useState<File[]>([]);
 
-  const [formData, setFormData] = useState<KayaTipiDorseFormData>({
+  const [formData, setFormData] = useState<HafriyatTipiDorseFormData>({
     title: '',
     description: '',
     price: '',
@@ -325,10 +327,10 @@ const HafriyatTipiForm: React.FC = () => {
       // API çağrısı
       const response = await api.post('/listings', listingData);
       
-      if (response.data) {
+      if (response.data.success) {
         console.log('✅ Hafriyat Tipi Dorse ilanı başarıyla oluşturuldu:', response.data);
-        alert('İlanınız başarıyla oluşturuldu! Moderatör onayından sonra yayınlanacaktır.');
-        // navigate('/my-ads');
+        alert('İlanınız başarıyla oluşturuldu! Admin onayından sonra yayınlanacaktır.');
+        navigate('/'); // Anasayfaya yönlendir
       }
     } catch (err: any) {
       console.error('❌ Hafriyat Tipi Dorse ilanı oluşturma hatası:', err);
@@ -345,7 +347,7 @@ const HafriyatTipiForm: React.FC = () => {
           <Stack spacing={3}>
             <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <LocalShipping color="primary" />
-              Kaya Tipi Damperli Dorse Bilgileri
+              Hafriyat Tipi Damperli Dorse Bilgileri
             </Typography>
 
             <TextField
@@ -353,7 +355,7 @@ const HafriyatTipiForm: React.FC = () => {
               label="İlan Başlığı"
               value={formData.title}
               onChange={(e) => handleInputChange('title', e.target.value)}
-              placeholder="Örn: Tertemiz 2020 Model Kaya Tipi Damperli Dorse"
+              placeholder="Örn: Tertemiz 2020 Model Hafriyat Tipi Damperli Dorse"
               required
             />
 
@@ -711,7 +713,7 @@ const HafriyatTipiForm: React.FC = () => {
         {/* Header */}
         <Box sx={{ mb: 4, textAlign: 'center' }}>
           <Typography variant="h4" component="h1" gutterBottom>
-            Kaya Tipi Damperli Dorse İlanı Oluştur
+            Hafriyat Tipi Damperli Dorse İlanı Oluştur
           </Typography>
         </Box>
 

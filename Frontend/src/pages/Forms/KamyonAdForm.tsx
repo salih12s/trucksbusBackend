@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { api } from '../../services/api';
+import { listingService } from '../../services/listingService';
+import { createStandardPayload, validateListingPayload } from '../../services/apiNormalizer';
 import {
   Box,
   Container,
@@ -508,15 +510,6 @@ const KamyonAdForm = () => {
       setLoading(true);
       setError('');
 
-      // Form validasyonu
-      if (!formData.title || !formData.price || !formData.city) {
-        setError('Zorunlu alanları doldurunuz');
-        return;
-      }
-
-      // Real API call to create listing using form data
-      console.log('Kamyon ilanı oluşturuluyor:', formData);
-      
       // Convert uploaded images to data URLs for backend
       const imageUrls = await Promise.all(
         uploadedImages.map(file => {
@@ -528,29 +521,31 @@ const KamyonAdForm = () => {
         })
       );
 
-      const listingData = {
+      // Create standardized payload
+      const standardPayload = createStandardPayload({
         title: formData.title,
         description: formData.description,
-        price: Number(formData.price.replace(/\./g, '')), // Remove dots from price
-        year: Number(formData.year),
-        km: Number(formData.km.replace(/\./g, '')) || 0, // Remove dots from km
-        category_id: selectedBrand?.vehicle_types?.categories?.id || "vehicle-category-001", // Vasıta category
-        vehicle_type_id: selectedBrand?.vehicle_type_id || selectedModel?.brands?.vehicle_type_id || "cme633w8v0001981ksnpl6dj6", // Kamyon & Kamyonet
-        brand_id: selectedBrand?.id || null, // Gerçek brand ID - varsayılan değer yok
-        model_id: selectedModel?.id || null, // Gerçek model ID - varsayılan değer yok
-        variant_id: selectedVariant?.id || null, // Gerçek variant ID
-        city_id: cities.find(city => city.name === formData.city)?.id || null, // Gerçek city ID
-        district_id: districts.find(district => district.name === formData.district)?.id || null, // Gerçek district ID
+        price: formData.price.replace(/\./g, ''), // Remove dots from price
+        year: formData.year,
+        km: formData.km.replace(/\./g, ''), // Remove dots from km
+        city: formData.city,
+        category_id: selectedBrand?.vehicle_types?.categories?.id || "vehicle-category-001",
+        vehicle_type_id: selectedBrand?.vehicle_type_id || selectedModel?.brands?.vehicle_type_id || "cme633w8v0001981ksnpl6dj6",
+        brand_id: selectedBrand?.id || null,
+        model_id: selectedModel?.id || null,
+        variant_id: selectedVariant?.id || null,
+        city_id: cities.find(city => city.name === formData.city)?.id,
+        district_id: districts.find(district => district.name === formData.district)?.id,
         seller_name: formData.sellerName,
-        seller_phone: formData.sellerPhone.replace(/[^\d]/g, ''), // Remove formatting from phone
-        seller_email: formData.sellerEmail,
+        seller_phone: formData.sellerPhone.replace(/[^\d]/g, ''),
+        images: imageUrls
+      }, {
+        // Kamyon-specific properties
         color: formData.color || "Belirtilmemiş",
         fuel_type: formData.fuelType,
         transmission: formData.transmission,
         vehicle_condition: formData.vehicleCondition,
         is_exchangeable: formData.exchange === 'Evet',
-        
-        // Kamyon özel alanları
         motor_power: formData.motorPower,
         engine_volume: formData.engineVolume,
         body_type: formData.bodyType,
@@ -560,51 +555,45 @@ const KamyonAdForm = () => {
         drive_type: formData.driveType,
         plate_origin: formData.plateOrigin,
         vehicle_plate: formData.vehiclePlate,
-        
-        // Özellikler
         features: formData.features,
         damage_record: formData.damageRecord,
         paint_change: formData.paintChange,
-        tramer_record: formData.tramerRecord,
-        
-        images: imageUrls // Send actual image data URLs
-      };
-
-      console.log('Gönderilecek veri:', listingData);
-      console.log('Selection context:', {
-        selectedBrand,
-        selectedModel, 
-        selectedVariant
+        tramer_record: formData.tramerRecord
       });
-      console.log('Selected brand vehicle_types:', selectedBrand?.vehicle_types);
-      console.log('Category from brand:', selectedBrand?.vehicle_types?.categories);
-      console.log('İstek URL:', `${api.defaults.baseURL}/listings`);
-      console.log('İstek başlıyor...');
 
-      const response = await api.post('/listings', listingData);
-      console.log('API Response:', response.data);
-      console.log('İstek başarılı!');
+      // Validate payload
+      const validation = validateListingPayload(standardPayload);
+      if (!validation.isValid) {
+        setError(validation.errors.join(', '));
+        return;
+      }
+
+      console.log('Kamyon ilanı oluşturuluyor:', standardPayload);
+
+      // Use standardized listing service
+      const response = await listingService.createStandardListing(standardPayload);
+      console.log('API Response:', response);
       
-      if (response.data.success) {
+      if (response.success) {
         alert('Kamyon ilanınız başarıyla oluşturuldu! Admin onayından sonra yayınlanacaktır.');
-        navigate('/');
+        navigate('/user/my-listings'); // Navigate to MyListings to show PENDING status
+      } else {
+        throw new Error(response.message || 'İlan oluşturulamadı');
       }
 
     } catch (error: any) {
       console.error('İlan oluşturma hatası:', error);
-      console.error('Error response:', error.response?.data);
-      console.error('Error status:', error.response?.status);
-      console.error('Error headers:', error.response?.headers);
-      console.error('Request config:', error.config);
       
-      if (error.code === 'ECONNREFUSED') {
+      if (error.message.includes('Zorunlu alanları doldurunuz') || error.message.includes('zorunludur')) {
+        setError('Zorunlu alanları doldurunuz');
+      } else if (error.code === 'ECONNREFUSED') {
         setError('Sunucuya bağlanılamıyor. Lütfen backend\'in çalıştığından emin olun.');
       } else if (error.response?.status === 404) {
         setError('API endpoint bulunamadı. URL\'yi kontrol edin.');
       } else if (error.response?.status === 401) {
         setError('Yetkilendirme hatası. Lütfen giriş yapın.');
       } else {
-        const errorMessage = error.response?.data?.message || 'İlan oluşturulurken bir hata oluştu';
+        const errorMessage = error.response?.data?.message || error.message || 'İlan oluşturulurken bir hata oluştu';
         setError(errorMessage);
       }
     } finally {

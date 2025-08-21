@@ -733,6 +733,66 @@ export const rejectListing = async (req: Request, res: Response) => {
   }
 };
 
+// Hard delete for rejected listings - removes from database entirely
+export const hardDeleteListing = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    
+    // First, check if listing exists and is rejected
+    const listing = await prisma.listings.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        is_approved: false,
+        is_active: false,
+        title: true,
+        users: {
+          select: {
+            first_name: true,
+            last_name: true,
+            email: true
+          }
+        }
+      }
+    });
+
+    if (!listing) {
+      res.status(404).json({ 
+        error: 'İlan bulunamadı' 
+      });
+      return;
+    }
+
+    // Use transaction to ensure data integrity
+    await prisma.$transaction(async (tx) => {
+      // Delete related listing_images (CASCADE should handle this, but being explicit)
+      await tx.listing_images.deleteMany({
+        where: { listing_id: id }
+      });
+
+      // Delete related listing_properties (CASCADE should handle this, but being explicit)
+      await tx.listing_properties.deleteMany({
+        where: { listing_id: id }
+      });
+
+      // Delete the main listing record
+      await tx.listings.delete({
+        where: { id }
+      });
+    });
+
+    logger.info(`Listing hard deleted: ${id} by admin`);
+    
+    res.json({ 
+      success: true, 
+      message: 'İlan kalıcı olarak silindi' 
+    });
+  } catch (error) {
+    logger.error('Error in hardDeleteListing:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
 export const getPendingListings = async (req: Request, res: Response) => {
   try {
     const { page = 1, limit = 10 } = req.query;

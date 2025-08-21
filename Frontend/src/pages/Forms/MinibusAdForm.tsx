@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { api } from '../../services/api';
+import { listingService } from '../../services/listingService';
+import { createStandardPayload, validateListingPayload } from '../../services/apiNormalizer';
 import {
   Box,
   Container,
@@ -463,15 +465,6 @@ const MinibusAdForm: React.FC = () => {
       setLoading(true);
       setError('');
 
-      // Form validasyonu
-      if (!formData.title || !formData.price || !formData.city) {
-        setError('Zorunlu alanları doldurunuz');
-        return;
-      }
-
-      // Real API call to create listing using form data
-      console.log('İlan oluşturuluyor:', formData);
-      
       // Convert uploaded images to data URLs for backend
       const imageUrls = await Promise.all(
         uploadedImages.map(file => {
@@ -483,63 +476,72 @@ const MinibusAdForm: React.FC = () => {
         })
       );
 
-      const listingData = {
+      // Create standardized payload
+      const standardPayload = createStandardPayload({
         title: formData.title,
         description: formData.description,
-        price: Number(formData.price.replace(/\./g, '')), // Remove dots from price
-        year: Number(formData.year),
-        km: Number(formData.km.replace(/\./g, '')) || 0, // Remove dots from km
-        category_id: selectedBrand?.vehicle_types?.categories?.id || "vehicle-category-001", // Real category ID from selection chain
-        vehicle_type_id: selectedBrand?.vehicle_type_id || selectedModel?.brands?.vehicle_type_id || "cme633w8v0001981ksnpl6dj8", // Real vehicle type ID from brand
-        brand_id: selectedBrand?.id || "brand-minibus-fiat", // Real brand ID from selection
-        model_id: selectedModel?.id || "fiat-ulysse-1755240605513", // Real model ID from selection
-        variant_id: selectedVariant?.id || null, // Real variant ID from selection
-        city_id: cities.find(city => city.name === formData.city)?.id || "city-01", // Real city ID from form
-        district_id: districts.find(district => district.name === formData.district)?.id || "district-01-1219", // Real district ID from form
+        price: formData.price.replace(/\./g, ''), // Remove dots from price
+        year: formData.year,
+        km: formData.km.replace(/\./g, ''), // Remove dots from km
+        city: formData.city,
+        category_id: selectedBrand?.vehicle_types?.categories?.id || "vehicle-category-001",
+        vehicle_type_id: selectedBrand?.vehicle_type_id || selectedModel?.brands?.vehicle_type_id || "cme633w8v0001981ksnpl6dj8",
+        brand_id: selectedBrand?.id || "brand-minibus-fiat",
+        model_id: selectedModel?.id || "fiat-ulysse-1755240605513",
+        variant_id: selectedVariant?.id || null,
+        city_id: cities.find(city => city.name === formData.city)?.id,
+        district_id: districts.find(district => district.name === formData.district)?.id,
         seller_name: formData.sellerName,
-        seller_phone: formData.sellerPhone.replace(/[^\d]/g, ''), // Remove formatting from phone
-        seller_email: formData.sellerEmail,
+        seller_phone: formData.sellerPhone.replace(/[^\d]/g, ''),
+        images: imageUrls
+      }, {
+        // Minibüs-specific properties
+        seatCount: formData.seatCount,
+        pullType: formData.pullType,
+        airConditioning: formData.airConditioning,
+        chassisType: formData.chassisType,
+        roofType: formData.roofType,
         color: formData.color || "Belirtilmemiş",
         fuel_type: formData.fuelType,
         transmission: formData.transmission,
         vehicle_condition: formData.vehicleCondition,
         is_exchangeable: formData.exchange === 'Evet',
-        images: imageUrls // Send actual image data URLs
-      };
-
-      console.log('Gönderilecek veri:', listingData);
-      console.log('Selection context:', {
-        selectedBrand,
-        selectedModel, 
-        selectedVariant
+        features: formData.features
       });
-      console.log('İstek URL:', `${api.defaults.baseURL}/listings`);
-      console.log('İstek başlıyor...');
 
-      const response = await api.post('/listings', listingData);
-      console.log('API Response:', response.data);
-      console.log('İstek başarılı!');
+      // Validate payload
+      const validation = validateListingPayload(standardPayload);
+      if (!validation.isValid) {
+        setError(validation.errors.join(', '));
+        return;
+      }
+
+      console.log('Minibüs ilanı oluşturuluyor:', standardPayload);
+
+      // Use standardized listing service
+      const response = await listingService.createStandardListing(standardPayload);
+      console.log('API Response:', response);
       
-      if (response.data.success) {
-        alert('İlanınız başarıyla oluşturuldu! Admin onayından sonra yayınlanacaktır.');
-        navigate('/');
+      if (response.success) {
+        alert('Minibüs ilanınız başarıyla oluşturuldu! Admin onayından sonra yayınlanacaktır.');
+        navigate('/user/my-listings'); // Navigate to MyListings to show PENDING status
+      } else {
+        throw new Error(response.message || 'İlan oluşturulamadı');
       }
 
     } catch (error: any) {
       console.error('İlan oluşturma hatası:', error);
-      console.error('Error response:', error.response?.data);
-      console.error('Error status:', error.response?.status);
-      console.error('Error headers:', error.response?.headers);
-      console.error('Request config:', error.config);
       
-      if (error.code === 'ECONNREFUSED') {
+      if (error.message.includes('Zorunlu alanları doldurunuz') || error.message.includes('zorunludur')) {
+        setError('Zorunlu alanları doldurunuz');
+      } else if (error.code === 'ECONNREFUSED') {
         setError('Sunucuya bağlanılamıyor. Lütfen backend\'in çalıştığından emin olun.');
       } else if (error.response?.status === 404) {
         setError('API endpoint bulunamadı. URL\'yi kontrol edin.');
       } else if (error.response?.status === 401) {
         setError('Yetkilendirme hatası. Lütfen giriş yapın.');
       } else {
-        const errorMessage = error.response?.data?.message || 'İlan oluşturulurken bir hata oluştu';
+        const errorMessage = error.response?.data?.message || error.message || 'İlan oluşturulurken bir hata oluştu';
         setError(errorMessage);
       }
     } finally {

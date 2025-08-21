@@ -57,9 +57,15 @@ import AhsapKasaForm from './pages/Forms/KaroserUstyapi/Damperli/AhsapKasaForm';
 import HafriyatTipiForm from './pages/Forms/KaroserUstyapi/Damperli/HafriyatTipiForm';
 import HavuzHardoxTipiForm from './pages/Forms/KaroserUstyapi/Damperli/HavuzHardoxTipiForm';
 import KayaTipiForm from './pages/Forms/KaroserUstyapi/Damperli/KayaTipiForm';
+// Dorse Damperli form'ları  
+import { default as HafriyatTipiFormDorse } from './pages/Forms/Dorse/Damperli/HafriyatTipiForm';
+import { default as HavuzHardoxTipiFormDorse } from './pages/Forms/Dorse/Damperli/HavuzHardoxTipiForm';
+import { default as KayaTipiFormDorse } from './pages/Forms/Dorse/Damperli/KayaTipiForm';
 import AcikKasaFormSabit from './pages/Forms/KaroserUstyapi/SabitKabin/AcikKasaForm';
 import KapaliKasaFormSabit from './pages/Forms/KaroserUstyapi/SabitKabin/KapaliKasaForm';
 import OzelKasaForm from './pages/Forms/KaroserUstyapi/SabitKabin/OzelKasaForm';
+import TekliAracForm from './pages/Forms/OtoKurtariciTasiyici/TekliAracForm';
+import CokluAracForm from './pages/Forms/OtoKurtariciTasiyici/CokluAracForm';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AllListings from './pages/admin/AllListings';
 import PendingListings from './pages/admin/PendingListings';
@@ -120,7 +126,10 @@ const App: React.FC = () => {
                 <Route path="create-ad/otobus/:variantId" element={<OtobusAdForm />} />
                 <Route path="create-ad/cekici/:variantId" element={<CekiciAdForm />} />
                 
-                <Route path="create-ad/dorse/damperli/kapakli-tip" element={<KapakliTipForm />} />
+                <Route path="create-ad/dorse/damperli/kapakli-tip/:variantId" element={<KapakliTipForm />} />
+                <Route path="create-ad/dorse/damperli/hafriyat-tipi/:variantId" element={<HafriyatTipiFormDorse />} />
+                <Route path="create-ad/dorse/damperli/havuz-hardox-tipi/:variantId" element={<HavuzHardoxTipiFormDorse />} />
+                <Route path="create-ad/dorse/damperli/kaya-tipi/:variantId" element={<KayaTipiFormDorse />} />
                 <Route path="create-ad/dorse/frigofirik/:variantId" element={<FrigofirikForm />} />
                 <Route path="create-ad/dorse/lowbed/havuzlu/:variantId" element={<HavuzluForm />} />
                 <Route path="create-ad/dorse/lowbed/ondekirmalı/:variantId" element={<OndekirmalıForm />} />
@@ -172,6 +181,9 @@ const App: React.FC = () => {
                 {/* Özel Amaçlı Römork Routes */}
                 <Route path="create-ad/romork/ozel-amacli-romork/:variantId" element={<OzelAmacliRomorkForm />} />
                 
+                {/* Özel Amaçlı Dorseler Routes */}
+                <Route path="create-ad/dorse/ozel-amacli-dorseler/:variantId" element={<OzelAmacliRomorkForm />} />
+                
                 {/* Karoser & Üstyapı Damperli Routes */}
                 <Route path="create-ad/karoser-ustyapi/damperli-ahsap-kasa/:variantId" element={<AhsapKasaForm />} />
                 <Route path="create-ad/karoser-ustyapi/damperli-hafriyat-tipi/:variantId" element={<HafriyatTipiForm />} />
@@ -182,6 +194,10 @@ const App: React.FC = () => {
                 <Route path="create-ad/karoser-ustyapi/sabit-kabin-acik-kasa/:variantId" element={<AcikKasaFormSabit />} />
                 <Route path="create-ad/karoser-ustyapi/sabit-kabin-kapali-kasa/:variantId" element={<KapaliKasaFormSabit />} />
                 <Route path="create-ad/karoser-ustyapi/sabit-kabin-ozel-kasa/:variantId" element={<OzelKasaForm />} />
+                
+                {/* Oto Kurtarıcı & Taşıyıcı Routes */}
+                <Route path="create-ad/oto-kurtarici-tasiyici/tekli-arac/:variantId" element={<TekliAracForm />} />
+                <Route path="create-ad/oto-kurtarici-tasiyici/coklu-arac/:variantId" element={<CokluAracForm />} />
               </Route>
               
               {/* Admin Routes with Layout */}

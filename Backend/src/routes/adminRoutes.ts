@@ -4,6 +4,7 @@ import {
   getPendingListings,
   approveListing,
   rejectListing,
+  hardDeleteListing,
   getDashboardStats,
   getRecentActivities,
   getUsers,
@@ -31,6 +32,7 @@ router.put('/users/:id', updateUser);
 router.delete('/users/:id', deleteUser);
 router.put('/listings/:id/approve', approveListing);
 router.put('/listings/:id/reject', rejectListing);
+router.delete('/listings/:id', hardDeleteListing);
 
 // Reports routes
 router.get('/reports', ReportsController.adminGetReports);

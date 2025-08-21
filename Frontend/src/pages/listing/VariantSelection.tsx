@@ -137,10 +137,13 @@ const VariantSelection: React.FC = () => {
       });
     }
     
-    // Havuzlu Lowbed kontrolü - daha kapsamlı kontrol
-    const isHavuzluLowbed = variant.name.toLowerCase().includes('havuzlu') ||
+    // Havuzlu Lowbed kontrolü - sadece gerçek lowbed'ler için, Hardox/Hafriyat/Kaya hariç
+    const isHavuzluLowbed = (variant.name.toLowerCase().includes('havuzlu') ||
                            (vehicleType?.name?.toLowerCase().includes('dorse') && 
-                            variant.name.toLowerCase().includes('havuz'));
+                            variant.name.toLowerCase().includes('havuz'))) &&
+                           !variant.name.toLowerCase().includes('hardox') && // Hardox olanları hariç tut
+                           !variant.name.toLowerCase().includes('hafriyat') && // Hafriyat olanları hariç tut
+                           !variant.name.toLowerCase().includes('kaya'); // Kaya olanları hariç tut
     
     // Öndekirmalı Lowbed kontrolü - daha kapsamlı
     const isOndekirmalıLowbed = variant.name.toLowerCase().includes('öndekirmalı') ||
@@ -415,6 +418,17 @@ const VariantSelection: React.FC = () => {
       return;
     }
     
+    // Frigofirik kontrolleri
+    const isFrigofirik = lowerVariantName2.includes('frigofirik') || lowerVariantName2.includes('frigo');
+    
+    if (isFrigofirik) {
+      console.log('❄️ Frigofirik Dorse YÖNLENDİRME');
+      navigate(`/create-ad/dorse/frigofirik/${variant.id}`, {
+        state: { variant, model, brand, vehicleType, selection: { vehicleType, brand, model, variant }}
+      });
+      return;
+    }
+    
     // Damperli Dorse için özel yönlendirme - SADECE Dorse kategorisi için (Karoser DEĞİL)
     const isDamperliDorse = !isKonteynerTasiyiciSasiGrubu && 
                            vehicleType?.name?.toLowerCase().includes('dorse') &&
@@ -422,25 +436,59 @@ const VariantSelection: React.FC = () => {
                            (model?.name === 'Damperli' || 
                            variant.name.toLowerCase().includes('damperli') ||
                            brand?.name?.toLowerCase().includes('damper') ||
+                           // Damperli alt türleri için özel kontrol
+                           variant.name.toLowerCase().includes('hafriyat') ||
+                           variant.name.toLowerCase().includes('havuz') ||
+                           variant.name.toLowerCase().includes('hardox') ||
+                           variant.name.toLowerCase().includes('kaya') ||
+                           variant.name.toLowerCase().includes('kapaklı') ||
                            // URL'de damperli varsa
                            window.location.href.includes('damperli'));
     
+    console.log('🚛 Damperli Dorse Kontrol Debug:', {
+      vehicleTypeName: vehicleType?.name,
+      isDorse: vehicleType?.name?.toLowerCase().includes('dorse'),
+      isKaroser: vehicleType?.name?.toLowerCase().includes('karoser'),
+      modelName: model?.name,
+      variantName: variant.name,
+      variantLower: variant.name.toLowerCase(),
+      hasHafriyat: variant.name.toLowerCase().includes('hafriyat'),
+      hasDamperli: variant.name.toLowerCase().includes('damperli'),
+      isDamperliDorse,
+      isKonteynerTasiyiciSasiGrubu
+    });
+
     if (isDamperliDorse) {
       let variantType = '';
       
-      // Variant ismine göre tip belirleme - gerçek variant isimlerini kullan
+      // Variant ismine göre tip belirleme - EN SPESİFİK OLANLARI ÖNCE KOY
       const variantNameLower = variant.name.toLowerCase();
       
-      if (variantNameLower.includes('kapaklı') || variantNameLower.includes('kapakli') || 
-          variantNameLower.includes('kapak') || variantNameLower === 'kapaklı tip') {
-        variantType = 'kapakli-tip';
-      } else if (variantNameLower.includes('kaya') || variantNameLower === 'kaya tipi') {
-        variantType = 'kaya-tipi';
-      } else if (variantNameLower.includes('hafriyat') || variantNameLower === 'hafriyat tipi') {
+      console.log('🔍 Variant Tip Belirleme Debug:', {
+        variantName: variant.name,
+        variantNameLower,
+        hasHafriyat: variantNameLower.includes('hafriyat'),
+        hasHavuz: variantNameLower.includes('havuz'),
+        hasHardox: variantNameLower.includes('hardox'),
+        hasKaya: variantNameLower.includes('kaya'),
+        hasKapak: variantNameLower.includes('kapak')
+      });
+      
+      // EN SPESİFİK kontrollerden başla
+      if (variantNameLower.includes('hafriyat') || variantNameLower === 'hafriyat tipi') {
         variantType = 'hafriyat-tipi';
+        console.log('✅ Hafriyat Tipi belirlendi');
       } else if (variantNameLower.includes('havuz') || variantNameLower.includes('hardox') || 
                  variantNameLower === 'havuz (hardox) tipi') {
         variantType = 'havuz-hardox-tipi';
+        console.log('✅ Havuz Hardox Tipi belirlendi');
+      } else if (variantNameLower.includes('kaya') || variantNameLower === 'kaya tipi') {
+        variantType = 'kaya-tipi';
+        console.log('✅ Kaya Tipi belirlendi');
+      } else if (variantNameLower.includes('kapaklı') || variantNameLower.includes('kapakli') || 
+          variantNameLower.includes('kapak') || variantNameLower === 'kapaklı tip') {
+        variantType = 'kapakli-tip';
+        console.log('✅ Kapaklı Tip belirlendi');
       } else {
         // Variant ID'sine göre de kontrol edelim
         if (variant.id === 'cme6bt060000f40qa8syjxrwu') {
@@ -452,7 +500,7 @@ const VariantSelection: React.FC = () => {
       
       console.log('🚛 Damperli Dorse yönlendirme:', variantType);
       
-      navigate(`/create-ad/dorse/damperli/${variantType}`, {
+      navigate(`/create-ad/dorse/damperli/${variantType}/${variant.id}`, {
         state: { 
           variant,
           model,
@@ -476,7 +524,10 @@ const VariantSelection: React.FC = () => {
       match1: vehicleType?.name === 'Karoser & Üst Yapı',
       match2: vehicleType?.name === 'Karoser & Üstyapı', 
       match3: vehicleType?.name?.toLowerCase().includes('karoser'),
-      lowerCase: vehicleType?.name?.toLowerCase()
+      lowerCase: vehicleType?.name?.toLowerCase(),
+      variantName: variant.name,
+      modelName: model?.name,
+      brandName: brand?.name
     });
 
     // ⚠️ KAROSER & ÜSTYAPI KONTROLÜ - isDamperliDorse'dan ÖNCE yapılmalı
@@ -578,6 +629,34 @@ const VariantSelection: React.FC = () => {
       // Eğer Karoser kategorisindeyse ama özel grup bulunamazsa, genel yönlendirme
       console.log('🏗️ Karoser & Üstyapı genel yönlendirme');
       navigate(`/create-ad/karoser-ustyapi/damperli-kaya-tipi/${variant.id}`, {
+        state: { variant, model, brand, vehicleType, selection: { vehicleType, brand, model, variant } }
+      });
+      return;
+    }
+
+    // Oto Kurtarıcı & Taşıyıcı routing
+    if (vehicleType?.name === 'Oto Kurtarıcı & Taşıyıcı' || 
+        vehicleType?.name?.toLowerCase().includes('oto kurtarıcı') ||
+        vehicleType?.name?.toLowerCase().includes('taşıyıcı')) {
+      console.log('🚛 Oto Kurtarıcı & Taşıyıcı kategorisine yönlendiriliyor', {
+        vehicleTypeName: vehicleType.name,
+        brandName: brand?.name,
+        variantName: variant.name
+      });
+      
+      // Çoklu Araç kontrolü
+      if (variant.name?.toLowerCase().includes('çoklu') || 
+          variant.name?.toLowerCase().includes('multi')) {
+        console.log('🚗 Çoklu Araç YÖNLENDİRME');
+        navigate(`/create-ad/oto-kurtarici-tasiyici/coklu-arac/${variant.id}`, {
+          state: { variant, model, brand, vehicleType, selection: { vehicleType, brand, model, variant } }
+        });
+        return;
+      }
+      
+      // Tekli Araç kontrolü (default)
+      console.log('🚗 Tekli Araç YÖNLENDİRME');
+      navigate(`/create-ad/oto-kurtarici-tasiyici/tekli-arac/${variant.id}`, {
         state: { variant, model, brand, vehicleType, selection: { vehicleType, brand, model, variant } }
       });
       return;
