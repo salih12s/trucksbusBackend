@@ -43,7 +43,6 @@ import {
 import { useNavigate, useLocation } from 'react-router-dom';
 import { locationService, City, District } from '../../services/locationService';
 import { api } from '../../services/api';
-import UserHeader from '../../components/layout/UserHeader';
 
 // Renk seçenekleri
 const colorOptions = [
@@ -1019,16 +1018,13 @@ const OtobusAdForm = () => {
   };
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', backgroundColor: '#f8f9fa' }}>
-      <UserHeader />
-      
-      <Container maxWidth="lg" sx={{ py: 4, mt: 4 }}>
-        {/* Header */}
-        <Box sx={{ mb: 4, textAlign: 'center' }}>
-          <Typography variant="h4" component="h1" gutterBottom>
-            🚌 Otobüs İlanı Oluştur
-          </Typography>
-          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', justifyContent: 'center' }}>
+    <Container maxWidth="lg" sx={{ py: 4 }}>
+      {/* Header */}
+      <Box sx={{ mb: 4, textAlign: 'center' }}>
+        <Typography variant="h4" component="h1" gutterBottom>
+          🚌 Otobüs İlanı Oluştur
+        </Typography>
+        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', justifyContent: 'center' }}>
             <Chip label="Otobüs" color="primary" variant="outlined" />
             {formData.brand && <Chip label={formData.brand} variant="outlined" />}
             {formData.model && <Chip label={formData.model} variant="outlined" />}
@@ -1091,7 +1087,6 @@ const OtobusAdForm = () => {
           </Box>
         </Paper>
       </Container>
-    </Box>
   );
 };
 

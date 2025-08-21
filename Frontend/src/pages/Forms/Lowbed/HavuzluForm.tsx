@@ -12,12 +12,6 @@ import {
   StepLabel,
   Button,
   TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  FormControlLabel,
-  Checkbox,
   Alert,
   InputAdornment,
   Card,
@@ -40,7 +34,6 @@ import {
   Close,
   Pool,
 } from '@mui/icons-material';
-import UserHeader from '../../../components/layout/UserHeader';
 import { locationService, City, District } from '../../../services/locationService';
 import { api } from '../../../services/api';
 import { formatPhoneNumber } from '../../../utils/phoneUtils';

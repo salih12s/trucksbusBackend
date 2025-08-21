@@ -39,7 +39,6 @@ import {
   CloudUpload,
   Close,
 } from '@mui/icons-material';
-import UserHeader from '../../../../components/layout/UserHeader';
 import { locationService, City, District } from '../../../../services/locationService';
 import { api } from '../../../../services/api';
 import { formatPhoneNumber } from '../../../../utils/phoneUtils';
@@ -706,7 +705,6 @@ const HafriyatTipiForm: React.FC = () => {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', backgroundColor: '#f8f9fa' }}>
       {/* Header */}
-      <UserHeader />
       
       {/* Main Content */}
       <Container maxWidth="lg" sx={{ py: 4, mt: 4 }}>

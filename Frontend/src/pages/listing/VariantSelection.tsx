@@ -67,9 +67,14 @@ const VariantSelection: React.FC = () => {
   }, [searchTerm, variants]);
 
   const fetchVariants = async () => {
+    if (!modelId) return;
+    
     try {
       setError(null);
-      const response = await fetch(`http://localhost:3005/api/categories/variants?model_id=${modelId}`);
+      console.log('🔍 Fetching variants for model_id:', modelId);
+      const encodedModelId = encodeURIComponent(modelId);
+      console.log('🔗 Encoded model_id:', encodedModelId);
+      const response = await fetch(`http://localhost:3005/api/categories/variants?model_id=${encodedModelId}`);
       
       if (!response.ok) {
         throw new Error('Varyantlar alınamadı');
@@ -113,8 +118,24 @@ const VariantSelection: React.FC = () => {
       modelName: model?.name,
       brandName: brand?.name,
       vehicleTypeName: vehicleType?.name,
-      variantId: variant.id
+      variantId: variant.id,
+      locationState: location.state
     });
+
+    // ÖZEL KAROSER & ÜSTYAPI DEBUG
+    if (vehicleType?.name?.toLowerCase().includes('karoser') || 
+        vehicleType?.name?.toLowerCase().includes('üstyapı') ||
+        vehicleType?.name?.toLowerCase().includes('ustyapi')) {
+      console.log('🏗️ KAROSER & ÜSTYAPI DETECTED!!!', {
+        vehicleTypeName: vehicleType.name,
+        vehicleTypeNameLower: vehicleType.name?.toLowerCase(),
+        brandName: brand?.name,
+        modelName: model?.name,
+        variantName: variant.name,
+        exactMatch1: vehicleType?.name === 'Karoser & Üst Yapı',
+        exactMatch2: vehicleType?.name === 'Karoser & Üstyapı'
+      });
+    }
     
     // Havuzlu Lowbed kontrolü - daha kapsamlı kontrol
     const isHavuzluLowbed = variant.name.toLowerCase().includes('havuzlu') ||
@@ -181,11 +202,12 @@ const VariantSelection: React.FC = () => {
       return;
     }
 
-    // Kuruyük kontrolleri - Türkçe karakter ve yazım farklarıyla
+    // Kuruyük kontrolleri - SADECE brand="Kuru Yük" olanlar için
     const lowerVariantName = variant.name.toLowerCase();
-    const isKuruyuk = lowerVariantName.includes('kuruyük') || lowerVariantName.includes('kuruyuk') || 
-                      lowerVariantName.includes('kapaklı') || lowerVariantName.includes('kapaksız') ||
-                      lowerVariantName.includes('platform') || lowerVariantName.includes('kaya');
+    const isKuruyuk = brand?.name === 'Kuru Yük' && 
+                      (lowerVariantName.includes('kuruyük') || lowerVariantName.includes('kuruyuk') || 
+                       lowerVariantName.includes('kapaklı') || lowerVariantName.includes('kapaksız') ||
+                       lowerVariantName.includes('platform') || lowerVariantName.includes('kaya'));
     
     console.log('🚛 Kuruyük Variant Debug:', {
       variantName: variant.name,
@@ -227,21 +249,144 @@ const VariantSelection: React.FC = () => {
 
     // Tenteli kontrolleri
     const lowerVariantName2 = variant.name.toLowerCase();
-    const isTenteli = lowerVariantName2.includes('tenteli') || 
+      const isTenteli = lowerVariantName2.includes('tenteli') || 
                       lowerVariantName2.includes('pilot') || 
                       lowerVariantName2.includes('midilli') ||
                       lowerVariantName2.includes('yarı midilli') ||
                       lowerVariantName2.includes('yari midilli');
+
+    // Tanker kontrolleri (sadece genel tanker, tanker şasi değil ve konteyner şasi grubu değilse ve Tarım Römorkları değilse)
+    const isTanker = lowerVariantName2.includes('tanker') && 
+                     !lowerVariantName2.includes('şasi') &&
+                     brand?.name !== 'Konteyner Taşıyıcı & Şasi Gr.' &&
+                     brand?.name !== 'Tarım Römorkları' &&
+                     model?.name !== 'Tarım Römorkları';
+    
+    // Tekstil kontrolleri
+    const isTekstil = lowerVariantName2.includes('tekstil');
+    
+    // Silobas kontrolleri
+    const isSilobas = lowerVariantName2.includes('silobas') || lowerVariantName2.includes('silo');
+    
+    // Konteyner Taşıyıcı & Şasi Grubu kontrolleri - ÖNCE brand/model kontrolü yap
+    const isKonteynerTasiyiciSasiGrubu = (brand?.name === 'Konteyner Taşıyıcı & Şasi Gr.' || 
+                                          model?.name === 'Konteyner Taşıyıcı & Şasi Gr.') &&
+                                         (lowerVariantName2 === 'damper şasi' ||
+                                          lowerVariantName2 === 'kılçık şasi' ||
+                                          lowerVariantName2 === 'platform şasi' ||
+                                          lowerVariantName2.includes('römork konvantörü') ||
+                                          lowerVariantName2 === 'tanker şasi' ||
+                                          lowerVariantName2 === 'uzayabilir şasi' ||
+                                          (lowerVariantName2.includes('konteyner') && lowerVariantName2.includes('şasi')));
     
     console.log('🏕️ Tenteli Variant Debug:', {
       variantName: variant.name,
       lowerVariantName: lowerVariantName2,
       isTenteli,
+      isTanker,
+      isTekstil,
+      isSilobas,
+      isKonteynerTasiyiciSasiGrubu,
       vehicleTypeName: vehicleType?.name,
+      brandName: brand?.name,
+      modelName: model?.name,
       containsPilot: lowerVariantName2.includes('pilot'),
       containsMidilli: lowerVariantName2.includes('midilli'),
       containsYariMidilli: lowerVariantName2.includes('yarı') || lowerVariantName2.includes('yari')
     });
+
+    // Konteyner Taşıyıcı & Şasi Grubu kontrollerini önce yap
+    if (isKonteynerTasiyiciSasiGrubu) {
+      console.log('📦 Konteyner Taşıyıcı & Şasi Grubu YÖNLENDİRME');
+      
+      // Her şasi türü için ayrı kontrol ve yönlendirme
+      if (lowerVariantName2.includes('damper') && lowerVariantName2.includes('şasi')) {
+        console.log('� Damper Şasi YÖNLENDİRME');
+        navigate(`/create-ad/dorse/damper-sasi/${variant.id}`, {
+          state: { variant, model, brand, vehicleType, selection: { vehicleType, brand, model, variant }}
+        });
+        return;
+      }
+      
+      if (lowerVariantName2.includes('kılçık') && lowerVariantName2.includes('şasi')) {
+        console.log('🐟 Kılçık Şasi YÖNLENDİRME');
+        navigate(`/create-ad/dorse/kilcik-sasi/${variant.id}`, {
+          state: { variant, model, brand, vehicleType, selection: { vehicleType, brand, model, variant }}
+        });
+        return;
+      }
+      
+      if (lowerVariantName2.includes('platform') && lowerVariantName2.includes('şasi')) {
+        console.log('�️ Platform Şasi YÖNLENDİRME');
+        navigate(`/create-ad/dorse/platform-sasi/${variant.id}`, {
+          state: { variant, model, brand, vehicleType, selection: { vehicleType, brand, model, variant }}
+        });
+        return;
+      }
+      
+      if (lowerVariantName2.includes('römork') && lowerVariantName2.includes('konvantör')) {
+        console.log('� Römork Konvantörü YÖNLENDİRME');
+        navigate(`/create-ad/dorse/romork-konvantoru/${variant.id}`, {
+          state: { variant, model, brand, vehicleType, selection: { vehicleType, brand, model, variant }}
+        });
+        return;
+      }
+      
+      if (lowerVariantName2.includes('tanker') && lowerVariantName2.includes('şasi')) {
+        console.log('⛽ Tanker Şasi YÖNLENDİRME');
+        navigate(`/create-ad/dorse/tanker-sasi/${variant.id}`, {
+          state: { variant, model, brand, vehicleType, selection: { vehicleType, brand, model, variant }}
+        });
+        return;
+      }
+      
+      if (lowerVariantName2.includes('uzayabilir') && lowerVariantName2.includes('şasi')) {
+        console.log('📏 Uzayabilir Şasi YÖNLENDİRME');
+        navigate(`/create-ad/dorse/uzayabilir-sasi/${variant.id}`, {
+          state: { variant, model, brand, vehicleType, selection: { vehicleType, brand, model, variant }}
+        });
+        return;
+      }
+    }
+
+    if (isTanker) {
+      console.log('� Tanker YÖNLENDİRME');
+      navigate(`/create-ad/dorse/tanker/${variant.id}`, {
+        state: { variant, model, brand, vehicleType, selection: { vehicleType, brand, model, variant }}
+      });
+      return;
+    }
+
+    if (isTekstil) {
+      console.log('🧵 Tekstil YÖNLENDİRME');
+      navigate(`/create-ad/dorse/tekstil/${variant.id}`, {
+        state: { variant, model, brand, vehicleType, selection: { vehicleType, brand, model, variant }}
+      });
+      return;
+    }
+
+    if (isSilobas) {
+      console.log('🏛️ Silobas YÖNLENDİRME');
+      navigate(`/create-ad/dorse/silobas/${variant.id}`, {
+        state: { variant, model, brand, vehicleType, selection: { vehicleType, brand, model, variant }}
+      });
+      return;
+    }
+
+    // Özel Amaçlı Dorseler kontrolleri
+    const isOzelAmacliDorseler = brand?.name === 'Özel Amaçlı Dorseler' || 
+                                 model?.name === 'Özel Amaçlı Dorseler' ||
+                                 lowerVariantName2.includes('hidrolik üst yapı') ||
+                                 lowerVariantName2.includes('mobil platform') ||
+                                 lowerVariantName2.includes('oto taşıyıcı');
+
+    if (isOzelAmacliDorseler) {
+      console.log('🎯 Özel Amaçlı Dorseler YÖNLENDİRME');
+      navigate(`/create-ad/dorse/ozel-amacli-dorseler/${variant.id}`, {
+        state: { variant, model, brand, vehicleType, selection: { vehicleType, brand, model, variant }}
+      });
+      return;
+    }
 
     if (isTenteli) {
       // Yarı Midilli kontrolü önce (daha spesifik)
@@ -270,14 +415,15 @@ const VariantSelection: React.FC = () => {
       return;
     }
     
-    // Damperli Dorse için özel yönlendirme - Dorse kategorisi kontrolü
-    const isDamperliDorse = model?.name === 'Damperli' || 
+    // Damperli Dorse için özel yönlendirme - SADECE Dorse kategorisi için (Karoser DEĞİL)
+    const isDamperliDorse = !isKonteynerTasiyiciSasiGrubu && 
+                           vehicleType?.name?.toLowerCase().includes('dorse') &&
+                           !vehicleType?.name?.toLowerCase().includes('karoser') && // Karoser'ı hariç tut
+                           (model?.name === 'Damperli' || 
                            variant.name.toLowerCase().includes('damperli') ||
-                           vehicleType?.name?.toLowerCase().includes('dorse') ||
-                           model?.name?.toLowerCase().includes('dorse') ||
                            brand?.name?.toLowerCase().includes('damper') ||
                            // URL'de damperli varsa
-                           window.location.href.includes('damperli');
+                           window.location.href.includes('damperli'));
     
     if (isDamperliDorse) {
       let variantType = '';
@@ -325,6 +471,119 @@ const VariantSelection: React.FC = () => {
     }
     
     // Vehicle type'a göre doğru form sayfasına yönlendir
+    console.log('🔍 ROUTING LOGIC TEST:', {
+      vehicleTypeName: vehicleType?.name,
+      match1: vehicleType?.name === 'Karoser & Üst Yapı',
+      match2: vehicleType?.name === 'Karoser & Üstyapı', 
+      match3: vehicleType?.name?.toLowerCase().includes('karoser'),
+      lowerCase: vehicleType?.name?.toLowerCase()
+    });
+
+    // ⚠️ KAROSER & ÜSTYAPI KONTROLÜ - isDamperliDorse'dan ÖNCE yapılmalı
+    if (vehicleType?.name === 'Karoser & Üst Yapı' || 
+        vehicleType?.name === 'Karoser & Üstyapı' ||
+        vehicleType?.name?.toLowerCase().includes('karoser')) {
+      console.log('🏗️ Karoser & Üst Yapı kategorisine yönlendiriliyor', {
+        vehicleTypeName: vehicleType.name,
+        brandName: brand?.name
+      });
+      
+      // Damperli grup kontrolü
+      if (brand?.name === 'Damperli Grup' || brand?.name === 'Damperli' || model?.name?.includes('Damperli')) {
+        const lowerVariantName = variant.name.toLowerCase();
+        
+        // Ahşap Kasa kontrolü
+        if (lowerVariantName.includes('ahşap') || lowerVariantName.includes('ahsap')) {
+          console.log('🪵 Ahşap Kasa YÖNLENDİRME');
+          navigate(`/create-ad/karoser-ustyapi/damperli-ahsap-kasa/${variant.id}`, {
+            state: { variant, model, brand, vehicleType, selection: { vehicleType, brand, model, variant } }
+          });
+          return;
+        }
+
+        // Hafriyat Tipi kontrolü
+        if (lowerVariantName.includes('hafriyat')) {
+          console.log('🏗️ Hafriyat Tipi YÖNLENDİRME');
+          navigate(`/create-ad/karoser-ustyapi/damperli-hafriyat-tipi/${variant.id}`, {
+            state: { variant, model, brand, vehicleType, selection: { vehicleType, brand, model, variant } }
+          });
+          return;
+        }
+
+        // Havuz (Hardox) Tipi kontrolü
+        if (lowerVariantName.includes('havuz') || lowerVariantName.includes('hardox')) {
+          console.log('🚰 Havuz (Hardox) Tipi YÖNLENDİRME');
+          navigate(`/create-ad/karoser-ustyapi/damperli-havuz-hardox-tipi/${variant.id}`, {
+            state: { variant, model, brand, vehicleType, selection: { vehicleType, brand, model, variant } }
+          });
+          return;
+        }
+
+        // Kaya Tipi kontrolü
+        if (lowerVariantName.includes('kaya')) {
+          console.log('🪨 Kaya Tipi YÖNLENDİRME');
+          navigate(`/create-ad/karoser-ustyapi/damperli-kaya-tipi/${variant.id}`, {
+            state: { variant, model, brand, vehicleType, selection: { vehicleType, brand, model, variant } }
+          });
+          return;
+        }
+
+        // Genel Damperli (default kaya tipi)
+        console.log('🚛 Genel Damperli YÖNLENDİRME (default kaya tipi)');
+        navigate(`/create-ad/karoser-ustyapi/damperli-kaya-tipi/${variant.id}`, {
+          state: { variant, model, brand, vehicleType, selection: { vehicleType, brand, model, variant } }
+        });
+        return;
+      }
+
+      // Sabit Kabin grup kontrolü
+      if (brand?.name === 'Sabit Kabin' || brand?.name?.includes('Sabit') || model?.name?.includes('Sabit Kabin')) {
+        const lowerVariantName = variant.name.toLowerCase();
+        
+        // Açık Kasa kontrolü
+        if (lowerVariantName.includes('açık') || lowerVariantName.includes('acik')) {
+          console.log('📦 Sabit Kabin Açık Kasa YÖNLENDİRME');
+          navigate(`/create-ad/karoser-ustyapi/sabit-kabin-acik-kasa/${variant.id}`, {
+            state: { variant, model, brand, vehicleType, selection: { vehicleType, brand, model, variant } }
+          });
+          return;
+        }
+
+        // Kapalı Kasa kontrolü
+        if (lowerVariantName.includes('kapalı') || lowerVariantName.includes('kapali')) {
+          console.log('📦 Sabit Kabin Kapalı Kasa YÖNLENDİRME');
+          navigate(`/create-ad/karoser-ustyapi/sabit-kabin-kapali-kasa/${variant.id}`, {
+            state: { variant, model, brand, vehicleType, selection: { vehicleType, brand, model, variant } }
+          });
+          return;
+        }
+
+        // Özel Kasa kontrolü
+        if (lowerVariantName.includes('özel') || lowerVariantName.includes('ozel')) {
+          console.log('📦 Sabit Kabin Özel Kasa YÖNLENDİRME');
+          navigate(`/create-ad/karoser-ustyapi/sabit-kabin-ozel-kasa/${variant.id}`, {
+            state: { variant, model, brand, vehicleType, selection: { vehicleType, brand, model, variant } }
+          });
+          return;
+        }
+
+        // Genel Sabit Kabin (default açık kasa)
+        console.log('📦 Genel Sabit Kabin YÖNLENDİRME (default açık kasa)');
+        navigate(`/create-ad/karoser-ustyapi/sabit-kabin-acik-kasa/${variant.id}`, {
+          state: { variant, model, brand, vehicleType, selection: { vehicleType, brand, model, variant } }
+        });
+        return;
+      }
+
+      // Eğer Karoser kategorisindeyse ama özel grup bulunamazsa, genel yönlendirme
+      console.log('🏗️ Karoser & Üstyapı genel yönlendirme');
+      navigate(`/create-ad/karoser-ustyapi/damperli-kaya-tipi/${variant.id}`, {
+        state: { variant, model, brand, vehicleType, selection: { vehicleType, brand, model, variant } }
+      });
+      return;
+    }
+    
+    // Diğer vehicle type kontrolleri
     if (vehicleType?.name === 'Minibüs & Midibüs') {
       navigate(`/create-ad/minibus/${variant.id}`, {
         state: { 
@@ -372,6 +631,238 @@ const VariantSelection: React.FC = () => {
       });
     } else if (vehicleType?.name === 'Çekici') {
       navigate(`/create-ad/cekici/${variant.id}`, {
+        state: { 
+          variant,
+          model,
+          brand,
+          vehicleType,
+          selection: {
+            vehicleType,
+            brand,
+            model,
+            variant
+          }
+        }
+      });
+    } else if (vehicleType?.name === 'Römork') {
+      // Kamyon Römorkları kontrolü
+      if (brand?.name === 'Kamyon Römorkları' || model?.name === 'Kamyon Römorkları' ||
+          variant.name.toLowerCase().includes('kamyon römork')) {
+        console.log('🚛 Kamyon Römorkları YÖNLENDİRME');
+        navigate(`/create-ad/romork/kamyon-romorklari/${variant.id}`, {
+          state: { 
+            variant,
+            model,
+            brand,
+            vehicleType,
+            selection: {
+              vehicleType,
+              brand,
+              model,
+              variant
+            }
+          }
+        });
+        return;
+      }
+
+      // Tarım Römorku kontrolü
+      if (brand?.name === 'Tarım Römorkları' || model?.name === 'Tarım Römorkları') {
+        // Açık Kasa kontrolü
+        if (variant.name.toLowerCase().includes('açık kasa')) {
+          console.log('🌾 Açık Kasa Tarım Römorku YÖNLENDİRME');
+          navigate(`/create-ad/romork/tarim-romork-acik-kasa/${variant.id}`, {
+            state: { 
+              variant,
+              model,
+              brand,
+              vehicleType,
+              selection: {
+                vehicleType,
+                brand,
+                model,
+                variant
+              }
+            }
+          });
+          return;
+        }
+
+        // Kapalı Kasa kontrolü
+        if (variant.name.toLowerCase().includes('kapalı kasa')) {
+          console.log('🌾 Kapalı Kasa Tarım Römorku YÖNLENDİRME');
+          navigate(`/create-ad/romork/tarim-romork-kapali-kasa/${variant.id}`, {
+            state: { 
+              variant,
+              model,
+              brand,
+              vehicleType,
+              selection: {
+                vehicleType,
+                brand,
+                model,
+                variant
+              }
+            }
+          });
+          return;
+        }
+
+        // Sulama kontrolü
+        if (variant.name.toLowerCase().includes('sulama')) {
+          console.log('🌾 Sulama Tarım Römorku YÖNLENDİRME');
+          navigate(`/create-ad/romork/tarim-romork-sulama/${variant.id}`, {
+            state: { 
+              variant,
+              model,
+              brand,
+              vehicleType,
+              selection: {
+                vehicleType,
+                brand,
+                model,
+                variant
+              }
+            }
+          });
+          return;
+        }
+
+        // Tanker kontrolü (Tarım Tanker)
+        if (variant.name.toLowerCase().includes('tanker')) {
+          console.log('🌾 Tanker Tarım Römorku YÖNLENDİRME');
+          navigate(`/create-ad/romork/tarim-romork-tanker/${variant.id}`, {
+            state: { 
+              variant,
+              model,
+              brand,
+              vehicleType,
+              selection: {
+                vehicleType,
+                brand,
+                model,
+                variant
+              }
+            }
+          });
+          return;
+        }
+
+        // Genel Tarım Römorku (default açık kasa)
+        console.log('🌾 Genel Tarım Römorku YÖNLENDİRME (default açık kasa)');
+        navigate(`/create-ad/romork/tarim-romork-acik-kasa/${variant.id}`, {
+          state: { 
+            variant,
+            model,
+            brand,
+            vehicleType,
+            selection: {
+              vehicleType,
+              brand,
+              model,
+              variant
+            }
+          }
+        });
+        return;
+      }
+
+      // Taşıma Römorkları kontrolü
+      if (brand?.name === 'Taşıma Römorkları' || model?.name === 'Taşıma Römorkları') {
+        const lowerVariantName = variant.name.toLowerCase();
+        
+        // Boru Römorku kontrolü
+        if (lowerVariantName.includes('boru')) {
+          console.log('🚰 Boru Römorku YÖNLENDİRME');
+          navigate(`/create-ad/romork/tasima-romorklari-boru/${variant.id}`, {
+            state: { variant, model, brand, vehicleType, selection: { vehicleType, brand, model, variant } }
+          });
+          return;
+        }
+
+        // Frigo Römorku kontrolü
+        if (lowerVariantName.includes('frigo')) {
+          console.log('❄️ Frigo Römorku YÖNLENDİRME');
+          navigate(`/create-ad/romork/tasima-romorklari-frigo/${variant.id}`, {
+            state: { variant, model, brand, vehicleType, selection: { vehicleType, brand, model, variant } }
+          });
+          return;
+        }
+
+        // Hayvan Römorku kontrolü
+        if (lowerVariantName.includes('hayvan')) {
+          console.log('🐄 Hayvan Römorku YÖNLENDİRME');
+          navigate(`/create-ad/romork/tasima-romorklari-hayvan/${variant.id}`, {
+            state: { variant, model, brand, vehicleType, selection: { vehicleType, brand, model, variant } }
+          });
+          return;
+        }
+
+        // Platform Römorku kontrolü
+        if (lowerVariantName.includes('platform')) {
+          console.log('📋 Platform Römorku YÖNLENDİRME');
+          navigate(`/create-ad/romork/tasima-romorklari-platform/${variant.id}`, {
+            state: { variant, model, brand, vehicleType, selection: { vehicleType, brand, model, variant } }
+          });
+          return;
+        }
+
+        // Seyehat Römorku kontrolü
+        if (lowerVariantName.includes('seyehat')) {
+          console.log('🏕️ Seyehat Römorku YÖNLENDİRME');
+          navigate(`/create-ad/romork/tasima-romorklari-seyehat/${variant.id}`, {
+            state: { variant, model, brand, vehicleType, selection: { vehicleType, brand, model, variant } }
+          });
+          return;
+        }
+
+        // Tüp Damacana Römorku kontrolü
+        if (lowerVariantName.includes('tüp') || lowerVariantName.includes('damacana')) {
+          console.log('🔥 Tüp Damacana Römorku YÖNLENDİRME');
+          navigate(`/create-ad/romork/tasima-romorklari-tup-damacana/${variant.id}`, {
+            state: { variant, model, brand, vehicleType, selection: { vehicleType, brand, model, variant } }
+          });
+          return;
+        }
+
+        // Vasıta Römorku kontrolü
+        if (lowerVariantName.includes('vasıta')) {
+          console.log('🚗 Vasıta Römorku YÖNLENDİRME');
+          navigate(`/create-ad/romork/tasima-romorklari-vasita/${variant.id}`, {
+            state: { variant, model, brand, vehicleType, selection: { vehicleType, brand, model, variant } }
+          });
+          return;
+        }
+
+        // Yük Römorku kontrolü
+        if (lowerVariantName.includes('yük')) {
+          console.log('📦 Yük Römorku YÖNLENDİRME');
+          navigate(`/create-ad/romork/tasima-romorklari-yuk/${variant.id}`, {
+            state: { variant, model, brand, vehicleType, selection: { vehicleType, brand, model, variant } }
+          });
+          return;
+        }
+
+        // Genel Taşıma Römorku (default platform)
+        console.log('🚛 Genel Taşıma Römorku YÖNLENDİRME (default platform)');
+        navigate(`/create-ad/romork/tasima-romorklari-platform/${variant.id}`, {
+          state: { variant, model, brand, vehicleType, selection: { vehicleType, brand, model, variant } }
+        });
+        return;
+      }
+
+      // Özel Amaçlı Römork kontrolü
+      if (brand?.name === 'Özel Amaçlı Römorklar' || model?.name === 'Özel Amaçlı Römorklar' ||
+          variant.name.toLowerCase().includes('özel amaçlı')) {
+        console.log('🎯 Özel Amaçlı Römork YÖNLENDİRME');
+        navigate(`/create-ad/romork/ozel-amacli-romork/${variant.id}`, {
+          state: { variant, model, brand, vehicleType, selection: { vehicleType, brand, model, variant } }
+        });
+        return;
+      }
+      
+      // Genel Römork (default kamyon römorku)
+      navigate(`/create-ad/romork/kamyon-romorklari/${variant.id}`, {
         state: { 
           variant,
           model,

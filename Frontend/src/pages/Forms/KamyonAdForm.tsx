@@ -42,7 +42,6 @@ import {
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { locationService, City, District } from '../../services/locationService';
-import UserHeader from '../../components/layout/UserHeader';
 
 // Renk seçenekleri
 const colorOptions = [
@@ -1246,19 +1245,14 @@ const KamyonAdForm = () => {
   };
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', backgroundColor: '#f8f9fa' }}>
+    <Container maxWidth="lg" sx={{ py: 4 }}>
       {/* Header */}
-      <UserHeader />
-      
-      {/* Main Content */}
-      <Container maxWidth="lg" sx={{ py: 4, mt: 4 }}>
-        {/* Header */}
-        <Box sx={{ mb: 4, textAlign: 'center' }}>
-          <Typography variant="h4" component="h1" gutterBottom>
-            🚛 Kamyon & Kamyonet İlanı Oluştur
-          </Typography>
-          
-          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', justifyContent: 'center' }}>
+      <Box sx={{ mb: 4, textAlign: 'center' }}>
+        <Typography variant="h4" component="h1" gutterBottom>
+          🚛 Kamyon & Kamyonet İlanı Oluştur
+        </Typography>
+        
+        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', justifyContent: 'center' }}>
             <Chip label="Kamyon & Kamyonet" color="primary" variant="outlined" />
             {formData.brand && <Chip label={formData.brand} variant="outlined" />}
             {formData.model && <Chip label={formData.model} variant="outlined" />}
@@ -1324,7 +1318,6 @@ const KamyonAdForm = () => {
           </Box>
         </Paper>
       </Container>
-    </Box>
   );
 };
 

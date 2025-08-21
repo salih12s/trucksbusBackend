@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import {
   Box,
-  Container,
   Paper,
   Typography,
   Stepper,
@@ -43,7 +42,6 @@ import {
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { locationService, City, District } from '../../services/locationService';
-import UserHeader from '../../components/layout/UserHeader';
 import api from '../../services/api';
 
 // Renk seçenekleri
@@ -1191,14 +1189,11 @@ const CekiciAdForm: React.FC = () => {
   };
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', backgroundColor: '#f8f9fa' }}>
-      <UserHeader />
-
-      <Container maxWidth="lg" sx={{ py: 4, mt: 4 }}>
-        {/* Header */}
-        <Box sx={{ mb: 4, textAlign: 'center' }}>
-          <Typography variant="h4" component="h1" gutterBottom>
-            🚛 Çekici İlanı Oluştur
+    <Box maxWidth="lg" sx={{ py: 4 }}>
+      {/* Header */}
+      <Box sx={{ mb: 4, textAlign: 'center' }}>
+        <Typography variant="h4" component="h1" gutterBottom>
+          🚛 Çekici İlanı Oluştur
           </Typography>
           <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', justifyContent: 'center' }}>
             <Chip label="Çekici" color="primary" variant="outlined" />
@@ -1262,8 +1257,7 @@ const CekiciAdForm: React.FC = () => {
             )}
           </Box>
         </Paper>
-      </Container>
-    </Box>
+      </Box>
   );
 };
 

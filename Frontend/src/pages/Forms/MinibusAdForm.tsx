@@ -41,7 +41,6 @@ import {
   Email,
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
-import UserHeader from '../../components/layout/UserHeader';
 import { locationService, City, District } from '../../services/locationService';
 
 // Renk seçenekleri
@@ -1234,8 +1233,6 @@ const MinibusAdForm: React.FC = () => {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', backgroundColor: '#f8f9fa' }}>
-      {/* Header */}
-      <UserHeader />
       
       {/* Main Content */}
       <Container maxWidth="lg" sx={{ py: 4, mt: 4 }}>
