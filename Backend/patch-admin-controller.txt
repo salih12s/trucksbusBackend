@@ -1,0 +1,58 @@
+// AdminController.ts için patch
+// 977-986 satırları arasındaki kısmı değiştir
+
+// ESKİ KOD:
+/*
+      listing_images: (listing as any).listing_images?.map((img: any) => {
+        console.log('🖼️ Processing image:', {url: img.url, sort_order: img.sort_order});
+        return {
+          id: img.id,
+          url: img.url,  // Frontend bunu bekliyor
+          image_url: img.url,  // Alternatif
+          sort_order: img.sort_order,
+          order: img.sort_order  // Alternatif
+        };
+      }) || [],
+*/
+
+// YENİ KOD:
+      listing_images: (() => {
+        // Önce listing_images tablosundan kontrol et
+        if ((listing as any).listing_images && (listing as any).listing_images.length > 0) {
+          console.log('🖼️ Using images from listing_images table');
+          return (listing as any).listing_images.map((img: any) => {
+            console.log('🖼️ Processing image:', {url: img.url, sort_order: img.sort_order});
+            return {
+              id: img.id,
+              url: img.url,
+              image_url: img.url,
+              sort_order: img.sort_order,
+              order: img.sort_order
+            };
+          });
+        }
+        
+        // Eğer listing_images tablosunda veri yoksa, listings.images alanından al
+        if (listing.images) {
+          console.log('🖼️ Using images from listings.images field');
+          try {
+            const parsedImages = Array.isArray(listing.images) ? listing.images : JSON.parse(listing.images as string);
+            return parsedImages.map((img: string, index: number) => {
+              console.log('🖼️ Processing inline image:', {index, url: img.substring(0, 50) + '...'});
+              return {
+                id: `inline_${index}`,
+                url: img,
+                image_url: img,
+                sort_order: index,
+                order: index
+              };
+            });
+          } catch (parseError) {
+            console.error('🖼️ Error parsing images JSON:', parseError);
+            return [];
+          }
+        }
+        
+        console.log('🖼️ No images found');
+        return [];
+      })(),

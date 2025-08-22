@@ -1,18 +1,45 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getFavorites = exports.toggleFavorite = exports.getUserListings = exports.debugListingImages = exports.deleteListing = exports.updateListing = exports.getListingById = exports.debugListingData = exports.getListings = exports.createListing = void 0;
 const database_1 = require("../utils/database");
 const logger_1 = require("../utils/logger");
+const path_1 = __importDefault(require("path"));
+const promises_1 = __importDefault(require("fs/promises"));
 const createListing = async (req, res) => {
     try {
-        console.log('🔄 Creating listing with data:', req.body);
-        const { title, description, price, year, mileage, fuel_type, transmission_type, engine_size, category_id, vehicle_type_id, brand_id, model_id, variant_id, city_id, district_id, images, contact_phone, contact_email, seller_name, seller_phone, seller_email } = req.body;
-        if (!title || !description || !price || !category_id || !vehicle_type_id || !brand_id) {
+        console.log('� CT:', req.headers['content-type']);
+        console.log('🔑 BODY KEYS:', Object.keys(req.body));
+        console.log('📁 FILES:', req.files);
+        console.log('🖼️ Images in files:', req.files?.images?.length || 'no images');
+        console.log('�🔄 Creating listing with data:', req.body);
+        console.log('🔍 Brand related data:', {
+            brand_id: req.body.brand_id,
+            selectedBrand: req.body.selectedBrand,
+            brandInfo: req.body.brand_id ? 'has brand_id' : 'no brand_id'
+        });
+        const { title, description, price, year, km, fuel_type, transmission, engine_volume, engine_power, color, vehicle_condition, is_exchangeable, category_id, vehicle_type_id, brand_id, model_id, variant_id, city_id, district_id, city, district, images, seller_name, seller_phone, seller_email, properties, motor_power, body_type, carrying_capacity, cabin_type, tire_condition, drive_type, plate_origin, vehicle_plate, features, damage_record, paint_change, tramer_record, mileage, transmission_type, engine_size, contact_phone, contact_email } = req.body;
+        if (!title || !price || !category_id || !vehicle_type_id) {
             res.status(400).json({
                 success: false,
-                message: 'Gerekli alanlar eksik: title, description, price, category_id, vehicle_type_id, brand_id'
+                message: 'Gerekli alanlar eksik: title, price, category_id, vehicle_type_id'
             });
             return;
+        }
+        if (brand_id && typeof brand_id === 'string') {
+            const brandExists = await database_1.prisma.brands.findUnique({
+                where: { id: brand_id }
+            });
+            if (!brandExists) {
+                console.log(`❌ Invalid brand_id: ${brand_id}`);
+                res.status(400).json({
+                    success: false,
+                    message: 'Geçersiz marka ID\'si. Lütfen geçerli bir marka seçin.'
+                });
+                return;
+            }
         }
         const userId = req.user?.id;
         if (!userId) {
@@ -31,6 +58,97 @@ const createListing = async (req, res) => {
             res.status(404).json({ error: 'User not found' });
             return;
         }
+        let resolved_city_id = city_id;
+        let resolved_district_id = district_id;
+        if (city && typeof city === 'string') {
+            const cityRecord = await database_1.prisma.cities.findFirst({
+                where: { name: { contains: city, mode: 'insensitive' } }
+            });
+            if (cityRecord)
+                resolved_city_id = cityRecord.id;
+        }
+        if (district && typeof district === 'string') {
+            const districtRecord = await database_1.prisma.districts.findFirst({
+                where: { name: { contains: district, mode: 'insensitive' } }
+            });
+            if (districtRecord)
+                resolved_district_id = districtRecord.id;
+        }
+        let imageUrls = [];
+        if (req.files && req.files.images) {
+            const uploadedFiles = req.files.images;
+            console.log('🖼️ Processing uploaded files:', uploadedFiles.length);
+            const uploadsDir = path_1.default.join(__dirname, '../../public/uploads/listings');
+            for (let i = 0; i < uploadedFiles.length; i++) {
+                const file = uploadedFiles[i];
+                const timestamp = Date.now();
+                const fileExtension = file.mimetype.split('/')[1];
+                const fileName = `listing_${timestamp}_${i}.${fileExtension}`;
+                const filePath = path_1.default.join(uploadsDir, fileName);
+                try {
+                    await promises_1.default.writeFile(filePath, file.buffer);
+                    const publicUrl = `/uploads/listings/${fileName}`;
+                    imageUrls.push(publicUrl);
+                    console.log(`🖼️ Saved image: ${fileName}`);
+                }
+                catch (error) {
+                    console.error(`❌ Error saving image ${fileName}:`, error);
+                }
+            }
+            console.log('🖼️ Generated image URLs:', imageUrls);
+        }
+        if (images && Array.isArray(images)) {
+            for (const img of images) {
+                if (typeof img === 'string') {
+                    if (img.startsWith('data:image/')) {
+                        try {
+                            const timestamp = Date.now();
+                            const randomId = Math.random().toString(36).substr(2, 9);
+                            const base64Data = img.replace(/^data:image\/[a-z]+;base64,/, '');
+                            const fileExtension = img.match(/^data:image\/([a-z]+);base64,/)?.[1] || 'jpeg';
+                            const fileName = `listing_base64_${timestamp}_${randomId}.${fileExtension}`;
+                            const uploadsDir = path_1.default.join(__dirname, '../../public/uploads/listings');
+                            const filePath = path_1.default.join(uploadsDir, fileName);
+                            await promises_1.default.writeFile(filePath, Buffer.from(base64Data, 'base64'));
+                            const publicUrl = `/uploads/listings/${fileName}`;
+                            imageUrls.push(publicUrl);
+                            console.log(`🖼️ Saved base64 image: ${fileName}`);
+                        }
+                        catch (error) {
+                            console.error('❌ Error saving base64 image:', error);
+                            imageUrls.push(img);
+                        }
+                    }
+                    else {
+                        imageUrls.push(img);
+                    }
+                }
+                else if (img && typeof img === 'object' && img.url) {
+                    if (img.url.startsWith('data:image/')) {
+                        try {
+                            const timestamp = Date.now();
+                            const randomId = Math.random().toString(36).substr(2, 9);
+                            const base64Data = img.url.replace(/^data:image\/[a-z]+;base64,/, '');
+                            const fileExtension = img.url.match(/^data:image\/([a-z]+);base64,/)?.[1] || 'jpeg';
+                            const fileName = `listing_base64_${timestamp}_${randomId}.${fileExtension}`;
+                            const uploadsDir = path_1.default.join(__dirname, '../../public/uploads/listings');
+                            const filePath = path_1.default.join(uploadsDir, fileName);
+                            await promises_1.default.writeFile(filePath, Buffer.from(base64Data, 'base64'));
+                            const publicUrl = `/uploads/listings/${fileName}`;
+                            imageUrls.push(publicUrl);
+                            console.log(`🖼️ Saved base64 object image: ${fileName}`);
+                        }
+                        catch (error) {
+                            console.error('❌ Error saving base64 object image:', error);
+                            imageUrls.push(img.url);
+                        }
+                    }
+                    else {
+                        imageUrls.push(img.url);
+                    }
+                }
+            }
+        }
         const listing = await database_1.prisma.listings.create({
             data: {
                 id: `listing_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
@@ -38,10 +156,25 @@ const createListing = async (req, res) => {
                 description,
                 price: Number(price),
                 year: year ? Number(year) : 2000,
-                km: mileage ? Number(mileage) : null,
+                km: km ? Number(km) : (mileage ? Number(mileage) : null),
                 fuel_type,
-                transmission: transmission_type,
-                engine_volume: engine_size,
+                transmission: transmission || transmission_type,
+                engine_volume: engine_volume || engine_size,
+                engine_power: engine_power || motor_power,
+                color,
+                vehicle_condition,
+                is_exchangeable: is_exchangeable || false,
+                license_plate: vehicle_plate,
+                body_type,
+                carrying_capacity,
+                cabin_type,
+                tire_condition,
+                drive_type,
+                plate_origin,
+                features: features || {},
+                damage_record,
+                paint_change,
+                tramer_record,
                 seller_name: seller_name || `${user.first_name} ${user.last_name}`,
                 seller_phone: seller_phone || contact_phone || user.phone || '',
                 seller_email: seller_email || contact_email || user.email || '',
@@ -51,9 +184,9 @@ const createListing = async (req, res) => {
                 brand_id: brand_id || null,
                 model_id: model_id || null,
                 variant_id: variant_id || null,
-                city_id: city_id || null,
-                district_id: district_id || null,
-                images: images || [],
+                city_id: resolved_city_id || null,
+                district_id: resolved_district_id || null,
+                images: imageUrls,
                 status: "PENDING",
                 is_active: true,
                 is_approved: false,
@@ -79,6 +212,26 @@ const createListing = async (req, res) => {
                 }
             }
         });
+        if (properties && typeof properties === 'object') {
+            const propertyPromises = Object.entries(properties).map(([key, value]) => {
+                if (value !== undefined && value !== null && value !== '') {
+                    return database_1.prisma.listing_properties.create({
+                        data: {
+                            id: `prop_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                            listing_id: listing.id,
+                            key: key,
+                            value: String(value),
+                            type: 'STRING'
+                        }
+                    });
+                }
+                return null;
+            }).filter(Boolean);
+            if (propertyPromises.length > 0) {
+                await Promise.all(propertyPromises);
+                console.log('✅ Properties saved:', Object.keys(properties));
+            }
+        }
         console.log('✅ Created listing:', listing);
         logger_1.logger.info(`New listing created: ${listing.id} by user: ${userId}`);
         res.status(201).json({
@@ -237,8 +390,39 @@ const getListings = async (req, res) => {
             }),
             database_1.prisma.listings.count({ where })
         ]);
+        const transformedListings = listings.map(listing => {
+            let imageUrls = [];
+            if (listing.listing_images && listing.listing_images.length > 0) {
+                imageUrls = listing.listing_images.map((img) => img.url);
+            }
+            if (listing.images && imageUrls.length === 0) {
+                try {
+                    const parsedImages = typeof listing.images === 'string'
+                        ? JSON.parse(listing.images)
+                        : listing.images;
+                    if (Array.isArray(parsedImages)) {
+                        imageUrls = parsedImages.map((img) => {
+                            if (typeof img === 'string') {
+                                return img;
+                            }
+                            else if (img && typeof img === 'object' && img.url) {
+                                return img.url;
+                            }
+                            return img;
+                        }).filter(url => url && typeof url === 'string');
+                    }
+                }
+                catch (e) {
+                    console.warn('Failed to parse images JSON for listing:', listing.id, listing.images);
+                }
+            }
+            return {
+                ...listing,
+                images: imageUrls
+            };
+        });
         const responseData = {
-            listings,
+            listings: transformedListings,
             pagination: {
                 page: Number(page),
                 limit: Number(limit),
@@ -322,21 +506,7 @@ const getListingById = async (req, res) => {
         const { id } = req.params;
         const listing = await database_1.prisma.listings.findUnique({
             where: { id },
-            select: {
-                id: true,
-                user_id: true,
-                title: true,
-                description: true,
-                price: true,
-                year: true,
-                km: true,
-                seller_name: true,
-                seller_phone: true,
-                seller_email: true,
-                created_at: true,
-                updated_at: true,
-                view_count: true,
-                status: true,
+            include: {
                 categories: {
                     select: {
                         id: true,
@@ -352,7 +522,8 @@ const getListingById = async (req, res) => {
                 brands: {
                     select: {
                         id: true,
-                        name: true
+                        name: true,
+                        image_url: true
                     }
                 },
                 models: {
@@ -384,7 +555,14 @@ const getListingById = async (req, res) => {
                         id: true,
                         first_name: true,
                         last_name: true,
-                        phone: true
+                        username: true,
+                        email: true,
+                        phone: true,
+                        role: true,
+                        is_active: true,
+                        is_email_verified: true,
+                        created_at: true,
+                        updated_at: true
                     }
                 },
                 listing_images: {
@@ -393,6 +571,9 @@ const getListingById = async (req, res) => {
                         url: true,
                         alt: true,
                         sort_order: true
+                    },
+                    orderBy: {
+                        sort_order: 'asc'
                     }
                 }
             }
@@ -405,7 +586,98 @@ const getListingById = async (req, res) => {
             where: { id },
             data: { view_count: { increment: 1 } }
         });
-        res.json(listing);
+        const response = {
+            id: listing.id,
+            title: listing.title,
+            description: listing.description,
+            price: Number(listing.price),
+            categoryId: listing.category_id,
+            category: {
+                id: listing.categories?.id || listing.category_id,
+                name: listing.categories?.name || 'Kategori Bulunamadı',
+                slug: 'kategori',
+                createdAt: new Date()
+            },
+            userId: listing.user_id,
+            user: {
+                id: listing.users?.id || listing.user_id,
+                email: listing.users?.email || '',
+                username: listing.users?.username || 'kullanici',
+                first_name: listing.users?.first_name || 'Ad',
+                last_name: listing.users?.last_name || 'Soyad',
+                phone: listing.users?.phone || '',
+                role: listing.users?.role || 'USER',
+                is_active: listing.users?.is_active ?? true,
+                is_email_verified: listing.users?.is_email_verified ?? false,
+                created_at: listing.users?.created_at || new Date(),
+                updated_at: listing.users?.updated_at || new Date()
+            },
+            images: (() => {
+                if (listing.listing_images && listing.listing_images.length > 0) {
+                    return listing.listing_images.map((img) => img.url);
+                }
+                if (listing.images) {
+                    console.log('🖼️ Raw images from DB:', typeof listing.images, listing.images);
+                    try {
+                        const parsedImages = typeof listing.images === 'string'
+                            ? JSON.parse(listing.images)
+                            : listing.images;
+                        console.log('🖼️ Parsed images:', parsedImages);
+                        if (Array.isArray(parsedImages)) {
+                            const processedImages = parsedImages.map((img) => {
+                                if (typeof img === 'string') {
+                                    console.log('🖼️ String image:', img.substring(0, 50) + '...');
+                                    return img;
+                                }
+                                else if (img && typeof img === 'object' && img.url) {
+                                    console.log('🖼️ Object image URL:', img.url.substring(0, 50) + '...');
+                                    return img.url;
+                                }
+                                return img;
+                            }).filter(url => url && typeof url === 'string');
+                            console.log('🖼️ Final processed images count:', processedImages.length);
+                            return processedImages;
+                        }
+                        return [];
+                    }
+                    catch (e) {
+                        console.warn('Failed to parse images JSON:', listing.images);
+                        return [];
+                    }
+                }
+                return [];
+            })(),
+            location: `${listing.districts?.name || ''}, ${listing.cities?.name || ''}`.replace(/^, |, $/, '') || 'Konum belirtilmemiş',
+            status: listing.status,
+            isApproved: listing.is_approved || false,
+            views: listing.view_count || 0,
+            createdAt: listing.created_at,
+            updatedAt: listing.updated_at,
+            year: listing.year,
+            km: listing.km,
+            fuel_type: listing.fuel_type,
+            transmission: listing.transmission,
+            engine_power: listing.engine_power,
+            engine_volume: listing.engine_volume,
+            color: listing.color,
+            vehicle_condition: listing.vehicle_condition,
+            license_plate: listing.license_plate,
+            is_exchangeable: listing.is_exchangeable,
+            brands: listing.brands,
+            models: listing.models,
+            variants: listing.variants,
+            categories: listing.categories,
+            vehicle_types: listing.vehicle_types,
+            cities: listing.cities,
+            districts: listing.districts,
+            mileage: listing.km,
+            fuelType: listing.fuel_type,
+            brand: listing.brands?.name,
+            model: listing.models?.name,
+            variant: listing.variants?.name,
+            view_count: listing.view_count
+        };
+        res.json(response);
     }
     catch (error) {
         logger_1.logger.error('Error fetching listing:', error);

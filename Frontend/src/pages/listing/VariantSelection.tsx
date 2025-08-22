@@ -13,6 +13,7 @@ import {
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import UserHeader from '../../components/layout/UserHeader';
+import api from '../../services/api';
 
 interface Variant {
   id: string;
@@ -74,13 +75,10 @@ const VariantSelection: React.FC = () => {
       console.log('🔍 Fetching variants for model_id:', modelId);
       const encodedModelId = encodeURIComponent(modelId);
       console.log('🔗 Encoded model_id:', encodedModelId);
-      const response = await fetch(`http://localhost:3005/api/categories/variants?model_id=${encodedModelId}`);
       
-      if (!response.ok) {
-        throw new Error('Varyantlar alınamadı');
-      }
+      const response = await api.get(`/categories/variants?model_id=${encodedModelId}`);
+      const data = response.data;
       
-      const data = await response.json();
       console.log('Variants API Response:', data);
       
       // Backend direkt array dönüyor

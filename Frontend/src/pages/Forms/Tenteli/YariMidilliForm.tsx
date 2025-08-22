@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useDropzone } from 'react-dropzone';
 import { useAuth } from '../../../context/AuthContext';
+import { useConfirmDialog } from '../../../hooks/useConfirmDialog';
 import {
   Box,
   Container,
@@ -87,6 +88,7 @@ const YariMidilliForm: React.FC = () => {
   const navigate = useNavigate();
   const { variantId } = useParams<{ variantId: string }>();
   const { user } = useAuth();
+  const { confirm } = useConfirmDialog();
   
   const [activeStep, setActiveStep] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -237,7 +239,13 @@ const YariMidilliForm: React.FC = () => {
       const response = await api.post('/listings', listingData);
       
       if (response.data) {
-        alert('İlanınız başarıyla oluşturuldu! Admin onayından sonra yayınlanacaktır.');
+        await confirm({
+          title: 'Başarılı',
+          description: 'İlanınız başarıyla oluşturuldu! Admin onayından sonra yayınlanacaktır.',
+          severity: 'success',
+          confirmText: 'Tamam',
+          cancelText: ''
+        });
         navigate('/');
       }
     } catch (err: any) {

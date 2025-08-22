@@ -11,6 +11,7 @@ const compression_1 = __importDefault(require("compression"));
 const morgan_1 = __importDefault(require("morgan"));
 const express_rate_limit_1 = __importDefault(require("express-rate-limit"));
 const dotenv_1 = __importDefault(require("dotenv"));
+const path_1 = __importDefault(require("path"));
 const http_1 = require("http");
 const socket_io_1 = require("socket.io");
 const socket_1 = require("./utils/socket");
@@ -20,10 +21,10 @@ const adminRoutes_1 = __importDefault(require("./routes/adminRoutes"));
 const categoryRoutes_1 = __importDefault(require("./routes/categoryRoutes"));
 const locationRoutes_1 = __importDefault(require("./routes/locationRoutes"));
 const conversationsRoutes_1 = __importDefault(require("./routes/conversationsRoutes"));
-const userRoutes_1 = __importDefault(require("./routes/userRoutes"));
 const reportRoutes_1 = __importDefault(require("./routes/reportRoutes"));
 const notificationRoutes_1 = __importDefault(require("./routes/notificationRoutes"));
 const favorites_1 = __importDefault(require("./routes/favorites"));
+const meRoutes_1 = __importDefault(require("./routes/meRoutes"));
 const logger_1 = require("./utils/logger");
 const database_1 = require("./utils/database");
 dotenv_1.default.config();
@@ -52,6 +53,9 @@ app.use((0, morgan_1.default)('combined'));
 app.use(limiter);
 app.use(express_1.default.json({ limit: '10mb' }));
 app.use(express_1.default.urlencoded({ extended: true, limit: '10mb' }));
+const uploadsPath = path_1.default.resolve('C:/Users/salih/Desktop/TruckBus/Backend/public/uploads');
+console.log('🖼️ Static uploads path:', uploadsPath);
+app.use('/uploads', express_1.default.static(uploadsPath));
 app.use((req, res, next) => {
     req.io = io;
     next();
@@ -70,7 +74,7 @@ app.use('/api/locations', locationRoutes_1.default);
 app.use('/api/listings', listingRoutes_1.default);
 app.use('/api/admin', adminRoutes_1.default);
 app.use('/api/conversations', conversationsRoutes_1.default);
-app.use('/api/me', userRoutes_1.default);
+app.use('/api/me', meRoutes_1.default);
 app.use('/api/favorites', favorites_1.default);
 app.use('/api/reports', reportRoutes_1.default);
 app.use('/api/notifications', notificationRoutes_1.default);
@@ -85,6 +89,22 @@ app.use((req, res) => {
     res.status(404).json({
         success: false,
         message: 'Route not found'
+    });
+});
+app.use((err, req, res, next) => {
+    const status = err.status || 500;
+    const message = err.message || 'Internal Server Error';
+    logger_1.logger.error('❌ Global Error Handler:', {
+        status,
+        message,
+        url: req.url,
+        method: req.method,
+        stack: err.stack
+    });
+    res.status(status).json({
+        success: false,
+        message,
+        ...(err.details ? { details: err.details } : {})
     });
 });
 async function connectDatabase() {

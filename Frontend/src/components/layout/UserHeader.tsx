@@ -302,10 +302,6 @@ const UserHeader: React.FC = () => {
                 transition: 'all 0.2s ease',
                 borderRadius: 2,
               }}
-              onClick={() => {
-                const q = prompt("Araç ara:");
-                if (q) navigate(`/?search=${encodeURIComponent(q)}`);
-              }}
             >
               <SearchRounded />
             </IconButton>

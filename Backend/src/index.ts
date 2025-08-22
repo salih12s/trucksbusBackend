@@ -5,6 +5,7 @@ import compression from 'compression';
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
+import path from 'path';
 import { createServer } from 'http';
 import { Server as SocketIOServer } from 'socket.io';
 import { setupSocketIO } from './middleware/socket';
@@ -64,6 +65,12 @@ app.use(limiter);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
+// Static files serving - uploaded images için  
+// Absolute path kullan
+const uploadsPath = path.resolve('C:/Users/salih/Desktop/TruckBus/Backend/public/uploads');
+console.log('🖼️ Static uploads path:', uploadsPath);
+app.use('/uploads', express.static(uploadsPath));
+
 // Socket.IO middleware - req'e io instance ekle
 app.use((req: any, res, next) => {
   req.io = io;
@@ -114,6 +121,26 @@ app.use((req: express.Request, res: express.Response) => {
   res.status(404).json({
     success: false,
     message: 'Route not found'
+  });
+});
+
+// Global error handler - ALWAYS returns JSON
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  const status = err.status || 500;
+  const message = err.message || 'Internal Server Error';
+  
+  logger.error('❌ Global Error Handler:', {
+    status,
+    message,
+    url: req.url,
+    method: req.method,
+    stack: err.stack
+  });
+  
+  res.status(status).json({ 
+    success: false, 
+    message,
+    ...(err.details ? { details: err.details } : {})
   });
 });
 

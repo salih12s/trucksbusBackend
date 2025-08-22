@@ -1,341 +1,453 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Container,
   Typography,
-  CircularProgress,
-  Alert,
-  Pagination,
   Button,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
+  TextField,
+  Stack,
+  Chip,
+  IconButton,
+  Tooltip,
+  Alert,
+  Card,
+  CardHeader,
+  CardContent,
+  Paper,
+  Divider,
+  Avatar,
+  CircularProgress,
 } from '@mui/material';
-import { CheckCircle, Cancel } from '@mui/icons-material';
-import TruckCenterCard from '../../components/cards/TruckCenterCard';
-import { api } from '../../services/api';
+import { 
+  CheckCircle, 
+  Cancel, 
+  Visibility,
+  Refresh,
+  PendingActions,
+  Assignment,
+  Schedule,
+  Person,
+  LocationOn,
+  Category,
+  Euro,
+} from '@mui/icons-material';
 
-interface Listing {
-  id: string;
-  title: string;
-  description: string;
-  price: number;
-  year: number;
-  mileage?: number;
-  images: string[];
-  created_at: string;
-  categories: {
-    name: string;
-  };
-  vehicle_types: {
-    name: string;
-  };
-  brands?: {
-    name: string;
-  };
-  models?: {
-    name: string;
-  };
-  variants?: {
-    name: string;
-  };
-  cities?: {
-    name: string;
-  };
-  districts?: {
-    name: string;
-  };
-  seller_name: string;
-  seller_phone: string;
-  seller_email: string;
-  users: {
-    id: string;
-    first_name: string;
-    last_name: string;
-    email: string;
-    phone: string;
-  };
-  is_approved: boolean;
-  is_active: boolean;
-}
-
-interface PendingListingsResponse {
-  listings: Listing[];
-  pagination: {
-    current_page: number;
-    total_pages: number;
-    total_items: number;
-    items_per_page: number;
-  };
-}
+import { 
+  usePendingListings, 
+  useApproveListing, 
+  useRejectListing,
+  type AdminListing 
+} from '../../hooks/admin';
+import { useConfirmDialog } from '../../hooks/useConfirmDialog';
+import { formatTRY, formatDateTR } from '../../utils/format';
+import AdminGuard from '../../components/admin/AdminGuard';
+import DataTable, { DataTableColumn } from '../../components/admin/DataTable';
+import AdminListingDetailModal from '../../components/admin/AdminListingDetailModal';
 
 const PendingListings: React.FC = () => {
-  const [listings, setListings] = useState<Listing[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(0);
-  const [approveDialog, setApproveDialog] = useState<{ open: boolean; listing: Listing | null }>({
-    open: false,
-    listing: null,
-  });
-  const [rejectDialog, setRejectDialog] = useState<{ open: boolean; listing: Listing | null }>({
-    open: false,
-    listing: null,
-  });
-  const [actionLoading, setActionLoading] = useState(false);
-  const itemsPerPage = 12;
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
+  const [sort, setSort] = useState('created_at');
+  const [order, setOrder] = useState<'asc' | 'desc'>('desc');
 
-  const loadPendingListings = async () => {
+  // Dialog states
+  const [rejectDialog, setRejectDialog] = useState<{
+    open: boolean;
+    listingId: string;
+    listingTitle: string;
+  }>({
+    open: false,
+    listingId: '',
+    listingTitle: ''
+  });
+  const [rejectReason, setRejectReason] = useState('');
+  
+  // Detail modal state
+  const [detailModal, setDetailModal] = useState<{
+    open: boolean;
+    listingId: string | null;
+  }>({
+    open: false,
+    listingId: null
+  });
+
+  // React Query hooks
+  const { confirm } = useConfirmDialog();
+  const { 
+    data: pendingListings, 
+    isLoading, 
+    error, 
+    refetch 
+  } = usePendingListings({
+    page: page + 1, // DataTable uses 0-based, backend uses 1-based
+    pageSize,
+    sort,
+    order
+  });
+
+  const approveMutation = useApproveListing();
+  const rejectMutation = useRejectListing();
+
+  // Event handlers
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage);
+  };
+
+  const handlePageSizeChange = (newPageSize: number) => {
+    setPageSize(newPageSize);
+    setPage(0); // Reset to first page
+  };
+
+  const handleSortChange = (newSort: string, newOrder: 'asc' | 'desc') => {
+    setSort(newSort);
+    setOrder(newOrder);
+  };
+
+  const handleApprove = async (listingId: string) => {
+    const confirmed = await confirm({
+      title: 'İlanı onayla?',
+      description: 'Bu ilanı yayına almak istiyor musunuz?',
+      severity: 'success',
+      confirmText: 'Onayla',
+      cancelText: 'Vazgeç'
+    });
+
+    if (!confirmed) return;
+
     try {
-      setLoading(true);
-      const response = await api.get('/admin/listings/pending', {
-        params: {
-          page: currentPage,
-          limit: itemsPerPage
-        }
+      await approveMutation.mutateAsync(listingId);
+      // Success handled by optimistic updates
+    } catch (error: any) {
+      console.error('Approve error:', error);
+      // Error handling could show a toast notification
+    }
+  };
+
+  const handleRejectClick = (listing: AdminListing) => {
+    setRejectDialog({
+      open: true,
+      listingId: listing.id,
+      listingTitle: listing.title
+    });
+    setRejectReason('');
+  };
+
+  const handleRejectConfirm = async () => {
+    if (!rejectDialog.listingId) return;
+
+    try {
+      await rejectMutation.mutateAsync({
+        listingId: rejectDialog.listingId,
+        reason: rejectReason || 'Moderatör tarafından uygun görülmedi'
       });
       
-      if (response.data.success) {
-        setListings(response.data.data.listings);
-        setTotalPages(response.data.data.pagination.total_pages);
-      }
-    } catch (error) {
-      console.error('Onay bekleyen ilanlar yüklenemedi:', error);
-      setError('Onay bekleyen ilanlar yüklenemedi. Lütfen tekrar deneyin.');
-    } finally {
-      setLoading(false);
+      setRejectDialog({ open: false, listingId: '', listingTitle: '' });
+      setRejectReason('');
+    } catch (error: any) {
+      console.error('Reject error:', error);
     }
   };
 
-  useEffect(() => {
-    loadPendingListings();
-  }, [currentPage]);
+  const handleRejectCancel = () => {
+    setRejectDialog({ open: false, listingId: '', listingTitle: '' });
+    setRejectReason('');
+  };
 
-  const handleApprove = async (id: string) => {
-    const listing = listings.find(l => l.id === id);
-    if (listing) {
-      setApproveDialog({ open: true, listing });
+  // Table columns
+  const columns: DataTableColumn<AdminListing>[] = [
+    {
+      id: 'title',
+      label: 'İlan Başlığı',
+      sortable: true,
+      width: '25%',
+      render: (value, row) => (
+        <Box>
+          <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+            {value}
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            {row.categories?.name} • {row.brands?.name} {row.models?.name}
+          </Typography>
+        </Box>
+      )
+    },
+    {
+      id: 'users',
+      label: 'İlan Sahibi',
+      width: '20%',
+      render: (_, row) => (
+        <Box>
+          <Typography variant="body2" sx={{ fontWeight: 500 }}>
+            {row.users.first_name} {row.users.last_name}
+          </Typography>
+          <Typography variant="caption" color="text.secondary">
+            {row.users.email}
+          </Typography>
+        </Box>
+      )
+    },
+    {
+      id: 'price',
+      label: 'Fiyat',
+      sortable: true,
+      width: '15%',
+      align: 'right',
+      render: (value) => (
+        <Typography variant="subtitle2" color="primary" sx={{ fontWeight: 600 }}>
+          {formatTRY(value)}
+        </Typography>
+      )
+    },
+    {
+      id: 'cities',
+      label: 'Konum',
+      width: '15%',
+      render: (_, row) => (
+        <Chip 
+          label={`${row.cities?.name}${row.districts ? ` / ${row.districts.name}` : ''}`}
+          size="small" 
+          variant="outlined"
+        />
+      )
+    },
+    {
+      id: 'created_at',
+      label: 'İlan Tarihi',
+      sortable: true,
+      width: '10%',
+      render: (value) => (
+        <Typography variant="body2" color="text.secondary">
+          {formatDateTR(value)}
+        </Typography>
+      )
+    },
+    {
+      id: 'actions',
+      label: 'İşlemler',
+      width: '15%',
+      align: 'center',
+      render: (_, row) => (
+        <Stack direction="row" spacing={1} justifyContent="center">
+          <Tooltip title="İlanı Görüntüle">
+            <IconButton 
+              size="small"
+              onClick={() => setDetailModal({ open: true, listingId: row.id })}
+            >
+              <Visibility fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Onayla">
+            <IconButton 
+              size="small" 
+              color="success"
+              onClick={() => handleApprove(row.id)}
+              disabled={approveMutation.isPending}
+            >
+              <CheckCircle fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Reddet">
+            <IconButton 
+              size="small" 
+              color="error"
+              onClick={() => handleRejectClick(row)}
+              disabled={rejectMutation.isPending}
+            >
+              <Cancel fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        </Stack>
+      )
     }
-  };
-
-  const handleReject = async (id: string) => {
-    const listing = listings.find(l => l.id === id);
-    if (listing) {
-      setRejectDialog({ open: true, listing });
-    }
-  };
-
-  const confirmApprove = async () => {
-    if (!approveDialog.listing) return;
-    
-    try {
-      setActionLoading(true);
-      await api.put(`/admin/listings/${approveDialog.listing.id}/approve`);
-      
-      // Remove from pending list
-      setListings(prev => prev.filter(l => l.id !== approveDialog.listing!.id));
-      setApproveDialog({ open: false, listing: null });
-      
-      alert('İlan başarıyla onaylandı ve yayınlandı!');
-    } catch (error) {
-      console.error('İlan onaylanamadı:', error);
-      alert('İlan onaylanırken bir hata oluştu.');
-    } finally {
-      setActionLoading(false);
-    }
-  };
-
-  const confirmReject = async () => {
-    if (!rejectDialog.listing) return;
-    
-    try {
-      setActionLoading(true);
-      await api.put(`/admin/listings/${rejectDialog.listing.id}/reject`);
-      
-      // Remove from pending list
-      setListings(prev => prev.filter(l => l.id !== rejectDialog.listing!.id));
-      setRejectDialog({ open: false, listing: null });
-      
-      alert('İlan reddedildi.');
-    } catch (error) {
-      console.error('İlan reddedilemedi:', error);
-      alert('İlan reddedilirken bir hata oluştu.');
-    } finally {
-      setActionLoading(false);
-    }
-  };
-
-  const handlePageChange = (_event: React.ChangeEvent<unknown>, page: number) => {
-    setCurrentPage(page);
-  };
-
-  if (error) {
-    return (
-      <Container maxWidth="xl" sx={{ py: 2 }}>
-        <Alert severity="error">{error}</Alert>
-      </Container>
-    );
-  }
+  ];
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Typography variant="h4" sx={{ mb: 3, fontWeight: 'bold' }}>
-        Onay Bekleyen İlanlar ({listings.length})
-      </Typography>
+    <AdminGuard>
+      <Container maxWidth="xl" sx={{ py: 4 }}>
+        {/* Header Card */}
+        <Card sx={{ mb: 3, borderRadius: 3, boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}>
+          <CardContent sx={{ p: 3 }}>
+            <Box display="flex" justifyContent="space-between" alignItems="center">
+              <Box display="flex" alignItems="center" gap={2}>
+                <Avatar sx={{ bgcolor: 'warning.main', width: 56, height: 56 }}>
+                  <PendingActions sx={{ fontSize: 28 }} />
+                </Avatar>
+                <Box>
+                  <Typography variant="h4" component="h1" sx={{ fontWeight: 600, mb: 0.5 }}>
+                    Onay Bekleyen İlanlar
+                  </Typography>
+                  {pendingListings && (
+                    <Box display="flex" alignItems="center" gap={1}>
+                      <Chip
+                        icon={<Assignment />}
+                        label={`${pendingListings.count} ilan bekliyor`}
+                        color="warning"
+                        variant="outlined"
+                        size="small"
+                      />
+                      <Chip
+                        icon={<Schedule />}
+                        label="Otomatik yenileme aktif"
+                        color="info"
+                        variant="outlined"
+                        size="small"
+                      />
+                    </Box>
+                  )}
+                </Box>
+              </Box>
+              
+              <Button
+                variant="contained"
+                startIcon={isLoading ? <CircularProgress size={20} color="inherit" /> : <Refresh />}
+                onClick={() => refetch()}
+                disabled={isLoading}
+                sx={{ 
+                  borderRadius: 2,
+                  textTransform: 'none',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                  '&:hover': {
+                    boxShadow: '0 6px 16px rgba(0,0,0,0.2)',
+                  }
+                }}
+              >
+                {isLoading ? 'Yenileniyor...' : 'Yenile'}
+              </Button>
+            </Box>
+          </CardContent>
+        </Card>
 
-      {loading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-          <CircularProgress />
-        </Box>
-      ) : (
-        <>
-          {/* İlan Kartları */}
-          <Box sx={{ 
-            display: 'grid', 
-            gridTemplateColumns: { 
-              xs: '1fr', 
-              sm: '1fr 1fr', 
-              md: '1fr 1fr 1fr' 
-            }, 
-            gap: 3,
-            mb: 4 
-          }}>
-            {listings.map(listing => {
-              // Listing verisini SimpleListing formatına dönüştür
-              const simpleListing = {
-                id: listing.id,
-                title: listing.title,
-                price: listing.price,
-                category: listing.categories?.name || 'Bilinmeyen',
-                brand: listing.brands?.name || 'Bilinmeyen',
-                model: listing.models?.name || 'Bilinmeyen',
-                year: listing.year,
-                km: listing.mileage || 0,
-                location: `${listing.cities?.name || ''}, ${listing.districts?.name || ''}`.trim(),
-                image: listing.images?.[0] || '/placeholder-truck.jpg',
-                seller: {
-                  name: listing.seller_name || 'İlan Sahibi',
-                  phone: listing.seller_phone || 'Telefon Belirtilmemiş'
-                },
-                owner: {
-                  name: listing.seller_name || 'İlan Sahibi',
-                  phone: listing.seller_phone || 'Telefon Belirtilmemiş'
-                },
-                user_id: listing.users?.id,
-                status: 'PENDING' as const,
-                createdAt: listing.created_at
-              };
-
-              return (
-                <TruckCenterCard
-                  key={listing.id}
-                  listing={simpleListing}
-                  isAdminView={true}
-                  onApprove={handleApprove}
-                  onReject={handleReject}
-                  onViewDetails={(id) => console.log('View details:', id)}
-                />
-              );
-            })}
-          </Box>
-
-          {/* Sayfalama */}
-          {totalPages > 1 && (
-            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-              <Pagination
-                count={totalPages}
-                page={currentPage}
-                onChange={handlePageChange}
-                color="primary"
-                size="large"
+        {/* Status Alert */}
+        {pendingListings && pendingListings.count > 0 && (
+          <Alert 
+            severity="warning" 
+            sx={{ 
+              mb: 3, 
+              borderRadius: 2,
+              '& .MuiAlert-icon': {
+                fontSize: '1.5rem'
+              }
+            }}
+            action={
+              <Chip 
+                label="Acil" 
+                color="warning" 
+                size="small"
+                variant="outlined"
               />
-            </Box>
-          )}
+            }
+          >
+            <Typography variant="body1" sx={{ fontWeight: 500 }}>
+              <strong>{pendingListings.count} ilan</strong> onayınızı bekliyor. 
+            </Typography>
+            <Typography variant="body2" sx={{ mt: 0.5, opacity: 0.8 }}>
+              İlanları inceleyip onaylayabilir veya reddedebilirsiniz.
+            </Typography>
+          </Alert>
+        )}
 
-          {/* Sonuç bulunamadı */}
-          {listings.length === 0 && !loading && (
-            <Box sx={{ textAlign: 'center', py: 8 }}>
-              <Typography variant="h6" color="text.secondary">
-                Onay bekleyen ilan bulunmuyor
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                Yeni ilanlar oluşturulduğunda burada görünecektir
-              </Typography>
-            </Box>
-          )}
-        </>
-      )}
+        {/* Data Table Card */}
+        <Card sx={{ borderRadius: 3, boxShadow: '0 4px 20px rgba(0,0,0,0.1)', overflow: 'hidden' }}>
+          <CardHeader
+            title={
+              <Box display="flex" alignItems="center" gap={1}>
+                <Assignment color="primary" />
+                <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                  İlan Listesi
+                </Typography>
+              </Box>
+            }
+            action={
+              pendingListings && (
+                <Chip
+                  label={`${pendingListings.count} kayıt`}
+                  color="primary"
+                  variant="outlined"
+                />
+              )
+            }
+            sx={{ 
+              borderBottom: 1, 
+              borderColor: 'divider',
+              bgcolor: 'grey.50'
+            }}
+          />
+          <CardContent sx={{ p: 0 }}>
+            <DataTable<AdminListing>
+              columns={columns}
+              rows={pendingListings?.data || []}
+              page={page}
+              pageSize={pageSize}
+              totalCount={pendingListings?.count || 0}
+              sort={sort}
+              order={order}
+              loading={isLoading}
+              error={error}
+              onPageChange={handlePageChange}
+              onPageSizeChange={handlePageSizeChange}
+              onSortChange={handleSortChange}
+              onRetry={() => refetch()}
+              emptyMessage="Onay bekleyen ilan bulunamadı"
+              rowsPerPageOptions={[5, 10, 25, 50]}
+            />
+          </CardContent>
+        </Card>
 
-      {/* Approve Confirmation Dialog */}
-      <Dialog 
-        open={approveDialog.open} 
-        onClose={() => setApproveDialog({ open: false, listing: null })}
-        maxWidth="sm"
-        fullWidth
-      >
-        <DialogTitle>İlanı Onayla</DialogTitle>
-        <DialogContent>
-          <Typography>
-            "{approveDialog.listing?.title}" ilanını onaylamak istediğinizden emin misiniz?
-            <br /><br />
-            Onaylandıktan sonra ilan anasayfada yayınlanacaktır.
-          </Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button 
-            onClick={() => setApproveDialog({ open: false, listing: null })}
-            disabled={actionLoading}
-          >
-            İptal
-          </Button>
-          <Button 
-            onClick={confirmApprove}
-            variant="contained"
-            color="success"
-            disabled={actionLoading}
-            startIcon={actionLoading ? <CircularProgress size={16} /> : <CheckCircle />}
-          >
-            {actionLoading ? 'Onaylanıyor...' : 'Onayla'}
-          </Button>
-        </DialogActions>
-      </Dialog>
+        {/* Reject Dialog */}
+        <Dialog
+          open={rejectDialog.open}
+          onClose={handleRejectCancel}
+          maxWidth="sm"
+          fullWidth
+        >
+          <DialogTitle>İlanı Reddet</DialogTitle>
+          <DialogContent>
+            <Typography variant="body1" sx={{ mb: 2 }}>
+              <strong>"{rejectDialog.listingTitle}"</strong> başlıklı ilanı reddetmek istediğinizden emin misiniz?
+            </Typography>
+            <TextField
+              fullWidth
+              multiline
+              rows={3}
+              label="Red Sebebi (İsteğe bağlı)"
+              placeholder="İlan reddetme sebebinizi yazabilirsiniz..."
+              value={rejectReason}
+              onChange={(e) => setRejectReason(e.target.value)}
+              sx={{ mt: 2 }}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleRejectCancel}>
+              İptal
+            </Button>
+            <Button 
+              onClick={handleRejectConfirm}
+              variant="contained"
+              color="error"
+              disabled={rejectMutation.isPending}
+            >
+              {rejectMutation.isPending ? 'Reddediliyor...' : 'İlanı Reddet'}
+            </Button>
+          </DialogActions>
+        </Dialog>
 
-      {/* Reject Confirmation Dialog */}
-      <Dialog 
-        open={rejectDialog.open} 
-        onClose={() => setRejectDialog({ open: false, listing: null })}
-        maxWidth="sm"
-        fullWidth
-      >
-        <DialogTitle>İlanı Reddet</DialogTitle>
-        <DialogContent>
-          <Typography>
-            "{rejectDialog.listing?.title}" ilanını reddetmek istediğinizden emin misiniz?
-            <br /><br />
-            Reddedilen ilanlar yayınlanmayacaktır.
-          </Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button 
-            onClick={() => setRejectDialog({ open: false, listing: null })}
-            disabled={actionLoading}
-          >
-            İptal
-          </Button>
-          <Button 
-            onClick={confirmReject}
-            variant="contained"
-            color="error"
-            disabled={actionLoading}
-            startIcon={actionLoading ? <CircularProgress size={16} /> : <Cancel />}
-          >
-            {actionLoading ? 'Reddediliyor...' : 'Reddet'}
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </Box>
+        {/* İlan Detay Modal'ı */}
+        <AdminListingDetailModal
+          open={detailModal.open}
+          onClose={() => setDetailModal({ open: false, listingId: null })}
+          listingId={detailModal.listingId}
+          onApprove={handleApprove}
+          onReject={(listing) => {
+            setDetailModal({ open: false, listingId: null });
+            handleRejectClick(listing);
+          }}
+        />
+      </Container>
+    </AdminGuard>
   );
 };
 

@@ -61,7 +61,6 @@ const AdminLayout = () => {
     { text: 'Dashboard', icon: <Dashboard />, path: '/admin' },
     { text: 'Tüm İlanlar', icon: <Assignment />, path: '/admin/all-listings' },
     { text: 'Onay Bekleyen İlanlar', icon: <HourglassEmpty />, path: '/admin/pending-listings' },
-    { text: 'Şikayet Kutusu', icon: <Report />, path: '/admin/complaints' },
     { text: 'Şikayet Yönetimi', icon: <Report />, path: '/admin/reports' },
     { text: 'Kullanıcılar', icon: <People />, path: '/admin/users' },
     { text: 'Mesajlaşma', icon: <Message />, path: '/admin/messages' },

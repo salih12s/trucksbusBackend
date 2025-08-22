@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
+import { useConfirmDialog } from '../../../hooks/useConfirmDialog';
 import {
   Box,
   Container,
@@ -89,6 +90,7 @@ const TankerForm: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { variantId } = useParams();
+  const { confirm } = useConfirmDialog();
   const [activeStep, setActiveStep] = useState(0);
   const [cities, setCities] = useState<City[]>([]);
   const [districts, setDistricts] = useState<District[]>([]);
@@ -235,7 +237,13 @@ const TankerForm: React.FC = () => {
       const response = await api.post('/listings', listingData);
       
       if (response.data) {
-        alert('İlanınız başarıyla oluşturuldu! Admin onayından sonra yayınlanacaktır.');
+        await confirm({
+          title: 'Başarılı',
+          description: 'İlanınız başarıyla oluşturuldu! Admin onayından sonra yayınlanacaktır.',
+          severity: 'success',
+          confirmText: 'Tamam',
+          cancelText: ''
+        });
         navigate('/');
       }
     } catch (err: any) {

@@ -10,6 +10,7 @@ import {
   Alert,
 } from '@mui/material';
 import UserHeader from '../../components/layout/UserHeader';
+import api from '../../services/api';
 
 // API'den gelecek vehicle_types interface'i
 interface VehicleType {
@@ -53,13 +54,9 @@ const CategorySelection: React.FC = () => {
   const fetchVehicleTypes = async () => {
     try {
       setError(null);
-      const response = await fetch('http://localhost:3005/api/categories/vehicle-types?category_id=vehicle-category-001');
+      const response = await api.get('/categories/vehicle-types?category_id=vehicle-category-001');
+      const data = response.data;
       
-      if (!response.ok) {
-        throw new Error('Araç türleri alınamadı');
-      }
-      
-      const data = await response.json();
       console.log('API Response:', data);
       
       // API response formatını kontrol et - backend direkt array dönüyor

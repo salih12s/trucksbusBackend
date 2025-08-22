@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { api } from '../../services/api';
 import { listingService } from '../../services/listingService';
 import { createStandardPayload, validateListingPayload } from '../../services/apiNormalizer';
+import { useConfirmDialog } from '../../hooks/useConfirmDialog';
 import {
   Box,
   Container,
@@ -79,6 +79,7 @@ const MinibusAdForm: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const { confirm } = useConfirmDialog();
   const [activeStep, setActiveStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [uploadedImages, setUploadedImages] = useState<File[]>([]);
@@ -523,7 +524,13 @@ const MinibusAdForm: React.FC = () => {
       console.log('API Response:', response);
       
       if (response.success) {
-        alert('Minibüs ilanınız başarıyla oluşturuldu! Admin onayından sonra yayınlanacaktır.');
+        await confirm({
+          title: 'Başarılı',
+          description: 'Minibüs ilanınız başarıyla oluşturuldu! Admin onayından sonra yayınlanacaktır.',
+          severity: 'success',
+          confirmText: 'Tamam',
+          cancelText: ''
+        });
         navigate('/user/my-listings'); // Navigate to MyListings to show PENDING status
       } else {
         throw new Error(response.message || 'İlan oluşturulamadı');

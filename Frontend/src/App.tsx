@@ -7,6 +7,8 @@ import { NotificationProvider } from './context/NotificationContext';
 import { FavoritesProvider } from './context/FavoritesContext';
 import { ListingProvider } from './context/ListingContext';
 import { WebSocketProvider } from './context/WebSocketContext';
+import { ConfirmDialogProvider } from './context/ConfirmDialogProvider';
+import { PromptDialogProvider } from './context/PromptDialogProvider';
 import UserLayout from './components/layout/UserLayout';
 import AdminLayout from './components/layout/AdminLayout';
 import AdminRoute from './components/auth/AdminRoute';
@@ -69,7 +71,6 @@ import CokluAracForm from './pages/Forms/OtoKurtariciTasiyici/CokluAracForm';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AllListings from './pages/admin/AllListings';
 import PendingListings from './pages/admin/PendingListings';
-import Complaints from './pages/admin/Complaints';
 import AdminReportsPage from './pages/admin/AdminReportsPage';
 import Users from './pages/admin/Users';
 // 🔧 Admin messages kaldırıldı - tek mimari
@@ -88,11 +89,13 @@ const App: React.FC = () => {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <AuthProvider>
-        <NotificationProvider>
-          <FavoritesProvider>
-            <ListingProvider>
-              <WebSocketProvider>
+      <ConfirmDialogProvider>
+        <PromptDialogProvider>
+          <AuthProvider>
+            <NotificationProvider>
+              <FavoritesProvider>
+                <ListingProvider>
+                  <WebSocketProvider>
                 <Router>
                 <Routes>
                 <Route path="/auth/login" element={<Login />} />
@@ -209,7 +212,6 @@ const App: React.FC = () => {
                 <Route index element={<AdminDashboard />} />
                 <Route path="all-listings" element={<AllListings />} />
                 <Route path="pending-listings" element={<PendingListings />} />
-                <Route path="complaints" element={<Complaints />} />
                 <Route path="reports" element={<AdminReportsPage />} />
                 <Route path="users" element={<Users />} />
                 {/* 🔧 Admin messages kaldırıldı - tek mimari */}
@@ -226,6 +228,8 @@ const App: React.FC = () => {
     </FavoritesProvider>
   </NotificationProvider>
 </AuthProvider>
+</PromptDialogProvider>
+</ConfirmDialogProvider>
 </ThemeProvider>
   );
 };

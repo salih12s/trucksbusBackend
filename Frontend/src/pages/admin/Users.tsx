@@ -17,9 +17,25 @@ import {
   TablePagination,
   CircularProgress,
   Alert,
+  Card,
+  CardContent,
+  Grid,
+  Divider,
+  IconButton,
+  Tooltip,
 } from '@mui/material';
-import { Search, Block, Edit, Visibility } from '@mui/icons-material';
+import { 
+  Search, 
+  Block, 
+  Edit, 
+  Visibility,
+  People,
+  PersonAdd,
+  FilterList,
+  Refresh
+} from '@mui/icons-material';
 import { api } from '../../services/api';
+import { useConfirmDialog } from '../../hooks/useConfirmDialog';
 
 interface User {
   id: string;
@@ -46,6 +62,7 @@ interface UsersResponse {
 }
 
 const Users = () => {
+  const { confirm } = useConfirmDialog();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -106,6 +123,25 @@ const Users = () => {
 
   const getRoleText = (role: string) => {
     return role === 'ADMIN' ? 'Admin' : 'Kullanıcı';
+  };
+
+  const handleBlockUser = async (userId: string, userName: string) => {
+    const confirmed = await confirm({
+      title: 'Kullanıcıyı Engelle',
+      description: `${userName} kullanıcısını engellemek istediğinizden emin misiniz? Bu işlem geri alınabilir.`,
+      severity: 'warning'
+    });
+
+    if (confirmed) {
+      try {
+        // TODO: API call to block user
+        console.log('Blocking user:', userId);
+        // For now, just refresh the page or show a success message
+        window.location.reload();
+      } catch (error) {
+        console.error('Error blocking user:', error);
+      }
+    }
   };
 
   if (error) {
@@ -218,6 +254,7 @@ const Users = () => {
                           variant="outlined"
                           color="error"
                           size="small"
+                          onClick={() => handleBlockUser(user.id, `${user.first_name} ${user.last_name}`)}
                         >
                           Engelle
                         </Button>

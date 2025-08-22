@@ -9,9 +9,25 @@ const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const ulid_1 = require("ulid");
 const database_1 = require("../utils/database");
 const logger_1 = require("../utils/logger");
+const phone_1 = require("../utils/phone");
 const register = async (req, res) => {
     try {
         const { email, password, first_name, last_name, phone, city, district } = req.body;
+        if (!email || !password || !first_name || !last_name || !phone) {
+            res.status(400).json({
+                success: false,
+                message: 'E-posta, şifre, ad, soyad ve telefon alanları zorunludur.'
+            });
+            return;
+        }
+        const normalizedPhone = (0, phone_1.normalizePhoneTR)(String(phone).trim());
+        if (!normalizedPhone) {
+            res.status(400).json({
+                success: false,
+                message: 'Geçerli bir telefon numarası giriniz (0xxx xxx xx xx).'
+            });
+            return;
+        }
         const existingUser = await database_1.prisma.users.findUnique({
             where: { email }
         });
@@ -31,7 +47,7 @@ const register = async (req, res) => {
                 password: hashedPassword,
                 first_name,
                 last_name,
-                phone,
+                phone: normalizedPhone,
                 city,
                 district,
                 role: 'USER',
@@ -54,8 +70,13 @@ const register = async (req, res) => {
                     email: user.email,
                     first_name: user.first_name,
                     last_name: user.last_name,
+                    phone: user.phone,
+                    role: user.role,
                     avatar: user.avatar,
-                    role: user.role
+                    is_active: user.is_active,
+                    is_email_verified: user.is_email_verified,
+                    created_at: user.created_at,
+                    updated_at: user.updated_at
                 },
                 token
             }
@@ -81,7 +102,26 @@ const login = async (req, res) => {
             return;
         }
         const user = await database_1.prisma.users.findUnique({
-            where: { email }
+            where: { email },
+            select: {
+                id: true,
+                email: true,
+                first_name: true,
+                last_name: true,
+                username: true,
+                phone: true,
+                city: true,
+                district: true,
+                role: true,
+                is_email_verified: true,
+                is_active: true,
+                avatar: true,
+                password: true,
+                login_attempts: true,
+                last_login: true,
+                created_at: true,
+                updated_at: true
+            }
         });
         if (!user) {
             res.status(401).json({
@@ -131,11 +171,11 @@ const login = async (req, res) => {
                     last_name: user.last_name,
                     username: user.username,
                     phone: user.phone,
-                    avatar: user.avatar,
                     city: user.city,
                     district: user.district,
                     role: user.role,
-                    is_email_verified: user.is_email_verified
+                    is_email_verified: user.is_email_verified,
+                    avatar: user.avatar
                 },
                 token
             }
@@ -185,7 +225,6 @@ const getMe = async (req, res) => {
                 last_name: true,
                 username: true,
                 phone: true,
-                avatar: true,
                 city: true,
                 district: true,
                 role: true,

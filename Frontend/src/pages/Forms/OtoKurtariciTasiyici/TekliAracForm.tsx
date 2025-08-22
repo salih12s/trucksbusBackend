@@ -3,8 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { Box, Button, TextField, Typography, Stepper, Step, StepLabel, Card, CardContent, MenuItem, Stack, Chip, InputAdornment, FormControl, FormLabel, RadioGroup, FormControlLabel, Radio, Checkbox, FormGroup, Autocomplete, Alert } from '@mui/material';
 import { AttachMoney, Upload, LocationOn, Person, Phone, Email, DirectionsCar, Build, Security } from '@mui/icons-material';
 import { useAuth } from '../../../context/AuthContext';
+import { useConfirmDialog } from '../../../hooks/useConfirmDialog';
 import { locationService, City, District } from '../../../services/locationService';
-import { api } from '../../../services/api';
+import { categoryService } from '../../../services/categoryService';
+import { createStandardPayload, validateListingPayload } from '../../../services/apiNormalizer';
+import { listingService } from '../../../services/listingService';
+import { useSnackbar } from 'notistack';
 
 interface TekliAracFormData {
   // 1. Sayfa - İlan Detayları
@@ -43,11 +47,21 @@ interface TekliAracFormData {
   sellerEmail: string;
   city: string;
   district: string;
+
+  // Backend için gerekli ID'ler - MinibüsForm uyumlu
+  category_id?: string | number;
+  vehicle_type_id?: string | number;
+  brand_id?: string;
+  model_id?: string;
+  variant_id?: string;
+  city_id?: string;
+  district_id?: string;
 }
 
 const steps = ['İlan Detayları', 'Araç Bilgileri', 'Detaylı Bilgi', 'Fotoğraflar', 'İletişim & Fiyat'];
 
 const TekliAracForm: React.FC = () => {
+  const { confirm } = useConfirmDialog();
   const [activeStep, setActiveStep] = useState(0);
   const [formData, setFormData] = useState<TekliAracFormData>({
     title: '',
@@ -81,9 +95,68 @@ const TekliAracForm: React.FC = () => {
 
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { enqueueSnackbar } = useSnackbar();
   const [cities, setCities] = useState<City[]>([]);
   const [districts, setDistricts] = useState<District[]>([]);
   const [submitError, setSubmitError] = useState<string>('');
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  
+  // Brand and model states - MinibüsForm uyumlu
+  const [brands, setBrands] = useState<any[]>([]);
+  const [models, setModels] = useState<any[]>([]);
+  const [selectedBrand, setSelectedBrand] = useState<any>(null);
+  const [selectedModel, setSelectedModel] = useState<any>(null);
+  const [loadingCities, setLoadingCities] = useState(true);
+  const [loadingDistricts, setLoadingDistricts] = useState(false);
+
+  // Load categories and find "Oto Kurtarıcı & Taşıyıcı" category
+  useEffect(() => {
+    const loadCategoryData = async () => {
+      try {
+        console.log('🔍 Loading categories...');
+        const categories = await categoryService.getCategories();
+        console.log('📋 Available categories:', categories.map(c => c.name));
+        
+        // "Vasıta" kategorisini bulalım
+        const targetCategory = categories.find(cat => cat.name === 'Vasıta');
+        
+        if (targetCategory) {
+          console.log('📋 Found category:', targetCategory.name, 'ID:', targetCategory.id);
+          
+          // Get vehicle types for this category
+          const vehicleTypes = await categoryService.getVehicleTypesByCategory(targetCategory.id);
+          console.log('🚗 Available vehicle types:', vehicleTypes.map(v => v.name));
+          
+          const tekliAracType = vehicleTypes.find(type => 
+            type.name === 'Oto Kurtarıcı & Taşıyıcı'
+          );
+          
+          if (tekliAracType) {
+            console.log('🚗 Found vehicle type:', tekliAracType.name, 'ID:', tekliAracType.id);
+            
+            // Update form data with IDs
+            setFormData(prev => ({
+              ...prev,
+              category_id: targetCategory.id,
+              vehicle_type_id: tekliAracType.id
+            }));
+            
+            console.log('✅ Form updated with category_id:', targetCategory.id, 'vehicle_type_id:', tekliAracType.id);
+          } else {
+            console.warn('⚠️ Tekli Araç vehicle type not found');
+          }
+        } else {
+          console.warn('⚠️ Vasıta category not found');
+        }
+      } catch (error) {
+        console.error('❌ Error loading category data:', error);
+        setSubmitError('Kategori bilgileri yüklenemedi');
+      }
+    };
+    
+    loadCategoryData();
+  }, []);
 
   // Load user data when component mounts
   useEffect(() => {
@@ -96,39 +169,39 @@ const TekliAracForm: React.FC = () => {
     }
   }, [user]);
 
-  // Load cities
+  // Load cities on component mount - MinibüsForm uyumlu
   useEffect(() => {
     const loadCities = async () => {
       try {
+        setLoadingCities(true);
         const citiesData = await locationService.getCities();
         setCities(citiesData);
+        console.log('🏙️ TekliAracForm: Şehirler yüklendi:', citiesData.length);
       } catch (error) {
-        console.error('Error loading cities:', error);
+        console.error('❌ TekliAracForm: Şehirler yüklenemedi:', error);
+      } finally {
+        setLoadingCities(false);
       }
     };
+    
     loadCities();
   }, []);
 
-  // Load districts when city changes
-  useEffect(() => {
-    if (formData.city) {
-      const loadDistricts = async () => {
-        try {
-          const selectedCity = cities.find(c => c.name === formData.city);
-          if (selectedCity) {
-            const districtsData = await locationService.getDistrictsByCity(selectedCity.id);
-            setDistricts(districtsData);
-          }
-        } catch (error) {
-          console.error('Error loading districts:', error);
-        }
-      };
-      loadDistricts();
-    } else {
-      setDistricts([]);
-      setFormData(prev => ({ ...prev, district: '' }));
+  // Load districts when city changes - MinibüsForm uyumlu
+  const handleCityChange = async (cityId: string, cityName: string) => {
+    try {
+      setLoadingDistricts(true);
+      setFormData(prev => ({ ...prev, city: cityName, district: '', city_id: cityId }));
+      
+      const districtsData = await locationService.getDistrictsByCity(cityId);
+      setDistricts(districtsData);
+      console.log('🏘️ TekliAracForm: İlçeler yüklendi:', districtsData.length);
+    } catch (error) {
+      console.error('❌ TekliAracForm: İlçeler yüklenemedi:', error);
+    } finally {
+      setLoadingDistricts(false);
     }
-  }, [formData.city, cities]);
+  };
 
   const handleNext = () => {
     if (validateStep(activeStep)) {
@@ -191,40 +264,129 @@ const TekliAracForm: React.FC = () => {
     return true;
   };
 
-  const handleSubmit = async () => {
-    try {
-      if (!validateStep(4)) return;
-      
-      // Prepare form data for submission
-      const listingData = {
-        ...formData,
-        category: 'Oto Kurtarıcı & Taşıyıcı',
-        subcategory: 'Tekli Araç',
-        images: formData.uploadedImages
-      };
+  // Pre-submit validation
+  const validateFormData = (): string[] => {
+    const missing: string[] = [];
+    
+    if (!formData.title?.trim()) missing.push('title');
+    if (!formData.price || toInt(formData.price) === undefined || toInt(formData.price)! <= 0) missing.push('price');
+    if (!formData.category_id) missing.push('category_id');
+    if (!formData.vehicle_type_id) missing.push('vehicle_type_id');
+    if (!formData.city?.trim()) missing.push('city');
+    if (!formData.district?.trim()) missing.push('district');
+    if (!formData.sellerPhone?.trim()) missing.push('seller_phone');
+    
+    return missing;
+  };
 
-      console.log('Submitting form data:', listingData);
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+    setSubmitError('');
+    
+    try {
+      // Kategori/araç tipi kesin dolu olsun
+      if (!formData.category_id || !formData.vehicle_type_id) {
+        setSubmitError('Sistemsel: kategori/araç tipi atanamadı. Lütfen sayfayı yenileyin.');
+        setIsSubmitting(false);
+        return;
+      }
       
-      // Make API call
-      const response = await api.post('/listings', listingData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        }
+      // Convert uploaded images to base64 - MinibüsForm uyumlu
+      const imageUrls = await Promise.all(
+        formData.uploadedImages.map(file => {
+          return new Promise<string>((resolve) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result as string);
+            reader.readAsDataURL(file);
+          });
+        })
+      );
+
+      // Create standardized payload - MinibüsForm uyumlu
+      const standardPayload = createStandardPayload({
+        title: formData.title,
+        description: formData.description,
+        price: formData.price.replace(/\./g, ''), // Remove dots from price
+        year: formData.modelYear,
+        km: formData.km.replace(/\./g, ''), // Remove dots from km
+        city: formData.city,
+        category_id: formData.category_id,
+        vehicle_type_id: formData.vehicle_type_id,
+        brand_id: formData.brand_id || null,
+        model_id: formData.model_id || null,
+        variant_id: formData.variant_id || null,
+        city_id: formData.city_id,
+        district_id: formData.district_id,
+        seller_name: formData.sellerName,
+        seller_phone: formData.sellerPhone.replace(/[^\d]/g, ''),
+        seller_email: formData.sellerEmail,
+        images: imageUrls
+      }, {
+        // Oto Kurtarıcı-specific properties
+        engineVolume: formData.engineVolume,
+        vehicleBrand: formData.vehicleBrand,
+        licensePlate: formData.licensePlate,
+        platformWidth: formData.platformWidth,
+        platformLength: formData.platformLength,
+        maxTorqueNm: formData.maxTorqueNm,
+        maxPowerHP: formData.maxPowerHP,
+        currency: formData.currency,
+        loadCapacity: formData.loadCapacity,
+        safetyFeatures: formData.safetyFeatures.join(', '),
+        vehicleEquipment: formData.vehicleEquipment.join(', '),
+        priceType: formData.priceType,
+        towingEquipment: formData.towingEquipment.join(', '),
+        isExchangeable: formData.isExchangeable,
+        heavyCommercialTransport: formData.heavyCommercialTransport,
+        fuel_type: formData.fuelType,
+        color: "Belirtilmemiş",
+        vehicle_condition: "İkinci El",
+        transmission: "Manuel"
       });
 
-      if (response.data.success) {
-        // Success - show admin approval message and navigate home
-        alert('İlanınız başarıyla oluşturuldu! Admin onayından sonra yayınlanacaktır.');
-        navigate('/');
-      } else {
-        setSubmitError(response.data.message || 'İlan oluşturulamadı');
+      // Validate payload - MinibüsForm uyumlu
+      const validation = validateListingPayload(standardPayload);
+      if (!validation.isValid) {
+        setSubmitError(validation.errors.join(', '));
+        return;
       }
+
+      console.log('Oto Kurtarıcı ilanı oluşturuluyor:', standardPayload);
+
+      // Use standardized listing service - MinibüsForm uyumlu
+      const response = await listingService.createStandardListing(standardPayload);
+      console.log('API Response:', response);
+      
+      if (response.success) {
+        await confirm({
+          title: 'Başarılı',
+          description: 'Oto Kurtarıcı ilanınız başarıyla oluşturuldu! Admin onayından sonra yayınlanacaktır.',
+          severity: 'success',
+          confirmText: 'Tamam',
+          cancelText: ''
+        });
+        navigate('/user/my-listings');
+      } else {
+        throw new Error(response.message || 'İlan oluşturulamadı');
+      }
+
     } catch (error: any) {
-      console.error('Error submitting form:', error);
-      setSubmitError(
-        error.response?.data?.message || 
-        'İlan gönderilirken bir hata oluştu. Lütfen tekrar deneyin.'
-      );
+      console.error('İlan oluşturma hatası:', error);
+      
+      if (error.message.includes('Zorunlu alanları doldurunuz') || error.message.includes('zorunludur')) {
+        setSubmitError('Zorunlu alanları doldurunuz');
+      } else if (error.code === 'ECONNREFUSED') {
+        setSubmitError('Sunucuya bağlanılamıyor. Lütfen backend\'in çalıştığından emin olun.');
+      } else if (error.response?.status === 404) {
+        setSubmitError('API endpoint bulunamadı. URL\'yi kontrol edin.');
+      } else if (error.response?.status === 401) {
+        setSubmitError('Yetkilendirme hatası. Lütfen giriş yapın.');
+      } else {
+        const errorMessage = error.response?.data?.message || error.message || 'İlan oluşturulurken bir hata oluştu';
+        setSubmitError(errorMessage);
+      }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -234,13 +396,19 @@ const TekliAracForm: React.FC = () => {
     if (submitError) setSubmitError('');
   };
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (!files) return;
     const newFiles = Array.from(files);
     const totalFiles = formData.uploadedImages.length + newFiles.length;
     if (totalFiles > 15) {
-      alert('En fazla 15 fotoğraf yükleyebilirsiniz.');
+      await confirm({
+        title: 'Uyarı',
+        description: 'En fazla 15 fotoğraf yükleyebilirsiniz.',
+        severity: 'warning',
+        confirmText: 'Tamam',
+        cancelText: ''
+      });
       return;
     }
     setFormData(prev => ({ ...prev, uploadedImages: [...prev.uploadedImages, ...newFiles] }));
@@ -703,8 +871,14 @@ const TekliAracForm: React.FC = () => {
                 getOptionLabel={(option) => option.name}
                 value={cities.find(city => city.name === formData.city) || null}
                 onChange={(_, newValue) => {
-                  handleInputChange('city', newValue ? newValue.name : '');
+                  if (newValue) {
+                    handleCityChange(newValue.id, newValue.name);
+                  } else {
+                    setFormData(prev => ({ ...prev, city: '', district: '', city_id: '', district_id: '' }));
+                    setDistricts([]);
+                  }
                 }}
+                loading={loadingCities}
                 renderInput={(params) => (
                   <TextField
                     {...params}
@@ -726,9 +900,14 @@ const TekliAracForm: React.FC = () => {
               getOptionLabel={(option) => option.name}
               value={districts.find(district => district.name === formData.district) || null}
               onChange={(_, newValue) => {
-                handleInputChange('district', newValue ? newValue.name : '');
+                setFormData(prev => ({ 
+                  ...prev, 
+                  district: newValue ? newValue.name : '',
+                  district_id: newValue ? newValue.id : ''
+                }));
               }}
               disabled={!formData.city}
+              loading={loadingDistricts}
               renderInput={(params) => (
                 <TextField
                   {...params}
@@ -840,8 +1019,9 @@ const TekliAracForm: React.FC = () => {
           <Button
             onClick={handleSubmit}
             variant="contained"
+            disabled={isSubmitting}
           >
-            İlanı Yayınla
+            {isSubmitting ? 'İlan Gönderiliyor...' : 'İlanı Yayınla'}
           </Button>
         ) : (
           <Button onClick={handleNext} variant="contained">

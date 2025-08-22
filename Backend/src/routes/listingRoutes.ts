@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import multer from 'multer';
 import {
   getListings,
   getListingById,
@@ -12,8 +13,10 @@ import {
   debugListingImages
 } from '../controllers/listingController';
 import { authMiddleware } from '../middleware/auth';
+import { normalizeMultipartAndCoerce } from '../middleware/normalizeMultipart';
 
 const router = Router();
+const upload = multer({ storage: multer.memoryStorage() });
 
 // Public routes
 router.get('/', getListings);  // GET /api/listings
@@ -22,7 +25,12 @@ router.get('/debug-images', debugListingImages);  // GET /api/listings/debug-ima
 
 // Protected routes - authentication required
 router.use(authMiddleware);
-router.post('/', createListing);  // POST /api/listings - Now requires authentication
+router.post(
+  '/',
+  upload.fields([{ name: 'images', maxCount: 15 }]), // hem dosyayı hem metni parse eder
+  normalizeMultipartAndCoerce,                        // normalize middleware
+  createListing
+);  // POST /api/listings - Now requires authentication
 router.get('/my-listings', getUserListings);  // GET /api/listings/my-listings
 router.get('/favorites', getFavorites);  // GET /api/listings/favorites
 router.get('/user/:userId', getUserListings);  // GET /api/listings/user/:userId (same as my-listings but with explicit user id)

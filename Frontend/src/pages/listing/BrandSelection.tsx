@@ -12,6 +12,7 @@ import {
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import UserHeader from '../../components/layout/UserHeader';
+import api from '../../services/api';
 
 interface Brand {
   id: string;
@@ -140,13 +141,10 @@ const BrandSelection: React.FC = () => {
     try {
       setError(null);
       console.log('🔍 Fetching brands for vehicle type:', vehicleTypeId);
-      const response = await fetch(`http://localhost:3005/api/categories/brands?vehicle_type_id=${vehicleTypeId}`);
       
-      if (!response.ok) {
-        throw new Error('Markalar alınamadı');
-      }
+      const response = await api.get(`/categories/brands?vehicle_type_id=${vehicleTypeId}`);
+      const data = response.data;
       
-      const data = await response.json();
       console.log('📦 Brands API Response:', data);
       console.log('📊 Data type and length:', typeof data, Array.isArray(data) ? data.length : 'not array');
       
@@ -178,25 +176,30 @@ const BrandSelection: React.FC = () => {
   };
 
   const handleBrandSelect = async (brand: Brand) => {
+    if (!brand?.id) {
+      console.warn('⚠️ Invalid brand selected:', brand);
+      return;
+    }
+
     // Dorse kategorisi için özel yönlendirme
     if (vehicleType?.name === 'Dorse') {
-      // Dorse kategorisinde marka seçilince direkt variant seçim sayfasına git
       try {
-        // Önce markanın modelini al (Dorse'de marka adıyla aynı isimde tek model var)
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/category/models?brand_id=${brand.id}`);
-        if (response.ok) {
-          const models = await response.json();
-          if (models.length > 0) {
-            // İlk modeli al (zaten tek model var)
-            const model = models[0];
-            navigate(`/variant-selection/${model.id}`, {
-              state: { model, brand, vehicleType }
-            });
-            return;
-          }
+        console.log('🔍 Fetching models for Dorse brand:', brand.id);
+        const response = await api.get(`/categories/models?brand_id=${brand.id}`);
+        const models = response.data;
+        
+        console.log('✅ Parsed models:', models);
+        
+        if (Array.isArray(models) && models.length > 0) {
+          const model = models[0];
+          navigate(`/variant-selection/${model.id}`, {
+            state: { model, brand, vehicleType }
+          });
+          return;
         }
       } catch (error) {
-        console.error('Model alınırken hata:', error);
+        console.error('❌ Model alınırken hata:', error);
+        // Fallback to normal flow
       }
     }
 
@@ -205,19 +208,20 @@ const BrandSelection: React.FC = () => {
       // Kamyon Römorkları ve Özel Amaçlı Römorklar direkt variant'a git (tek model var)
       if (brand.name === 'Kamyon Römorkları' || brand.name === 'Özel Amaçlı Römorklar') {
         try {
-          const response = await fetch(`${import.meta.env.VITE_API_URL}/api/category/models?brand_id=${brand.id}`);
-          if (response.ok) {
-            const models = await response.json();
-            if (models.length > 0) {
-              const model = models[0];
-              navigate(`/variant-selection/${model.id}`, {
-                state: { model, brand, vehicleType }
-              });
-              return;
-            }
+          const response = await api.get(`/categories/models?brand_id=${brand.id}`);
+          const models = response.data;
+          
+          console.log('✅ Parsed römork models:', models);
+          
+          if (Array.isArray(models) && models.length > 0) {
+            const model = models[0];
+            navigate(`/variant-selection/${model.id}`, {
+              state: { model, brand, vehicleType }
+            });
+            return;
           }
         } catch (error) {
-          console.error('Model alınırken hata:', error);
+          console.error('❌ Model alınırken hata (römork):', error);
         }
       }
       // Tarım ve Taşıma Römorkları normal model seçimine git (çoklu model var)
@@ -227,19 +231,20 @@ const BrandSelection: React.FC = () => {
     if (vehicleType?.name === 'Oto Kurtarıcı & Taşıyıcı') {
       // Tüm markalar direkt variant'a git (tek model var, marka adıyla aynı)
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/category/models?brand_id=${brand.id}`);
-        if (response.ok) {
-          const models = await response.json();
-          if (models.length > 0) {
-            const model = models[0];
-            navigate(`/variant-selection/${model.id}`, {
-              state: { model, brand, vehicleType }
-            });
-            return;
-          }
+        const response = await api.get(`/categories/models?brand_id=${brand.id}`);
+        const models = response.data;
+        
+        console.log('✅ Parsed oto kurtarıcı models:', models);
+        
+        if (Array.isArray(models) && models.length > 0) {
+          const model = models[0];
+          navigate(`/variant-selection/${model.id}`, {
+            state: { model, brand, vehicleType }
+          });
+          return;
         }
       } catch (error) {
-        console.error('Model alınırken hata:', error);
+        console.error('❌ Model alınırken hata (oto kurtarıcı):', error);
       }
     }
     

@@ -3,6 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import { api } from '../../services/api';
 import { listingService } from '../../services/listingService';
 import { createStandardPayload, validateListingPayload } from '../../services/apiNormalizer';
+import { useConfirmDialog } from '../../hooks/useConfirmDialog';
 import {
   Box,
   Container,
@@ -112,6 +113,7 @@ const KamyonAdForm = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const { confirm } = useConfirmDialog();
   
   // Location state'den gelen varyant bilgilerini al
   const selectedVariant = location.state?.selectedVariant;
@@ -575,7 +577,13 @@ const KamyonAdForm = () => {
       console.log('API Response:', response);
       
       if (response.success) {
-        alert('Kamyon ilanınız başarıyla oluşturuldu! Admin onayından sonra yayınlanacaktır.');
+        await confirm({
+          title: 'Başarılı',
+          description: 'Kamyon ilanınız başarıyla oluşturuldu! Admin onayından sonra yayınlanacaktır.',
+          severity: 'success',
+          confirmText: 'Tamam',
+          cancelText: ''
+        });
         navigate('/user/my-listings'); // Navigate to MyListings to show PENDING status
       } else {
         throw new Error(response.message || 'İlan oluşturulamadı');

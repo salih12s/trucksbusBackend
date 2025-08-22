@@ -13,6 +13,7 @@ import ReportModal from '../../components/ReportModal';
 import { useAuth } from '../../context/AuthContext';
 import { useNotification } from '../../context/NotificationContext';
 import { api } from '../../services/api';
+import { useConfirmDialog } from '../../hooks/useConfirmDialog';
 
 interface Listing {
   id: string;
@@ -89,6 +90,7 @@ interface ListingsResponse {
 const AllListingsPage: React.FC = () => {
   const { user } = useAuth();
   const { showErrorNotification } = useNotification();
+  const { confirm } = useConfirmDialog();
   const navigate = useNavigate();
   const [rawListings, setRawListings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -197,6 +199,29 @@ const AllListingsPage: React.FC = () => {
     };
   }, []);
 
+  // Handle message click function
+  const handleMessageClick = useCallback(async (listingId: string) => {
+    if (!user) {
+      navigate('/auth');
+      return;
+    }
+    
+    // Kendi ilanına mesaj göndermeyi engelle
+    const listing = listings.find(l => l && l.id === listingId);
+    if (listing && listing.user_id === user.id) {
+      await confirm({
+        title: 'Uyarı',
+        description: 'Kendi ilanınıza mesaj gönderemezsiniz!',
+        severity: 'warning',
+        confirmText: 'Tamam',
+        cancelText: ''
+      });
+      return;
+    }
+    
+    navigate(`/real-time-messages?listing=${listingId}`);
+  }, [user, navigate, confirm]);
+
   // Memoized transformed listings
   const listings = useMemo(() => {
     console.log('🔄 Memoizing listings transformation...');
@@ -257,7 +282,7 @@ const AllListingsPage: React.FC = () => {
     navigate(`/listing/${id}`);
   };
 
-  const handleSendMessage = (listingId: string) => {
+  const handleSendMessage = async (listingId: string) => {
     if (!user) {
       navigate('/auth/login');
       return;
@@ -266,7 +291,13 @@ const AllListingsPage: React.FC = () => {
     // Kendi ilanına mesaj göndermeyi engelle
     const listing = listings.find(l => l && l.id === listingId);
     if (listing && listing.user_id === user.id) {
-      alert('Kendi ilanınıza mesaj gönderemezsiniz!');
+      await confirm({
+        title: 'Uyarı',
+        description: 'Kendi ilanınıza mesaj gönderemezsiniz!',
+        severity: 'warning',
+        confirmText: 'Tamam',
+        cancelText: ''
+      });
       return;
     }
     

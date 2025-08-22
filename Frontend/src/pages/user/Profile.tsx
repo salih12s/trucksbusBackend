@@ -17,6 +17,7 @@ import {
   Alert,
   CircularProgress
 } from '@mui/material';
+import { useConfirmDialog } from '../../hooks/useConfirmDialog';
 import {
   PhotoCamera,
   Person,
@@ -70,6 +71,7 @@ function a11yProps(index: number) {
 
 const Profile: React.FC = () => {
   const { updateUser } = useAuth();
+  const { confirm } = useConfirmDialog();
   const [user, setUser] = useState<UserProfile | null>(null);
   const [stats, setStats] = useState<UserStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -127,7 +129,13 @@ const Profile: React.FC = () => {
       setIsEditing(false);
     } catch (error) {
       console.error('Error updating profile:', error);
-      alert('Profil güncellenirken bir hata oluştu!');
+      await confirm({
+        title: 'Hata',
+        description: 'Profil güncellenirken bir hata oluştu!',
+        severity: 'error',
+        confirmText: 'Tamam',
+        cancelText: ''
+      });
     } finally {
       setAvatarLoading(false);
     }
@@ -135,7 +143,13 @@ const Profile: React.FC = () => {
 
   const handlePasswordChange = async () => {
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      alert('Yeni şifreler eşleşmiyor!');
+      await confirm({
+        title: 'Hata',
+        description: 'Yeni şifreler eşleşmiyor!',
+        severity: 'error',
+        confirmText: 'Tamam',
+        cancelText: ''
+      });
       return;
     }
 
@@ -145,7 +159,13 @@ const Profile: React.FC = () => {
         newPassword: passwordData.newPassword,
       });
       
-      alert('Şifre başarıyla değiştirildi!');
+      await confirm({
+        title: 'Başarılı',
+        description: 'Şifre başarıyla değiştirildi!',
+        severity: 'success',
+        confirmText: 'Tamam',
+        cancelText: ''
+      });
       setPasswordData({
         currentPassword: '',
         newPassword: '',
@@ -153,7 +173,13 @@ const Profile: React.FC = () => {
       });
     } catch (error: any) {
       console.error('Error changing password:', error);
-      alert(error.response?.data?.error || 'Şifre değiştirme sırasında bir hata oluştu!');
+      await confirm({
+        title: 'Hata',
+        description: error.response?.data?.error || 'Şifre değiştirme sırasında bir hata oluştu!',
+        severity: 'error',
+        confirmText: 'Tamam',
+        cancelText: ''
+      });
     }
   };
 

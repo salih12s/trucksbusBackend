@@ -2,6 +2,7 @@ import { Router } from 'express';
 import {
   getListings,
   getPendingListings,
+  getListingDetail,
   approveListing,
   rejectListing,
   hardDeleteListing,
@@ -27,6 +28,7 @@ router.get('/dashboard/activities', getRecentActivities);
 // Admin management routes
 router.get('/listings', getListings);
 router.get('/listings/pending', getPendingListings);
+router.get('/listings/:id', getListingDetail);
 router.get('/users', getUsers);
 router.put('/users/:id', updateUser);
 router.delete('/users/:id', deleteUser);

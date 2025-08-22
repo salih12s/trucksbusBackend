@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useConfirmDialog } from '../../hooks/useConfirmDialog';
 import {
   Container,
   Typography,
@@ -36,6 +37,7 @@ const steps = ['Kategori Seçimi', 'İlan Bilgileri', 'Fotoğraflar', 'Önizleme
 
 const CreateListing: React.FC = () => {
   const navigate = useNavigate();
+  const { confirm } = useConfirmDialog();
   const [activeStep, setActiveStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -87,10 +89,16 @@ const CreateListing: React.FC = () => {
     }
   };
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
     if (files.length + images.length > 10) {
-      alert('Maksimum 10 fotoğraf yükleyebilirsiniz');
+      await confirm({
+        title: 'Uyarı',
+        description: 'Maksimum 10 fotoğraf yükleyebilirsiniz',
+        severity: 'warning',
+        confirmText: 'Tamam',
+        cancelText: ''
+      });
       return;
     }
 
@@ -193,7 +201,13 @@ const CreateListing: React.FC = () => {
       console.log('İstek başarılı!');
       
       if (response.data.success) {
-        alert('İlanınız başarıyla oluşturuldu! Admin onayından sonra yayınlanacaktır.');
+        await confirm({
+          title: 'Başarılı',
+          description: 'İlanınız başarıyla oluşturuldu! Admin onayından sonra yayınlanacaktır.',
+          severity: 'success',
+          confirmText: 'Tamam',
+          cancelText: ''
+        });
         navigate('/');
       }
     } catch (error: any) {
@@ -204,12 +218,30 @@ const CreateListing: React.FC = () => {
       console.error('Request config:', error.config);
       
       if (error.code === 'ECONNREFUSED') {
-        alert('Sunucuya bağlanılamıyor. Lütfen backend\'in çalıştığından emin olun.');
+        await confirm({
+          title: 'Bağlantı Hatası',
+          description: 'Sunucuya bağlanılamıyor. Lütfen backend\'in çalıştığından emin olun.',
+          severity: 'error',
+          confirmText: 'Tamam',
+          cancelText: ''
+        });
       } else if (error.response?.status === 404) {
-        alert('API endpoint bulunamadı. URL\'yi kontrol edin.');
+        await confirm({
+          title: 'Hata',
+          description: 'API endpoint bulunamadı. URL\'yi kontrol edin.',
+          severity: 'error',
+          confirmText: 'Tamam',
+          cancelText: ''
+        });
       } else {
         const errorMessage = error.response?.data?.message || 'Bir hata oluştu. Lütfen tekrar deneyin.';
-        alert(errorMessage);
+        await confirm({
+          title: 'Hata',
+          description: errorMessage,
+          severity: 'error',
+          confirmText: 'Tamam',
+          cancelText: ''
+        });
       }
     } finally {
       setLoading(false);

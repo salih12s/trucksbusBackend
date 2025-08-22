@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Box, Button, TextField, Typography, Stepper, Step, StepLabel, Card, CardContent, MenuItem, Stack, Chip, InputAdornment, Alert, FormControl, FormLabel, RadioGroup, FormControlLabel, Radio } from '@mui/material';
 import { AttachMoney, Upload, LocationOn, Person, Phone, Email } from '@mui/icons-material';
+import { useConfirmDialog } from '../../../../hooks/useConfirmDialog';
 
 interface OzelKasaFormData {
   title: string;
@@ -24,6 +25,7 @@ interface OzelKasaFormData {
 const steps = ['İlan Detayları', 'Fotoğraflar', 'İletişim & Fiyat'];
 
 const OzelKasaForm: React.FC = () => {
+  const { confirm } = useConfirmDialog();
   const [activeStep, setActiveStep] = useState(0);
   const [formData, setFormData] = useState<OzelKasaFormData>({
     title: '',
@@ -56,7 +58,13 @@ const OzelKasaForm: React.FC = () => {
     const newFiles = Array.from(files);
     const totalFiles = formData.uploadedImages.length + newFiles.length;
     if (totalFiles > 15) {
-      alert('En fazla 15 fotoğraf yükleyebilirsiniz.');
+      confirm({
+        title: 'Fotoğraf Limiti',
+        description: 'En fazla 15 fotoğraf yükleyebilirsiniz.',
+        severity: 'warning',
+        confirmText: 'Tamam',
+        cancelText: ''
+      });
       return;
     }
     setFormData(prev => ({ ...prev, uploadedImages: [...prev.uploadedImages, ...newFiles] }));

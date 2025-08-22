@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { categoryService, Category, VehicleType, Brand, Model, Variant } from '../../services/categoryService';
+import { useConfirmDialog } from '../../hooks/useConfirmDialog';
 
 const CategoryPage: React.FC = () => {
   const { id: categoryId, vehicleTypeId, brandId, modelId } = useParams();
   const navigate = useNavigate();
+  const { confirm } = useConfirmDialog();
   const [categories, setCategories] = useState<Category[]>([]);
   const [vehicleTypes, setVehicleTypes] = useState<VehicleType[]>([]);
   const [brands, setBrands] = useState<Brand[]>([]);
@@ -155,9 +157,15 @@ const CategoryPage: React.FC = () => {
     navigate(`/category/${categoryId}/vehicle-type/${vehicleTypeId}/brand/${brandId}/model/${model.id}`);
   };
 
-  const handleVariantClick = (variant: Variant) => {
+  const handleVariantClick = async (variant: Variant) => {
     // Burada ilan sayfasına yönlendirilecek - şimdilik alert
-    alert(`${variant.name} için ilan sayfası açılacak`);
+    await confirm({
+      title: 'Bilgilendirme',
+      description: `${variant.name} için ilan sayfası açılacak`,
+      severity: 'info',
+      confirmText: 'Tamam',
+      cancelText: ''
+    });
   };
 
   if (loading) {

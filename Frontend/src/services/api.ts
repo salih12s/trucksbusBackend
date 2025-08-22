@@ -1,12 +1,69 @@
-import axios from 'axios';
+import axios, { AxiosError, AxiosResponse } from 'axios';
 
-// 🔧 Environment variable kullan - WebSocketProvider ile aynı origin
+// 🔧 Environment variable kullan - Backend API
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3005/api';
+
+// API Response types
+export interface ApiResponse<T = any> {
+  success: boolean;
+  data: T;
+  message?: string;
+  count?: number;
+}
+
+export interface ApiError {
+  message: string;
+  status: number;
+  data?: any;
+}
+
+// Utility functions
+export const toInt = (v: any): number | undefined => (v === null || v === undefined || v === '') ? undefined : Number(v);
+export const cleanObject = (o: Record<string, any>): Record<string, any> => 
+  Object.fromEntries(Object.entries(o).filter(([, v]) => v !== undefined && v !== null && v !== ''));
+
+// JSON Response checker
+export const assertJson = (response: AxiosResponse): void => {
+  const contentType = response.headers['content-type'];
+  if (!contentType?.includes('application/json')) {
+    throw new Error('JSON bekleniyordu, alınan: ' + contentType);
+  }
+};
+
+// Query builder for pagination and filtering
+export interface QueryParams {
+  page?: number;
+  pageSize?: number;
+  sort?: string;
+  order?: 'asc' | 'desc';
+  filters?: Record<string, any>;
+}
+
+export const buildQuery = (params: QueryParams = {}): string => {
+  const searchParams = new URLSearchParams();
+  
+  if (params.page !== undefined) searchParams.set('page', params.page.toString());
+  if (params.pageSize !== undefined) searchParams.set('pageSize', params.pageSize.toString());
+  if (params.sort) searchParams.set('sort', params.sort);
+  if (params.order) searchParams.set('order', params.order);
+  
+  // Add filters
+  if (params.filters) {
+    Object.entries(params.filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        searchParams.set(key, value.toString());
+      }
+    });
+  }
+  
+  return searchParams.toString();
+};
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
+    'Accept': 'application/json'
   },
 });
 
@@ -17,8 +74,7 @@ api.interceptors.request.use(
     console.log('🚀 API Request:', {
       method: config.method?.toUpperCase(),
       url: `${config.baseURL}${config.url}`,
-      hasToken: !!token,
-      headers: config.headers
+      hasToken: !!token
     });
     
     if (token) {
@@ -32,30 +88,60 @@ api.interceptors.request.use(
   }
 );
 
-// Yanıt interceptor - hata yönetimi
+// Yanıt interceptor - hata yönetimi ve JSON kontrolü
 api.interceptors.response.use(
   (response) => {
+    // JSON kontrolü
+    try {
+      assertJson(response);
+    } catch (e) {
+      console.warn('⚠️ Non-JSON Response:', response.headers['content-type']);
+    }
+    
     console.log('✅ API Response:', {
       status: response.status,
       url: response.config.url,
-      data: response.data
+      contentType: response.headers['content-type']
     });
     return response;
   },
-  (error) => {
+  (error: AxiosError) => {
+    // Content-Type kontrolü
+    const contentType = error.response?.headers['content-type'];
+    
+    let apiError: ApiError;
+    
+    if (error.response && !contentType?.includes('application/json')) {
+      // HTML hata sayfası geliyorsa
+      apiError = {
+        message: 'Sunucudan beklenmeyen yanıt (JSON değil).',
+        status: error.response.status || 0,
+        data: { raw: error.response.data, contentType }
+      };
+    } else {
+      // Normal JSON hata
+      apiError = {
+        message: (error.response?.data as any)?.message || error.message || 'Bilinmeyen hata',
+        status: error.response?.status || 0,
+        data: error.response?.data
+      };
+    }
+    
     console.error('❌ API Error:', {
       status: error.response?.status,
       url: error.config?.url,
-      message: error.message,
+      contentType,
+      message: apiError.message,
       data: error.response?.data
     });
     
+    // 401 durumunda token'ı temizle
     if (error.response?.status === 401) {
       localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      window.location.href = '/';
+      window.location.href = '/login';
     }
-    return Promise.reject(error);
+    
+    return Promise.reject(apiError);
   }
 );
 

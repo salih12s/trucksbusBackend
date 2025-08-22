@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Box, Button, TextField, Typography, Stepper, Step, StepLabel, Card, CardContent, MenuItem, Stack, Chip, InputAdornment, Alert, FormControl, FormLabel, RadioGroup, FormControlLabel, Radio, Checkbox, FormControlLabel as MuiFormControlLabel } from '@mui/material';
 import { AttachMoney, Upload, LocationOn, Person, Phone, Email } from '@mui/icons-material';
+import { useConfirmDialog } from '../../../../hooks/useConfirmDialog';
 
 interface AcikKasaFormData {
   title: string;
@@ -25,6 +26,7 @@ interface AcikKasaFormData {
 const steps = ['İlan Detayları', 'Fotoğraflar', 'İletişim & Fiyat'];
 
 const AcikKasaForm: React.FC = () => {
+  const { confirm } = useConfirmDialog();
   const [activeStep, setActiveStep] = useState(0);
   const [formData, setFormData] = useState<AcikKasaFormData>({
     title: '',
@@ -52,13 +54,19 @@ const AcikKasaForm: React.FC = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (!files) return;
     const newFiles = Array.from(files);
     const totalFiles = formData.uploadedImages.length + newFiles.length;
     if (totalFiles > 15) {
-      alert('En fazla 15 fotoğraf yükleyebilirsiniz.');
+      await confirm({
+        title: 'Uyarı',
+        description: 'En fazla 15 fotoğraf yükleyebilirsiniz.',
+        severity: 'warning',
+        confirmText: 'Tamam',
+        cancelText: ''
+      });
       return;
     }
     setFormData(prev => ({ ...prev, uploadedImages: [...prev.uploadedImages, ...newFiles] }));

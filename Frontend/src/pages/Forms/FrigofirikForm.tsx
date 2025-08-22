@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useConfirmDialog } from '../../hooks/useConfirmDialog';
+import { createStandardPayload, validateListingPayload } from '../../services/apiNormalizer';
+import { listingService } from '../../services/listingService';
 import {
   Box,
   Container,
@@ -43,7 +46,6 @@ import {
   AcUnit,
 } from '@mui/icons-material';
 import { locationService, City, District } from '../../services/locationService';
-import api from '../../services/api';
 import { formatPhoneNumber } from '../../utils/phoneUtils';
 
 interface FrigofirikFormData {
@@ -84,6 +86,7 @@ const FrigofirikForm: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { variantId } = useParams<{ variantId: string }>();
+  const { confirm } = useConfirmDialog();
   const [activeStep, setActiveStep] = useState(0);
   const [cities, setCities] = useState<City[]>([]);
   const [districts, setDistricts] = useState<District[]>([]);
@@ -261,63 +264,92 @@ const FrigofirikForm: React.FC = () => {
     setLoading(true);
     try {
       console.log('🚀 Frigofirik ilanı oluşturuluyor...');
-      console.log('Form Data:', formData);
-      console.log('Images:', uploadedImages.length);
 
-      // Fotoğrafları base64'e çevir
-      const imageDataUrls = await Promise.all(
-        uploadedImages.map((file) => {
+      // Convert uploaded images to base64 - MinibüsForm uyumlu
+      const imageUrls = await Promise.all(
+        uploadedImages.map(file => {
           return new Promise<string>((resolve) => {
             const reader = new FileReader();
-            reader.onload = (e) => resolve(e.target?.result as string);
+            reader.onload = () => resolve(reader.result as string);
             reader.readAsDataURL(file);
           });
         })
       );
 
-      // API için veri hazırlığı - Frigofirik'i Dorse kategorisi altında gönder
-      const listingData = {
+      // Create standardized payload - MinibüsForm uyumlu  
+      const standardPayload = createStandardPayload({
         title: formData.title,
         description: formData.description,
-        price: parseFloat(formData.price),
+        price: formData.price,
         year: formData.year,
+        city: formData.city,
         category_id: 'vehicle-category-001', // Vasıta kategorisi
         vehicle_type_id: 'cme633w8v0001981ksnpl6dj5', // Dorse vehicle_type_id
         variant_id: variantId, // URL'den gelen variant ID
+        brand_id: null,
+        model_id: null,
+        city_id: cities.find(city => city.name === formData.city)?.id,
+        district_id: districts.find(district => district.name === formData.district)?.id,
         seller_name: formData.sellerName,
-        seller_phone: formData.sellerPhone,
+        seller_phone: formData.sellerPhone.replace(/[^\d]/g, ''),
         seller_email: formData.sellerEmail,
-        city: formData.city,
-        district: formData.district,
+        images: imageUrls
+      }, {
+        // Frigofirik-specific properties
+        dorseType: 'Frigofirik',
+        uzunluk: formData.uzunluk.toString(),
+        lastikDurumu: formData.lastikDurumu.toString(),
+        sogutucu: formData.sogutucu,
+        warranty: formData.warranty ? 'Evet' : 'Hayır',
+        negotiable: formData.negotiable ? 'Evet' : 'Hayır',
         is_exchangeable: formData.exchange,
-        images: imageDataUrls,
-        // Frigofirik'e özel bilgileri properties olarak gönder
-        properties: {
-          dorseType: 'Frigofirik', // Dorse alt kategorisi olarak Frigofirik
-          uzunluk: formData.uzunluk.toString(),
-          lastikDurumu: formData.lastikDurumu.toString(),
-          sogutucu: formData.sogutucu,
-          warranty: formData.warranty ? 'Evet' : 'Hayır',
-          negotiable: formData.negotiable ? 'Evet' : 'Hayır'
-        }
-      };
+        color: "Belirtilmemiş",
+        vehicle_condition: "İkinci El",
+        fuel_type: "Dizel",
+        transmission: "Manuel"
+      });
 
-      console.log('🚀 API verileri:', listingData);
-
-      // API çağrısı
-      const response = await api.post('/listings', listingData);
-      
-      if (response.data) {
-        console.log('✅ Frigofirik ilanı başarıyla oluşturuldu:', response.data);
-        alert('İlanınız başarıyla oluşturuldu! Admin onayından sonra yayınlanacaktır.');
-        navigate('/profile');
+      // Validate payload - MinibüsForm uyumlu
+      const validation = validateListingPayload(standardPayload);
+      if (!validation.isValid) {
+        setError(validation.errors.join(', '));
+        return;
       }
+
+      console.log('Frigofirik ilanı oluşturuluyor:', standardPayload);
+
+      // Use standardized listing service - MinibüsForm uyumlu
+      const response = await listingService.createStandardListing(standardPayload);
+      console.log('API Response:', response);
+      
+      if (response.success) {
+        await confirm({
+          title: 'Başarılı',
+          description: 'Frigofirik ilanınız başarıyla oluşturuldu! Admin onayından sonra yayınlanacaktır.',
+          severity: 'success',
+          confirmText: 'Tamam',
+          cancelText: ''
+        });
+        navigate('/user/my-listings');
+      } else {
+        throw new Error(response.message || 'İlan oluşturulamadı');
+      }
+      
     } catch (err: any) {
       console.error('❌ Frigofirik ilanı oluşturma hatası:', err);
-      console.error('Error response:', err.response?.data);
-      console.error('Error status:', err.response?.status);
       
-      setError(err.response?.data?.message || 'İlan oluşturulurken hata oluştu');
+      if (err.message.includes('Zorunlu alanları doldurunuz') || err.message.includes('zorunludur')) {
+        setError('Zorunlu alanları doldurunuz');
+      } else if (err.code === 'ECONNREFUSED') {
+        setError('Sunucuya bağlanılamıyor. Lütfen backend\'in çalıştığından emin olun.');
+      } else if (err.response?.status === 404) {
+        setError('API endpoint bulunamadı. URL\'yi kontrol edin.');
+      } else if (err.response?.status === 401) {
+        setError('Yetkilendirme hatası. Lütfen giriş yapın.');
+      } else {
+        const errorMessage = err.response?.data?.message || err.message || 'İlan oluşturulurken bir hata oluştu';
+        setError(errorMessage);
+      }
     } finally {
       setLoading(false);
     }

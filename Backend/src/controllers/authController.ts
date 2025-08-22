@@ -4,10 +4,30 @@ import jwt from 'jsonwebtoken';
 import { ulid } from 'ulid';
 import { prisma } from '../utils/database';
 import { logger } from '../utils/logger';
+import { normalizePhoneTR, isValidPhoneTR } from '../utils/phone';
 
 export const register = async (req: Request, res: Response): Promise<void> => {
   try {
     const { email, password, first_name, last_name, phone, city, district } = req.body;
+
+    // Validate required fields
+    if (!email || !password || !first_name || !last_name || !phone) {
+      res.status(400).json({ 
+        success: false, 
+        message: 'E-posta, şifre, ad, soyad ve telefon alanları zorunludur.' 
+      });
+      return;
+    }
+
+    // Validate and normalize phone
+    const normalizedPhone = normalizePhoneTR(String(phone).trim());
+    if (!normalizedPhone) {
+      res.status(400).json({ 
+        success: false, 
+        message: 'Geçerli bir telefon numarası giriniz (0xxx xxx xx xx).' 
+      });
+      return;
+    }
 
     // Check if user already exists
     const existingUser = await prisma.users.findUnique({
@@ -34,7 +54,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
         password: hashedPassword,
         first_name,
         last_name,
-        phone,
+        phone: normalizedPhone,
         city,
         district,
         role: 'USER',
@@ -64,8 +84,13 @@ export const register = async (req: Request, res: Response): Promise<void> => {
           email: user.email,
           first_name: user.first_name,
           last_name: user.last_name,
+          phone: user.phone,
           role: user.role,
-          avatar: user.avatar
+          avatar: user.avatar,
+          is_active: user.is_active,
+          is_email_verified: user.is_email_verified,
+          created_at: user.created_at,
+          updated_at: user.updated_at
         },
         token
       }

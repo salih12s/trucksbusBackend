@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useDropzone } from 'react-dropzone';
 import { useAuth } from '../../../context/AuthContext';
+import { useConfirmDialog } from '../../../hooks/useConfirmDialog';
 import {
   Box,
   Container,
@@ -92,6 +93,7 @@ const HavuzluForm: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { variantId } = useParams();
+  const { confirm } = useConfirmDialog();
   const [activeStep, setActiveStep] = useState(0);
   const [cities, setCities] = useState<City[]>([]);
   const [districts, setDistricts] = useState<District[]>([]);
@@ -323,7 +325,13 @@ const HavuzluForm: React.FC = () => {
       
       if (response.data) {
         console.log('✅ Havuzlu ilanı başarıyla oluşturuldu:', response.data);
-        alert('İlanınız başarıyla oluşturuldu! Admin onayından sonra yayınlanacaktır.');
+        await confirm({
+          title: 'İlan Başarıyla Oluşturuldu',
+          description: 'İlanınız başarıyla oluşturuldu! Admin onayından sonra yayınlanacaktır.',
+          severity: 'success',
+          confirmText: 'Tamam',
+          cancelText: ''
+        });
         navigate('/');
       }
     } catch (err: any) {

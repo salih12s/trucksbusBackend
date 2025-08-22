@@ -23,6 +23,7 @@ import {
 import { Delete, Search } from '@mui/icons-material';
 import TruckCenterCard from '../../components/cards/TruckCenterCard';
 import { api } from '../../services/api';
+import { useConfirmDialog } from '../../hooks/useConfirmDialog';
 
 interface Listing {
   id: string;
@@ -57,6 +58,7 @@ interface AdminListingsResponse {
 }
 
 const AllListings = () => {
+  const { confirm } = useConfirmDialog();
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -117,10 +119,10 @@ const AllListings = () => {
       setListings(prev => prev.filter(l => l.id !== deleteDialog.listing!.id));
       setDeleteDialog({ open: false, listing: null });
       
-      alert('İlan başarıyla silindi!');
+      console.log('İlan başarıyla silindi!');
     } catch (error) {
       console.error('İlan silinemedi:', error);
-      alert('İlan silinirken bir hata oluştu.');
+      console.error('İlan silinirken bir hata oluştu.');
     } finally {
       setActionLoading(false);
     }

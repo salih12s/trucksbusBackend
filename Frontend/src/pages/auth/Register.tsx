@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import PhoneInputTR from '../../components/common/PhoneInputTR';
+import { isValidPhoneTR, normalizePhoneTR } from '../../utils/phone';
 
 const Register: React.FC = () => {
   const navigate = useNavigate();
@@ -11,18 +13,26 @@ const Register: React.FC = () => {
     firstName: '',
     lastName: '',
     password: '',
+    phone: '',
   });
   const [showPassword, setShowPassword] = useState(false);
 
   const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     clearError();
+    
+    // Telefon validasyonu
+    if (!isValidPhoneTR(formData.phone)) {
+      return; // PhoneInputTR komponenti zaten error gösteriyor
+    }
+    
     try {
       const user = await register({
         email: formData.email,
         password: formData.password,
         firstName: formData.firstName,
         lastName: formData.lastName,
+        phone: normalizePhoneTR(formData.phone),
       });
       if (user.role === 'ADMIN') navigate('/admin');
       else navigate('/');
@@ -122,6 +132,52 @@ const Register: React.FC = () => {
             </div>
 
             <div className="space-y-2">
+              <label className="block text-sm text-slate-600">Telefon</label>
+              <div className="relative">
+                <PhoneInputTR
+                  value={formData.phone}
+                  onChange={(normalized) => {
+                    setFormData({ ...formData, phone: normalized });
+                  }}
+                  required
+                  error={!!formData.phone && !isValidPhoneTR(formData.phone)}
+                  helperText={
+                    formData.phone && !isValidPhoneTR(formData.phone) 
+                      ? 'Lütfen 0 ile başlayan 11 haneli bir numara girin (0xxx xxx xx xx).' 
+                      : ' '
+                  }
+                  fullWidth
+                  variant="outlined"
+                  className="w-full"
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      padding: '0',
+                      '& input': {
+                        padding: '14px 16px',
+                        fontSize: '16px',
+                      },
+                      '& fieldset': {
+                        borderRadius: '12px',
+                        borderColor: 'rgb(226, 232, 240)',
+                      },
+                      '&:hover fieldset': {
+                        borderColor: 'rgb(14, 165, 233)',
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: 'rgb(14, 165, 233)',
+                        boxShadow: '0 0 0 3px rgba(14, 165, 233, 0.15)',
+                      },
+                    },
+                    '& .MuiFormHelperText-root': {
+                      fontSize: '12px',
+                      marginTop: '4px',
+                    },
+                  }}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
               <label className="block text-sm text-slate-600">Şifre</label>
               <div className="relative">
                 <input
@@ -148,7 +204,7 @@ const Register: React.FC = () => {
             <button 
               className="w-full mt-6 px-4 py-3.5 bg-sky-500 hover:bg-sky-600 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-bold text-base rounded-xl transition-all duration-150 hover:shadow-lg active:translate-y-0.5" 
               type="submit" 
-              disabled={isLoading}
+              disabled={isLoading || !isValidPhoneTR(formData.phone)}
             >
               {isLoading ? 'Hesap oluşturuluyor…' : 'Hesap Aç'}
             </button>

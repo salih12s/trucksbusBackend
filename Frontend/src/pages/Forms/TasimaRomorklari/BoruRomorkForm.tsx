@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useConfirmDialog } from '../../../hooks/useConfirmDialog';
 import {
   Box,
   Button,
@@ -47,6 +48,7 @@ interface BoruRomorkFormData {
 const steps = ['İlan Detayları', 'Fotoğraflar', 'İletişim & Fiyat'];
 
 const BoruRomorkForm: React.FC = () => {
+  const { confirm } = useConfirmDialog();
   const [activeStep, setActiveStep] = useState(0);
   const [formData, setFormData] = useState<BoruRomorkFormData>({
     title: '',
@@ -82,7 +84,7 @@ const BoruRomorkForm: React.FC = () => {
     }));
   };
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (!files) return;
 
@@ -90,7 +92,13 @@ const BoruRomorkForm: React.FC = () => {
     const totalFiles = formData.uploadedImages.length + newFiles.length;
 
     if (totalFiles > 10) {
-      alert('En fazla 10 fotoğraf yükleyebilirsiniz.');
+      await confirm({
+        title: 'Uyarı',
+        description: 'En fazla 10 fotoğraf yükleyebilirsiniz.',
+        severity: 'warning',
+        confirmText: 'Tamam',
+        cancelText: ''
+      });
       return;
     }
 

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../../context/AuthContext';
+import { useConfirmDialog } from '../../../../hooks/useConfirmDialog';
 import {
   Box,
   Container,
@@ -94,6 +95,7 @@ const steps = [
 const HafriyatTipiForm: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { confirm } = useConfirmDialog();
   const [activeStep, setActiveStep] = useState(0);
   const [cities, setCities] = useState<City[]>([]);
   const [districts, setDistricts] = useState<District[]>([]);
@@ -329,7 +331,13 @@ const HafriyatTipiForm: React.FC = () => {
       
       if (response.data.success) {
         console.log('✅ Hafriyat Tipi Dorse ilanı başarıyla oluşturuldu:', response.data);
-        alert('İlanınız başarıyla oluşturuldu! Admin onayından sonra yayınlanacaktır.');
+        await confirm({
+          title: 'Başarılı',
+          description: 'İlanınız başarıyla oluşturuldu! Admin onayından sonra yayınlanacaktır.',
+          severity: 'success',
+          confirmText: 'Tamam',
+          cancelText: ''
+        });
         navigate('/'); // Anasayfaya yönlendir
       }
     } catch (err: any) {

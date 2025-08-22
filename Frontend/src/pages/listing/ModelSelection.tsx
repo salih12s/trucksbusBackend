@@ -12,6 +12,7 @@ import {
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import UserHeader from '../../components/layout/UserHeader';
+import api from '../../services/api';
 
 interface Model {
   id: string;
@@ -62,13 +63,10 @@ const ModelSelection: React.FC = () => {
   const fetchModels = async () => {
     try {
       setError(null);
-      const response = await fetch(`http://localhost:3005/api/categories/models?brand_id=${brandId}`);
       
-      if (!response.ok) {
-        throw new Error('Modeller alınamadı');
-      }
+      const response = await api.get(`/categories/models?brand_id=${brandId}`);
+      const data = response.data;
       
-      const data = await response.json();
       console.log('Models API Response:', data);
       
       // Backend direkt array dönüyor
