@@ -1,4 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
+import { useAuth } from '../../../context/AuthContext';
+import { useConfirmDialog } from '../../../hooks/useConfirmDialog';
+import { listingService } from '../../../services/listingService';
+import { createStandardPayload, validateListingPayload } from '../../../services/apiNormalizer';
+import { locationService, City, District } from '../../../services/locationService';
 import {
   Box,
   Button,
@@ -19,7 +25,8 @@ import {
   Stack,
   Chip,
   InputAdornment,
-  Alert
+  Alert,
+  Autocomplete
 } from '@mui/material';
 import { AttachMoney, Upload, LocationOn, Person, Phone, Email } from '@mui/icons-material';
 
@@ -48,7 +55,19 @@ const steps = ['İlan Detayları', 'Fotoğraflar', 'İletişim & Fiyat'];
 const usageAreaOptions = ['Bisiklet', 'Deniz Aracı', 'Motosiklet', 'Otomobil'];
 
 const YukRomorkForm: React.FC = () => {
+  const { user } = useAuth();
+  const location = useLocation();
+  const { confirm } = useConfirmDialog();
+  const selectedBrand = location.state?.brand;
+  const selectedModel = location.state?.model;
+  const selectedVariant = location.state?.variant;
+  
   const [activeStep, setActiveStep] = useState(0);
+  const [cities, setCities] = useState<City[]>([]);
+  const [districts, setDistricts] = useState<District[]>([]);
+  const [loadingCities, setLoadingCities] = useState(true);
+  const [loadingDistricts, setLoadingDistricts] = useState(false);
+  
   const [formData, setFormData] = useState<YukRomorkFormData>({
     title: '',
     description: '',
@@ -67,6 +86,54 @@ const YukRomorkForm: React.FC = () => {
     district: ''
   });
 
+  // Load cities on component mount
+  useEffect(() => {
+    const loadCities = async () => {
+      try {
+        setLoadingCities(true);
+        const citiesData = await locationService.getCities();
+        setCities(citiesData);
+        console.log('🏙️ YukRomorkForm: Şehirler yüklendi:', citiesData.length);
+      } catch (error) {
+        console.error('❌ YukRomorkForm: Şehirler yüklenemedi:', error);
+      } finally {
+        setLoadingCities(false);
+      }
+    };
+    
+    loadCities();
+  }, []);
+
+  // Load districts when city changes
+  const handleCityChange = async (cityId: string, cityName: string) => {
+    try {
+      setLoadingDistricts(true);
+      setFormData(prev => ({ ...prev, city: cityName, district: '' }));
+      
+      const districtsData = await locationService.getDistrictsByCity(cityId);
+      setDistricts(districtsData);
+      console.log('🏘️ YukRomorkForm: İlçeler yüklendi:', districtsData.length);
+    } catch (error) {
+      console.error('❌ YukRomorkForm: İlçeler yüklenemedi:', error);
+    } finally {
+      setLoadingDistricts(false);
+    }
+  };
+
+  // Load user data
+  useEffect(() => {
+    if (user) {
+      setFormData(prev => ({
+        ...prev,
+        sellerName: `${user.first_name} ${user.last_name}`,
+        sellerPhone: user.phone || '',
+        sellerEmail: user.email,
+        city: user.city || '',
+        district: user.district || '',
+      }));
+    }
+  }, [user]);
+
   const handleNext = () => setActiveStep((prev) => prev + 1);
   const handleBack = () => setActiveStep((prev) => prev - 1);
 
@@ -74,13 +141,106 @@ const YukRomorkForm: React.FC = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSubmit = async () => {
+    if (!formData.title || !formData.description || !formData.price) {
+      await confirm({
+        title: 'Eksik Bilgi',
+        description: 'Lütfen tüm gerekli alanları doldurun.',
+        severity: 'warning'
+      });
+      return;
+    }
+    
+    try {
+      const base64Images = await Promise.all(
+        formData.uploadedImages.map((file) => {
+          return new Promise<string>((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (e) => resolve(e.target?.result as string);
+            reader.readAsDataURL(file);
+          });
+        })
+      );
+
+      // City ve District'i ID'ye çevir
+      const selectedCity = cities.find(city => city.name === formData.city);
+      const selectedDistrict = districts.find(district => district.name === formData.district);
+      
+      if (!selectedCity || !selectedDistrict) {
+        await confirm({
+          title: 'Eksik Bilgi',
+          description: 'Lütfen şehir ve ilçe seçimi yapınız.',
+          severity: 'warning'
+        });
+        return;
+      }
+
+      const payload = createStandardPayload({
+        title: formData.title,
+        description: formData.description,
+        price: parseFloat(formData.price),
+        year: parseInt(formData.productionYear),
+        city: formData.city,
+        city_id: selectedCity.id,
+        district_id: selectedDistrict.id,
+        category_id: selectedBrand?.vehicle_types?.categories?.id || "vehicle-category-001",
+        seller_name: formData.sellerName,
+        seller_phone: formData.sellerPhone,
+        seller_email: formData.sellerEmail,
+        is_exchangeable: formData.isExchangeable === 'yes',
+        images: base64Images,
+        vehicle_type_id: selectedBrand?.vehicle_type_id,
+        brand_id: selectedBrand?.id,
+        model_id: selectedModel?.id,
+        variant_id: selectedVariant?.id
+      }, {
+        hasDamper: formData.hasDamper ? 'Evet' : 'Hayır',
+        usageArea: formData.usageArea,
+        currency: formData.currency,
+        priceType: formData.priceType
+      });
+
+      const validationResult = validateListingPayload(payload);
+      if (!validationResult.isValid) {
+        await confirm({
+          title: 'Doğrulama Hatası',
+          description: `Veri doğrulama hatası: ${validationResult.errors.join(', ')}`,
+          severity: 'error'
+        });
+        return;
+      }
+
+      const response = await listingService.createStandardListing(payload);
+      
+      if (response.success) {
+        await confirm({
+          title: 'Başarılı',
+          description: 'İlanınız başarıyla oluşturuldu! Admin onayından sonra yayınlanacaktır.',
+          severity: 'success'
+        });
+      } else {
+        throw new Error(response.message || 'İlan oluşturulamadı');
+      }
+    } catch (err: any) {
+      await confirm({
+        title: 'Hata',
+        description: err.message || 'İlan oluşturulurken hata oluştu',
+        severity: 'error'
+      });
+    }
+  };
+
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (!files) return;
     const newFiles = Array.from(files);
     const totalFiles = formData.uploadedImages.length + newFiles.length;
     if (totalFiles > 10) {
-      alert('En fazla 10 fotoğraf yükleyebilirsiniz.');
+      await confirm({
+        title: 'Fotoğraf Limiti',
+        description: 'En fazla 10 fotoğraf yükleyebilirsiniz.',
+        severity: 'warning'
+      });
       return;
     }
     setFormData(prev => ({ ...prev, uploadedImages: [...prev.uploadedImages, ...newFiles] }));
@@ -288,42 +448,64 @@ const YukRomorkForm: React.FC = () => {
               Fiyat ve İletişim Bilgileri
             </Typography>
 
-            <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-              <TextField
-                sx={{ flex: 1, minWidth: 200 }}
-                label="Fiyat"
-                value={formData.price}
-                onChange={(e) => handleInputChange('price', e.target.value)}
-                placeholder="Örn: 450.000"
-                InputProps={{
-                  startAdornment: <InputAdornment position="start">₺</InputAdornment>,
-                }}
-                required
-              />
-
-              <TextField
-                sx={{ flex: 1, minWidth: 200 }}
-                label="İl"
-                value={formData.city}
-                onChange={(e) => handleInputChange('city', e.target.value)}
-                placeholder="Şehir"
-                InputProps={{
-                  startAdornment: <InputAdornment position="start"><LocationOn /></InputAdornment>,
-                }}
-                required
-              />
-            </Box>
-
             <TextField
               fullWidth
-              label="İlçe"
-              value={formData.district}
-              onChange={(e) => handleInputChange('district', e.target.value)}
-              placeholder="İlçe"
+              label="Fiyat"
+              value={formData.price}
+              onChange={(e) => handleInputChange('price', e.target.value)}
+              placeholder="Örn: 450.000"
               InputProps={{
-                startAdornment: <InputAdornment position="start"><LocationOn /></InputAdornment>,
+                startAdornment: <InputAdornment position="start">₺</InputAdornment>,
               }}
               required
+            />
+
+            {/* Şehir Seçimi */}
+            <Autocomplete
+              options={cities}
+              getOptionLabel={(option) => option.name}
+              loading={loadingCities}
+              value={cities.find(city => city.name === formData.city) || null}
+              onChange={(event, newValue) => {
+                if (newValue) {
+                  handleCityChange(newValue.id, newValue.name);
+                }
+              }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="İl"
+                  InputProps={{
+                    ...params.InputProps,
+                    startAdornment: <InputAdornment position="start"><LocationOn /></InputAdornment>
+                  }}
+                  required
+                />
+              )}
+            />
+
+            {/* İlçe Seçimi */}
+            <Autocomplete
+              options={districts}
+              getOptionLabel={(option) => option.name}
+              loading={loadingDistricts}
+              disabled={!formData.city || loadingDistricts}
+              value={districts.find(district => district.name === formData.district) || null}
+              onChange={(event, newValue) => {
+                setFormData(prev => ({ ...prev, district: newValue ? newValue.name : '' }));
+              }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="İlçe"
+                  InputProps={{
+                    ...params.InputProps,
+                    startAdornment: <InputAdornment position="start"><LocationOn /></InputAdornment>
+                  }}
+                  required
+                  helperText={!formData.city ? "Önce il seçiniz" : ""}
+                />
+              )}
             />
 
             <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
@@ -335,25 +517,25 @@ const YukRomorkForm: React.FC = () => {
                 sx={{ flex: 1, minWidth: 200 }}
                 label="Ad Soyad"
                 value={formData.sellerName}
-                onChange={(e) => handleInputChange('sellerName', e.target.value)}
+                disabled={!!user}
                 InputProps={{
                   startAdornment: <InputAdornment position="start"><Person /></InputAdornment>,
                 }}
                 required
+                helperText={user ? "Kullanıcı bilgilerinizden alınmıştır" : ""}
               />
 
               <TextField
                 sx={{ flex: 1, minWidth: 200 }}
                 label="Telefon"
                 value={formData.sellerPhone}
-                onChange={(e) => handleInputChange('sellerPhone', e.target.value)}
+                disabled={!!user}
                 placeholder="(5XX) XXX XX XX"
                 InputProps={{
                   startAdornment: <InputAdornment position="start"><Phone /></InputAdornment>,
                 }}
                 required
-                error={!formData.sellerPhone}
-                helperText={!formData.sellerPhone ? "Telefon numarası zorunludur" : ""}
+                helperText={user ? "Kullanıcı bilgilerinizden alınmıştır" : "Telefon numarası zorunludur"}
               />
             </Box>
 
@@ -361,12 +543,13 @@ const YukRomorkForm: React.FC = () => {
               fullWidth
               label="E-posta"
               value={formData.sellerEmail}
-              onChange={(e) => handleInputChange('sellerEmail', e.target.value)}
+              disabled={!!user}
               InputProps={{
                 startAdornment: <InputAdornment position="start"><Email /></InputAdornment>,
               }}
               type="email"
               required
+              helperText={user ? "Kullanıcı bilgilerinizden alınmıştır" : ""}
             />
 
             <Alert severity="info">
@@ -410,7 +593,7 @@ const YukRomorkForm: React.FC = () => {
         </Button>
         <Box sx={{ flex: '1 1 auto' }} />
         {activeStep === steps.length - 1 ? (
-          <Button onClick={() => console.log('Form submitted:', formData)} variant="contained">
+          <Button onClick={handleSubmit} variant="contained">
             İlanı Yayınla
           </Button>
         ) : (

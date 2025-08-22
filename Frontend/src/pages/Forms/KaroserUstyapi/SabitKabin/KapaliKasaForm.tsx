@@ -1,16 +1,22 @@
-import React, { useState } from 'react';
-import { Box, Button, TextField, Typography, Stepper, Step, StepLabel, Card, CardContent, MenuItem, Stack, Chip, InputAdornment, Alert, FormControl, FormLabel, RadioGroup, FormControlLabel, Radio } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../../../context/AuthContext';
+import { useLocation } from 'react-router-dom';
+import { useConfirmDialog } from '../../../../hooks/useConfirmDialog';
+import { listingService } from '../../../../services/listingService';
+import { createStandardPayload, validateListingPayload } from '../../../../services/apiNormalizer';
+import { locationService, City, District } from '../../../../services/locationService';
+import { Box, Button, TextField, Typography, Stepper, Step, StepLabel, Card, CardContent, MenuItem, Stack, Chip, InputAdornment, Alert, FormControl, FormLabel, RadioGroup, FormControlLabel, Radio, Autocomplete } from '@mui/material';
 import { AttachMoney, Upload, LocationOn, Person, Phone, Email } from '@mui/icons-material';
 
 interface KapaliKasaFormData {
   title: string;
   description: string;
   productionYear: string;
-  usageArea: string; // Kullanım alanı
-  bodyStructure: string; // Karoser yapısı
-  length: string; // Uzunluk (m)
-  width: string; // Genişlik (m)
-  isExchangeable: string; // Takaslı
+  usageArea: string;
+  bodyStructure: string;
+  length: string;
+  width: string;
+  isExchangeable: string;
   uploadedImages: File[];
   price: string;
   priceType: string;
@@ -25,7 +31,34 @@ interface KapaliKasaFormData {
 const steps = ['İlan Detayları', 'Fotoğraflar', 'İletişim & Fiyat'];
 
 const KapaliKasaForm: React.FC = () => {
+  const { user } = useAuth();
+  const location = useLocation();
+  const { confirm } = useConfirmDialog();
+  const selectedBrand = location.state?.brand;
+  const selectedModel = location.state?.model;
+  const selectedVariant = location.state?.variant;
+  
+  console.log('🚀 KapaliKasaForm location state:', location.state);
+  console.log('📋 Selected Brand:', selectedBrand);
+  console.log('📋 Selected Model:', selectedModel);
+  console.log('📋 Selected Variant:', selectedVariant);
+  console.log('👤 User Context:', user);
+  
   const [activeStep, setActiveStep] = useState(0);
+  const [cities, setCities] = useState<City[]>([]);
+  const [districts, setDistricts] = useState<District[]>([]);
+  const [selectedCity, setSelectedCity] = useState<City | null>(null);
+  const [selectedDistrict, setSelectedDistrict] = useState<District | null>(null);
+  const [loadingCities, setLoadingCities] = useState(false);
+  const [loadingDistricts, setLoadingDistricts] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [userInfo, setUserInfo] = useState({
+    name: '',
+    phone: '',
+    email: '',
+    loading: true
+  });
+
   const [formData, setFormData] = useState<KapaliKasaFormData>({
     title: '',
     description: '',
@@ -46,6 +79,383 @@ const KapaliKasaForm: React.FC = () => {
     district: ''
   });
 
+  // Dynamic form title generation
+  const getFormTitle = () => {
+    if (selectedBrand && selectedModel && selectedVariant) {
+      return `${selectedBrand.name} ${selectedModel.name} ${selectedVariant.name} - Kapalı Kasa`;
+    } else if (selectedBrand && selectedModel) {
+      return `${selectedBrand.name} ${selectedModel.name} - Kapalı Kasa`;
+    } else if (selectedBrand) {
+      return `${selectedBrand.name} - Kapalı Kasa`;
+    }
+    return 'Kapalı Kasa İlanı Ver';
+  };
+
+  const getStepTitle = (step: number) => {
+    const baseTitle = selectedBrand ? `${selectedBrand.name} Kapalı Kasa` : 'Kapalı Kasa';
+    const stepTitles = [
+      `${baseTitle} - İlan Detayları`,
+      `${baseTitle} - Fotoğraf Yükleme`,
+      `${baseTitle} - İletişim & Fiyat`
+    ];
+    return stepTitles[step] || baseTitle;
+  };
+
+  // Load user info from backend
+  useEffect(() => {
+    const loadUserInfo = async () => {
+      try {
+        if (user?.id) {
+          // Backend'den user bilgilerini çek
+          console.log('👤 Loading user info for user ID:', user.id);
+          
+          // Gerçek API çağrısı burada olacak
+          // const userProfile = await userService.getUserProfile(user.id);
+          
+          // Şimdilik user context'den alıyoruz
+          const userName = `${user.first_name || ''} ${user.last_name || ''}`.trim();
+          const userPhone = user.phone || '';
+          const userEmail = user.email || '';
+          
+          setUserInfo({
+            name: userName,
+            phone: userPhone,
+            email: userEmail,
+            loading: false
+          });
+          
+          // Form data'yı güncelle
+          setFormData(prev => ({
+            ...prev,
+            sellerName: userName,
+            sellerPhone: userPhone,
+            sellerEmail: userEmail
+          }));
+          
+          console.log('✅ User info loaded:', { name: userName, phone: userPhone, email: userEmail });
+        }
+      } catch (error) {
+        console.error('❌ Error loading user info:', error);
+        setUserInfo(prev => ({ ...prev, loading: false }));
+        confirm({
+          title: 'Hata',
+          description: 'Kullanıcı bilgileri yüklenirken bir hata oluştu.',
+          severity: 'error'
+        });
+      }
+    };
+
+    loadUserInfo();
+  }, [user, confirm]);
+
+  // Load cities on component mount
+  useEffect(() => {
+    const loadCities = async () => {
+      setLoadingCities(true);
+      try {
+        const citiesData = await locationService.getCities();
+        setCities(citiesData);
+        console.log('🏙️ Cities loaded:', citiesData.length);
+      } catch (error) {
+        console.error('Şehirler yüklenirken hata:', error);
+        confirm({
+          title: 'Hata',
+          description: 'Şehirler yüklenirken bir hata oluştu. Lütfen tekrar deneyin.',
+          severity: 'error'
+        });
+      } finally {
+        setLoadingCities(false);
+      }
+    };
+    
+    loadCities();
+  }, [confirm]);
+
+  // Load districts when city changes
+  useEffect(() => {
+    const loadDistricts = async () => {
+      if (!selectedCity) {
+        setDistricts([]);
+        setSelectedDistrict(null);
+        return;
+      }
+
+      setLoadingDistricts(true);
+      try {
+        const districtsData = await locationService.getDistrictsByCity(selectedCity.id);
+        setDistricts(districtsData);
+        console.log('🏘️ Districts loaded for', selectedCity.name, ':', districtsData.length);
+      } catch (error) {
+        console.error('İlçeler yüklenirken hata:', error);
+        confirm({
+          title: 'Hata',
+          description: 'İlçeler yüklenirken bir hata oluştu. Lütfen tekrar deneyin.',
+          severity: 'error'
+        });
+      } finally {
+        setLoadingDistricts(false);
+      }
+    };
+    
+    loadDistricts();
+  }, [selectedCity, confirm]);
+
+  const usageAreaOptions = [
+    'Gıda Taşımacılığı',
+    'Kargo Taşımacılığı',
+    'Tekstil Taşımacılığı',
+    'Elektronik Taşımacılığı',
+    'İnşaat Malzemesi',
+    'Otomobil Taşımacılığı',
+    'Mobilya Taşımacılığı',
+    'Tarım Ürünleri',
+    'Hayvan Taşımacılığı',
+    'Soğuk Zincir',
+    'Tehlikeli Madde',
+    'Genel Kargo',
+    'Diğer'
+  ];
+
+  const handleSubmit = async () => {
+    // Validation with user-friendly modals
+    if (!selectedBrand?.vehicle_type_id) {
+      confirm({
+        title: 'Eksik Bilgi',
+        description: 'Araç türü seçimi zorunludur. Lütfen araç seçim sayfasına geri dönün.',
+        severity: 'warning'
+      });
+      return;
+    }
+
+    if (!formData.title?.trim()) {
+      confirm({
+        title: 'Eksik Bilgi',
+        description: 'İlan başlığı zorunludur.',
+        severity: 'warning'
+      });
+      return;
+    }
+
+    if (!formData.description?.trim()) {
+      confirm({
+        title: 'Eksik Bilgi', 
+        description: 'Açıklama zorunludur.',
+        severity: 'warning'
+      });
+      return;
+    }
+
+    if (!formData.productionYear) {
+      confirm({
+        title: 'Eksik Bilgi',
+        description: 'Üretim yılı seçimi zorunludur.',
+        severity: 'warning'
+      });
+      return;
+    }
+
+    if (!formData.usageArea) {
+      confirm({
+        title: 'Eksik Bilgi',
+        description: 'Kullanım alanı seçimi zorunludur.',
+        severity: 'warning'
+      });
+      return;
+    }
+
+    if (!formData.bodyStructure) {
+      confirm({
+        title: 'Eksik Bilgi',
+        description: 'Karoser yapısı seçimi zorunludur.',
+        severity: 'warning'
+      });
+      return;
+    }
+
+    if (!formData.length?.trim() || !formData.width?.trim()) {
+      confirm({
+        title: 'Eksik Bilgi',
+        description: 'Uzunluk ve genişlik bilgileri zorunludur.',
+        severity: 'warning'
+      });
+      return;
+    }
+
+    if (!formData.isExchangeable) {
+      confirm({
+        title: 'Eksik Bilgi',
+        description: 'Takas durumu seçimi zorunludur.',
+        severity: 'warning'
+      });
+      return;
+    }
+
+    if (!formData.price?.trim()) {
+      confirm({
+        title: 'Eksik Bilgi',
+        description: 'Fiyat bilgisi zorunludur.',
+        severity: 'warning'
+      });
+      return;
+    }
+
+    if (!selectedCity || !selectedDistrict) {
+      confirm({
+        title: 'Eksik Bilgi',
+        description: 'Şehir ve ilçe seçimi zorunludur.',
+        severity: 'warning'
+      });
+      return;
+    }
+
+    if (!formData.sellerName?.trim() || !formData.sellerPhone?.trim() || !formData.sellerEmail?.trim()) {
+      confirm({
+        title: 'Eksik Bilgi',
+        description: 'Kullanıcı bilgileri eksik. Lütfen profil bilgilerinizi tamamlayın.',
+        severity: 'warning'
+      });
+      return;
+    }
+
+    if (formData.uploadedImages.length === 0) {
+      confirm({
+        title: 'Eksik Bilgi',
+        description: 'En az bir fotoğraf yüklemeniz gerekiyor.',
+        severity: 'warning'
+      });
+      return;
+    }
+
+    // Confirm submission
+    const confirmSubmit = await confirm({
+      title: 'İlan Yayınlansın mı?',
+      description: 'İlanınız moderatör onayından sonra yayınlanacaktır. Devam etmek istediğinizden emin misiniz?',
+      severity: 'info'
+    });
+
+    if (!confirmSubmit) {
+      return;
+    }
+
+    setIsSubmitting(true);
+    
+    try {
+      console.log('🚀 KapaliKasa form submission starting...');
+      console.log('📋 Form Data:', formData);
+      console.log('🏢 Selected City:', selectedCity);
+      console.log('🏘️ Selected District:', selectedDistrict);
+
+      // Convert images to base64
+      const base64Images = await Promise.all(
+        formData.uploadedImages.map((file) => {
+          return new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (e) => resolve(e.target?.result as string);
+            reader.onerror = () => reject(new Error('Fotoğraf dönüştürülemedi'));
+            reader.readAsDataURL(file);
+          });
+        })
+      );
+
+      console.log('📸 Images converted to base64, count:', base64Images.length);
+
+      // Create standardized payload
+      const payload = createStandardPayload({
+        title: formData.title.trim(),
+        description: formData.description.trim(),
+        price: parseFloat(formData.price),
+        year: parseInt(formData.productionYear),
+        city: selectedCity.name,
+        city_id: selectedCity.id,
+        district_id: selectedDistrict.id,
+        category_id: selectedBrand?.vehicle_types?.categories?.id || "vehicle-category-001",
+        seller_name: formData.sellerName.trim(),
+        seller_phone: formData.sellerPhone.trim(),
+        seller_email: formData.sellerEmail.trim(),
+        is_exchangeable: formData.isExchangeable === 'evet',
+        images: base64Images,
+        vehicle_type_id: selectedBrand?.vehicle_type_id,
+        brand_id: selectedBrand?.id,
+        model_id: selectedModel?.id,
+        variant_id: selectedVariant?.id
+      }, {
+        // KapaliKasa specific properties
+        usageArea: formData.usageArea,
+        bodyStructure: formData.bodyStructure,
+        length: formData.length,
+        width: formData.width,
+        currency: formData.currency,
+        priceType: formData.priceType
+      });
+
+      console.log('📦 Payload created:', payload);
+
+      // Validate payload
+      const validationResult = validateListingPayload(payload);
+      if (!validationResult.isValid) {
+        console.error('❌ Validation failed:', validationResult.errors);
+        confirm({
+          title: 'Veri Hatası',
+          description: `Lütfen şu alanları kontrol edin: ${validationResult.errors.join(', ')}`,
+          severity: 'error'
+        });
+        return;
+      }
+
+      console.log('✅ Payload validation passed');
+
+      // Submit to API
+      const response = await listingService.createStandardListing(payload);
+      
+      if (response.success) {
+        console.log('✅ KapaliKasa listing created successfully:', response.data);
+        
+        await confirm({
+          title: '🎉 Başarılı!',
+          description: 'Kapalı Kasa ilanınız başarıyla oluşturuldu! Admin onayından sonra yayınlanacaktır. İlanlarım sayfasından durumunu takip edebilirsiniz.',
+          severity: 'success'
+        });
+        
+        // Reset form completely
+        setFormData({
+          title: '',
+          description: '',
+          productionYear: '',
+          usageArea: '',
+          bodyStructure: '',
+          length: '',
+          width: '',
+          isExchangeable: '',
+          uploadedImages: [],
+          price: '',
+          priceType: 'fixed',
+          currency: 'TRY',
+          sellerPhone: userInfo.phone,
+          sellerName: userInfo.name,
+          sellerEmail: userInfo.email,
+          city: '',
+          district: ''
+        });
+        setActiveStep(0);
+        setSelectedCity(null);
+        setSelectedDistrict(null);
+        
+        console.log('✅ Form reset completed');
+      } else {
+        throw new Error(response.message || 'İlan oluşturulamadı');
+      }
+    } catch (err: any) {
+      console.error('❌ KapaliKasa listing creation error:', err);
+      confirm({
+        title: 'Hata',
+        description: err.message || 'İlan oluşturulurken bir hata oluştu. Lütfen tekrar deneyin.',
+        severity: 'error'
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const handleNext = () => setActiveStep((prev) => prev + 1);
   const handleBack = () => setActiveStep((prev) => prev - 1);
   const handleInputChange = (field: keyof KapaliKasaFormData, value: any) => {
@@ -55,12 +465,19 @@ const KapaliKasaForm: React.FC = () => {
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (!files) return;
+    
     const newFiles = Array.from(files);
     const totalFiles = formData.uploadedImages.length + newFiles.length;
+    
     if (totalFiles > 15) {
-      alert('En fazla 15 fotoğraf yükleyebilirsiniz.');
+      confirm({
+        title: 'Dosya Sınırı',
+        description: 'En fazla 15 fotoğraf yükleyebilirsiniz.',
+        severity: 'warning'
+      });
       return;
     }
+    
     setFormData(prev => ({ ...prev, uploadedImages: [...prev.uploadedImages, ...newFiles] }));
   };
 
@@ -80,22 +497,6 @@ const KapaliKasaForm: React.FC = () => {
     return years;
   };
 
-  const usageAreaOptions = [
-    'Gıda Taşımacılığı',
-    'Kargo Taşımacılığı',
-    'Tekstil Taşımacılığı',
-    'Elektronik Taşımacılığı',
-    'İnşaat Malzemesi',
-    'Otomobil Taşımacılığı',
-    'Mobilya Taşımacılığı',
-    'Tarım Ürünleri',
-    'Hayvan Taşımacılığı',
-    'Soğuk Zincir',
-    'Tehlikeli Madde',
-    'Genel Kargo',
-    'Diğer'
-  ];
-
   const renderStepContent = (step: number) => {
     switch (step) {
       case 0:
@@ -103,8 +504,14 @@ const KapaliKasaForm: React.FC = () => {
           <Card>
             <CardContent>
               <Typography variant="h6" gutterBottom>
-                Kapalı Kasa İlan Detayları
+                {getStepTitle(0)}
               </Typography>
+              
+              <Alert severity="info" sx={{ mb: 2 }}>
+                <strong>Seçilen Araç:</strong> {selectedBrand?.name || 'Bilinmiyor'} 
+                {selectedModel && ` - ${selectedModel.name}`}
+                {selectedVariant && ` - ${selectedVariant.name}`}
+              </Alert>
               
               <TextField
                 fullWidth
@@ -172,6 +579,8 @@ const KapaliKasaForm: React.FC = () => {
                 <MenuItem value="metal">Metal</MenuItem>
                 <MenuItem value="polyester">Polyester</MenuItem>
                 <MenuItem value="branda">Branda</MenuItem>
+                <MenuItem value="kompozit">Kompozit</MenuItem>
+                <MenuItem value="fiberglass">Fiberglass</MenuItem>
               </TextField>
 
               <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
@@ -181,7 +590,7 @@ const KapaliKasaForm: React.FC = () => {
                   value={formData.length}
                   onChange={(e) => handleInputChange('length', e.target.value)}
                   type="number"
-                  inputProps={{ step: 0.1 }}
+                  inputProps={{ step: 0.1, min: 0 }}
                   required
                 />
                 
@@ -191,7 +600,7 @@ const KapaliKasaForm: React.FC = () => {
                   value={formData.width}
                   onChange={(e) => handleInputChange('width', e.target.value)}
                   type="number"
-                  inputProps={{ step: 0.1 }}
+                  inputProps={{ step: 0.1, min: 0 }}
                   required
                 />
               </Box>
@@ -312,40 +721,83 @@ const KapaliKasaForm: React.FC = () => {
             </Typography>
 
             <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-              <TextField
+              <Autocomplete
                 sx={{ flex: 1, minWidth: 200 }}
-                label="Fiyat"
-                value={formData.price}
-                onChange={(e) => handleInputChange('price', e.target.value)}
-                placeholder="Örn: 450.000"
-                InputProps={{
-                  startAdornment: <InputAdornment position="start">₺</InputAdornment>
+                options={cities}
+                getOptionLabel={(option) => option.name}
+                loading={loadingCities}
+                value={selectedCity}
+                onChange={(_, newValue) => {
+                  setSelectedCity(newValue);
+                  setSelectedDistrict(null);
+                  handleInputChange('city', newValue?.name || '');
                 }}
-                required
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Şehir"
+                    placeholder="Şehir seçin"
+                    InputProps={{
+                      ...params.InputProps,
+                      startAdornment: (
+                        <>
+                          <InputAdornment position="start">
+                            <LocationOn />
+                          </InputAdornment>
+                          {params.InputProps.startAdornment}
+                        </>
+                      )
+                    }}
+                    required
+                  />
+                )}
               />
               
-              <TextField
+              <Autocomplete
                 sx={{ flex: 1, minWidth: 200 }}
-                label="İl"
-                value={formData.city}
-                onChange={(e) => handleInputChange('city', e.target.value)}
-                placeholder="Şehir"
-                InputProps={{
-                  startAdornment: <InputAdornment position="start"><LocationOn /></InputAdornment>
+                options={districts}
+                getOptionLabel={(option) => option.name}
+                loading={loadingDistricts}
+                value={selectedDistrict}
+                onChange={(_, newValue) => {
+                  setSelectedDistrict(newValue);
+                  handleInputChange('district', newValue?.name || '');
                 }}
-                required
+                disabled={!selectedCity}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="İlçe"
+                    placeholder={selectedCity ? "İlçe seçin" : "Önce şehir seçin"}
+                    InputProps={{
+                      ...params.InputProps,
+                      startAdornment: (
+                        <>
+                          <InputAdornment position="start">
+                            <LocationOn />
+                          </InputAdornment>
+                          {params.InputProps.startAdornment}
+                        </>
+                      )
+                    }}
+                    required
+                  />
+                )}
               />
             </Box>
 
             <TextField
               fullWidth
-              label="İlçe"
-              value={formData.district}
-              onChange={(e) => handleInputChange('district', e.target.value)}
-              placeholder="İlçe"
+              label="Fiyat"
+              value={formData.price}
+              onChange={(e) => handleInputChange('price', e.target.value)}
+              placeholder="Örn: 450.000"
               InputProps={{
-                startAdornment: <InputAdornment position="start"><LocationOn /></InputAdornment>
+                startAdornment: <InputAdornment position="start">
+                  <AttachMoney />
+                </InputAdornment>
               }}
+              type="number"
               required
             />
 
@@ -358,25 +810,25 @@ const KapaliKasaForm: React.FC = () => {
                 sx={{ flex: 1, minWidth: 200 }}
                 label="Ad Soyad"
                 value={formData.sellerName}
-                onChange={(e) => handleInputChange('sellerName', e.target.value)}
                 InputProps={{
                   startAdornment: <InputAdornment position="start"><Person /></InputAdornment>
                 }}
+                disabled={!userInfo.loading}
                 required
+                helperText={userInfo.loading ? "Bilgiler yükleniyor..." : "Profil bilgilerinizden otomatik alınmıştır"}
               />
               
               <TextField
                 sx={{ flex: 1, minWidth: 200 }}
                 label="Telefon"
                 value={formData.sellerPhone}
-                onChange={(e) => handleInputChange('sellerPhone', e.target.value)}
                 placeholder="(5XX) XXX XX XX"
                 InputProps={{
                   startAdornment: <InputAdornment position="start"><Phone /></InputAdornment>
                 }}
+                disabled={!userInfo.loading}
                 required
-                error={!formData.sellerPhone}
-                helperText={!formData.sellerPhone ? "Telefon numarası zorunludur" : ""}
+                helperText={userInfo.loading ? "Bilgiler yükleniyor..." : "Profil bilgilerinizden otomatik alınmıştır"}
               />
             </Box>
 
@@ -384,12 +836,13 @@ const KapaliKasaForm: React.FC = () => {
               fullWidth
               label="E-posta"
               value={formData.sellerEmail}
-              onChange={(e) => handleInputChange('sellerEmail', e.target.value)}
               InputProps={{
                 startAdornment: <InputAdornment position="start"><Email /></InputAdornment>
               }}
               type="email"
+              disabled={!userInfo.loading}
               required
+              helperText={userInfo.loading ? "Bilgiler yükleniyor..." : "Profil bilgilerinizden otomatik alınmıştır"}
             />
 
             <Alert severity="info">
@@ -407,7 +860,7 @@ const KapaliKasaForm: React.FC = () => {
   return (
     <Box sx={{ width: '100%', p: 3 }}>
       <Typography variant="h4" component="h1" gutterBottom>
-        Kapalı Kasa İlanı Ver
+        {getFormTitle()}
       </Typography>
 
       <Stepper activeStep={activeStep} sx={{ mb: 4 }}>
@@ -434,10 +887,11 @@ const KapaliKasaForm: React.FC = () => {
         <Box sx={{ flex: '1 1 auto' }} />
         {activeStep === steps.length - 1 ? (
           <Button
-            onClick={() => console.log('Form submitted:', formData)}
+            onClick={handleSubmit}
             variant="contained"
+            disabled={isSubmitting}
           >
-            İlanı Yayınla
+            {isSubmitting ? 'İlan Oluşturuluyor...' : 'İlanı Yayınla'}
           </Button>
         ) : (
           <Button onClick={handleNext} variant="contained">

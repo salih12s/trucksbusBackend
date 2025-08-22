@@ -10,6 +10,17 @@ export const createListing = async (req: Request, res: Response): Promise<void> 
       selectedBrand: req.body.selectedBrand,
       brandInfo: req.body.brand_id ? 'has brand_id' : 'no brand_id'
     });
+    console.log('🖼️ Images data:', {
+      images: req.body.images,
+      imagesType: typeof req.body.images,
+      imagesLength: req.body.images?.length || 0,
+      firstImage: req.body.images?.[0] ? 'exists' : 'no image'
+    });
+    console.log('🏷️ Properties data:', {
+      properties: req.body.properties,
+      propertiesType: typeof req.body.properties,
+      propertiesKeys: req.body.properties ? Object.keys(req.body.properties) : 'no keys'
+    });
     
     const {
       title,
@@ -200,6 +211,73 @@ export const createListing = async (req: Request, res: Response): Promise<void> 
       }
     });
 
+    // Property value'larını Türkçeleştiren mapping function
+    const getPropertyDisplayValue = (key: string, value: string): string => {
+      const valueMap: { [key: string]: { [value: string]: string } } = {
+        'exchangeable': {
+          'evet': 'Evet',
+          'hayır': 'Hayır',
+          'yes': 'Evet',
+          'no': 'Hayır'
+        },
+        'takas': {
+          'evet': 'Evet', 
+          'hayır': 'Hayır'
+        },
+        'negotiable': {
+          'evet': 'Evet',
+          'hayır': 'Hayır'
+        },
+        'warranty': {
+          'evet': 'Evet',
+          'hayır': 'Hayır'
+        }
+      };
+      
+      const keyMap = valueMap[key];
+      if (keyMap && keyMap[value.toLowerCase()]) {
+        return keyMap[value.toLowerCase()];
+      }
+      
+      return value;
+    };
+
+    // Property name'leri Türkçeleştiren mapping function
+    const getPropertyDisplayName = (key: string): string => {
+      const propertyNameMap: { [key: string]: string } = {
+        // Şasi özellikleri
+        'axleCount': 'Aks Sayısı',
+        'loadCapacity': 'Yükleme Kapasitesi',
+        'tireCondition': 'Lastik Durumu',
+        'exchangeable': 'Takas',
+        
+        // Dorse özellikleri
+        'length': 'Uzunluk',
+        'width': 'Genişlik',
+        'height': 'Yükseklik',
+        'capacity': 'Kapasite',
+        'material': 'Malzeme',
+        'doorType': 'Kapı Tipi',
+        'floorType': 'Taban Tipi',
+        'sideType': 'Yan Duvar Tipi',
+        'roofType': 'Çatı Tipi',
+        'uzunluk': 'Uzunluk',
+        'genislik': 'Genişlik', 
+        'lastikDurumu': 'Lastik Durumu',
+        'devrilmeYonu': 'Devrilme Yönü',
+        'negotiable': 'Pazarlık',
+        'warranty': 'Garanti',
+        
+        // Diğer özellikler
+        'year': 'Model Yılı',
+        'condition': 'Durum',
+        'brand': 'Marka',
+        'model': 'Model'
+      };
+      
+      return propertyNameMap[key] || key;
+    };
+
     // Properties varsa kaydet (Dorse özel bilgileri için)
     if (properties && typeof properties === 'object') {
       const propertyPromises = Object.entries(properties).map(([key, value]) => {
@@ -208,8 +286,8 @@ export const createListing = async (req: Request, res: Response): Promise<void> 
             data: {
               id: `prop_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
               listing_id: listing.id,
-              key: key,
-              value: String(value),
+              key: getPropertyDisplayName(key), // Türkçe isim kullan
+              value: getPropertyDisplayValue(key, String(value)), // Türkçe value kullan
               type: 'STRING' // Default type
             }
           });
@@ -556,6 +634,14 @@ export const getListingById = async (req: Request, res: Response): Promise<void>
           orderBy: {
             sort_order: 'asc'
           }
+        },
+        listing_properties: {
+          select: {
+            id: true,
+            key: true,
+            value: true,
+            type: true
+          }
         }
       }
     });
@@ -617,6 +703,7 @@ export const getListingById = async (req: Request, res: Response): Promise<void>
         }
         return [];
       })(),
+      listing_properties: listing.listing_properties || [],
       location: `${listing.districts?.name || ''}, ${listing.cities?.name || ''}`.replace(/^, |, $/, '') || 'Konum belirtilmemiş',
       status: listing.status,
       isApproved: listing.is_approved || false,

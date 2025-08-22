@@ -1,4 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../../context/AuthContext';
+import { useConfirmDialog } from '../../../hooks/useConfirmDialog';
+import { listingService } from '../../../services/listingService';
+import { createStandardPayload, validateListingPayload } from '../../../services/apiNormalizer';
+import { locationService, City, District } from '../../../services/locationService';
 import {
   Box,
   Button,
@@ -19,7 +25,8 @@ import {
   Stack,
   Chip,
   InputAdornment,
-  Alert
+  Alert,
+  Autocomplete
 } from '@mui/material';
 import { AttachMoney, Upload, LocationOn, Person, Phone, Email } from '@mui/icons-material';
 
@@ -45,7 +52,23 @@ interface HayvanRomorkFormData {
 const steps = ['İlan Detayları', 'Fotoğraflar', 'İletişim & Fiyat'];
 
 const HayvanRomorkForm: React.FC = () => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const location = useLocation();
+  const { confirm } = useConfirmDialog();
+  
+  // Parse location state for brand/model/variant data
+  const selectedBrand = location.state?.brand;
+  const selectedModel = location.state?.model;
+  const selectedVariant = location.state?.variant;
+  
   const [activeStep, setActiveStep] = useState(0);
+  
+  // City/District state
+  const [cities, setCities] = useState<City[]>([]);
+  const [districts, setDistricts] = useState<District[]>([]);
+  const [loadingCities, setLoadingCities] = useState(true);
+  const [loadingDistricts, setLoadingDistricts] = useState(false);
   const [formData, setFormData] = useState<HayvanRomorkFormData>({
     title: '',
     description: '',
@@ -63,6 +86,78 @@ const HayvanRomorkForm: React.FC = () => {
     district: ''
   });
 
+  // Dynamic title based on selected variant/model/brand
+  const getFormTitle = () => {
+    if (selectedVariant?.name) return `${selectedVariant.name} İlanı Ver`;
+    if (selectedModel?.name) return `${selectedModel.name} İlanı Ver`;
+    if (selectedBrand?.name) return `${selectedBrand.name} İlanı Ver`;
+    return 'Hayvan Römorku İlanı Ver';
+  };
+
+  const getStepTitle = () => {
+    if (selectedVariant?.name) return `${selectedVariant.name} İlan Detayları`;
+    if (selectedModel?.name) return `${selectedModel.name} İlan Detayları`;
+    if (selectedBrand?.name) return `${selectedBrand.name} İlan Detayları`;
+    return 'Hayvan Römorku İlan Detayları';
+  };
+
+  // Load cities on component mount
+  useEffect(() => {
+    const loadCities = async () => {
+      try {
+        setLoadingCities(true);
+        const citiesData = await locationService.getCities();
+        setCities(citiesData);
+        console.log('🏙️ HayvanRomorkForm: Şehirler yüklendi:', citiesData.length);
+      } catch (error) {
+        console.error('❌ HayvanRomorkForm: Şehirler yüklenemedi:', error);
+      } finally {
+        setLoadingCities(false);
+      }
+    };
+    
+    loadCities();
+  }, []);
+
+  // Load districts when city changes
+  const handleCityChange = async (cityId: string, cityName: string) => {
+    try {
+      setLoadingDistricts(true);
+      setFormData(prev => ({ ...prev, city: cityName, district: '' }));
+      
+      const districtsData = await locationService.getDistrictsByCity(cityId);
+      setDistricts(districtsData);
+      console.log('🏘️ HayvanRomorkForm: İlçeler yüklendi:', districtsData.length);
+    } catch (error) {
+      console.error('❌ HayvanRomorkForm: İlçeler yüklenemedi:', error);
+    } finally {
+      setLoadingDistricts(false);
+    }
+  };
+
+  // Load user data and set city if available
+  useEffect(() => {
+    if (user && cities.length > 0) {
+      console.log('👤 HayvanRomorkForm: User data loading:', user);
+      setFormData(prev => ({
+        ...prev,
+        sellerName: `${user.first_name} ${user.last_name}`,
+        sellerPhone: user.phone || '',
+        sellerEmail: user.email,
+        city: user.city || '',
+        district: user.district || '',
+      }));
+      
+      // Eğer user'da city varsa otomatik ilçeleri yükle
+      if (user.city) {
+        const userCity = cities.find(city => city.name === user.city);
+        if (userCity) {
+          handleCityChange(userCity.id, userCity.name);
+        }
+      }
+    }
+  }, [user, cities]);
+
   const handleNext = () => setActiveStep((prev) => prev + 1);
   const handleBack = () => setActiveStep((prev) => prev - 1);
 
@@ -70,13 +165,144 @@ const HayvanRomorkForm: React.FC = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSubmit = async () => {
+    if (!formData.title || !formData.description || !formData.price) {
+      await confirm({
+        title: 'Eksik Bilgi',
+        description: 'Lütfen tüm gerekli alanları doldurun.',
+        severity: 'warning'
+      });
+      return;
+    }
+
+    console.log('HayvanRomorkForm - Form gönderim başlatıldı');
+    console.log('Seçili Brand:', selectedBrand);
+    console.log('Seçili Model:', selectedModel);
+    console.log('Seçili Variant:', selectedVariant);
+    console.log('Form Data:', formData);
+    console.log('Cities State:', cities.length);
+    console.log('Districts State:', districts.length);
+
+    // City/District validation
+    if (!formData.city || !formData.district) {
+      await confirm({
+        title: 'Eksik Bilgi',
+        description: 'Lütfen şehir ve ilçe seçimi yapınız.',
+        severity: 'warning'
+      });
+      return;
+    }
+
+    const selectedCity = cities.find(city => city.name === formData.city);
+    const selectedDistrict = districts.find(district => district.name === formData.district);
+
+    console.log('Form city/district values:', { city: formData.city, district: formData.district });
+    console.log('Seçili şehir:', selectedCity);
+    console.log('Seçili ilçe:', selectedDistrict);
+
+    if (!selectedCity || !selectedDistrict) {
+      await confirm({
+        title: 'Eksik Bilgi',
+        description: 'Lütfen şehir ve ilçe seçimi yapınız.',
+        severity: 'warning'
+      });
+      return;
+    }
+    
+    try {
+      const base64Images = await Promise.all(
+        formData.uploadedImages.map((file) => {
+          return new Promise<string>((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (e) => resolve(e.target?.result as string);
+            reader.readAsDataURL(file);
+          });
+        })
+      );
+
+      // VasitaRomorkForm ile aynı payload pattern kullan
+      const payload = createStandardPayload({
+        title: formData.title,
+        description: formData.description,
+        price: parseFloat(formData.price),
+        year: parseInt(formData.productionYear),
+        city: formData.city,
+        district: formData.district,
+        city_id: selectedCity.id,
+        district_id: selectedDistrict.id,
+        category_id: selectedBrand?.vehicle_types?.categories?.id || "vehicle-category-001",
+        seller_name: formData.sellerName,
+        seller_phone: formData.sellerPhone,
+        seller_email: formData.sellerEmail,
+        is_exchangeable: formData.isExchangeable === 'evet',
+        images: base64Images,
+        vehicle_type_id: selectedBrand?.vehicle_type_id,
+        brand_id: selectedBrand?.id,
+        model_id: selectedModel?.id,
+        variant_id: selectedVariant?.id
+      }, {
+        hasDamper: formData.hasDamper ? 'Evet' : 'Hayır',
+        currency: formData.currency,
+        priceType: formData.priceType
+      });
+
+      console.log('Payload created with createStandardPayload:', payload);
+      console.log('Payload JSON stringify:', JSON.stringify(payload, null, 2));
+      console.log('Selected Brand vehicle_types:', selectedBrand?.vehicle_types);
+      console.log('Category ID from brand:', selectedBrand?.vehicle_types?.categories?.id);
+      console.log('Vehicle type ID (selectedBrand?.vehicle_type_id):', selectedBrand?.vehicle_type_id);
+
+      const validationResult = validateListingPayload(payload);
+      if (!validationResult.isValid) {
+        await confirm({
+          title: 'Doğrulama Hatası',
+          description: `Veri doğrulama hatası: ${validationResult.errors.join(', ')}`,
+          severity: 'error'
+        });
+        return;
+      }
+
+      console.log('Submitting:', payload);
+      
+      // Use standard listing service
+      const response = await listingService.createStandardListing(payload);
+      
+      if (response.success) {
+        console.log('✅ Hayvan Römorku ilanı başarıyla oluşturuldu:', response.data);
+        await confirm({
+          title: 'Başarılı',
+          description: 'İlanınız başarıyla oluşturuldu! Admin onayından sonra yayınlanacaktır.',
+          severity: 'success',
+          confirmText: 'Tamam',
+          cancelText: ''
+        });
+        navigate('/'); // Anasayfaya yönlendir
+      } else {
+        throw new Error(response.message || 'İlan oluşturulamadı');
+      }
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      await confirm({
+        title: 'Hata',
+        description: error instanceof Error ? error.message : 'İlan oluşturulurken hata oluştu',
+        severity: 'error',
+        confirmText: 'Tamam',
+        cancelText: ''
+      });
+    }
+  };
+
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (!files) return;
     const newFiles = Array.from(files);
     const totalFiles = formData.uploadedImages.length + newFiles.length;
     if (totalFiles > 10) {
-      alert('En fazla 10 fotoğraf yükleyebilirsiniz.');
+      await confirm({
+        title: 'Fotoğraf Limiti',
+        description: 'En fazla 10 fotoğraf yükleyebilirsiniz.',
+        severity: 'warning'
+      });
       return;
     }
     setFormData(prev => ({ ...prev, uploadedImages: [...prev.uploadedImages, ...newFiles] }));
@@ -101,7 +327,7 @@ const HayvanRomorkForm: React.FC = () => {
         return (
           <Card>
             <CardContent>
-              <Typography variant="h6" gutterBottom>Hayvan Römorku İlan Detayları</Typography>
+              <Typography variant="h6" gutterBottom>{getStepTitle()}</Typography>
               <TextField fullWidth label="İlan Başlığı" value={formData.title} onChange={(e) => handleInputChange('title', e.target.value)} margin="normal" required />
               <TextField fullWidth label="Açıklama" value={formData.description} onChange={(e) => handleInputChange('description', e.target.value)} margin="normal" multiline rows={4} required />
               <TextField select fullWidth label="Üretim Yılı" value={formData.productionYear} onChange={(e) => handleInputChange('productionYear', e.target.value)} margin="normal" required>
@@ -155,11 +381,65 @@ const HayvanRomorkForm: React.FC = () => {
         return (
           <Stack spacing={3}>
             <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}><AttachMoney color="primary" />Fiyat ve İletişim Bilgileri</Typography>
-            <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-              <TextField sx={{ flex: 1, minWidth: 200 }} label="Fiyat" value={formData.price} onChange={(e) => handleInputChange('price', e.target.value)} placeholder="Örn: 450.000" InputProps={{ startAdornment: <InputAdornment position="start">₺</InputAdornment> }} required />
-              <TextField sx={{ flex: 1, minWidth: 200 }} label="İl" value={formData.city} onChange={(e) => handleInputChange('city', e.target.value)} placeholder="Şehir" InputProps={{ startAdornment: <InputAdornment position="start"><LocationOn /></InputAdornment> }} required />
-            </Box>
-            <TextField fullWidth label="İlçe" value={formData.district} onChange={(e) => handleInputChange('district', e.target.value)} placeholder="İlçe" InputProps={{ startAdornment: <InputAdornment position="start"><LocationOn /></InputAdornment> }} required />
+            
+            {/* Fiyat */}
+            <TextField 
+              fullWidth 
+              label="Fiyat" 
+              value={formData.price} 
+              onChange={(e) => handleInputChange('price', e.target.value)} 
+              placeholder="Örn: 450.000" 
+              InputProps={{ startAdornment: <InputAdornment position="start">₺</InputAdornment> }} 
+              required 
+            />
+            
+            {/* Şehir Seçimi */}
+            <Autocomplete
+              options={cities}
+              getOptionLabel={(option) => option.name}
+              loading={loadingCities}
+              value={cities.find(city => city.name === formData.city) || null}
+              onChange={(_, newValue) => {
+                if (newValue) {
+                  handleCityChange(newValue.id, newValue.name);
+                }
+              }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="İl"
+                  InputProps={{
+                    ...params.InputProps,
+                    startAdornment: <InputAdornment position="start"><LocationOn /></InputAdornment>
+                  }}
+                  required
+                />
+              )}
+            />
+            
+            {/* İlçe Seçimi */}
+            <Autocomplete
+              options={districts}
+              getOptionLabel={(option) => option.name}
+              loading={loadingDistricts}
+              disabled={!formData.city || loadingDistricts}
+              value={districts.find(district => district.name === formData.district) || null}
+              onChange={(_, newValue) => {
+                setFormData(prev => ({ ...prev, district: newValue ? newValue.name : '' }));
+              }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="İlçe"
+                  InputProps={{
+                    ...params.InputProps,
+                    startAdornment: <InputAdornment position="start"><LocationOn /></InputAdornment>
+                  }}
+                  required
+                />
+              )}
+            />
+            
             <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>📞 İletişim Bilgileri</Typography>
             <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
               <TextField sx={{ flex: 1, minWidth: 200 }} label="Ad Soyad" value={formData.sellerName} onChange={(e) => handleInputChange('sellerName', e.target.value)} InputProps={{ startAdornment: <InputAdornment position="start"><Person /></InputAdornment> }} required />
@@ -175,13 +455,13 @@ const HayvanRomorkForm: React.FC = () => {
 
   return (
     <Box sx={{ width: '100%', p: 3 }}>
-      <Typography variant="h4" component="h1" gutterBottom>Hayvan Römorku İlanı Ver</Typography>
+      <Typography variant="h4" component="h1" gutterBottom>{getFormTitle()}</Typography>
       <Stepper activeStep={activeStep} sx={{ mb: 4 }}>{steps.map((label) => (<Step key={label}><StepLabel>{label}</StepLabel></Step>))}</Stepper>
       <Box sx={{ mb: 4 }}>{renderStepContent(activeStep)}</Box>
       <Box sx={{ display: 'flex', flexDirection: 'row', pt: 2 }}>
         <Button color="inherit" disabled={activeStep === 0} onClick={handleBack} sx={{ mr: 1 }}>Geri</Button>
         <Box sx={{ flex: '1 1 auto' }} />
-        {activeStep === steps.length - 1 ? (<Button onClick={() => console.log('Form submitted:', formData)} variant="contained">İlanı Yayınla</Button>) : (<Button onClick={handleNext} variant="contained">İleri</Button>)}
+        {activeStep === steps.length - 1 ? (<Button onClick={handleSubmit} variant="contained">İlanı Yayınla</Button>) : (<Button onClick={handleNext} variant="contained">İleri</Button>)}
       </Box>
     </Box>
   );

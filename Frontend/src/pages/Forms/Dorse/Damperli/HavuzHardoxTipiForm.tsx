@@ -1,6 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../../context/AuthContext';
+import { useConfirmDialog } from '../../../../hooks/useConfirmDialog';
+import { listingService } from '../../../../services/listingService';
+import { createStandardPayload, validateListingPayload } from '../../../../services/apiNormalizer';
 import {
   Box,
   Container,
@@ -40,7 +44,6 @@ import {
   Close,
 } from '@mui/icons-material';
 import { locationService, City, District } from '../../../../services/locationService';
-import { api } from '../../../../services/api';
 import { formatPhoneNumber } from '../../../../utils/phoneUtils';
 
 // Havuz Hardox Tipi Damperli Dorse Üreticileri
@@ -93,6 +96,12 @@ const steps = [
 
 const HavuzHardoxTipiDorseAdForm: React.FC = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { confirm } = useConfirmDialog();
+  const selectedBrand = location.state?.brand;
+  const selectedModel = location.state?.model;
+  const selectedVariant = location.state?.variant;
   const [activeStep, setActiveStep] = useState(0);
   const [cities, setCities] = useState<City[]>([]);
   const [districts, setDistricts] = useState<District[]>([]);
@@ -282,9 +291,11 @@ const HavuzHardoxTipiDorseAdForm: React.FC = () => {
     if (!validateStep(3)) return;
     
     setLoading(true);
+    setError('');
+    
     try {
-      // Fotoğrafları base64'e çevir
-      const imageDataUrls = await Promise.all(
+      // Base64 image conversion
+      const base64Images = await Promise.all(
         photos.map((file) => {
           return new Promise<string>((resolve) => {
             const reader = new FileReader();
@@ -294,45 +305,72 @@ const HavuzHardoxTipiDorseAdForm: React.FC = () => {
         })
       );
 
-      // API için veri hazırlığı
-      const listingData = {
+      // City ve District'i ID'ye çevir
+      const selectedCity = cities.find(city => city.name === formData.city);
+      const selectedDistrict = districts.find(district => district.name === formData.district);
+      
+      if (!selectedCity || !selectedDistrict) {
+        setError('Lütfen şehir ve ilçe seçimi yapınız.');
+        return;
+      }
+
+      // Create standard payload using our service
+      const payload = createStandardPayload({
         title: formData.title,
         description: formData.description,
         price: parseFloat(formData.price),
-        year: formData.year,
-        category_id: 'vehicle-category-001', // Dorse kategorisi
-        vehicle_type_id: 'cme633w8v0001981ksnpl6dj5', // Dorse vehicle_type_id
+        year: parseInt(formData.year),
+        city: formData.city,
+        city_id: selectedCity.id,
+        district_id: selectedDistrict.id,
+        category_id: selectedBrand?.vehicle_types?.categories?.id || "vehicle-category-001",
         seller_name: formData.sellerName,
         seller_phone: formData.phone,
         seller_email: formData.email,
-        city: formData.city,
-        district: formData.district,
         is_exchangeable: formData.exchange,
-        images: imageDataUrls,
-        // Dorse'ye özel bilgileri properties olarak gönder
-        properties: {
-          genislik: formData.genislik.toString(),
-          uzunluk: formData.uzunluk.toString(),
-          lastikDurumu: formData.lastikDurumu.toString(),
-          devrilmeYonu: formData.devrilmeYonu,
-          warranty: formData.warranty ? 'Evet' : 'Hayır',
-          negotiable: formData.negotiable ? 'Evet' : 'Hayır'
-        }
-      };
+        images: base64Images,
+        vehicle_type_id: selectedBrand?.vehicle_type_id,
+        brand_id: selectedBrand?.id,
+        model_id: selectedModel?.id,
+        variant_id: selectedVariant?.id
+      }, {
+        // Dorse properties
+        genislik: formData.genislik.toString(),
+        uzunluk: formData.uzunluk.toString(),
+        lastikDurumu: formData.lastikDurumu.toString(),
+        devrilmeYonu: formData.devrilmeYonu,
+        warranty: formData.warranty ? 'Evet' : 'Hayır',
+        negotiable: formData.negotiable ? 'Evet' : 'Hayır'
+      });
 
-      console.log('🚀 Havuz Hardox Tipi Dorse ilanı oluşturuluyor...', listingData);
+      // Validate payload
+      const validationResult = validateListingPayload(payload);
+      if (!validationResult.isValid) {
+        setError(`Veri doğrulama hatası: ${validationResult.errors.join(', ')}`);
+        return;
+      }
 
-      // API çağrısı
-      const response = await api.post('/listings', listingData);
+      console.log('🚀 Havuz Hardox Tipi Dorse ilanı oluşturuluyor...', payload);
+
+      // Use standard listing service
+      const response = await listingService.createStandardListing(payload);
       
-      if (response.data) {
+      if (response.success) {
         console.log('✅ Havuz Hardox Tipi Dorse ilanı başarıyla oluşturuldu:', response.data);
-        alert('İlanınız başarıyla oluşturuldu! Admin onayından sonra yayınlanacaktır.');
-        // navigate('/my-ads');
+        await confirm({
+          title: 'Başarılı',
+          description: 'İlanınız başarıyla oluşturuldu! Admin onayından sonra yayınlanacaktır.',
+          severity: 'success',
+          confirmText: 'Tamam',
+          cancelText: ''
+        });
+        navigate('/'); // Anasayfaya yönlendir
+      } else {
+        throw new Error(response.message || 'İlan oluşturulamadı');
       }
     } catch (err: any) {
       console.error('❌ Havuz Hardox Tipi Dorse ilanı oluşturma hatası:', err);
-      setError(err.response?.data?.message || 'İlan oluşturulurken hata oluştu');
+      setError(err.message || 'İlan oluşturulurken hata oluştu');
     } finally {
       setLoading(false);
     }
@@ -690,11 +728,6 @@ const HavuzHardoxTipiDorseAdForm: React.FC = () => {
               disabled
               helperText="Kullanıcı profilinden otomatik dolduruldu"
             />
-
-            <Alert severity="info">
-              <strong>Önemli:</strong> İlanınız yayına alınmadan önce moderatörlerimiz tarafından incelenecektir. 
-              Onay sürecinde e-posta veya telefon ile bilgilendirileceksiniz.
-            </Alert>
           </Stack>
         );
 

@@ -3260,3 +3260,141 @@ Argument `not` must not be null.
     at Module.load (node:internal/modules/cjs/loader:1427:32)
     at Module._load (node:internal/modules/cjs/loader:1250:12)
     at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-22 20:13:11 [error]: Database error: 
+Invalid `prisma.listings.create()` invocation in
+C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\listingController.ts:143:43
+
+  140 }
+  141 
+  142 // Ilan oluştur
+→ 143 const listing = await prisma.listings.create(
+Foreign key constraint violated on the constraint: `listings_category_id_fkey`
+2025-08-22 20:13:11 [error]: PrismaClientKnownRequestError: 
+Invalid `prisma.listings.create()` invocation in
+C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\listingController.ts:143:43
+
+  140 }
+  141 
+  142 // Ilan oluştur
+→ 143 const listing = await prisma.listings.create(
+Foreign key constraint violated on the constraint: `listings_category_id_fkey`
+    at ei.handleRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:228:13)
+    at ei.handleAndLogRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:174:12)
+    at ei.request (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:143:12)
+    at async a (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:833:24)
+    at async createListing (C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\listingController.ts:143:21)
+2025-08-22 20:14:06 [error]: Database error: 
+Invalid `prisma.listings.create()` invocation in
+C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\listingController.ts:143:43
+
+  140 }
+  141 
+  142 // Ilan oluştur
+→ 143 const listing = await prisma.listings.create(
+Foreign key constraint violated on the constraint: `listings_category_id_fkey`
+2025-08-22 20:14:06 [error]: PrismaClientKnownRequestError: 
+Invalid `prisma.listings.create()` invocation in
+C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\listingController.ts:143:43
+
+  140 }
+  141 
+  142 // Ilan oluştur
+→ 143 const listing = await prisma.listings.create(
+Foreign key constraint violated on the constraint: `listings_category_id_fkey`
+    at ei.handleRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:228:13)
+    at ei.handleAndLogRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:174:12)
+    at ei.request (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:143:12)
+    at async a (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:833:24)
+    at async createListing (C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\listingController.ts:143:21)
+2025-08-22 20:17:21 [error]: Database error: 
+Invalid `prisma.listings.create()` invocation in
+C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\listingController.ts:143:43
+
+  140 }
+  141 
+  142 // Ilan oluştur
+→ 143 const listing = await prisma.listings.create(
+Foreign key constraint violated on the constraint: `listings_category_id_fkey`
+2025-08-22 20:17:21 [error]: PrismaClientKnownRequestError: 
+Invalid `prisma.listings.create()` invocation in
+C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\listingController.ts:143:43
+
+  140 }
+  141 
+  142 // Ilan oluştur
+→ 143 const listing = await prisma.listings.create(
+Foreign key constraint violated on the constraint: `listings_category_id_fkey`
+    at ei.handleRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:228:13)
+    at ei.handleAndLogRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:174:12)
+    at ei.request (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:143:12)
+    at async a (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:833:24)
+    at async createListing (C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\listingController.ts:143:21)
+2025-08-22 20:17:57 [error]: Database error: 
+Invalid `prisma.listings.create()` invocation in
+C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\listingController.ts:143:43
+
+  140 }
+  141 
+  142 // Ilan oluştur
+→ 143 const listing = await prisma.listings.create(
+Foreign key constraint violated on the constraint: `listings_category_id_fkey`
+2025-08-22 20:17:57 [error]: PrismaClientKnownRequestError: 
+Invalid `prisma.listings.create()` invocation in
+C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\listingController.ts:143:43
+
+  140 }
+  141 
+  142 // Ilan oluştur
+→ 143 const listing = await prisma.listings.create(
+Foreign key constraint violated on the constraint: `listings_category_id_fkey`
+    at ei.handleRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:228:13)
+    at ei.handleAndLogRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:174:12)
+    at ei.request (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:143:12)
+    at async a (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:833:24)
+    at async createListing (C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\listingController.ts:143:21)
+2025-08-22 20:18:44 [error]: Database error: 
+Invalid `prisma.listings.create()` invocation in
+C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\listingController.ts:143:43
+
+  140 }
+  141 
+  142 // Ilan oluştur
+→ 143 const listing = await prisma.listings.create(
+Foreign key constraint violated on the constraint: `listings_category_id_fkey`
+2025-08-22 20:18:44 [error]: PrismaClientKnownRequestError: 
+Invalid `prisma.listings.create()` invocation in
+C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\listingController.ts:143:43
+
+  140 }
+  141 
+  142 // Ilan oluştur
+→ 143 const listing = await prisma.listings.create(
+Foreign key constraint violated on the constraint: `listings_category_id_fkey`
+    at ei.handleRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:228:13)
+    at ei.handleAndLogRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:174:12)
+    at ei.request (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:143:12)
+    at async a (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:833:24)
+    at async createListing (C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\listingController.ts:143:21)
+2025-08-22 20:21:43 [error]: Database error: 
+Invalid `prisma.listings.create()` invocation in
+C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\listingController.ts:143:43
+
+  140 }
+  141 
+  142 // Ilan oluştur
+→ 143 const listing = await prisma.listings.create(
+Foreign key constraint violated on the constraint: `listings_category_id_fkey`
+2025-08-22 20:21:43 [error]: PrismaClientKnownRequestError: 
+Invalid `prisma.listings.create()` invocation in
+C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\listingController.ts:143:43
+
+  140 }
+  141 
+  142 // Ilan oluştur
+→ 143 const listing = await prisma.listings.create(
+Foreign key constraint violated on the constraint: `listings_category_id_fkey`
+    at ei.handleRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:228:13)
+    at ei.handleAndLogRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:174:12)
+    at ei.request (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:143:12)
+    at async a (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:833:24)
+    at async createListing (C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\listingController.ts:143:21)

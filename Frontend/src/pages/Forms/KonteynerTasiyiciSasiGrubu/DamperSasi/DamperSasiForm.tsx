@@ -1,5 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../../../context/AuthContext';
+import { useLocation } from 'react-router-dom';
+import { useConfirmDialog } from '../../../../hooks/useConfirmDialog';
+import { locationService, City, District } from '../../../../services/locationService';
+import { createStandardPayload } from '../../../../services/apiNormalizer';
+import { listingService } from '../../../../services/listingService';
 import {
   Box,
   Stepper,
@@ -17,14 +23,39 @@ import {
   RadioGroup,
   FormControlLabel,
   Radio,
-  Paper
+  Paper,
+  InputAdornment,
+  Alert,
+  Autocomplete
 } from '@mui/material';
+import {
+  AttachMoney,
+  LocationOn,
+  Person,
+  Phone,
+  Email
+} from '@mui/icons-material';
 import { useDropzone } from 'react-dropzone';
 
 const steps = ['İlan Bilgileri', 'Teknik Özellikler', 'Fotoğraflar', 'İletişim & Fiyat'];
 
 const DamperSasiForm: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const location = useLocation();
+  const { confirm } = useConfirmDialog();
+  
+  // Parse location state
+  const selectedBrand = location.state?.brand;
+  const selectedModel = location.state?.model;
+  const selectedVariant = location.state?.variant;
+  
+  // Location states
+  const [cities, setCities] = useState<City[]>([]);
+  const [districts, setDistricts] = useState<District[]>([]);
+  const [loadingCities, setLoadingCities] = useState(true);
+  const [loadingDistricts, setLoadingDistricts] = useState(false);
+
   const [activeStep, setActiveStep] = useState(0);
   const [formData, setFormData] = useState({
     // İlan Bilgileri
@@ -39,14 +70,78 @@ const DamperSasiForm: React.FC = () => {
     // Fotoğraflar
     images: [] as File[],
     // İletişim & Fiyat
-    contactName: '',
-    phone: '',
-    email: '',
+    sellerName: user?.first_name + ' ' + user?.last_name || '',
+    sellerPhone: user?.phone || '',
+    sellerEmail: user?.email || '',
     price: '',
     currency: 'TL',
     city: '',
     district: ''
   });
+
+  // Load cities on component mount
+  useEffect(() => {
+    const loadCities = async () => {
+      try {
+        setLoadingCities(true);
+        const citiesData = await locationService.getCities();
+        setCities(citiesData);
+      } catch (error) {
+        console.error('Error loading cities:', error);
+      } finally {
+        setLoadingCities(false);
+      }
+    };
+
+    loadCities();
+  }, []);
+
+  // Auto-fill user data
+  useEffect(() => {
+    if (user) {
+      setFormData(prev => ({
+        ...prev,
+        sellerName: `${user.first_name} ${user.last_name}`,
+        sellerPhone: user.phone || '',
+        sellerEmail: user.email || ''
+      }));
+    }
+  }, [user]);
+
+  // Generic input change handler
+  const handleInputChange = (field: string, value: any) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  // Handle city change and load districts
+  const handleCityChange = async (cityName: string) => {
+    setFormData(prev => ({
+      ...prev,
+      city: cityName,
+      district: '' // Reset district when city changes
+    }));
+
+    if (cityName) {
+      try {
+        setLoadingDistricts(true);
+        const city = cities.find(c => c.name === cityName);
+        if (city) {
+          const districtsData = await locationService.getDistrictsByCity(city.id);
+          setDistricts(districtsData);
+        }
+      } catch (error) {
+        console.error('Error loading districts:', error);
+        setDistricts([]);
+      } finally {
+        setLoadingDistricts(false);
+      }
+    } else {
+      setDistricts([]);
+    }
+  };
 
   const handleNext = () => {
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -56,9 +151,89 @@ const DamperSasiForm: React.FC = () => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
   };
 
-  const handleSubmit = () => {
-    console.log('Form Data:', formData);
-    navigate('/');
+  const handleSubmit = async () => {
+    try {
+      // Base64 image conversion
+      const base64Images = await Promise.all(
+        formData.images.map((file) => {
+          return new Promise<string>((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (e) => resolve(e.target?.result as string);
+            reader.readAsDataURL(file);
+          });
+        })
+      );
+
+      const selectedCity = cities.find(city => city.name === formData.city);
+      const selectedDistrict = districts.find(district => district.name === formData.district);
+      
+      if (!selectedCity || !selectedDistrict) {
+        await confirm({
+          title: 'Hata',
+          description: 'Lütfen şehir ve ilçe seçimi yapınız.',
+          severity: 'error',
+          confirmText: 'Tamam',
+          cancelText: ''
+        });
+        return;
+      }
+
+      const payload = createStandardPayload({
+        title: formData.title,
+        description: formData.description,
+        price: parseFloat(formData.price),
+        currency: formData.currency,
+        images: base64Images,
+        seller_name: formData.sellerName,
+        seller_phone: formData.sellerPhone,
+        seller_email: formData.sellerEmail,
+        city: selectedCity.name,
+        district: selectedDistrict.name,
+        city_id: selectedCity.id,
+        district_id: selectedDistrict.id,
+        category_id: selectedBrand?.vehicle_types?.categories?.id || "vehicle-category-001",
+        brand_id: selectedBrand?.id,
+        model_id: selectedModel?.id,
+        variant_id: selectedVariant?.id,
+        vehicle_type_id: selectedBrand?.vehicle_type_id,
+        year: parseInt(formData.year) || 0,
+        is_exchangeable: formData.exchangeable === 'evet'
+      }, {
+        // Şasi properties
+        axleCount: formData.axleCount,
+        loadCapacity: formData.loadCapacity,
+        tireCondition: formData.tireCondition,
+        exchangeable: formData.exchangeable
+      });
+
+      console.log('Submitting:', payload);
+      
+      // Use standard listing service
+      const response = await listingService.createStandardListing(payload);
+      
+      if (response.success) {
+        console.log('✅ Damper Şasi ilanı başarıyla oluşturuldu:', response.data);
+        await confirm({
+          title: 'Başarılı',
+          description: 'İlanınız başarıyla oluşturuldu! Admin onayından sonra yayınlanacaktır.',
+          severity: 'success',
+          confirmText: 'Tamam',
+          cancelText: ''
+        });
+        navigate('/'); // Anasayfaya yönlendir
+      } else {
+        throw new Error(response.message || 'İlan oluşturulamadı');
+      }
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      await confirm({
+        title: 'Hata',
+        description: 'İlan oluşturulurken bir hata oluştu. Lütfen tekrar deneyin.',
+        severity: 'error',
+        confirmText: 'Tamam',
+        cancelText: ''
+      });
+    }
   };
 
   const onDrop = (acceptedFiles: File[]) => {
@@ -219,63 +394,118 @@ const DamperSasiForm: React.FC = () => {
       case 3:
         return (
           <Stack spacing={3}>
-            <Typography variant="h5" gutterBottom>İletişim & Fiyat</Typography>
-            <TextField
-              label="İletişim Kişisi"
-              value={formData.contactName}
-              onChange={(e) => setFormData(prev => ({ ...prev, contactName: e.target.value }))}
-              fullWidth
-              required
-            />
-            <TextField
-              label="Telefon"
-              value={formData.phone}
-              onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
-              fullWidth
-              required
-            />
-            <TextField
-              label="E-posta"
-              type="email"
-              value={formData.email}
-              onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-              fullWidth
-            />
-            <Box sx={{ display: 'flex', gap: 2 }}>
+            <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <AttachMoney color="primary" />
+              Fiyat ve İletişim Bilgileri
+            </Typography>
+
+            <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
               <TextField
+                sx={{ flex: 1, minWidth: 200 }}
                 label="Fiyat"
-                type="number"
                 value={formData.price}
-                onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
-                fullWidth
+                onChange={(e) => handleInputChange('price', e.target.value)}
+                placeholder="Örn: 450.000"
+                InputProps={{
+                  startAdornment: <InputAdornment position="start">₺</InputAdornment>,
+                }}
                 required
               />
-              <FormControl sx={{ minWidth: 120 }}>
-                <InputLabel>Para Birimi</InputLabel>
-                <Select
-                  value={formData.currency}
-                  label="Para Birimi"
-                  onChange={(e) => setFormData(prev => ({ ...prev, currency: e.target.value }))}
-                >
-                  <MenuItem value="TL">TL</MenuItem>
-                  <MenuItem value="USD">USD</MenuItem>
-                  <MenuItem value="EUR">EUR</MenuItem>
-                </Select>
-              </FormControl>
+
+              <Autocomplete
+                sx={{ flex: 1, minWidth: 200 }}
+                options={cities}
+                getOptionLabel={(option) => option.name}
+                value={cities.find(city => city.name === formData.city) || null}
+                onChange={(_, value) => {
+                  if (value) {
+                    handleCityChange(value.name);
+                  } else {
+                    setFormData(prev => ({ ...prev, city: '', district: '' }));
+                    setDistricts([]);
+                  }
+                }}
+                loading={loadingCities}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="İl"
+                    required
+                    InputProps={{
+                      ...params.InputProps,
+                      startAdornment: <InputAdornment position="start"><LocationOn /></InputAdornment>,
+                    }}
+                  />
+                )}
+              />
             </Box>
-            <TextField
-              label="Şehir"
-              value={formData.city}
-              onChange={(e) => setFormData(prev => ({ ...prev, city: e.target.value }))}
+
+            <Autocomplete
               fullWidth
-              required
+              options={districts}
+              getOptionLabel={(option) => option.name}
+              value={districts.find(district => district.name === formData.district) || null}
+              onChange={(_, value) => {
+                handleInputChange('district', value ? value.name : '');
+              }}
+              disabled={!formData.city}
+              loading={loadingDistricts}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="İlçe"
+                  placeholder={formData.city ? "İlçe seçin" : "Önce il seçin"}
+                  InputProps={{
+                    ...params.InputProps,
+                    startAdornment: <InputAdornment position="start"><LocationOn /></InputAdornment>,
+                  }}
+                />
+              )}
             />
+
+            <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+              📞 İletişim Bilgileri
+            </Typography>
+
+            <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+              <TextField
+                sx={{ flex: 1, minWidth: 200 }}
+                label="Ad Soyad"
+                value={formData.sellerName}
+                onChange={(e) => handleInputChange('sellerName', e.target.value)}
+                InputProps={{
+                  startAdornment: <InputAdornment position="start"><Person /></InputAdornment>,
+                }}
+                disabled
+                helperText="Kullanıcı profilinden otomatik dolduruldu"
+              />
+
+              <TextField
+                sx={{ flex: 1, minWidth: 200 }}
+                label="Telefon"
+                value={formData.sellerPhone}
+                onChange={(e) => handleInputChange('sellerPhone', e.target.value)}
+                placeholder="(5XX) XXX XX XX"
+                InputProps={{
+                  startAdornment: <InputAdornment position="start"><Phone /></InputAdornment>,
+                }}
+                required
+                error={!formData.sellerPhone}
+                helperText={!formData.sellerPhone ? "Telefon numarası zorunludur" : ""}
+              />
+            </Box>
+
             <TextField
-              label="İlçe"
-              value={formData.district}
-              onChange={(e) => setFormData(prev => ({ ...prev, district: e.target.value }))}
               fullWidth
-              required
+              label="E-posta"
+              value={formData.sellerEmail}
+              onChange={(e) => handleInputChange('sellerEmail', e.target.value)}
+              disabled
+              helperText="Kullanıcı profilinden otomatik dolduruldu"
+              InputProps={{
+                startAdornment: <InputAdornment position="start"><Email /></InputAdornment>,
+              }}
+              type="email"
             />
           </Stack>
         );
@@ -283,9 +513,7 @@ const DamperSasiForm: React.FC = () => {
       default:
         return 'Bilinmeyen adım';
     }
-  };
-
-  return (
+  };  return (
     <Box sx={{ width: '100%', p: 3 }}>
       <Typography variant="h4" gutterBottom align="center">
         Damper Şasi İlanı

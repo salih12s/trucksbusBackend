@@ -1,5 +1,11 @@
-import React, { useState } from 'react';
-import { Box, Button, TextField, Typography, Stepper, Step, StepLabel, Card, CardContent, FormControl, FormLabel, RadioGroup, Radio, MenuItem, Stack, Chip, InputAdornment, Alert, FormControlLabel } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../../context/AuthContext';
+import { useLocation } from 'react-router-dom';
+import { useConfirmDialog } from '../../../hooks/useConfirmDialog';
+import { listingService } from '../../../services/listingService';
+import { createStandardPayload, validateListingPayload } from '../../../services/apiNormalizer';
+import { locationService, City, District } from '../../../services/locationService';
+import { Box, Button, TextField, Typography, Stepper, Step, StepLabel, Card, CardContent, FormControl, FormLabel, RadioGroup, Radio, MenuItem, Stack, Chip, InputAdornment, Alert, FormControlLabel, Autocomplete } from '@mui/material';
 import { AttachMoney, Upload, LocationOn, Person, Phone, Email } from '@mui/icons-material';
 
 interface OzelAmacliRomorkFormData {
@@ -22,7 +28,21 @@ interface OzelAmacliRomorkFormData {
 const steps = ['İlan Detayları', 'Fotoğraflar', 'İletişim & Fiyat'];
 
 const OzelAmacliRomorkForm: React.FC = () => {
+  const { user } = useAuth();
+  const location = useLocation();
+  const { confirm } = useConfirmDialog();
+  
+  // Brand/Model/Variant states - location.state'den gelecek
+  const selectedVariant = location.state?.variant;
+  const selectedModel = location.state?.model;
+  const selectedBrand = location.state?.brand;
+  
   const [activeStep, setActiveStep] = useState(0);
+  const [cities, setCities] = useState<City[]>([]);
+  const [districts, setDistricts] = useState<District[]>([]);
+  const [loadingCities, setLoadingCities] = useState(false);
+  const [loadingDistricts, setLoadingDistricts] = useState(false);
+  
   const [formData, setFormData] = useState<OzelAmacliRomorkFormData>({
     title: '',
     description: '',
@@ -33,12 +53,54 @@ const OzelAmacliRomorkForm: React.FC = () => {
     price: '',
     priceType: 'fixed',
     currency: 'TRY',
-    sellerPhone: '',
-    sellerName: '',
-    sellerEmail: '',
+    sellerPhone: user?.phone || '',
+    sellerName: `${user?.first_name || ''} ${user?.last_name || ''}`.trim(),
+    sellerEmail: user?.email || '',
     city: '',
     district: ''
   });
+
+  // Load cities on component mount
+  useEffect(() => {
+    const loadCities = async () => {
+      setLoadingCities(true);
+      try {
+        const citiesData = await locationService.getCities();
+        setCities(citiesData);
+      } catch (error) {
+        console.error('Şehirler yüklenirken hata:', error);
+      } finally {
+        setLoadingCities(false);
+      }
+    };
+    
+    loadCities();
+  }, []);
+
+  // Load districts when city changes
+  useEffect(() => {
+    const loadDistricts = async () => {
+      if (!formData.city) {
+        setDistricts([]);
+        return;
+      }
+      
+      const selectedCity = cities.find(city => city.name === formData.city);
+      if (!selectedCity) return;
+
+      setLoadingDistricts(true);
+      try {
+        const districtsData = await locationService.getDistrictsByCity(selectedCity.id);
+        setDistricts(districtsData);
+      } catch (error) {
+        console.error('İlçeler yüklenirken hata:', error);
+      } finally {
+        setLoadingDistricts(false);
+      }
+    };
+    
+    loadDistricts();
+  }, [formData.city, cities]);
 
   const typeOptions = [
     'Seçiniz',
@@ -60,7 +122,96 @@ const OzelAmacliRomorkForm: React.FC = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSubmit = async () => {
+    if (!formData.title || !formData.description || !formData.price) {
+      await confirm({
+        title: 'Eksik Bilgi',
+        description: 'Lütfen tüm gerekli alanları doldurun.',
+        severity: 'warning'
+      });
+      return;
+    }
+    
+    try {
+      const base64Images = await Promise.all(
+        formData.uploadedImages.map((file) => {
+          return new Promise<string>((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (e) => resolve(e.target?.result as string);
+            reader.readAsDataURL(file);
+          });
+        })
+      );
+
+      // City ve District'i ID'ye çevir
+      const selectedCity = cities.find(city => city.name === formData.city);
+      const selectedDistrict = districts.find(district => district.name === formData.district);
+      
+      if (!selectedCity || !selectedDistrict) {
+        await confirm({
+          title: 'Eksik Bilgi',
+          description: 'Lütfen şehir ve ilçe seçimi yapınız.',
+          severity: 'warning'
+        });
+        return;
+      }
+
+      const payload = createStandardPayload({
+        title: formData.title,
+        description: formData.description,
+        price: parseFloat(formData.price),
+        year: parseInt(formData.productionYear),
+        city: formData.city,
+        city_id: selectedCity.id,
+        district_id: selectedDistrict.id,
+        category_id: selectedBrand?.vehicle_types?.categories?.id || "vehicle-category-001",
+        seller_name: formData.sellerName,
+        seller_phone: formData.sellerPhone,
+        seller_email: formData.sellerEmail,
+        is_exchangeable: formData.isExchangeable === 'yes',
+        images: base64Images,
+        // Brand/Model/Variant bilgileri
+        brand_id: selectedBrand?.id || "default-brand-id",
+        model_id: selectedModel?.id || "default-model-id", 
+        variant_id: selectedVariant?.id || null,
+        vehicle_type_id: selectedBrand?.vehicle_type_id || selectedModel?.brands?.vehicle_type_id || "default-vehicle-type-id"
+      }, {
+        type: formData.type,
+        currency: formData.currency,
+        priceType: formData.priceType
+      });
+
+      const validationResult = validateListingPayload(payload);
+      if (!validationResult.isValid) {
+        await confirm({
+          title: 'Doğrulama Hatası',
+          description: `Veri doğrulama hatası: ${validationResult.errors.join(', ')}`,
+          severity: 'error'
+        });
+        return;
+      }
+
+      const response = await listingService.createStandardListing(payload);
+      
+      if (response.success) {
+        await confirm({
+          title: 'Başarılı',
+          description: 'İlanınız başarıyla oluşturuldu! Admin onayından sonra yayınlanacaktır.',
+          severity: 'success'
+        });
+      } else {
+        throw new Error(response.message || 'İlan oluşturulamadı');
+      }
+    } catch (err: any) {
+      await confirm({
+        title: 'Hata',
+        description: err.message || 'İlan oluşturulurken hata oluştu',
+        severity: 'error'
+      });
+    }
+  };
+
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (!files) return;
     
@@ -68,7 +219,11 @@ const OzelAmacliRomorkForm: React.FC = () => {
     const totalFiles = formData.uploadedImages.length + newFiles.length;
     
     if (totalFiles > 15) {
-      alert('En fazla 15 fotoğraf yükleyebilirsiniz.');
+      await confirm({
+        title: 'Fotoğraf Limiti',
+        description: 'En fazla 15 fotoğraf yükleyebilirsiniz.',
+        severity: 'warning'
+      });
       return;
     }
     
@@ -285,29 +440,53 @@ const OzelAmacliRomorkForm: React.FC = () => {
                 }}
                 required
               />
-              <TextField
+              <Autocomplete
                 sx={{ flex: 1, minWidth: 200 }}
-                label="İl"
-                value={formData.city}
-                onChange={(e) => handleInputChange('city', e.target.value)}
-                placeholder="Şehir"
-                InputProps={{
-                  startAdornment: <InputAdornment position="start"><LocationOn /></InputAdornment>
+                options={cities}
+                getOptionLabel={(option) => option.name}
+                value={cities.find(city => city.name === formData.city) || null}
+                onChange={(event, newValue) => {
+                  handleInputChange('city', newValue?.name || '');
+                  handleInputChange('district', ''); // Reset district when city changes
                 }}
-                required
+                loading={loadingCities}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="İl"
+                    placeholder="Şehir seçin"
+                    InputProps={{
+                      ...params.InputProps,
+                      startAdornment: <InputAdornment position="start"><LocationOn /></InputAdornment>
+                    }}
+                    required
+                  />
+                )}
               />
             </Box>
 
-            <TextField
+            <Autocomplete
               fullWidth
-              label="İlçe"
-              value={formData.district}
-              onChange={(e) => handleInputChange('district', e.target.value)}
-              placeholder="İlçe"
-              InputProps={{
-                startAdornment: <InputAdornment position="start"><LocationOn /></InputAdornment>
+              options={districts}
+              getOptionLabel={(option) => option.name}
+              value={districts.find(district => district.name === formData.district) || null}
+              onChange={(event, newValue) => {
+                handleInputChange('district', newValue?.name || '');
               }}
-              required
+              loading={loadingDistricts}
+              disabled={!formData.city}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="İlçe"
+                  placeholder={formData.city ? "İlçe seçin" : "Önce şehir seçin"}
+                  InputProps={{
+                    ...params.InputProps,
+                    startAdornment: <InputAdornment position="start"><LocationOn /></InputAdornment>
+                  }}
+                  required
+                />
+              )}
             />
 
             <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
@@ -394,7 +573,7 @@ const OzelAmacliRomorkForm: React.FC = () => {
         <Box sx={{ flex: '1 1 auto' }} />
         {activeStep === steps.length - 1 ? (
           <Button 
-            onClick={() => console.log('Form submitted:', formData)} 
+            onClick={handleSubmit} 
             variant="contained"
           >
             İlanı Yayınla

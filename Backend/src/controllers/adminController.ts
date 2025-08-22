@@ -323,6 +323,14 @@ export const getListings = async (req: Request, res: Response): Promise<void> =>
             orderBy: {
               sort_order: 'asc'
             }
+          },
+          listing_properties: {
+            select: {
+              id: true,
+              key: true,
+              value: true,
+              type: true
+            }
           }
         },
         orderBy: {
@@ -414,6 +422,14 @@ export const getPendingListings = async (req: Request, res: Response): Promise<v
             },
             orderBy: {
               sort_order: 'asc'
+            }
+          },
+          listing_properties: {
+            select: {
+              id: true,
+              key: true,
+              value: true,
+              type: true
             }
           }
         },

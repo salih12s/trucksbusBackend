@@ -254,7 +254,8 @@ const VariantSelection: React.FC = () => {
                       lowerVariantName2.includes('pilot') || 
                       lowerVariantName2.includes('midilli') ||
                       lowerVariantName2.includes('yarı midilli') ||
-                      lowerVariantName2.includes('yari midilli');
+                      lowerVariantName2.includes('yari midilli') ||
+                      lowerVariantName2.includes('yarımidilli');
 
     // Tanker kontrolleri (sadece genel tanker, tanker şasi değil ve konteyner şasi grubu değilse ve Tarım Römorkları değilse)
     const isTanker = lowerVariantName2.includes('tanker') && 
@@ -390,8 +391,18 @@ const VariantSelection: React.FC = () => {
     }
 
     if (isTenteli) {
-      // Yarı Midilli kontrolü önce (daha spesifik)
-      if (lowerVariantName2.includes('yarı midilli') || lowerVariantName2.includes('yari midilli')) {
+      console.log('🏕️ TENTELI KONTROLÜ BAŞLADI:');
+      console.log('- Variant Name:', variant.name);
+      console.log('- Lower Variant Name:', lowerVariantName2);
+      console.log('- includes yarı midilli:', lowerVariantName2.includes('yarı midilli'));
+      console.log('- includes yari midilli:', lowerVariantName2.includes('yari midilli'));
+      console.log('- includes midilli:', lowerVariantName2.includes('midilli'));
+      console.log('- includes pilot:', lowerVariantName2.includes('pilot'));
+      
+      // Yarı Midilli kontrolü önce (daha spesifik) - hem boşluklu hem boşluksuz versiyonları kontrol et
+      if (lowerVariantName2.includes('yarı midilli') || 
+          lowerVariantName2.includes('yari midilli') || 
+          lowerVariantName2.includes('yarımidilli')) {
         console.log('🏕️ Yarı Midilli Tenteli YÖNLENDİRME');
         navigate(`/create-ad/dorse/tenteli/yari-midilli/${variant.id}`, {
           state: { variant, model, brand, vehicleType, selection: { vehicleType, brand, model, variant }}
@@ -408,16 +419,28 @@ const VariantSelection: React.FC = () => {
         return;
       }
       
-      // Midilli kontrolü (default)
-      console.log('🏕️ Midilli Tenteli YÖNLENDİRME (default)');
-      navigate(`/create-ad/dorse/tenteli/midilli/${variant.id}`, {
+      // Midilli kontrolü (sadece "midilli" varsa ama "yarı midilli" yoksa)
+      if (lowerVariantName2.includes('midilli') && 
+          !lowerVariantName2.includes('yarı midilli') && 
+          !lowerVariantName2.includes('yari midilli') && 
+          !lowerVariantName2.includes('yarımidilli')) {
+        console.log('🏕️ Midilli Tenteli YÖNLENDİRME');
+        navigate(`/create-ad/dorse/tenteli/midilli/${variant.id}`, {
+          state: { variant, model, brand, vehicleType, selection: { vehicleType, brand, model, variant }}
+        });
+        return;
+      }
+      
+      // Diğer tenteli türleri için default olarak Pilot formunu kullan
+      console.log('🏕️ Tenteli (Default Pilot) YÖNLENDİRME');
+      navigate(`/create-ad/dorse/tenteli/pilot/${variant.id}`, {
         state: { variant, model, brand, vehicleType, selection: { vehicleType, brand, model, variant }}
       });
       return;
     }
     
-    // Frigofirik kontrolleri
-    const isFrigofirik = lowerVariantName2.includes('frigofirik') || lowerVariantName2.includes('frigo');
+    // Frigofirik kontrolleri (Dorse için sadece frigofirik, frigo değil)
+    const isFrigofirik = lowerVariantName2.includes('frigofirik');
     
     if (isFrigofirik) {
       console.log('❄️ Frigofirik Dorse YÖNLENDİRME');
@@ -884,9 +907,9 @@ const VariantSelection: React.FC = () => {
           return;
         }
 
-        // Seyehat Römorku kontrolü
-        if (lowerVariantName.includes('seyehat')) {
-          console.log('🏕️ Seyehat Römorku YÖNLENDİRME');
+        // Seyehat Römorku kontrolü (ek kontroller ile)
+        if (lowerVariantName.includes('seyehat') || lowerVariantName.includes('seyahat')) {
+          console.log('🏕️ Seyehat Römorku YÖNLENDİRME - Variant:', variant.name, 'Lower:', lowerVariantName);
           navigate(`/create-ad/romork/tasima-romorklari-seyehat/${variant.id}`, {
             state: { variant, model, brand, vehicleType, selection: { vehicleType, brand, model, variant } }
           });
@@ -921,7 +944,7 @@ const VariantSelection: React.FC = () => {
         }
 
         // Genel Taşıma Römorku (default platform)
-        console.log('🚛 Genel Taşıma Römorku YÖNLENDİRME (default platform)');
+        console.log('🚛 Genel Taşıma Römorku YÖNLENDİRME (default platform) - Variant:', variant.name, 'Lower:', lowerVariantName);
         navigate(`/create-ad/romork/tasima-romorklari-platform/${variant.id}`, {
           state: { variant, model, brand, vehicleType, selection: { vehicleType, brand, model, variant } }
         });

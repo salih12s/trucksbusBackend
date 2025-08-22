@@ -1,4 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../../context/AuthContext';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useConfirmDialog } from '../../../hooks/useConfirmDialog';
+import { listingService } from '../../../services/listingService';
+import { createStandardPayload, validateListingPayload } from '../../../services/apiNormalizer';
+import { locationService, City, District } from '../../../services/locationService';
 import {
   Box,
   Button,
@@ -49,7 +55,60 @@ interface SulamaFormData {
 const steps = ['İlan Detayları', 'Fotoğraflar', 'İletişim & Fiyat'];
 
 const SulamaForm: React.FC = () => {
+  const { user } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { confirm } = useConfirmDialog();
+  
+  // Location state'den gelen veriler
+  const selectedBrand = location.state?.brand;
+  const selectedModel = location.state?.model;
+  const selectedVariant = location.state?.variant;
+  
   const [activeStep, setActiveStep] = useState(0);
+  const [cities, setCities] = useState<City[]>([]);
+  const [districts, setDistricts] = useState<District[]>([]);
+  const [selectedCity, setSelectedCity] = useState<any>(null);
+  const [selectedDistrict, setSelectedDistrict] = useState<any>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Dinamik başlık fonksiyonları
+  const getFormTitle = () => {
+    if (selectedVariant?.variant_name) {
+      return `${selectedVariant.variant_name} İlanı`;
+    }
+    if (selectedModel?.model_name) {
+      return `${selectedModel.model_name} Sulama İlanı`;
+    }
+    if (selectedBrand?.brand_name) {
+      return `${selectedBrand.brand_name} Sulama İlanı`;
+    }
+    return 'Sulama İlanı Ver';
+  };
+
+  const getStepTitle = () => {
+    const baseName = selectedVariant?.variant_name || selectedModel?.model_name || 'Sulama';
+    return `${baseName} - ${steps[activeStep]}`;
+  };
+
+  // Şehir değişikliği yönetimi
+  const handleCityChange = async (city: any) => {
+    setSelectedCity(city);
+    setSelectedDistrict(null);
+    setFormData(prev => ({ ...prev, district: '', city: city?.name || '' }));
+    
+    if (city) {
+      try {
+        const cityDistricts = await locationService.getDistrictsByCity(city.id);
+        setDistricts(cityDistricts);
+      } catch (error) {
+        console.error('İlçeler yüklenirken hata:', error);
+      }
+    } else {
+      setDistricts([]);
+    }
+  };
+  
   const [formData, setFormData] = useState<SulamaFormData>({
     title: '',
     description: '',
@@ -63,12 +122,37 @@ const SulamaForm: React.FC = () => {
     price: '',
     priceType: 'fixed',
     currency: 'TRY',
-    sellerPhone: '',
-    sellerName: '',
-    sellerEmail: '',
+    sellerPhone: user?.phone || '',
+    sellerName: `${user?.first_name || ''} ${user?.last_name || ''}`.trim(),
+    sellerEmail: user?.email || '',
     city: '',
     district: ''
   });
+
+  // Component mount olduğunda çalışacak
+  useEffect(() => {
+    const loadInitialData = async () => {
+      try {
+        // Şehirleri yükle
+        const citiesData = await locationService.getCities();
+        setCities(citiesData);
+
+        // Kullanıcı verilerini otomatik doldur
+        if (user) {
+          setFormData(prev => ({
+            ...prev,
+            sellerName: `${user.first_name || ''} ${user.last_name || ''}`.trim(),
+            sellerEmail: user.email || '',
+            sellerPhone: user.phone || ''
+          }));
+        }
+      } catch (error) {
+        console.error('Başlangıç verileri yüklenirken hata:', error);
+      }
+    };
+
+    loadInitialData();
+  }, [user]);
 
   const handleNext = () => {
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -85,15 +169,21 @@ const SulamaForm: React.FC = () => {
     }));
   };
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (!files) return;
 
     const newFiles = Array.from(files);
     const totalFiles = formData.uploadedImages.length + newFiles.length;
 
-    if (totalFiles > 10) {
-      alert('En fazla 10 fotoğraf yükleyebilirsiniz.');
+    if (totalFiles > 15) {
+      await confirm({
+        title: 'Maksimum Dosya Sayısı',
+        description: 'En fazla 15 fotoğraf yükleyebilirsiniz.',
+        severity: 'warning',
+        confirmText: 'Tamam',
+        cancelText: ''
+      });
       return;
     }
 
@@ -119,9 +209,165 @@ const SulamaForm: React.FC = () => {
     return years;
   };
 
-  const handleSubmit = () => {
-    console.log('Form submitted:', formData);
-    // Form gönderme işlemleri buraya gelecek
+  const handleSubmit = async () => {
+    if (isSubmitting) return;
+    
+    try {
+      setIsSubmitting(true);
+
+      // Gerekli alanların kontrolü
+      const requiredFields = [
+        { field: 'title', message: 'İlan başlığı gereklidir' },
+        { field: 'description', message: 'Açıklama gereklidir' },
+        { field: 'productionYear', message: 'Üretim yılı seçimi gereklidir' },
+        { field: 'volume', message: 'Hacim bilgisi gereklidir' },
+        { field: 'price', message: 'Fiyat bilgisi gereklidir' },
+        { field: 'sellerName', message: 'İletişim adı gereklidir' },
+        { field: 'sellerPhone', message: 'Telefon numarası gereklidir' }
+      ];
+
+      for (const { field, message } of requiredFields) {
+        if (!formData[field as keyof typeof formData]) {
+          await confirm({
+            title: 'Eksik Bilgi',
+            description: message,
+            severity: 'warning',
+            confirmText: 'Tamam',
+            cancelText: ''
+          });
+          setIsSubmitting(false);
+          return;
+        }
+      }
+
+      // Lokasyon kontrolü
+      if (!selectedCity || !selectedDistrict) {
+        await confirm({
+          title: 'Eksik Bilgi',
+          description: 'Şehir ve ilçe seçimi gereklidir',
+          severity: 'warning',
+          confirmText: 'Tamam',
+          cancelText: ''
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Vehicle type kontrolü ve debug
+      console.log('Debug - selectedBrand:', selectedBrand);
+      console.log('Debug - selectedBrand.vehicle_type_id:', selectedBrand?.vehicle_type_id);
+      console.log('Debug - selectedBrand.vehicle_types:', selectedBrand?.vehicle_types);
+      console.log('Debug - selectedBrand.vehicle_types?.id:', selectedBrand?.vehicle_types?.id);
+      
+      if (!selectedBrand?.vehicle_type_id) {
+        console.error('Vehicle type ID bulunamadı! selectedBrand structure:', selectedBrand);
+        await confirm({
+          title: 'Eksik Bilgi',
+          description: 'Araç türü seçimi zorunludur',
+          severity: 'warning',
+          confirmText: 'Tamam',
+          cancelText: ''
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Convert images to base64
+      const base64Images = await Promise.all(
+        formData.uploadedImages.map((file) => {
+          return new Promise<string>((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (e) => resolve(e.target?.result as string);
+            reader.readAsDataURL(file);
+          });
+        })
+      );
+
+      // Standardized payload oluşturma
+      const payload = createStandardPayload({
+        // Temel bilgiler
+        title: formData.title,
+        description: formData.description,
+        
+        // Araç bilgileri
+        vehicle_type_id: selectedBrand?.vehicle_type_id,
+        brand_id: selectedBrand?.id,
+        model_id: selectedModel?.id,
+        variant_id: selectedVariant?.id,
+        category_id: selectedBrand?.vehicle_types?.categories?.id || "vehicle-category-001",
+        
+        // Lokasyon
+        city: formData.city,
+        district: formData.district,
+        city_id: selectedCity.id,
+        district_id: selectedDistrict.id,
+        
+        // İletişim ve fiyat
+        price: parseFloat(formData.price.replace(/[^\d.-]/g, '')),
+        seller_name: formData.sellerName,
+        seller_phone: formData.sellerPhone,
+        seller_email: formData.sellerEmail || undefined,
+        
+        // Yıl
+        year: parseInt(formData.productionYear),
+        
+        // Fotoğraflar
+        images: base64Images
+      }, {
+        // Özel özellikler (additional properties)
+        hasDamper: formData.hasDamper ? 'Evet' : 'Hayır',
+        volume: formData.volume,
+        isExchangeable: formData.isExchangeable
+      });
+
+      console.log('Gönderilen payload:', payload);
+
+      // Payload validasyonu
+      const validationResult = validateListingPayload(payload);
+      if (!validationResult.isValid) {
+        console.error('Payload validasyon hatası:', validationResult.errors);
+        await confirm({
+          title: 'Doğrulama Hatası',
+          description: `Form validasyon hatası: ${validationResult.errors.join(', ')}`,
+          severity: 'error',
+          confirmText: 'Tamam',
+          cancelText: ''
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
+      // API'ye gönder
+      const response = await listingService.createStandardListing(payload);
+      
+      if (response.success) {
+        console.log('✅ Sulama Römorku ilanı başarıyla oluşturuldu:', response.data);
+        const shouldNavigate = await confirm({
+          title: 'İlan Başarıyla Oluşturuldu! 🎉',
+          description: 'İlanınız başarıyla oluşturuldu ve inceleme sürecine alındı. Onaylandıktan sonra yayına alınacak. Ana sayfaya dönmek istiyor musunuz?',
+          severity: 'success',
+          confirmText: 'Ana Sayfaya Git',
+          cancelText: 'Bu Sayfada Kal'
+        });
+        if (shouldNavigate) {
+          navigate('/');
+        }
+      } else {
+        throw new Error(response.message || 'İlan oluşturulamadı');
+      }
+
+    } catch (error) {
+      console.error('İlan oluşturma hatası:', error);
+      await confirm({
+        title: 'Hata',
+        description: error instanceof Error ? error.message : 'İlan oluşturulurken bir hata oluştu. Lütfen tekrar deneyin.',
+        severity: 'error',
+        confirmText: 'Tamam',
+        cancelText: ''
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const renderStepContent = (step: number) => {
@@ -131,7 +377,7 @@ const SulamaForm: React.FC = () => {
           <Card>
             <CardContent>
               <Typography variant="h6" gutterBottom>
-                Sulama İlan Detayları
+                {getStepTitle()}
               </Typography>
               
               <TextField
@@ -320,29 +566,59 @@ const SulamaForm: React.FC = () => {
                 required
               />
 
-              <TextField
+              <Autocomplete
                 sx={{ flex: 1, minWidth: 200 }}
-                label="İl"
-                value={formData.city}
-                onChange={(e) => handleInputChange('city', e.target.value)}
-                placeholder="Şehir"
-                InputProps={{
-                  startAdornment: <InputAdornment position="start"><LocationOn /></InputAdornment>,
-                }}
-                required
+                options={cities}
+                getOptionLabel={(option) => option.name || ''}
+                value={selectedCity}
+                onChange={(_, newValue) => handleCityChange(newValue)}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="İl"
+                    required
+                    InputProps={{
+                      ...params.InputProps,
+                      startAdornment: (
+                        <>
+                          <InputAdornment position="start"><LocationOn /></InputAdornment>
+                          {params.InputProps.startAdornment}
+                        </>
+                      ),
+                    }}
+                  />
+                )}
+                isOptionEqualToValue={(option, value) => option.id === value?.id}
               />
             </Box>
 
-            <TextField
+            <Autocomplete
               fullWidth
-              label="İlçe"
-              value={formData.district}
-              onChange={(e) => handleInputChange('district', e.target.value)}
-              placeholder="İlçe"
-              InputProps={{
-                startAdornment: <InputAdornment position="start"><LocationOn /></InputAdornment>,
+              options={districts}
+              getOptionLabel={(option) => option.name || ''}
+              value={selectedDistrict}
+              onChange={(_, newValue) => {
+                setSelectedDistrict(newValue);
+                handleInputChange('district', newValue?.name || '');
               }}
-              required
+              disabled={!selectedCity}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="İlçe"
+                  placeholder={selectedCity ? "İlçe seçin" : "Önce il seçin"}
+                  InputProps={{
+                    ...params.InputProps,
+                    startAdornment: (
+                      <>
+                        <InputAdornment position="start"><LocationOn /></InputAdornment>
+                        {params.InputProps.startAdornment}
+                      </>
+                    ),
+                  }}
+                />
+              )}
+              isOptionEqualToValue={(option, value) => option.id === value?.id}
             />
 
             <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
@@ -403,7 +679,7 @@ const SulamaForm: React.FC = () => {
   return (
     <Box sx={{ width: '100%', p: 3 }}>
         <Typography variant="h4" component="h1" gutterBottom>
-          Sulama İlanı Ver
+          {getFormTitle()}
         </Typography>
         
         <Stepper activeStep={activeStep} sx={{ mb: 4 }}>

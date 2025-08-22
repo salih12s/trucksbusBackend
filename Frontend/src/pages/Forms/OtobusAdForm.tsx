@@ -73,6 +73,9 @@ const OtobusAdForm = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const selectedBrand = location.state?.brand;
+  const selectedModel = location.state?.model;
+  const selectedVariant = location.state?.variant;
   const { confirm } = useConfirmDialog();
   const [activeStep, setActiveStep] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -372,10 +375,10 @@ const OtobusAdForm = () => {
         km: formData.km.replace(/\./g, ''), // Remove dots from km
         city: formData.city,
         category_id: 'vehicle-category-001', // Vasıta category
-        vehicle_type_id: 'cme633w8v0001981ksnpl6dj9', // Otobüs vehicle_type_id
-        brand_id: null,
-        model_id: null,
-        variant_id: null,
+        vehicle_type_id: selectedBrand?.vehicle_type_id || 'cme633w8v0001981ksnpl6dj9', // Otobüs vehicle_type_id
+        brand_id: selectedBrand?.id,
+        model_id: selectedModel?.id,
+        variant_id: selectedVariant?.id,
         city_id: cities.find(city => city.name === formData.city)?.id,
         district_id: districts.find(district => district.name === formData.district)?.id,
         seller_name: formData.sellerName,

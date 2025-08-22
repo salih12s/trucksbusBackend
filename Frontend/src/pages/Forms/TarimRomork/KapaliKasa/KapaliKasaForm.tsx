@@ -1,5 +1,10 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../../../context/AuthContext';
+import { listingService } from '../../../../services/listingService';
+import { createStandardPayload, validateListingPayload } from '../../../../services/apiNormalizer';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useConfirmDialog } from '../../../../hooks/useConfirmDialog';
+import { locationService } from '../../../../services/locationService';
 import {
   Box,
   Stepper,
@@ -22,7 +27,8 @@ import {
   CardContent,
   Chip,
   InputAdornment,
-  Alert
+  Alert,
+  Autocomplete
 } from '@mui/material';
 import {
   Upload,
@@ -36,8 +42,84 @@ import {
 const steps = ['İlan Bilgileri', 'Fotoğraflar', 'İletişim & Fiyat'];
 
 const KapaliKasaForm: React.FC = () => {
+  const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const { confirm } = useConfirmDialog();
+  
+  // Location state'den gelen veriler
+  const selectedBrand = location.state?.brand;
+  const selectedModel = location.state?.model;
+  const selectedVariant = location.state?.variant;
+
   const [activeStep, setActiveStep] = useState(0);
+  const [cities, setCities] = useState<any[]>([]);
+  const [districts, setDistricts] = useState<any[]>([]);
+  const [selectedCity, setSelectedCity] = useState<any>(null);
+  const [selectedDistrict, setSelectedDistrict] = useState<any>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Dinamik başlık fonksiyonları
+  const getFormTitle = () => {
+    if (selectedVariant?.variant_name) {
+      return `${selectedVariant.variant_name} İlanı`;
+    }
+    if (selectedModel?.model_name) {
+      return `${selectedModel.model_name} Kapalı Kasa İlanı`;
+    }
+    if (selectedBrand?.brand_name) {
+      return `${selectedBrand.brand_name} Kapalı Kasa İlanı`;
+    }
+    return 'Kapalı Kasa Tarım Römorku İlanı';
+  };
+
+  const getStepTitle = () => {
+    const baseName = selectedVariant?.variant_name || selectedModel?.model_name || 'Kapalı Kasa';
+    return `${baseName} - ${steps[activeStep]}`;
+  };
+
+  // Şehir değişikliği yönetimi
+  const handleCityChange = async (city: any) => {
+    setSelectedCity(city);
+    setSelectedDistrict(null);
+    setFormData(prev => ({ ...prev, city: city?.name || '', district: '' }));
+    
+    if (city) {
+      try {
+        const cityDistricts = await locationService.getDistrictsByCity(city.id);
+        setDistricts(cityDistricts);
+      } catch (error) {
+        console.error('İlçeler yüklenirken hata:', error);
+      }
+    } else {
+      setDistricts([]);
+    }
+  };
+
+  // Component mount olduğunda çalışacak
+  useEffect(() => {
+    const loadInitialData = async () => {
+      try {
+        // Şehirleri yükle
+        const citiesData = await locationService.getCities();
+        setCities(citiesData);
+
+        // Kullanıcı verilerini otomatik doldur
+        if (user) {
+          setFormData(prev => ({
+            ...prev,
+            contactName: `${user.first_name || ''} ${user.last_name || ''}`.trim(),
+            email: user.email || '',
+            phone: user.phone || ''
+          }));
+        }
+      } catch (error) {
+        console.error('Başlangıç verileri yüklenirken hata:', error);
+      }
+    };
+
+    loadInitialData();
+  }, [user]);
   const [formData, setFormData] = useState({
     // İlan Bilgileri
     title: '',
@@ -64,9 +146,163 @@ const KapaliKasaForm: React.FC = () => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
   };
 
-  const handleSubmit = () => {
-    console.log('Form Data:', formData);
-    navigate('/');
+  const handleSubmit = async () => {
+    if (isSubmitting) return;
+    
+    try {
+      setIsSubmitting(true);
+
+      // Gerekli alanların kontrolü
+      const requiredFields = [
+        { field: 'title', message: 'İlan başlığı gereklidir' },
+        { field: 'description', message: 'Açıklama gereklidir' },
+        { field: 'productionYear', message: 'Üretim yılı seçimi gereklidir' },
+        { field: 'price', message: 'Fiyat bilgisi gereklidir' },
+        { field: 'contactName', message: 'İletişim adı gereklidir' },
+        { field: 'phone', message: 'Telefon numarası gereklidir' }
+      ];
+
+      for (const { field, message } of requiredFields) {
+        if (!formData[field as keyof typeof formData]) {
+          await confirm({
+            title: 'Eksik Bilgi',
+            description: message,
+            severity: 'warning',
+            confirmText: 'Tamam',
+            cancelText: ''
+          });
+          setIsSubmitting(false);
+          return;
+        }
+      }
+
+      // Lokasyon kontrolü
+      if (!selectedCity) {
+        await confirm({
+          title: 'Eksik Bilgi',
+          description: 'Şehir seçimi gereklidir',
+          severity: 'warning',
+          confirmText: 'Tamam',
+          cancelText: ''
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Vehicle type kontrolü ve debug
+      console.log('Debug - selectedBrand:', selectedBrand);
+      console.log('Debug - selectedBrand.vehicle_type_id:', selectedBrand?.vehicle_type_id);
+      console.log('Debug - selectedBrand.vehicle_types:', selectedBrand?.vehicle_types);
+      console.log('Debug - selectedBrand.vehicle_types?.id:', selectedBrand?.vehicle_types?.id);
+      
+      if (!selectedBrand?.vehicle_type_id) {
+        console.error('Vehicle type ID bulunamadı! selectedBrand structure:', selectedBrand);
+        await confirm({
+          title: 'Eksik Bilgi',
+          description: 'Araç türü seçimi zorunludur',
+          severity: 'warning',
+          confirmText: 'Tamam',
+          cancelText: ''
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Convert images to base64
+      const base64Images = await Promise.all(
+        formData.images.map((file) => {
+          return new Promise<string>((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (e) => resolve(e.target?.result as string);
+            reader.readAsDataURL(file);
+          });
+        })
+      );
+
+      // Standardized payload oluşturma
+      const payload = createStandardPayload({
+        // Temel bilgiler
+        title: formData.title,
+        description: formData.description,
+        
+        // Araç bilgileri
+        vehicle_type_id: selectedBrand?.vehicle_type_id,
+        brand_id: selectedBrand?.id,
+        model_id: selectedModel?.id,
+        variant_id: selectedVariant?.id,
+        category_id: selectedBrand?.vehicle_types?.categories?.id || "vehicle-category-001",
+        
+        // Lokasyon
+        city: formData.city,
+        district: formData.district,
+        city_id: selectedCity.id,
+        district_id: selectedDistrict?.id,
+        
+        // İletişim ve fiyat
+        price: parseFloat(formData.price.replace(/[^\d.-]/g, '')),
+        seller_name: formData.contactName,
+        seller_phone: formData.phone,
+        seller_email: formData.email || undefined,
+        
+        // Yıl
+        year: parseInt(formData.productionYear),
+        
+        // Fotoğraflar
+        images: base64Images
+      }, {
+        // Özel özellikler (additional properties)
+        hasDamper: formData.hasDamper ? 'Evet' : 'Hayır',
+        isExchangeable: formData.exchangeable
+      });
+
+      console.log('Gönderilen payload:', payload);
+
+      // Payload validasyonu
+      const validationResult = validateListingPayload(payload);
+      if (!validationResult.isValid) {
+        console.error('Payload validasyon hatası:', validationResult.errors);
+        await confirm({
+          title: 'Doğrulama Hatası',
+          description: `Form validasyon hatası: ${validationResult.errors.join(', ')}`,
+          severity: 'error',
+          confirmText: 'Tamam',
+          cancelText: ''
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
+      // API'ye gönder
+      const response = await listingService.createStandardListing(payload);
+      
+      if (response.success) {
+        console.log('✅ Kapalı Kasa Tarım Römorku ilanı başarıyla oluşturuldu:', response.data);
+        const shouldNavigate = await confirm({
+          title: 'İlan Başarıyla Oluşturuldu! 🎉',
+          description: 'İlanınız başarıyla oluşturuldu ve inceleme sürecine alındı. Onaylandıktan sonra yayına alınacak. Ana sayfaya dönmek istiyor musunuz?',
+          severity: 'success',
+          confirmText: 'Ana Sayfaya Git',
+          cancelText: 'Bu Sayfada Kal'
+        });
+        if (shouldNavigate) {
+          navigate('/');
+        }
+      } else {
+        throw new Error(response.message || 'İlan oluşturulamadı');
+      }
+
+    } catch (error) {
+      console.error('İlan oluşturma hatası:', error);
+      await confirm({
+        title: 'Hata',
+        description: error instanceof Error ? error.message : 'İlan oluşturulurken bir hata oluştu. Lütfen tekrar deneyin.',
+        severity: 'error',
+        confirmText: 'Tamam',
+        cancelText: ''
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const removeImage = (index: number) => {
@@ -85,7 +321,7 @@ const KapaliKasaForm: React.FC = () => {
       case 0:
         return (
           <Stack spacing={3}>
-            <Typography variant="h5" gutterBottom>İlan Bilgileri</Typography>
+            <Typography variant="h5" gutterBottom>{getStepTitle()}</Typography>
             <TextField
               label="İlan Başlığı"
               value={formData.title}
@@ -263,27 +499,59 @@ const KapaliKasaForm: React.FC = () => {
                 required
               />
 
-              <TextField
+              <Autocomplete
                 sx={{ flex: 1, minWidth: 200 }}
-                label="İl"
-                value={formData.city}
-                onChange={(e) => setFormData(prev => ({ ...prev, city: e.target.value }))}
-                InputProps={{
-                  startAdornment: <InputAdornment position="start"><LocationOn /></InputAdornment>,
-                }}
-                required
+                options={cities}
+                getOptionLabel={(option) => option.name || ''}
+                value={selectedCity}
+                onChange={(_, newValue) => handleCityChange(newValue)}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="İl"
+                    required
+                    InputProps={{
+                      ...params.InputProps,
+                      startAdornment: (
+                        <>
+                          <InputAdornment position="start"><LocationOn /></InputAdornment>
+                          {params.InputProps.startAdornment}
+                        </>
+                      ),
+                    }}
+                  />
+                )}
+                isOptionEqualToValue={(option, value) => option.id === value?.id}
               />
             </Box>
 
-            <TextField
+            <Autocomplete
               fullWidth
-              label="İlçe"
-              value={formData.district}
-              onChange={(e) => setFormData(prev => ({ ...prev, district: e.target.value }))}
-              placeholder="İlçe seçin"
-              InputProps={{
-                startAdornment: <InputAdornment position="start"><LocationOn /></InputAdornment>,
+              options={districts}
+              getOptionLabel={(option) => option.name || ''}
+              value={selectedDistrict}
+              onChange={(_, newValue) => {
+                setSelectedDistrict(newValue);
+                setFormData(prev => ({ ...prev, district: newValue?.name || '' }));
               }}
+              disabled={!selectedCity}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="İlçe"
+                  placeholder={selectedCity ? "İlçe seçin" : "Önce il seçin"}
+                  InputProps={{
+                    ...params.InputProps,
+                    startAdornment: (
+                      <>
+                        <InputAdornment position="start"><LocationOn /></InputAdornment>
+                        {params.InputProps.startAdornment}
+                      </>
+                    ),
+                  }}
+                />
+              )}
+              isOptionEqualToValue={(option, value) => option.id === value?.id}
             />
 
             <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
@@ -343,7 +611,7 @@ const KapaliKasaForm: React.FC = () => {
   return (
     <Box sx={{ width: '100%', p: 3 }}>
       <Typography variant="h4" gutterBottom align="center">
-        Kapalı Kasa Tarım Römorku İlanı
+        {getFormTitle()}
       </Typography>
       
       <Stepper activeStep={activeStep} sx={{ mb: 4 }}>

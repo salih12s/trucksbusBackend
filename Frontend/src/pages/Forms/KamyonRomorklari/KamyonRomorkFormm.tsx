@@ -1,5 +1,10 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../../../context/AuthContext';
+import { useConfirmDialog } from '../../../hooks/useConfirmDialog';
+import { listingService } from '../../../services/listingService';
+import { createStandardPayload, validateListingPayload } from '../../../services/apiNormalizer';
+import { locationService, City, District } from '../../../services/locationService';
 import {
   Box,
   Stepper,
@@ -23,7 +28,8 @@ import {
   CardContent,
   Chip,
   InputAdornment,
-  Alert
+  Alert,
+  Autocomplete
 } from '@mui/material';
 import {
   Upload,
@@ -33,13 +39,50 @@ import {
   Phone,
   Email
 } from '@mui/icons-material';
-import { useDropzone } from 'react-dropzone';
 
 const steps = ['İlan Bilgileri', 'Römork Özellikleri', 'Fotoğraflar', 'İletişim & Fiyat'];
 
 const KamyonRomorkForm: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { user } = useAuth();
+  const { confirm } = useConfirmDialog();
+  
+  // Location state'den gelen veriler
+  const selectedBrand = location.state?.brand;
+  const selectedModel = location.state?.model;
+  const selectedVariant = location.state?.variant;
+  
   const [activeStep, setActiveStep] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Dinamik başlık fonksiyonları
+  const getFormTitle = () => {
+    if (selectedVariant?.variant_name) {
+      return `${selectedVariant.variant_name} İlanı`;
+    }
+    if (selectedModel?.model_name) {
+      return `${selectedModel.model_name} Kamyon Römorku İlanı`;
+    }
+    if (selectedBrand?.brand_name) {
+      return `${selectedBrand.brand_name} Kamyon Römorku İlanı`;
+    }
+    return 'Kamyon Römorku İlanı';
+  };
+
+  const getStepTitle = () => {
+    const baseName = selectedVariant?.variant_name || selectedModel?.model_name || 'Kamyon Römorku';
+    return `${baseName} - ${steps[activeStep]}`;
+  };
+  
+  // City/District state
+  const [cities, setCities] = useState<City[]>([]);
+  const [districts, setDistricts] = useState<District[]>([]);
+  const [selectedCity, setSelectedCity] = useState<City | null>(null);
+  const [selectedDistrict, setSelectedDistrict] = useState<District | null>(null);
+  const [loadingCities, setLoadingCities] = useState(true);
+  const [loadingDistricts, setLoadingDistricts] = useState(false);
+  
   const [formData, setFormData] = useState({
     // İlan Bilgileri
     title: '',
@@ -63,6 +106,58 @@ const KamyonRomorkForm: React.FC = () => {
     district: ''
   });
 
+  // Load cities on component mount
+  useEffect(() => {
+    const loadCities = async () => {
+      try {
+        setLoadingCities(true);
+        const citiesData = await locationService.getCities();
+        setCities(citiesData);
+        console.log('🏙️ KamyonRomorkForm: Şehirler yüklendi:', citiesData.length);
+      } catch (error) {
+        console.error('❌ KamyonRomorkForm: Şehirler yüklenemedi:', error);
+      } finally {
+        setLoadingCities(false);
+      }
+    };
+    
+    loadCities();
+  }, []);
+
+  // Load districts when city changes
+  const handleCityChange = async (city: City | null) => {
+    setSelectedCity(city);
+    setSelectedDistrict(null);
+    setFormData(prev => ({ ...prev, city: city?.name || '', district: '' }));
+    
+    if (city) {
+      try {
+        setLoadingDistricts(true);
+        const districtsData = await locationService.getDistrictsByCity(city.id);
+        setDistricts(districtsData);
+        console.log('🏘️ KamyonRomorkForm: İlçeler yüklendi:', districtsData.length);
+      } catch (error) {
+        console.error('❌ KamyonRomorkForm: İlçeler yüklenemedi:', error);
+      } finally {
+        setLoadingDistricts(false);
+      }
+    } else {
+      setDistricts([]);
+    }
+  };
+
+  // Load user data
+  useEffect(() => {
+    if (user) {
+      setFormData(prev => ({
+        ...prev,
+        contactName: `${user.first_name || ''} ${user.last_name || ''}`.trim(),
+        phone: user.phone || '',
+        email: user.email || ''
+      }));
+    }
+  }, [user]);
+
   const handleNext = () => {
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
   };
@@ -71,27 +166,188 @@ const KamyonRomorkForm: React.FC = () => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
   };
 
-  const handleSubmit = () => {
-    console.log('Form Data:', formData);
-    navigate('/');
-  };
+  const handleSubmit = async () => {
+    if (isSubmitting) return;
+    
+    try {
+      setIsSubmitting(true);
 
-  const onDrop = (acceptedFiles: File[]) => {
-    if (formData.images.length + acceptedFiles.length <= 15) {
-      setFormData(prev => ({
-        ...prev,
-        images: [...prev.images, ...acceptedFiles]
-      }));
+      // Gerekli alanların kontrolü
+      const requiredFields = [
+        { field: 'title', message: 'İlan başlığı gereklidir' },
+        { field: 'description', message: 'Açıklama gereklidir' },
+        { field: 'productionYear', message: 'Üretim yılı seçimi gereklidir' },
+        { field: 'length', message: 'Uzunluk bilgisi gereklidir' },
+        { field: 'width', message: 'Genişlik bilgisi gereklidir' },
+        { field: 'price', message: 'Fiyat bilgisi gereklidir' },
+        { field: 'contactName', message: 'İletişim adı gereklidir' },
+        { field: 'phone', message: 'Telefon numarası gereklidir' }
+      ];
+
+      for (const { field, message } of requiredFields) {
+        if (!formData[field as keyof typeof formData]) {
+          await confirm({
+            title: 'Eksik Bilgi',
+            description: message,
+            severity: 'warning',
+            confirmText: 'Tamam',
+            cancelText: ''
+          });
+          setIsSubmitting(false);
+          return;
+        }
+      }
+
+      // Lokasyon kontrolü
+      if (!selectedCity || !selectedDistrict) {
+        await confirm({
+          title: 'Eksik Bilgi',
+          description: 'Şehir ve ilçe seçimi gereklidir',
+          severity: 'warning',
+          confirmText: 'Tamam',
+          cancelText: ''
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Vehicle type kontrolü
+      if (!selectedBrand?.vehicle_type_id) {
+        await confirm({
+          title: 'Eksik Bilgi',
+          description: 'Marka seçimi zorunludur',
+          severity: 'warning',
+          confirmText: 'Tamam',
+          cancelText: ''
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Convert images to base64
+      const base64Images = await Promise.all(
+        formData.images.map((file) => {
+          return new Promise<string>((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (e) => resolve(e.target?.result as string);
+            reader.readAsDataURL(file);
+          });
+        })
+      );
+
+      // Standardized payload oluşturma
+      const payload = createStandardPayload({
+        // Temel bilgiler
+        title: formData.title,
+        description: formData.description,
+        
+        // Araç bilgileri
+        vehicle_type_id: selectedBrand?.vehicle_type_id,
+        brand_id: selectedBrand?.id,
+        model_id: selectedModel?.id,
+        variant_id: selectedVariant?.id,
+        category_id: selectedBrand?.vehicle_types?.categories?.id || "vehicle-category-001",
+        
+        // Lokasyon
+        city: formData.city,
+        district: formData.district,
+        city_id: selectedCity.id,
+        district_id: selectedDistrict.id,
+        
+        // İletişim ve fiyat
+        price: parseFloat(formData.price.replace(/[^\d.-]/g, '')),
+        seller_name: formData.contactName,
+        seller_phone: formData.phone,
+        seller_email: formData.email || undefined,
+        
+        // Yıl
+        year: parseInt(formData.productionYear),
+        
+        // Fotoğraflar
+        images: base64Images
+      }, {
+        // Özel özellikler (additional properties)
+        length: formData.length,
+        width: formData.width,
+        hasTent: formData.hasTent ? 'Evet' : 'Hayır',
+        hasDamper: formData.hasDamper ? 'Evet' : 'Hayır',
+        exchangeable: formData.exchangeable,
+        currency: formData.currency
+      });
+
+      console.log('Gönderilen payload:', payload);
+
+      // Payload validasyonu
+      const validationResult = validateListingPayload(payload);
+      if (!validationResult.isValid) {
+        console.error('Payload validasyon hatası:', validationResult.errors);
+        await confirm({
+          title: 'Doğrulama Hatası',
+          description: `Form validasyon hatası: ${validationResult.errors.join(', ')}`,
+          severity: 'error',
+          confirmText: 'Tamam',
+          cancelText: ''
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
+      // API'ye gönder
+      const response = await listingService.createStandardListing(payload);
+      
+      if (response.success) {
+        console.log('✅ Kamyon Römorku ilanı başarıyla oluşturuldu:', response.data);
+        const shouldNavigate = await confirm({
+          title: 'İlan Başarıyla Oluşturuldu! 🎉',
+          description: 'İlanınız başarıyla oluşturuldu ve inceleme sürecine alındı. Onaylandıktan sonra yayına alınacak. Ana sayfaya dönmek istiyor musunuz?',
+          severity: 'success',
+          confirmText: 'Ana Sayfaya Git',
+          cancelText: 'Bu Sayfada Kal'
+        });
+        if (shouldNavigate) {
+          navigate('/');
+        }
+      } else {
+        throw new Error(response.message || 'İlan oluşturulamadı');
+      }
+
+    } catch (error) {
+      console.error('İlan oluşturma hatası:', error);
+      await confirm({
+        title: 'Hata',
+        description: error instanceof Error ? error.message : 'İlan oluşturulurken bir hata oluştu. Lütfen tekrar deneyin.',
+        severity: 'error',
+        confirmText: 'Tamam',
+        cancelText: ''
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  useDropzone({
-    onDrop,
-    accept: {
-      'image/*': ['.jpeg', '.jpg', '.png', '.webp']
-    },
-    maxFiles: 15
-  });
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files) return;
+
+    const newFiles = Array.from(files);
+    const totalFiles = formData.images.length + newFiles.length;
+
+    if (totalFiles > 15) {
+      await confirm({
+        title: 'Maksimum Dosya Sayısı',
+        description: 'En fazla 15 fotoğraf yükleyebilirsiniz.',
+        severity: 'warning',
+        confirmText: 'Tamam',
+        cancelText: ''
+      });
+      return;
+    }
+
+    setFormData(prev => ({
+      ...prev,
+      images: [...prev.images, ...newFiles]
+    }));
+  };
 
   const removeImage = (index: number) => {
     setFormData(prev => ({
@@ -109,7 +365,7 @@ const KamyonRomorkForm: React.FC = () => {
       case 0:
         return (
           <Stack spacing={3}>
-            <Typography variant="h5" gutterBottom>İlan Bilgileri</Typography>
+            <Typography variant="h5" gutterBottom>{getStepTitle()}</Typography>
             <TextField
               label="İlan Başlığı"
               value={formData.title}
@@ -146,7 +402,7 @@ const KamyonRomorkForm: React.FC = () => {
       case 1:
         return (
           <Stack spacing={3}>
-            <Typography variant="h5" gutterBottom>Römork Özellikleri</Typography>
+            <Typography variant="h5" gutterBottom>{getStepTitle()}</Typography>
             <Box sx={{ display: 'flex', gap: 2 }}>
               <TextField
                 label="Uzunluk (cm)"
@@ -229,15 +485,7 @@ const KamyonRomorkForm: React.FC = () => {
                   id="image-upload"
                   multiple
                   type="file"
-                  onChange={(e) => {
-                    const files = Array.from(e.target.files || []);
-                    if (formData.images.length + files.length <= 15) {
-                      setFormData(prev => ({
-                        ...prev,
-                        images: [...prev.images, ...files]
-                      }));
-                    }
-                  }}
+                  onChange={handleImageUpload}
                 />
                 <label htmlFor="image-upload">
                   <Button variant="contained" component="span">
@@ -325,27 +573,49 @@ const KamyonRomorkForm: React.FC = () => {
                 required
               />
 
-              <TextField
+              <Autocomplete
                 sx={{ flex: 1, minWidth: 200 }}
-                label="İl"
-                value={formData.city}
-                onChange={(e) => setFormData(prev => ({ ...prev, city: e.target.value }))}
-                InputProps={{
-                  startAdornment: <InputAdornment position="start"><LocationOn /></InputAdornment>,
-                }}
-                required
+                options={cities}
+                getOptionLabel={(option) => option.name}
+                value={selectedCity}
+                onChange={(_, newValue) => handleCityChange(newValue)}
+                loading={loadingCities}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="İl"
+                    required
+                    InputProps={{
+                      ...params.InputProps,
+                      startAdornment: <InputAdornment position="start"><LocationOn /></InputAdornment>,
+                    }}
+                  />
+                )}
               />
             </Box>
 
-            <TextField
+            <Autocomplete
               fullWidth
-              label="İlçe"
-              value={formData.district}
-              onChange={(e) => setFormData(prev => ({ ...prev, district: e.target.value }))}
-              placeholder="İlçe seçin"
-              InputProps={{
-                startAdornment: <InputAdornment position="start"><LocationOn /></InputAdornment>,
+              options={districts}
+              getOptionLabel={(option) => option.name}
+              value={selectedDistrict}
+              onChange={(_, newValue) => {
+                setSelectedDistrict(newValue);
+                setFormData(prev => ({ ...prev, district: newValue?.name || '' }));
               }}
+              loading={loadingDistricts}
+              disabled={!selectedCity}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="İlçe"
+                  placeholder={selectedCity ? "İlçe seçin" : "Önce şehir seçin"}
+                  InputProps={{
+                    ...params.InputProps,
+                    startAdornment: <InputAdornment position="start"><LocationOn /></InputAdornment>,
+                  }}
+                />
+              )}
             />
 
             <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
@@ -405,7 +675,7 @@ const KamyonRomorkForm: React.FC = () => {
   return (
     <Box sx={{ width: '100%', p: 3 }}>
       <Typography variant="h4" gutterBottom align="center">
-        Kamyon Römorkları İlanı
+        {getFormTitle()}
       </Typography>
       
       <Stepper activeStep={activeStep} sx={{ mb: 4 }}>
@@ -431,8 +701,8 @@ const KamyonRomorkForm: React.FC = () => {
         </Button>
         <Box sx={{ flex: '1 1 auto' }} />
         {activeStep === steps.length - 1 ? (
-          <Button onClick={handleSubmit} variant="contained">
-            İlanı Yayınla
+          <Button onClick={handleSubmit} variant="contained" disabled={isSubmitting}>
+            {isSubmitting ? 'İlan Oluşturuluyor...' : 'İlanı Yayınla'}
           </Button>
         ) : (
           <Button onClick={handleNext} variant="contained">
