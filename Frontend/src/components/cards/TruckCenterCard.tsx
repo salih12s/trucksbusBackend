@@ -154,9 +154,23 @@ const TruckCenterCard: React.FC<TruckCenterCardProps> = ({
 
   const formatPrice = (price: number) =>
     new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY', maximumFractionDigits: 0 }).format(price);
-  const formatDate = (date: Date | string) => {
-    const dateObj = typeof date === 'string' ? new Date(date) : date;
-    return dateObj.toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  
+  const formatDate = (date: Date | string | undefined | null) => {
+    if (!date) return 'Tarih belirtilmemiş';
+    
+    try {
+      const dateObj = typeof date === 'string' ? new Date(date) : date;
+      
+      // Geçerli bir tarih olup olmadığını kontrol et
+      if (isNaN(dateObj.getTime())) {
+        return 'Geçersiz tarih';
+      }
+      
+      return dateObj.toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    } catch (error) {
+      console.error('❌ Date formatting error:', error);
+      return 'Tarih hatası';
+    }
   };
 
   return (

@@ -78,12 +78,15 @@ interface Listing {
 }
 
 interface ListingsResponse {
-  listings: Listing[];
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    pages: number;
+  success: boolean;
+  data: {
+    listings: Listing[];
+    pagination: {
+      page: number;
+      limit: number;
+      total: number;
+      pages: number;
+    };
   };
 }
 
@@ -251,15 +254,17 @@ const AllListingsPage: React.FC = () => {
         }
       });
       
-      if (response.data.listings && Array.isArray(response.data.listings)) {
-        
+      // Backend response format: { success: true, data: { listings: [], pagination: {} } }
+      const responseData = response.data.data || response.data;
+      
+      if (responseData.listings && Array.isArray(responseData.listings)) {
         // Deep clone to prevent reference issues
-        const listingsClone = JSON.parse(JSON.stringify(response.data.listings));
+        const listingsClone = JSON.parse(JSON.stringify(responseData.listings));
         setRawListings(listingsClone);
-        setTotalPages(response.data.pagination.pages);
+        setTotalPages(responseData.pagination.pages);
         console.log('✅ Raw listings set:', listingsClone.length);
       } else {
-        console.warn('⚠️ No listings data or invalid format');
+        console.warn('⚠️ No listings data or invalid format', { responseData });
         setRawListings([]);
       }
     } catch (error) {

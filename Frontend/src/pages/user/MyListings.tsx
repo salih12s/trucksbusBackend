@@ -98,12 +98,15 @@ interface Listing {
 }
 
 interface ListingsResponse {
-  listings: Listing[];
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    pages: number;
+  success: boolean;
+  data: {
+    listings: Listing[];
+    pagination: {
+      page: number;
+      limit: number;
+      total: number;
+      pages: number;
+    };
   };
 }
 

@@ -570,7 +570,9 @@ export const getListings = async (req: Request, res: Response): Promise<void> =>
       page = 1, 
       limit = 10,
       category_id,
+      category, // Kategori ismi ile filtreleme için
       vehicle_type_id,
+      vehicle_type, // Vehicle type ismi ile filtreleme için
       brand_id,
       model_id,
       city_id,
@@ -593,6 +595,27 @@ export const getListings = async (req: Request, res: Response): Promise<void> =>
     console.log('🔍 Initial where clause:', where);
 
     if (category_id) where.category_id = category_id as string;
+    
+    // Kategori ismi ile filtreleme
+    if (category) {
+      where.categories = {
+        name: {
+          equals: category as string,
+          mode: 'insensitive'
+        }
+      };
+    }
+    
+    // Vehicle type ismi ile filtreleme
+    if (vehicle_type) {
+      where.vehicle_types = {
+        name: {
+          equals: vehicle_type as string,
+          mode: 'insensitive'
+        }
+      };
+    }
+    
     if (vehicle_type_id) where.vehicle_type_id = vehicle_type_id as string;
     if (brand_id) where.brand_id = brand_id as string;
     if (model_id) where.model_id = model_id as string;
@@ -727,6 +750,8 @@ export const getListings = async (req: Request, res: Response): Promise<void> =>
     };
     
     console.log('📋 About to send response - seller data check:');
+    console.log('📋 Category filter applied:', category);
+    console.log('📋 Total listings found:', total);
     if (responseData.listings[0]) {
       console.log('  - seller_name:', responseData.listings[0].seller_name);
       console.log('  - seller_phone:', responseData.listings[0].seller_phone);
@@ -735,7 +760,10 @@ export const getListings = async (req: Request, res: Response): Promise<void> =>
       console.log('🔍 FULL LISTING OBJECT:', JSON.stringify(responseData.listings[0], null, 2));
     }
     
-    res.json(responseData);
+    res.json({
+      success: true,
+      data: responseData
+    });
   } catch (error) {
     logger.error('Error fetching listings:', error);
     res.status(500).json({ error: 'Internal server error' });

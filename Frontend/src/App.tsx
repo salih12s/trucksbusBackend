@@ -14,6 +14,7 @@ import AdminLayout from './components/layout/AdminLayout';
 import AdminRoute from './components/auth/AdminRoute';
 import NewHomePage from './pages/user/NewHomePage';
 import NewCategoryPage from './pages/user/NewCategoryPage';
+import CategoryListingsPage from './pages/listings/CategoryListingsPage';
 import CategorySelection from './pages/listing/CategorySelection';
 import BrandSelection from './pages/listing/BrandSelection';
 import ModelSelection from './pages/listing/ModelSelection';
@@ -109,6 +110,7 @@ const App: React.FC = () => {
               {/* User Routes with Layout */}
               <Route path="/" element={<UserLayout />}>
                 <Route index element={<NewHomePage />} />
+                <Route path="category/:category" element={<CategoryListingsPage />} />
                 <Route path="categories" element={<NewCategoryPage />} />
                 <Route path="category/:id" element={<NewCategoryPage />} />
                 <Route path="category/:id/vehicle-type/:vehicleTypeId" element={<NewCategoryPage />} />
