@@ -445,7 +445,7 @@ const OzelAmacliRomorkForm: React.FC = () => {
                 options={cities}
                 getOptionLabel={(option) => option.name}
                 value={cities.find(city => city.name === formData.city) || null}
-                onChange={(event, newValue) => {
+                onChange={(_event, newValue) => {
                   handleInputChange('city', newValue?.name || '');
                   handleInputChange('district', ''); // Reset district when city changes
                 }}
@@ -470,7 +470,7 @@ const OzelAmacliRomorkForm: React.FC = () => {
               options={districts}
               getOptionLabel={(option) => option.name}
               value={districts.find(district => district.name === formData.district) || null}
-              onChange={(event, newValue) => {
+              onChange={(_event, newValue) => {
                 handleInputChange('district', newValue?.name || '');
               }}
               loading={loadingDistricts}

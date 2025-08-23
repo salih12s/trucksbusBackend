@@ -41,10 +41,7 @@ const PlatformSasiForm: React.FC = () => {
   const location = useLocation();
   const { confirm } = useConfirmDialog();
   
-  // Selection states from route
-  const selectedBrand = location.state?.brand;
-  const selectedModel = location.state?.model;
-  const selectedVariant = location.state?.variant;
+
   
   // Location states
   const [cities, setCities] = useState<City[]>([]);

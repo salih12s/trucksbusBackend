@@ -15,9 +15,6 @@ import {
   Stack,
   TextField,
   FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
   FormLabel,
   RadioGroup,
   FormControlLabel,
@@ -25,10 +22,6 @@ import {
   Paper,
   InputAdornment,
   Autocomplete,
-  Card,
-  CardContent,
-  IconButton,
-  Grid
 } from '@mui/material';
 import {
   AttachMoney,
@@ -36,8 +29,7 @@ import {
   Person,
   Phone,
   Email,
-  Close,
-  CloudUpload
+
 } from '@mui/icons-material';
 import { useDropzone } from 'react-dropzone';
 

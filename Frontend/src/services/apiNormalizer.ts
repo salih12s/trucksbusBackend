@@ -97,6 +97,9 @@ export interface StandardListingPayload {
   city_id?: string;
   district_id?: string;
   
+  // Features from form checkboxes
+  features?: Record<string, boolean | string | number>;
+  
   // Special properties for dorse/trailer forms
   properties?: Record<string, string | number | boolean>;
 }
@@ -117,6 +120,15 @@ export const validateListingPayload = (payload: Partial<StandardListingPayload>)
 };
 
 export const createStandardPayload = (formData: any, additionalProperties?: Record<string, any>): StandardListingPayload => {
+  // Extract features from additionalProperties if available
+  let features = additionalProperties?.features || formData.features || {};
+  
+  // Clean up additionalProperties (remove features as it will be handled separately)
+  const cleanAdditionalProperties = additionalProperties ? { ...additionalProperties } : {};
+  if (cleanAdditionalProperties.features) {
+    delete cleanAdditionalProperties.features;
+  }
+  
   return {
     title: formData.title?.trim() || '',
     description: formData.description?.trim() || '',
@@ -134,6 +146,7 @@ export const createStandardPayload = (formData: any, additionalProperties?: Reco
     seller_name: formData.seller_name || formData.sellerName || formData.contactName || undefined,
     seller_phone: formData.seller_phone || formData.sellerPhone || formData.contactPhone || undefined,
     images: Array.isArray(formData.images) ? formData.images : [],
-    properties: additionalProperties || undefined
+    features: features, // Add features directly to payload
+    properties: Object.keys(cleanAdditionalProperties).length > 0 ? cleanAdditionalProperties : undefined
   };
 };

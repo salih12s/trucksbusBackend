@@ -246,7 +246,7 @@ const TupDamacanaRomorkForm: React.FC = () => {
             getOptionLabel={(option) => option.name}
             loading={loadingCities}
             value={cities.find(city => city.name === formData.city) || null}
-            onChange={(event, newValue) => {
+            onChange={(_event, newValue) => {
               if (newValue) {
                 handleCityChange(newValue.id, newValue.name);
               }
@@ -271,7 +271,7 @@ const TupDamacanaRomorkForm: React.FC = () => {
             loading={loadingDistricts}
             disabled={!formData.city || loadingDistricts}
             value={districts.find(district => district.name === formData.district) || null}
-            onChange={(event, newValue) => {
+            onChange={(_event, newValue) => {
               setFormData(prev => ({ ...prev, district: newValue ? newValue.name : '' }));
             }}
             renderInput={(params) => (

@@ -24,11 +24,6 @@ interface VehicleType {
   };
 }
 
-interface ApiResponse {
-  success?: boolean;
-  data?: VehicleType[];
-}
-
 // Kategori isimleri ve resim dosyalarının eşleşmesi
 const categoryImageMap: { [key: string]: string } = {
   'Çekici': '/CategoryImage/Çekici.png',

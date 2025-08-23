@@ -326,7 +326,7 @@ const KayaTipiDorseAdForm: React.FC = () => {
         title: formData.title,
         description: formData.description,
         price: parseFloat(formData.price),
-        year: parseInt(formData.year),
+        year: formData.year,
         city: formData.city,
         city_id: selectedCity.id,
         district_id: selectedDistrict.id,

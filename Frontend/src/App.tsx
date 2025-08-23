@@ -41,7 +41,7 @@ import PlatformSasiForm from './pages/Forms/KonteynerTasiyiciSasiGrubu/PlatformS
 import RomorkKonvantöruForm from './pages/Forms/KonteynerTasiyiciSasiGrubu/RomorkKonvantoru/RomorkKonvantöruForm';
 import TankerSasiForm from './pages/Forms/KonteynerTasiyiciSasiGrubu/TankerSasi/TankerSasiForm';
 import UzayabilirSasiForm from './pages/Forms/KonteynerTasiyiciSasiGrubu/UzayabilirSasi/UzayabilirSasiForm';
-import KamyonRomorkForm from './pages/Forms/KamyonRomorklari/KamyonRomorkFormm';
+import KamyonRomorkForm from './pages/Forms/KamyonRomorklari/KamyonRomorkForm';
 import AcikKasaForm from './pages/Forms/TarimRomork/AcikKasa/AcikKasaForm';
 import KapaliKasaForm from './pages/Forms/TarimRomork/KapaliKasa/KapaliKasaForm';
 import SulamaForm from './pages/Forms/TarimRomork/SulamaForm';
@@ -77,7 +77,7 @@ import Users from './pages/admin/Users';
 import RealTimeMessagesPage from './pages/messages/RealTimeMessagesPage';
 import MyReportsPage from './pages/user/MyReportsPage';
 import FavoritesPage from './pages/user/FavoritesPage';
-import ListingDetail from './pages/user/ListingDetail';
+import DetailOrchestrator from './pages/listings/DetailOrchestrator';
 import Profile from './pages/user/Profile';
 import MyListings from './pages/user/MyListings';
 import Login from './pages/auth/Login';
@@ -114,7 +114,7 @@ const App: React.FC = () => {
                 <Route path="category/:id/vehicle-type/:vehicleTypeId" element={<NewCategoryPage />} />
                 <Route path="category/:id/vehicle-type/:vehicleTypeId/brand/:brandId" element={<NewCategoryPage />} />
                 <Route path="category/:id/vehicle-type/:vehicleTypeId/brand/:brandId/model/:modelId" element={<NewCategoryPage />} />
-                <Route path="listing/:id" element={<ListingDetail />} />
+                <Route path="listing/:id" element={<DetailOrchestrator />} />
                 <Route path="messages" element={<RealTimeMessagesPage />} />
                 <Route path="favorites" element={<FavoritesPage />} />
                 <Route path="my-reports" element={<MyReportsPage />} />

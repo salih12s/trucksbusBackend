@@ -23,11 +23,6 @@ interface Brand {
   updated_at: string;
 }
 
-interface ApiResponse {
-  success: boolean;
-  data: Brand[];
-  count: number;
-}
 
 interface VehicleType {
   id: string;

@@ -256,7 +256,6 @@ const PlatformRomorkForm: React.FC = () => {
     setFormData(prev => ({ ...prev, uploadedImages: [...prev.uploadedImages, ...newFiles] })); 
   };
   const removeImage = (index: number) => { setFormData(prev => ({ ...prev, uploadedImages: prev.uploadedImages.filter((_, i) => i !== index) })); };
-  const generateYearOptions = () => { const currentYear = new Date().getFullYear(); const years = []; for (let year = currentYear; year >= currentYear - 30; year--) { years.push(year.toString()); } return years; };
 
   const renderStepContent = (step: number) => {
     switch (step) {

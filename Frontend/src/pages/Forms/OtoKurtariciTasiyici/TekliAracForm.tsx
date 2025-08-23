@@ -8,7 +8,7 @@ import { locationService, City, District } from '../../../services/locationServi
 import { categoryService } from '../../../services/categoryService';
 import { createStandardPayload, validateListingPayload } from '../../../services/apiNormalizer';
 import { listingService } from '../../../services/listingService';
-import { useSnackbar } from 'notistack';
+
 
 interface TekliAracFormData {
   // 1. Sayfa - İlan Detayları
@@ -95,18 +95,12 @@ const TekliAracForm: React.FC = () => {
 
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { enqueueSnackbar } = useSnackbar();
   const [cities, setCities] = useState<City[]>([]);
   const [districts, setDistricts] = useState<District[]>([]);
   const [submitError, setSubmitError] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   
-  // Brand and model states - MinibüsForm uyumlu
-  const [brands, setBrands] = useState<any[]>([]);
-  const [models, setModels] = useState<any[]>([]);
-  const [selectedBrand, setSelectedBrand] = useState<any>(null);
-  const [selectedModel, setSelectedModel] = useState<any>(null);
+
   const [loadingCities, setLoadingCities] = useState(true);
   const [loadingDistricts, setLoadingDistricts] = useState(false);
 
@@ -264,21 +258,7 @@ const TekliAracForm: React.FC = () => {
     return true;
   };
 
-  // Pre-submit validation
-  const validateFormData = (): string[] => {
-    const missing: string[] = [];
-    
-    if (!formData.title?.trim()) missing.push('title');
-    if (!formData.price || toInt(formData.price) === undefined || toInt(formData.price)! <= 0) missing.push('price');
-    if (!formData.category_id) missing.push('category_id');
-    if (!formData.vehicle_type_id) missing.push('vehicle_type_id');
-    if (!formData.city?.trim()) missing.push('city');
-    if (!formData.district?.trim()) missing.push('district');
-    if (!formData.sellerPhone?.trim()) missing.push('seller_phone');
-    
-    return missing;
-  };
-
+ 
   const handleSubmit = async () => {
     setIsSubmitting(true);
     setSubmitError('');

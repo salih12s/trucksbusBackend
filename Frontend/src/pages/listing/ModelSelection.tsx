@@ -22,12 +22,6 @@ interface Model {
   updated_at: string;
 }
 
-interface ApiResponse {
-  success: boolean;
-  data: Model[];
-  count: number;
-}
-
 interface Brand {
   id: string;
   name: string;

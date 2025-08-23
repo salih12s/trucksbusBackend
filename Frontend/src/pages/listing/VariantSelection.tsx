@@ -23,11 +23,6 @@ interface Variant {
   updated_at: string;
 }
 
-interface ApiResponse {
-  success: boolean;
-  data: Variant[];
-  count: number;
-}
 
 interface Model {
   id: string;

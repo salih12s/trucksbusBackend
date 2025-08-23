@@ -452,14 +452,7 @@ export const getListings = async (req: Request, res: Response): Promise<void> =>
               name: true
             }
           },
-          listing_images: {
-            select: {
-              id: true,
-              url: true,
-              alt: true,
-              sort_order: true
-            }
-          },
+
           users: {
             select: {
               id: true,
@@ -556,6 +549,249 @@ export const debugListingData = async (req: Request, res: Response): Promise<voi
   } catch (error) {
     console.error('Debug endpoint error:', error);
     res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+// Enhanced listing details with category-specific schema
+export const getListingDetails = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+
+    const listing = await prisma.listings.findUnique({
+      where: { id },
+      include: {
+        categories: {
+          select: {
+            id: true,
+            name: true
+          }
+        },
+        vehicle_types: {
+          select: {
+            id: true,
+            name: true
+          }
+        },
+        brands: {
+          select: {
+            id: true,
+            name: true,
+            image_url: true
+          }
+        },
+        models: {
+          select: {
+            id: true,
+            name: true
+          }
+        },
+        variants: {
+          select: {
+            id: true,
+            name: true
+          }
+        },
+        cities: {
+          select: {
+            id: true,
+            name: true
+          }
+        },
+        districts: {
+          select: {
+            id: true,
+            name: true
+          }
+        },
+        users: {
+          select: {
+            id: true,
+            first_name: true,
+            last_name: true,
+            phone: true,
+            email: true
+          }
+        },
+        listing_properties: {
+          select: {
+            key: true,
+            value: true,
+            type: true
+          }
+        }
+      }
+    });
+
+    if (!listing) {
+      res.status(404).json({ success: false, error: 'Listing not found' });
+      return;
+    }
+
+    // Increment view count
+    await prisma.listings.update({
+      where: { id },
+      data: { view_count: { increment: 1 } }
+    });
+
+    // Schema bilgilerini listing_properties'den çıkartıyoruz
+    const propertyKeys = [...new Set(listing.listing_properties?.map(prop => prop.key) || [])];
+    
+    // Basit schema oluşturmak için property'leri grupluyoruz  
+    const schemaGroups = [{
+      key: 'details',
+      label: 'İlan Detayları',
+      order: 1,
+      attributes: propertyKeys.map((key, index) => ({
+        key,
+        label: key,
+        data_type: 'STRING',
+        is_required: false,
+        order: index
+      }))
+    }];
+
+    // Process media from listings.images field (JSON array)
+    const media: any[] = [];
+    
+    if (listing.images) {
+      try {
+        const imageUrls = typeof listing.images === 'string' 
+          ? JSON.parse(listing.images) 
+          : Array.isArray(listing.images) 
+            ? listing.images 
+            : [];
+            
+        if (Array.isArray(imageUrls)) {
+          media.push(...imageUrls.map((url: string, index: number) => ({
+            url,
+            alt: listing.title,
+            sort: index
+          })));
+        }
+      } catch (e) {
+        console.log('Error parsing images from listings.images:', e);
+      }
+    }
+
+    // Convert properties to values with proper types
+    const values: Record<string, any> = {};
+    listing.listing_properties?.forEach(prop => {
+      try {
+        switch (prop.type) {
+          case 'NUMBER':
+            values[prop.key] = prop.value ? parseFloat(prop.value) : null;
+            break;
+          case 'BOOLEAN':
+            values[prop.key] = prop.value === 'true' || prop.value === '1';
+            break;
+          case 'MULTISELECT':
+            values[prop.key] = prop.value ? JSON.parse(prop.value) : [];
+            break;
+          default:
+            values[prop.key] = prop.value || null;
+        }
+      } catch (e) {
+        values[prop.key] = prop.value;
+      }
+    });
+
+    // Add base vehicle properties
+    if (listing.year) values.year = listing.year;
+    if (listing.km) values.km = listing.km;
+    if (listing.fuel_type) values.fuel_type = listing.fuel_type;
+    if (listing.transmission) values.transmission = listing.transmission;
+    if (listing.engine_power) values.engine_power = listing.engine_power;
+    if (listing.color) values.color = listing.color;
+    if (listing.vehicle_condition) values.vehicle_condition = listing.vehicle_condition;
+
+    // Features'ları işle
+    let processedFeatures: Record<string, string> = {};
+    if (listing.features) {
+      try {
+        const features = typeof listing.features === 'string' 
+          ? JSON.parse(listing.features) 
+          : listing.features;
+        
+        if (features && typeof features === 'object') {
+          Object.keys(features).forEach(key => {
+            if (features[key] === true) {
+              processedFeatures[key] = 'Evet';
+            } else if (features[key] === false) {
+              processedFeatures[key] = 'Hayır';
+            } else if (features[key]) {
+              processedFeatures[key] = String(features[key]);
+            }
+          });
+        }
+      } catch (e) {
+        console.log('Error parsing features:', e);
+      }
+    }
+
+    const response = {
+      success: true,
+      data: {
+        base: {
+          id: listing.id,
+          title: listing.title,
+          description: listing.description,
+          price: Number(listing.price),
+          status: listing.status,
+          isApproved: listing.is_approved,
+          views: listing.view_count || 0,
+          category: {
+            id: listing.categories?.id || listing.category_id,
+            name: listing.categories?.name || 'Kategori',
+            slug: listing.categories?.name?.toLowerCase().replace(/\s+/g, '-') || 'kategori'
+          },
+          vehicle_type: {
+            id: listing.vehicle_types?.id || listing.vehicle_type_id,
+            name: listing.vehicle_types?.name || 'Tür',
+            slug: listing.vehicle_types?.name?.toLowerCase().replace(/\s+/g, '-') || 'vehicle'
+          },
+          brand: listing.brands ? {
+            id: listing.brands.id,
+            name: listing.brands.name
+          } : null,
+          model: listing.models ? {
+            id: listing.models.id,
+            name: listing.models.name
+          } : null,
+          variant: listing.variants ? {
+            id: listing.variants.id,
+            name: listing.variants.name
+          } : null,
+          year: listing.year,
+          km: listing.km,
+          locationText: `${listing.districts?.name || ''}, ${listing.cities?.name || ''}`.replace(/^, |, $/, '') || 'Konum belirtilmemiş',
+          createdAt: listing.created_at,
+          updatedAt: listing.updated_at,
+          seller: {
+            name: listing.seller_name || `${listing.users?.first_name} ${listing.users?.last_name}`.trim(),
+            phone: listing.seller_phone || listing.users?.phone,
+            email: listing.seller_email || listing.users?.email
+          },
+          media,
+          features: processedFeatures // İşlenmiş features'ı ekle
+        },
+        schema: {
+          groups: schemaGroups,
+          flat: propertyKeys.map((key, index) => ({
+            key,
+            label: key,
+            data_type: 'STRING',
+            is_required: false,
+            order: index
+          }))
+        },
+        values
+      }
+    };
+
+    res.json(response);
+  } catch (error) {
+    logger.error('Error fetching listing details:', error);
+    res.status(500).json({ success: false, error: 'Internal server error' });
   }
 };
 

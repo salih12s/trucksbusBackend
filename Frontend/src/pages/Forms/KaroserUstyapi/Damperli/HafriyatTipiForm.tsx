@@ -57,7 +57,7 @@ const HafriyatTipiForm: React.FC = () => {
     loading: true
   });
 
-  const [formData, setFormData] = useState<HafriyatTipiFormData>({
+    const [formData, setFormData] = useState<HafriyatTipiFormData>({
     title: '',
     description: '',
     productionYear: '',
