@@ -28,6 +28,7 @@ interface TruckCenterCardProps {
   onViewDetails?: (id: string) => void;
   onSendMessage?: (id: string) => void;
   onReport?: (id: string) => void;
+  onDelete?: (id: string) => void;
   isAdminView?: boolean;
   onApprove?: (id: string) => void;
   onReject?: (id: string) => void;

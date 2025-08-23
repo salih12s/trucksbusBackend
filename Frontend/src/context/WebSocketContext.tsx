@@ -148,7 +148,7 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
             }
           });
         } catch (e) {
-          console.warn('conversation:upsert refresh failed', e);
+          if (import.meta.env.DEV) console.warn('conversation:upsert refresh failed', e);
         }
       });
     } catch (e) {
@@ -163,7 +163,7 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
     // 🔧 Backend'e uyumlu event ismi: conversation:join
     socket.emit('conversation:join', { conversation_id: conversationId });
     joinedRoomsRef.current.add(conversationId);
-    console.log('🚪 joined room (once):', conversationId);
+    if (import.meta.env.DEV) console.log('🚪 joined room (once):', conversationId);
   }, [socket, isConnected]);
 
   // Initialize WebSocket connection
@@ -185,7 +185,7 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
     const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3005/api';
     const serverUrl = new URL(API_BASE_URL).origin;
     
-    console.log('🔌 Initializing WebSocket connection to:', serverUrl);
+    if (import.meta.env.DEV) console.log('🔌 Initializing WebSocket connection to:', serverUrl);
     
     const socketInstance = io(serverUrl, {
       auth: { token },
@@ -199,7 +199,7 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
 
     // Connection events
     socketInstance.on('connect', async () => {
-      console.log('🟢 WebSocket connected');
+      if (import.meta.env.DEV) console.log('🟢 WebSocket connected');
       setIsConnected(true);
       joinedRoomsRef.current.clear();                 // 🔧 önemli
 
@@ -218,10 +218,10 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
         const unreadResponse = await messageService.getUnreadCount();
         if (unreadResponse?.success && unreadResponse?.data?.count !== undefined) {
           setUnreadCount(unreadResponse.data.count);
-          console.log('🔢 Initial unread count loaded:', unreadResponse.data.count);
+          if (import.meta.env.DEV) console.log('🔢 Initial unread count loaded:', unreadResponse.data.count);
         }
       } catch (error) {
-        console.warn('Failed to load initial unread count:', error);
+        if (import.meta.env.DEV) console.warn('Failed to load initial unread count:', error);
       }
 
       // 🎯 kritik: tüm konuşma odalarına katıl ki new_message düşsün
@@ -229,7 +229,7 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
     });
 
     socketInstance.on('disconnect', () => {
-      console.log('🔴 WebSocket disconnected');
+      if (import.meta.env.DEV) console.log('🔴 WebSocket disconnected');
       setIsConnected(false);
     });
 
@@ -284,30 +284,30 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
     // ---- socket event'lerinde SADECE bu handler'ı çağır:
     socketInstance.on('new_message', (raw: any) => {
       const message = normalizeMessage(raw);
-      console.log('📨 new_message:', message);
+      if (import.meta.env.DEV) console.log('📨 new_message:', message);
       handleIncoming(message);
     });
 
     // message:new alias (backend compatibility)
     socketInstance.on('message:new', (raw: any) => {
       const message = normalizeMessage(raw.message || raw);
-      console.log('📨 message:new (alias):', message);
+      if (import.meta.env.DEV) console.log('📨 message:new (alias):', message);
       handleIncoming(message);
     });
 
     // Typing events - dual support
     socketInstance.on('user_typing', (data: any) => {
-      console.log('⌨️ user_typing:', data);
+      if (import.meta.env.DEV) console.log('⌨️ user_typing:', data);
       typingCallbacksRef.current.forEach(callback => callback(data));
     });
 
     socketInstance.on('typing:start', (data: any) => {
-      console.log('⌨️ typing:start (alias):', data);
+      if (import.meta.env.DEV) console.log('⌨️ typing:start (alias):', data);
       typingCallbacksRef.current.forEach(callback => callback(data));
     });
 
     socketInstance.on('user_stop_typing', (data: { userId: string }) => {
-      console.log('⌨️ Global WebSocket: User stopped typing:', data);
+      if (import.meta.env.DEV) console.log('⌨️ Global WebSocket: User stopped typing:', data);
     });
 
     // ---- notify handler (sadeleştirildi)
@@ -350,7 +350,7 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
 
     // Report notification events
     socketInstance.on('admin:report:new', (data: any) => {
-      console.log('📋 New report notification:', data);
+      if (import.meta.env.DEV) console.log('📋 New report notification:', data);
       if (user?.role === 'ADMIN') {
         setNotifications(prev => [
           {
@@ -368,7 +368,7 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
     });
 
     socketInstance.on('admin:report:resolved', (data: any) => {
-      console.log('📋 Report resolved notification:', data);
+      if (import.meta.env.DEV) console.log('📋 Report resolved notification:', data);
       if (user?.role === 'ADMIN') {
         setNotifications(prev => [
           {
@@ -386,38 +386,40 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
     });
 
     socketInstance.on('unreadCountUpdate', (data: any) => {
-      console.log('🔢 Unread count update:', data);
+      if (import.meta.env.DEV) console.log('🔢 Unread count update:', data);
       setUnreadCount(data.total_unread || 0);
     });
 
     // ---- badge:update event'i için özel handler
     socketInstance.on('badge:update', (data: any) => {
-      console.log('🔔 badge:update received:', data);
+      if (import.meta.env.DEV) console.log('🔔 badge:update received:', data);
       
       // Mesaj sayfasında DEĞİLKEN badge güncelle
       const onMsgRoute = getRoutePath().startsWith('/real-time-messages') || getRoutePath().startsWith('/messages');
       
       if (!onMsgRoute && data?.total_unread !== undefined) {
         setUnreadCount(data.total_unread);
-        console.log('🔔 Badge updated to:', data.total_unread);
-      } else if (onMsgRoute) {
+        if (import.meta.env.DEV) console.log('🔔 Badge updated to:', data.total_unread);
+      } else if (onMsgRoute && import.meta.env.DEV) {
         console.log('🔔 Badge update ignored - on messages page');
       }
     });
 
     // ---- conversation:upsert event'i - gizli konuşma geri geldiğinde
     socketInstance.on('conversation:upsert', (payload: any) => {
-      console.log('🔄 conversation:upsert received:', payload);
+      if (import.meta.env.DEV) console.log('🔄 conversation:upsert received:', payload);
       
       // Eğer mesaj sayfasındaysak ve conversations state'i varsa güncelle
       // Bu event'i MessageService veya RealTimeMessagesPage dinleyebilir
       // Şimdilik sadece log atalım - frontend'de ayrıca implement edilecek
     });
 
-    // ---- debug: hangi eventler geliyor görmek için
-    socketInstance.onAny((event, ...args) => {
-      console.log('[socket-event]', event, args?.[0]);
-    });
+    // ---- debug: hangi eventler geliyor görmek için (sadece development)
+    if (import.meta.env.DEV) {
+      socketInstance.onAny((event, ...args) => {
+        console.log('[socket-event]', event, args?.[0]);
+      });
+    }
 
     // ---- polling fallback
     let poll: any = null;
@@ -433,14 +435,14 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
           setUnreadCount(total);
         }
       } catch (e) {
-        console.warn('unread polling failed', e);
+        if (import.meta.env.DEV) console.warn('unread polling failed', e);
       }
     }, 15000);
 
     setSocket(socketInstance);
 
     return () => {
-      console.log('🔌 Cleaning up WebSocket connection');
+      if (import.meta.env.DEV) console.log('🔌 Cleaning up WebSocket connection');
       socketInstance.disconnect();
       if (poll) clearInterval(poll);
     };
@@ -488,10 +490,10 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
           });
           ack?.(m);
         } else {
-          console.warn('sendMessage ACK failed:', raw);
+          if (import.meta.env.DEV) console.warn('sendMessage ACK failed:', raw);
         }
       } catch (e) {
-        console.warn('ack parse failed:', e, raw);
+        if (import.meta.env.DEV) console.warn('ack parse failed:', e, raw);
       }
     });
   }, [socket, isConnected, ensureJoined]);
@@ -505,7 +507,7 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
       // 🔧 Backend'e uyumlu event ismi: conversation:leave
       socket.emit('conversation:leave', { conversation_id: conversationId });
       joinedRoomsRef.current.delete(conversationId);
-      console.log('🚪 left room:', conversationId);
+      if (import.meta.env.DEV) console.log('🚪 left room:', conversationId);
     }
   }, [socket, isConnected]);
 
@@ -578,7 +580,7 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
         setUnreadCount(unreadResponse.data.count);
       }
     } catch (error) {
-      console.warn('Failed to mark conversation as read:', error);
+      if (import.meta.env.DEV) console.warn('Failed to mark conversation as read:', error);
     }
   }, []);
 

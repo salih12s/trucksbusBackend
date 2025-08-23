@@ -100,7 +100,7 @@ const AdminReportsPage: React.FC = () => {
       setLoading(true);
       const params: any = { page: pageNumber, limit: 20 };
       if (statusFilter !== 'ALL') params.status = statusFilter;
-      if (searchQuery.trim()) params.search = searchQuery.trim();
+      if (searchQuery.trim()) params.q = searchQuery.trim();
 
       const response = await reportService.adminGetReports(params);
       
@@ -122,8 +122,8 @@ const AdminReportsPage: React.FC = () => {
 
   const openDetail = async (reportId: string) => {
     try {
-      const report = await reportService.adminGetReportDetail(reportId);
-      setDetailDialog({ open: true, report });
+      const detail = await reportService.adminGetReportDetail(reportId);
+      setDetailDialog({ open: true, report: detail });
     } catch (error: any) {
       showErrorNotification(error?.response?.data?.message || 'Detay yüklenemedi');
     }

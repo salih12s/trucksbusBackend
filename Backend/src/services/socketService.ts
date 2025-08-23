@@ -24,6 +24,109 @@ export class SocketService {
     logger.info('Socket.IO service initialized');
   }
 
+  // ✨ Participant kontrolü yardımcı fonksiyonu
+  private async isParticipant(userId: string, conversationId: string): Promise<boolean> {
+    try {
+      const conv = await prisma.conversations.findUnique({
+        where: { id: conversationId },
+        select: { least_user_id: true, greatest_user_id: true }
+      }) as any;
+      
+      if (!conv) return false;
+      return conv.least_user_id === userId || conv.greatest_user_id === userId;
+    } catch (error) {
+      logger.error('Error checking participant status:', error);
+      return false;
+    }
+  }
+
+  // 🔒 Güvenli mesaj oluşturma ve yayınlama
+  private async createAndBroadcastMessage(conversation_id: string, senderId: string, body: string) {
+    // 1) katılım doğrulama
+    const conv = await prisma.conversations.findUnique({ where: { id: conversation_id } }) as any;
+    if (!conv) throw new Error('Conversation not found');
+
+    if (![conv.least_user_id, conv.greatest_user_id].includes(senderId)) {
+      throw new Error('Not a participant');
+    }
+
+    // 2) mesaj yaz
+    const message = await (prisma as any).messages.create({
+      data: { 
+        id: ulid(), 
+        conversation_id, 
+        sender_id: senderId, 
+        body, 
+        status: 'SENT' 
+      }
+    });
+
+    // 3) sender info
+    const senderInfo = await prisma.users.findUnique({
+      where: { id: senderId }, 
+      select: { 
+        id: true, 
+        first_name: true, 
+        last_name: true, 
+        username: true 
+      }
+    });
+
+    const completeMessage = {
+      id: message.id,
+      conversation_id,
+      sender_id: senderId,
+      content: message.body,
+      created_at: message.created_at,
+      users: senderInfo
+    };
+
+    // 4) odaya yayınla
+    this.io.to(`conversation:${conversation_id}`).emit('message:new', { 
+      conversation_id, 
+      message: completeMessage 
+    });
+
+    // 6) unread counter güncelleme
+    const receiverIds = [conv.least_user_id, conv.greatest_user_id].filter((id: string) => id !== senderId);
+    for (const receiverId of receiverIds) {
+      await (prisma as any).conversation_unread_counters.upsert({
+        where: { 
+          conversation_id_user_id: { 
+            conversation_id, 
+            user_id: receiverId 
+          } 
+        },
+        create: { 
+          id: ulid(), 
+          conversation_id, 
+          user_id: receiverId, 
+          unread_count: 1 
+        },
+        update: { 
+          unread_count: { increment: 1 }, 
+          updated_at: new Date() 
+        }
+      });
+      
+      const totalAgg = await (prisma as any).conversation_unread_counters.aggregate({
+        _sum: { unread_count: true }, 
+        where: { user_id: receiverId }
+      });
+      const totalUnread = totalAgg._sum.unread_count || 0;
+      
+      await (prisma as any).user_unread_counters.upsert({
+        where: { user_id: receiverId },
+        create: { user_id: receiverId, total_unread: totalUnread },
+        update: { total_unread: totalUnread, updated_at: new Date() }
+      });
+      
+      this.io.to(`user:${receiverId}`).emit('badge:update', { total_unread: totalUnread });
+    }
+
+    return completeMessage;
+  }
+
   private setupMiddleware() {
     // Authentication middleware
     this.io.use(async (socket, next) => {
@@ -63,28 +166,64 @@ export class SocketService {
       socket.join(`user:${userId}`);
       logger.info(`User ${userId} connected with socket ${socket.id}`);
 
-      // Join conversation rooms
-      socket.on('conversation:join', ({ conversation_id }: { conversation_id: string }) => {
-        socket.join(`conversation:${conversation_id}`);
-        logger.info(`User ${userId} joined conversation: ${conversation_id}`);
+      // 🔒 Güvenli conversation join
+      socket.on('conversation:join', async ({ conversation_id }: { conversation_id: string }) => {
+        try {
+          if (!conversation_id) return;
+          const ok = await this.isParticipant(userId, conversation_id);
+          if (!ok) {
+            logger.warn(`🚫 Forbidden join attempt by ${userId} to ${conversation_id}`);
+            socket.emit('error:forbidden', { resource: 'conversation', id: conversation_id });
+            return;
+          }
+          socket.join(`conversation:${conversation_id}`);
+          logger.info(`✅ User ${userId} joined conversation: ${conversation_id}`);
+        } catch (error) {
+          logger.error('join error:', error);
+        }
       });
 
-      // Legacy alias for join_conversation
-      socket.on('join_conversation', (conversationId: string) => {
-        socket.join(`conversation:${conversationId}`);
-        logger.info(`User ${userId} joined conversation (legacy): ${conversationId}`);
+      // 🔒 Legacy alias for join_conversation - güvenli
+      socket.on('join_conversation', async (conversationId: string) => {
+        try {
+          if (!conversationId) return;
+          const ok = await this.isParticipant(userId, conversationId);
+          if (!ok) {
+            logger.warn(`🚫 Forbidden legacy join attempt by ${userId} to ${conversationId}`);
+            socket.emit('error:forbidden', { resource: 'conversation', id: conversationId });
+            return;
+          }
+          socket.join(`conversation:${conversationId}`);
+          logger.info(`✅ User ${userId} joined conversation (legacy): ${conversationId}`);
+        } catch (error) {
+          logger.error('legacy join error:', error);
+        }
       });
 
-      // Leave conversation rooms
-      socket.on('conversation:leave', ({ conversation_id }: { conversation_id: string }) => {
-        socket.leave(`conversation:${conversation_id}`);
-        logger.info(`User ${userId} left conversation: ${conversation_id}`);
+      // 🔒 Güvenli conversation leave
+      socket.on('conversation:leave', async ({ conversation_id }: { conversation_id: string }) => {
+        try {
+          if (!conversation_id) return;
+          const ok = await this.isParticipant(userId, conversation_id);
+          if (!ok) return; // sessizce ignore et
+          socket.leave(`conversation:${conversation_id}`);
+          logger.info(`👋 User ${userId} left conversation: ${conversation_id}`);
+        } catch (error) {
+          logger.error('leave error:', error);
+        }
       });
 
-      // Legacy alias for leave_conversation  
-      socket.on('leave_conversation', (conversationId: string) => {
-        socket.leave(`conversation:${conversationId}`);
-        logger.info(`User ${userId} left conversation (legacy): ${conversationId}`);
+      // 🔒 Legacy alias for leave_conversation - güvenli  
+      socket.on('leave_conversation', async (conversationId: string) => {
+        try {
+          if (!conversationId) return;
+          const ok = await this.isParticipant(userId, conversationId);
+          if (!ok) return; // sessizce ignore et
+          socket.leave(`conversation:${conversationId}`);
+          logger.info(`👋 User ${userId} left conversation (legacy): ${conversationId}`);
+        } catch (error) {
+          logger.error('legacy leave error:', error);
+        }
       });
 
       // Handle typing indicators
@@ -108,135 +247,26 @@ export class SocketService {
         });
       });
 
-      // Message send handler
+      // 🔒 Güvenli mesaj gönderme - ana handler
       socket.on('message:send', async (payload: { conversation_id: string; body: string }, cb?: (ack: any) => void) => {
         try {
-          const { conversation_id, body } = payload;
-          const senderId = userId;
-
-          // Message send handler - updated for database fields  
-          logger.info(`📤 Socket message:send from ${senderId} to conversation ${conversation_id}: "${body}"`);
-
-          // 1) Check participant access
-          const conversation = await prisma.conversations.findUnique({
-            where: { id: conversation_id }
-          }) as any;
-
-          if (!conversation) {
-            return cb?.({ ok: false, error: 'Conversation not found' });
-          }
-
-          const isParticipant = [conversation.least_user_id, conversation.greatest_user_id].includes(senderId);
-          if (!isParticipant) {
-            return cb?.({ ok: false, error: 'Not a participant' });
-          }
-
-          // 2) Create message
-          const message = await (prisma as any).messages.create({
-            data: {
-              id: ulid(),
-              conversation_id,
-              sender_id: senderId,
-              body: body,
-              status: 'SENT'
-            }
-          });
-
-          // 3) Get sender info for complete ACK
-          const senderInfo = await prisma.users.findUnique({
-            where: { id: senderId },
-            select: {
-              id: true,
-              first_name: true,
-              last_name: true,
-              username: true
-            }
-          });
-
-          // 4) Format complete message for ACK
-          const completeMessage = {
-            id: message.id,
-            conversation_id: message.conversation_id,
-            sender_id: message.sender_id,
-            content: message.body,
-            created_at: message.created_at,
-            users: senderInfo
-          };
-
-          // 5) BROADCAST to conversation room
-          logger.info(`🚀 Emitting message:new to conversation:${conversation_id}`);
-          this.io.to(`conversation:${conversation_id}`).emit('message:new', {
-            conversation_id,
-            message: completeMessage
-          });
-
-          // 6) Update unread counters for receivers using real database counters
-          const receiverIds = [conversation.least_user_id, conversation.greatest_user_id]
-            .filter(id => id !== senderId);
-
-          for (const receiverId of receiverIds) {
-            // Update conversation-specific unread counter
-            await (prisma as any).conversation_unread_counters.upsert({
-              where: { 
-                conversation_id_user_id: { 
-                  conversation_id, 
-                  user_id: receiverId 
-                } 
-              },
-              create: { 
-                id: ulid(), 
-                conversation_id, 
-                user_id: receiverId, 
-                unread_count: 1 
-              },
-              update: { 
-                unread_count: { increment: 1 },
-                updated_at: new Date()
-              }
-            });
-
-            // Recalculate total unread for user
-            const totalAgg = await (prisma as any).conversation_unread_counters.aggregate({
-              _sum: { unread_count: true },
-              where: { user_id: receiverId }
-            });
-            const totalUnread = totalAgg._sum.unread_count || 0;
-
-            // Update user's total unread counter
-            await (prisma as any).user_unread_counters.upsert({
-              where: { user_id: receiverId },
-              create: { user_id: receiverId, total_unread: totalUnread },
-              update: { total_unread: totalUnread, updated_at: new Date() }
-            });
-
-            // Send real badge update
-            this.io.to(`user:${receiverId}`).emit('badge:update', { total_unread: totalUnread });
-          }
-
-          // 7) Return complete message in ACK (not just {ok, id})
-          cb?.({ 
-            ok: true, 
-            message: completeMessage
-          });
-        } catch (error) {
-          logger.error('Error handling message:send:', error);
-          cb?.({ ok: false, error: 'Failed to send message' });
+          const res = await this.createAndBroadcastMessage(payload.conversation_id, userId, payload.body);
+          cb?.({ ok: true, message: res });
+        } catch (err: any) {
+          logger.error('message:send error:', err);
+          cb?.({ ok: false, error: err?.message || 'Failed to send' });
         }
       });
 
-      // Legacy alias for send_message
+      // 🔒 Legacy alias - güvenli
       socket.on('send_message', async (payload: { conversationId: string; content?: string; body?: string }, cb?: (ack: any) => void) => {
         try {
-          const { conversationId, content, body } = payload;
-          const messageBody = content || body || '';
-          
-          logger.info(`📤 Socket send_message (legacy) from ${userId} to conversation ${conversationId}: "${messageBody}"`);
-          
-          // Redirect to main handler
-          socket.emit('message:send', { conversation_id: conversationId, body: messageBody }, cb);
-        } catch (error) {
-          logger.error('Error handling send_message (legacy):', error);
-          cb?.({ ok: false, error: 'Failed to send message' });
+          const messageBody = payload.content || payload.body || '';
+          const res = await this.createAndBroadcastMessage(payload.conversationId, userId, messageBody);
+          cb?.({ ok: true, message: res });
+        } catch (err: any) {
+          logger.error('send_message error:', err);
+          cb?.({ ok: false, error: err?.message || 'Failed to send' });
         }
       });
 

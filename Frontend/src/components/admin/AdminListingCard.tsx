@@ -9,7 +9,7 @@ import {
   Box,
   Chip
 } from '@mui/material';
-import { Listing } from '../../types/listing';
+import { Listing } from '../../types';
 
 interface AdminListingCardProps {
   listing: Listing;
@@ -91,7 +91,7 @@ const AdminListingCard: React.FC<AdminListingCardProps> = ({
         </Typography>
         
         <Typography variant="body2" color="text.secondary">
-          📅 {formatDate(listing.created_at)}
+          📅 {formatDate(listing.createdAt.toISOString())}
         </Typography>
       </CardContent>
       

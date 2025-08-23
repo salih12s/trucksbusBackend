@@ -300,7 +300,8 @@ const TekliAracForm: React.FC = () => {
         seller_name: formData.sellerName,
         seller_phone: formData.sellerPhone.replace(/[^\d]/g, ''),
         seller_email: formData.sellerEmail,
-        images: imageUrls
+        images: imageUrls,
+        safetyFeatures: formData.safetyFeatures // Array olarak gönder
       }, {
         // Oto Kurtarıcı-specific properties
         engineVolume: formData.engineVolume,
@@ -312,7 +313,6 @@ const TekliAracForm: React.FC = () => {
         maxPowerHP: formData.maxPowerHP,
         currency: formData.currency,
         loadCapacity: formData.loadCapacity,
-        safetyFeatures: formData.safetyFeatures.join(', '),
         vehicleEquipment: formData.vehicleEquipment.join(', '),
         priceType: formData.priceType,
         towingEquipment: formData.towingEquipment.join(', '),

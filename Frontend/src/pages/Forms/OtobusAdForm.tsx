@@ -384,7 +384,8 @@ const OtobusAdForm = () => {
         seller_name: formData.sellerName,
         seller_phone: formData.sellerPhone.replace(/[^\d]/g, ''),
         seller_email: formData.sellerEmail,
-        images: imageUrls
+        images: imageUrls,
+        features: formData.features  // Features'ı ana objede gönder
       }, {
         // Otobüs-specific properties
         color: formData.color || "Belirtilmemiş",
@@ -401,7 +402,6 @@ const OtobusAdForm = () => {
         tire_condition: formData.tireCondition,
         plate_origin: formData.plateOrigin,
         vehicle_plate: formData.vehiclePlate,
-        features: formData.features,
         damage_record: formData.damageRecord,
         paint_change: formData.paintChange,
         warranty: formData.warranty

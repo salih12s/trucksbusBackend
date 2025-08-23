@@ -1,14 +1,16 @@
 import React from 'react';
 import {
   Box, Container, Card, CardContent, Typography, Avatar,
-  Button, Alert, Skeleton, CircularProgress, Chip, Grid
+  Button, Alert, Skeleton, CircularProgress, Chip,
+  List, ListItem, ListItemAvatar, ListItemText, Divider
 } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import {
-  TrendingUp, TrendingDown, People, Assignment, Report, Message, Refresh
+  TrendingUp, TrendingDown, People, Assignment, Report, Message, Refresh,
+  PersonAdd, PostAdd, Schedule
 } from '@mui/icons-material';
 
-import { useDashboardStats } from '../../hooks/admin';
+import { useDashboardStats, useRecentActivities } from '../../hooks/admin';
 import { formatTRY, formatNumber } from '../../utils/format';
 import AdminGuard from '../../components/admin/AdminGuard';
 
@@ -115,7 +117,17 @@ const AdminDashboard: React.FC = () => {
     refetch: refetchStats
   } = useDashboardStats({ refetchInterval: 30_000 });
 
-  const handleRefresh = () => { refetchStats(); };
+  const {
+    data: recentActivities,
+    isLoading: activitiesLoading,
+    error: activitiesError,
+    refetch: refetchActivities
+  } = useRecentActivities(10, 30_000);
+
+  const handleRefresh = () => { 
+    refetchStats(); 
+    refetchActivities();
+  };
 
   if (statsLoading && !dashboardStats) {
     return (
@@ -185,34 +197,144 @@ const AdminDashboard: React.FC = () => {
         )}
 
         {/* Top stats */}
-        <Grid container spacing={2.5} sx={{ mb: 3 }}>
-          <Grid item xs={12} sm={6} md={3}>
-            <StatCard title="Toplam Kullanıcı" value={dashboardStats?.usersCount || 0} icon={<People />} color="primary" loading={statsLoading} />
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <StatCard title="Toplam İlan" value={dashboardStats?.totalListings || 0} icon={<Assignment />} color="info" loading={statsLoading} />
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <StatCard title="Aktif İlan" value={dashboardStats?.activeCount || 0} icon={<Assignment />} color="success" loading={statsLoading} />
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <StatCard title="Onay Bekleyen" value={dashboardStats?.pendingCount || 0} icon={<Report />} color="warning" loading={statsLoading} />
-          </Grid>
-        </Grid>
+        <Box 
+          sx={{ 
+            display: 'grid', 
+            gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' },
+            gap: 2.5, 
+            mb: 3 
+          }}
+        >
+          <StatCard title="Toplam Kullanıcı" value={dashboardStats?.usersCount || 0} icon={<People />} color="primary" loading={statsLoading} />
+          <StatCard title="Toplam İlan" value={dashboardStats?.totalListings || 0} icon={<Assignment />} color="info" loading={statsLoading} />
+          <StatCard title="Aktif İlan" value={dashboardStats?.activeCount || 0} icon={<Assignment />} color="success" loading={statsLoading} />
+          <StatCard title="Onay Bekleyen" value={dashboardStats?.pendingCount || 0} icon={<Report />} color="warning" loading={statsLoading} />
+        </Box>
 
         {/* Activity section */}
         <SectionCard title="Aktivite Özeti" subtitle="Bugün, bu hafta ve mesaj hacmi">
-          <Grid container spacing={2.5}>
-            <Grid item xs={12} sm={6} md={4}>
-              <StatCard title="Bugün Kayıt" value={dashboardStats?.todayCreated || 0} icon={<People />} color="success" loading={statsLoading} />
-            </Grid>
-            <Grid item xs={12} sm={6} md={4}>
-              <StatCard title="Bu Hafta" value={dashboardStats?.weekCreated || 0} icon={<People />} color="info" loading={statsLoading} />
-            </Grid>
-            <Grid item xs={12} sm={6} md={4}>
-              <StatCard title="Toplam Mesaj" value={dashboardStats?.totalMessages || 0} icon={<Message />} color="secondary" loading={statsLoading} />
-            </Grid>
-          </Grid>
+          <Box 
+            sx={{ 
+              display: 'grid', 
+              gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' },
+              gap: 2.5 
+            }}
+          >
+            <StatCard title="Bugün Kayıt" value={dashboardStats?.todayCreated || 0} icon={<People />} color="success" loading={statsLoading} />
+            <StatCard title="Bu Hafta" value={dashboardStats?.weekCreated || 0} icon={<People />} color="info" loading={statsLoading} />
+            <StatCard title="Toplam Mesaj" value={dashboardStats?.totalMessages || 0} icon={<Message />} color="secondary" loading={statsLoading} />
+          </Box>
+        </SectionCard>
+
+        {/* Recent Activities section */}
+        <SectionCard title="Son Aktiviteler" subtitle="Platformdaki güncel hareketlilik">
+          {activitiesLoading ? (
+            <Box>
+              {[...Array(5)].map((_, index) => (
+                <Box key={index} sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                  <Skeleton variant="circular" width={40} height={40} sx={{ mr: 2 }} />
+                  <Box sx={{ flex: 1 }}>
+                    <Skeleton variant="text" width="70%" />
+                    <Skeleton variant="text" width="50%" />
+                  </Box>
+                </Box>
+              ))}
+            </Box>
+          ) : activitiesError ? (
+            <Alert severity="error">
+              Son aktiviteler yüklenemedi: {(activitiesError as any).message}
+            </Alert>
+          ) : !recentActivities || recentActivities.length === 0 ? (
+            <Box sx={{ textAlign: 'center', py: 3 }}>
+              <Typography color="text.secondary">Son 24 saatte aktivite bulunmuyor</Typography>
+            </Box>
+          ) : (
+            <List sx={{ '& .MuiListItem-root': { px: 0 } }}>
+              {recentActivities.slice(0, 8).map((activity, index) => (
+                <React.Fragment key={activity.id}>
+                  <ListItem>
+                    <ListItemAvatar>
+                      <Avatar
+                        sx={(theme) => ({
+                          width: 40,
+                          height: 40,
+                          bgcolor: activity.type === 'user' 
+                            ? alpha(theme.palette.success.main, 0.1)
+                            : alpha(theme.palette.primary.main, 0.1),
+                          color: activity.type === 'user'
+                            ? theme.palette.success.main
+                            : theme.palette.primary.main
+                        })}
+                      >
+                        {activity.type === 'user' ? <PersonAdd /> : <PostAdd />}
+                      </Avatar>
+                    </ListItemAvatar>
+                    <ListItemText
+                      primary={
+                        <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                          {activity.title}
+                        </Typography>
+                      }
+                      secondary={
+                        <Box>
+                          <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+                            {activity.description}
+                          </Typography>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <Typography variant="caption" color="text.secondary">
+                              {activity.user}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary">•</Typography>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                              <Schedule fontSize="small" sx={{ fontSize: 12 }} />
+                              <Typography variant="caption" color="text.secondary">
+                                {new Date(activity.time).toLocaleString('tr-TR', {
+                                  month: 'short',
+                                  day: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
+                              </Typography>
+                            </Box>
+                            {activity.price && (
+                              <>
+                                <Typography variant="caption" color="text.secondary">•</Typography>
+                                <Typography variant="caption" sx={{ fontWeight: 500 }}>
+                                  {formatTRY(activity.price)}
+                                </Typography>
+                              </>
+                            )}
+                            <Chip
+                              size="small"
+                              label={
+                                activity.status === 'pending' ? 'Onay Bekliyor' :
+                                activity.status === 'approved' ? 'Onaylandı' : 'Aktif'
+                              }
+                              color={
+                                activity.status === 'pending' ? 'warning' :
+                                activity.status === 'approved' ? 'success' : 'default'
+                              }
+                              variant="outlined"
+                              sx={{ ml: 'auto', fontSize: '0.7rem', height: 20 }}
+                            />
+                          </Box>
+                        </Box>
+                      }
+                    />
+                  </ListItem>
+                  {index < recentActivities.length - 1 && index < 7 && <Divider />}
+                </React.Fragment>
+              ))}
+            </List>
+          )}
+          
+          {recentActivities && recentActivities.length > 8 && (
+            <Box sx={{ textAlign: 'center', mt: 2 }}>
+              <Button variant="outlined" size="small">
+                Tümünü Görüntüle ({recentActivities.length})
+              </Button>
+            </Box>
+          )}
         </SectionCard>
 
         {dashboardStats && (

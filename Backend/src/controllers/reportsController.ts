@@ -13,6 +13,51 @@ interface AuthenticatedRequest extends Request {
   };
 }
 
+// Input validation helpers
+function validateReportInput(listingId: string, reasonCode: string, description: string) {
+  const errors: string[] = [];
+  
+  if (!listingId?.trim()) errors.push('listingId is required');
+  if (!reasonCode?.trim()) errors.push('reasonCode is required');
+  if (!description?.trim()) errors.push('description is required');
+  
+  if (description && description.trim().length < 10) {
+    errors.push('Description must be at least 10 characters');
+  }
+  if (description && description.trim().length > 2000) {
+    errors.push('Description must be less than 2000 characters');
+  }
+  
+  const validReasons = Object.values(ReportReason);
+  if (reasonCode && !validReasons.includes(reasonCode as ReportReason)) {
+    errors.push('Invalid reason code');
+  }
+  
+  if (reasonCode === 'OTHER' && description && description.trim().length < 20) {
+    errors.push('Other reason requires at least 20 characters');
+  }
+  
+  return errors;
+}
+
+function validateStatusUpdate(status: string, resolutionNote?: string) {
+  const errors: string[] = [];
+  const validStatuses = ['OPEN', 'UNDER_REVIEW', 'ACCEPTED', 'REJECTED'];
+  
+  if (!status) errors.push('status is required');
+  if (!validStatuses.includes(status)) errors.push('Invalid status');
+  
+  if (resolutionNote && resolutionNote.length > 1000) {
+    errors.push('Resolution note must be less than 1000 characters');
+  }
+  
+  if (status === 'REJECTED' && (!resolutionNote || resolutionNote.trim().length < 10)) {
+    errors.push('Resolution note is required and must be at least 10 characters when rejecting');
+  }
+  
+  return errors;
+}
+
 export class ReportsController {
   
   // POST /api/reports - Şikayet oluştur
@@ -26,16 +71,12 @@ export class ReportsController {
       const { listingId, reasonCode, description } = req.body;
 
       // Validasyon
-      if (!listingId || !reasonCode || !description) {
-        return res.status(400).json({ success: false, message: 'Missing required fields' });
-      }
-
-      if (description.trim().length < 10) {
-        return res.status(400).json({ success: false, message: 'Description must be at least 10 characters' });
-      }
-
-      if (reasonCode === 'OTHER' && description.trim().length < 20) {
-        return res.status(400).json({ success: false, message: 'Other reason requires at least 20 characters' });
+      const validationErrors = validateReportInput(listingId, reasonCode, description);
+      if (validationErrors.length > 0) {
+        return res.status(400).json({ 
+          success: false, 
+          message: validationErrors[0] 
+        });
       }
 
       const report = await createReport({
@@ -158,9 +199,12 @@ export class ReportsController {
       const { status, resolutionNote, removeListing } = req.body;
 
       // Validasyon
-      const validStatuses = ['OPEN', 'UNDER_REVIEW', 'ACCEPTED', 'REJECTED'];
-      if (!validStatuses.includes(status)) {
-        return res.status(400).json({ success: false, message: 'Invalid status' });
+      const validationErrors = validateStatusUpdate(status, resolutionNote);
+      if (validationErrors.length > 0) {
+        return res.status(400).json({ 
+          success: false, 
+          message: validationErrors[0] 
+        });
       }
 
       const updated = await adminUpdateStatus({

@@ -206,30 +206,58 @@ export async function adminUpdateStatus({
   resolutionNote?: string;
   removeListing?: boolean;
 }) {
-  const report = await prisma.reports.findUnique({ where: { id } });
+  const report = await prisma.reports.findUnique({
+    where: { id },
+    select: { id: true, status: true, updated_at: true, reporter_id: true, listing_id: true }
+  });
+  
   if (!report) throw new Error('Report not found');
+
+  // Transition guard
+  if (['ACCEPTED','REJECTED'].includes(report.status)) {
+    throw new Error('Resolved reports cannot be changed');
+  }
+  if (status === 'UNDER_REVIEW' && report.status !== 'OPEN') {
+    throw new Error('Only OPEN → UNDER_REVIEW allowed');
+  }
 
   if (status === 'REJECTED' && !resolutionNote) {
     throw new Error('Resolution note is required when rejecting');
   }
 
+  if (removeListing && status !== 'ACCEPTED') {
+    throw new Error('removeListing only allowed when ACCEPTED');
+  }
+
   const updated = await prisma.$transaction(async (tx) => {
     const prev = report.status;
 
-    const r = await tx.reports.update({
-      where: { id },
+    // optimistic concurrency: updated_at şart koş
+    const updatedCount = await tx.reports.updateMany({
+      where: { id, updated_at: report.updated_at },
       data: {
         status: status as any,
         resolution_note: resolutionNote ?? null,
         reviewer_id: reviewerId,
       },
+    });
+    if (updatedCount.count === 0) {
+      throw new Error('Conflict: report was modified. Refresh and retry.');
+    }
+
+    const r = await tx.reports.findUnique({
+      where: { id },
       include: {
         reporter: { select: { id: true, first_name: true, last_name: true } },
         owner: { select: { id: true } },
         listing: { select: { id: true, title: true } },
-        reviewer: { select: { id: true, first_name: true, last_name: true } }, // 👈 ekle
+        reviewer: { select: { id: true, first_name: true, last_name: true } },
       },
     });
+
+    if (!r) {
+      throw new Error('Report not found after update');
+    }
 
     await tx.report_history.create({
       data: {
@@ -306,6 +334,21 @@ export async function adminUpdateStatus({
         }
       );
     }
+
+    // Real-time notification to user about report status update
+    emitToUser(
+      updated.reporter_id,
+      'user:report:status-update',
+      {
+        reportId: updated.id,
+        reporterId: updated.reporter_id,
+        listingId: updated.listing_id,
+        oldStatus: report.status,
+        newStatus: status,
+        resolutionNote,
+        updatedAt: new Date().toISOString()
+      }
+    );
 
     // Notify all admins about the resolution
     emitToAdmins('admin:report:resolved', {

@@ -22,8 +22,9 @@ import {
 } from '@mui/material';
 import { Delete, Search } from '@mui/icons-material';
 import TruckCenterCard from '../../components/cards/TruckCenterCard';
+import { SimpleListing } from '../../context/ListingContext';
 import { api } from '../../services/api';
-import { useConfirmDialog } from '../../hooks/useConfirmDialog';
+// import { useConfirmDialog } from '../../hooks/useConfirmDialog'; // Unused for now
 
 interface Listing {
   id: string;
@@ -58,7 +59,7 @@ interface AdminListingsResponse {
 }
 
 const AllListings = () => {
-  const { confirm } = useConfirmDialog();
+  // const { confirm } = useConfirmDialog(); // Unused for now
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -153,34 +154,29 @@ const AllListings = () => {
   };
 
   // Transform API data to match TruckCenterCard expectations
-  const transformListing = (listing: Listing) => ({
+  const transformListing = (listing: Listing): SimpleListing => ({
     id: listing.id,
     title: listing.title,
     price: listing.price,
-    category: listing.categories.name,
+    category: listing.categories?.name || 'N/A',
+    brand: 'N/A',
     model: listing.title.split(' ').slice(0, 2).join(' '),
     year: listing.year,
-    kilometers: listing.kilometers,
-    city: listing.city_name,
-    district: listing.district_name,
-    description: listing.description,
+    km: listing.kilometers || 0,
+    location: `${listing.city_name || 'N/A'}, ${listing.district_name || 'N/A'}`,
+    image: (listing.images && listing.images.length > 0) ? listing.images[0] : '/placeholder.jpg',
     images: listing.images || [],
-    publishDate: new Date(listing.created_at).toLocaleDateString('tr-TR'),
+    seller: {
+      name: `${listing.users.first_name} ${listing.users.last_name}`,
+      phone: listing.users.phone || '',
+    },
     owner: {
       name: `${listing.users.first_name} ${listing.users.last_name}`,
-      phone: listing.users.phone,
+      phone: listing.users.phone || '',
     },
-    details: {
-      year: listing.year,
-      km: listing.kilometers,
-      location: `${listing.city_name}, ${listing.district_name}`,
-      description: listing.description,
-    },
-    views: 0,
+    status: (listing.status as 'PENDING' | 'APPROVED' | 'REJECTED') || 'PENDING',
     isFavorite: false,
-    status: listing.status as any,
-    createdAt: new Date(listing.created_at),
-    updatedAt: new Date(listing.created_at),
+    createdAt: listing.created_at,
   });
 
   if (error) {

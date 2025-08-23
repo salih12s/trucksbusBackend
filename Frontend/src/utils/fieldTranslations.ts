@@ -1,5 +1,30 @@
 // Araç özelliklerinin Türkçe çevirileri
 export const fieldTranslations: Record<string, string> = {
+  // Backend'den gelen İngilizce label'lar
+  'Color': 'Renk',
+  'Plate Origin': 'Plaka Menşei',
+  'Tire Condition': 'Lastik Durumu',
+  'Transmission': 'Şanzıman',
+  'Vehicle Condition': 'Araç Durumu',
+  'Vehicle Plate': 'Araç Plakası',
+  'Engine Power': 'Motor Gücü',
+  'Engine Volume': 'Motor Hacmi',
+  'Fuel Type': 'Yakıt Tipi',
+  'Motor Power': 'Motor Gücü',
+  'Body Type': 'Gövde Tipi',
+  'Cabin Type': 'Kabin Tipi',
+  'Damage Record': 'Hasar Kaydı',
+  'Paint Change': 'Boya Değişimi',
+  'Features': 'Özellikler',
+  'Garanti': 'Garanti',
+  'Is Exchangeable': 'Takaslanabilir',
+
+  // Backend'den gelen grup label'ları
+  'Genel Bilgiler': 'Genel Bilgiler',
+  'Motor & Performans': 'Motor & Performans',
+  'Özellikler': 'Özellikler',
+  'Teknik Özellikler': 'Teknik Özellikler',
+
   // Temel Araç Bilgileri (backend'den gelen alanlar)
   'fuel_type': 'Yakıt Tipi',
   'fuel_capacity': 'Yakıt Kapasitesi',

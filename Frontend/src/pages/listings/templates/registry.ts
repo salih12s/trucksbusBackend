@@ -1,4 +1,4 @@
-import React from 'react';
+import { ReactNode } from 'react';
 import { 
   LocalShipping, 
   AcUnit, 
@@ -25,7 +25,7 @@ export interface CategoryConfig {
   // Ana görsel özellikler
   heroColor: string;
   badge?: string;
-  icon: React.ElementType; // ✅ any yerine
+  icon: any;
   
   // Hangi alanlar öncelikli gösterilsin
   priorityFields: string[];
@@ -35,13 +35,15 @@ export interface CategoryConfig {
     [groupName: string]: {
       label: string;
       fields: string[];
-      icon?: React.ElementType; // ✅ any yerine
+      icon?: any;
       order: number;
     };
   };
   
   // Özel formatlamalar
-  fieldFormatters?: Record<string, (v: any) => React.ReactNode>;
+  fieldFormatters?: {
+    [fieldName: string]: (value: any) => ReactNode;
+  };
 }
 export const CATEGORY_CONFIGS: Record<string, CategoryConfig> = {
   // 🧊 FRİGOFİRİK (Soğutuculu Araçlar)
@@ -408,6 +410,28 @@ export const CATEGORY_CONFIGS: Record<string, CategoryConfig> = {
     }
   },
 
+  // 🧵 TEKSTİL
+  'tekstil': {
+    heroColor: '#e91e63', // Pembe
+    badge: 'Tekstil',
+    icon: LocalShipping,
+    priorityFields: ['year', 'takasli'],
+    fieldGroups: {
+      basic: {
+        label: 'Temel Bilgiler',
+        icon: InfoIcon,
+        order: 1,
+        fields: ['title', 'description', 'price', 'year']
+      },
+      features: {
+        label: 'Özellikler',
+        icon: StarIcon,
+        order: 2,
+        fields: ['takasli', 'warranty', 'negotiable', 'exchange']
+      }
+    }
+  },
+
   // 🌾 SİLOBAS
   'silobas': {
     heroColor: '#ff9800', // Turuncu
@@ -724,35 +748,7 @@ export const CATEGORY_CONFIGS: Record<string, CategoryConfig> = {
     }
   },
 
-  // 🧵 TEKSTİL 
-  'tekstil': {
-    heroColor: '#e91e63', // Pembe
-    badge: 'Tekstil',
-    icon: CategoryIcon,
-    priorityFields: ['title', 'year', 'price', 'takasli'],
-    fieldGroups: {
-      basic: {
-        label: 'Temel Bilgiler',
-        icon: InfoIcon,
-        order: 1,
-        fields: ['title', 'description', 'price', 'year']
-      },
-      textile: {
-        label: 'Tekstil Özellikleri',
-        icon: CategoryIcon,
-        order: 2,
-        fields: ['takasli']
-      },
-      condition: {
-        label: 'Durum & Seçenekler',
-        icon: VerifiedIcon,
-        order: 3,
-        fields: ['warranty', 'negotiable', 'exchange']
-      }
-    }
-  },
-
-  // 🎯 DEFAULT - Diğer tüm kategoriler
+  // �🎯 DEFAULT - Diğer tüm kategoriler
   'default': {
     heroColor: '#757575', // Gri
     badge: 'Araç',
@@ -777,10 +773,6 @@ export const CATEGORY_CONFIGS: Record<string, CategoryConfig> = {
 
 // Kategori slug'ından config döndüren function
 export const getCategoryConfig = (categorySlug: string, vehicleTypeSlug?: string): CategoryConfig => {
-  // B: hem "category:vehicleType" hem fallback
-  const keyCombo = vehicleTypeSlug ? `${categorySlug}:${vehicleTypeSlug}` : undefined;
-  if (keyCombo && CATEGORY_CONFIGS[keyCombo]) return CATEGORY_CONFIGS[keyCombo];
-  
   // Önce vehicle_type ile dene
   if (vehicleTypeSlug && CATEGORY_CONFIGS[vehicleTypeSlug]) {
     return CATEGORY_CONFIGS[vehicleTypeSlug];

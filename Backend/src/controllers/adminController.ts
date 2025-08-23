@@ -314,6 +314,16 @@ export const getListings = async (req: Request, res: Response): Promise<void> =>
               phone: true
             }
           },
+          listing_images: {
+            select: {
+              id: true,
+              url: true,
+              sort_order: true
+            },
+            orderBy: {
+              sort_order: 'asc'
+            }
+          },
           listing_properties: {
             select: {
               id: true,
@@ -402,6 +412,16 @@ export const getPendingListings = async (req: Request, res: Response): Promise<v
               last_name: true,
               email: true,
               phone: true
+            }
+          },
+          listing_images: {
+            select: {
+              id: true,
+              url: true,
+              sort_order: true
+            },
+            orderBy: {
+              sort_order: 'asc'
             }
           },
           listing_properties: {
@@ -917,6 +937,16 @@ export const getListingDetail = async (req: Request, res: Response): Promise<voi
             created_at: true
           }
         },
+        listing_images: {
+          select: {
+            id: true,
+            url: true,
+            sort_order: true
+          },
+          orderBy: {
+            sort_order: 'asc'
+          }
+        },
         listing_properties: {
           select: {
             id: true,
@@ -1015,6 +1045,7 @@ export const getListingDetail = async (req: Request, res: Response): Promise<voi
       ) : {}
     };
 
+    console.log('� TRANSFORMED Images:', transformedListing.listing_images?.length || 0);
     console.log('� TRANSFORMED Properties:', transformedListing.listing_properties?.length || 0);
     console.log('� TRANSFORMED Features:', transformedListing.features);
 

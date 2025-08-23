@@ -848,3 +848,131 @@ ConnectorError(ConnectorError { user_facing_error: None, kind: QueryError(Postgr
     at ei.request (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:143:12)
     at async a (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:833:24)
     at async createListing (C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\listingController.ts:143:21)
+2025-08-23 08:30:22 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/listingController.ts[0m:[93m669[0m:[93m88[0m - [91merror[0m[90m TS2345: [0mArgument of type 'string | number | true | JsonObject' is not assignable to parameter of type 'string'.
+  Type 'number' is not assignable to type 'string'.
+
+[7m669[0m         const imageArray = Array.isArray(listing.images) ? listing.images : JSON.parse(listing.images);
+[7m   [0m [91m                                                                                       ~~~~~~~~~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-23 08:32:21 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/listingController.ts[0m:[93m686[0m:[93m36[0m - [91merror[0m[90m TS2448: [0mBlock-scoped variable 'values' used before its declaration.
+
+[7m686[0m       processedValues: Object.keys(values)
+[7m   [0m [91m                                   ~~~~~~[0m
+
+  [96msrc/controllers/listingController.ts[0m:[93m690[0m:[93m11[0m
+    [7m690[0m     const values: Record<string, any> = {};
+    [7m   [0m [96m          ~~~~~~[0m
+    'values' is declared here.
+[96msrc/controllers/listingController.ts[0m:[93m686[0m:[93m36[0m - [91merror[0m[90m TS2454: [0mVariable 'values' is used before being assigned.
+
+[7m686[0m       processedValues: Object.keys(values)
+[7m   [0m [91m                                   ~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-23 08:32:41 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/listingController.ts[0m:[93m686[0m:[93m36[0m - [91merror[0m[90m TS2448: [0mBlock-scoped variable 'values' used before its declaration.
+
+[7m686[0m       processedValues: Object.keys(values)
+[7m   [0m [91m                                   ~~~~~~[0m
+
+  [96msrc/controllers/listingController.ts[0m:[93m690[0m:[93m11[0m
+    [7m690[0m     const values: Record<string, any> = {};
+    [7m   [0m [96m          ~~~~~~[0m
+    'values' is declared here.
+[96msrc/controllers/listingController.ts[0m:[93m686[0m:[93m36[0m - [91merror[0m[90m TS2454: [0mVariable 'values' is used before being assigned.
+
+[7m686[0m       processedValues: Object.keys(values)
+[7m   [0m [91m                                   ~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-23 08:48:44 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/listingController.ts[0m:[93m757[0m:[93m9[0m - [91merror[0m[90m TS1128: [0mDeclaration or statement expected.
+
+[7m757[0m     }); else {
+[7m   [0m [91m        ~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-23 16:18:46 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/listingController.ts[0m:[93m957[0m:[93m9[0m - [91merror[0m[90m TS1117: [0mAn object literal cannot have multiple properties with the same name.
+
+[7m957[0m         'is_exchangeable': 'Takaslanabilir',
+[7m   [0m [91m        ~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/listingController.ts[0m:[93m959[0m:[93m9[0m - [91merror[0m[90m TS1117: [0mAn object literal cannot have multiple properties with the same name.
+
+[7m959[0m         'axle_count': 'Dingil Sayısı',
+[7m   [0m [91m        ~~~~~~~~~~~~[0m
+[96msrc/controllers/listingController.ts[0m:[93m961[0m:[93m9[0m - [91merror[0m[90m TS1117: [0mAn object literal cannot have multiple properties with the same name.
+
+[7m961[0m         'tire_condition': 'Lastik Durumu',
+[7m   [0m [91m        ~~~~~~~~~~~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-23 16:21:47 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/listingController.ts[0m:[93m315[0m:[93m15[0m - [91merror[0m[90m TS2322: [0mType 'string' is not assignable to type 'PropertyType'.
+
+[7m315[0m               type: propertyType // Dinamik tip belirleme
+[7m   [0m [91m              ~~~~[0m
+
+  [96mnode_modules/.prisma/client/index.d.ts[0m:[93m40681[0m:[93m5[0m
+    [7m40681[0m     type: $Enums.PropertyType
+    [7m     [0m [96m    ~~~~[0m
+    The expected type comes from property 'type' which is declared here on type '(Without<listing_propertiesCreateInput, listing_propertiesUncheckedCreateInput> & listing_propertiesUncheckedCreateInput) | (Without<...> & listing_propertiesCreateInput)'
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)

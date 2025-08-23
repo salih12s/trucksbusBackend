@@ -97,11 +97,14 @@ export interface StandardListingPayload {
   city_id?: string;
   district_id?: string;
   
-  // Features from form checkboxes
-  features?: Record<string, boolean | string | number>;
-  
   // Special properties for dorse/trailer forms
   properties?: Record<string, string | number | boolean>;
+  
+  // Features for vehicle forms (Kamyon, Otobüs, etc.)
+  features?: Record<string, boolean>;
+  
+  // SafetyFeatures for OtoKurtarici forms
+  safetyFeatures?: string[];
 }
 
 export const validateListingPayload = (payload: Partial<StandardListingPayload>): { isValid: boolean; errors: string[] } => {
@@ -120,16 +123,8 @@ export const validateListingPayload = (payload: Partial<StandardListingPayload>)
 };
 
 export const createStandardPayload = (formData: any, additionalProperties?: Record<string, any>): StandardListingPayload => {
-  // Extract features from additionalProperties if available
-  let features = additionalProperties?.features || formData.features || {};
-  
-  // Clean up additionalProperties (remove features as it will be handled separately)
-  const cleanAdditionalProperties = additionalProperties ? { ...additionalProperties } : {};
-  if (cleanAdditionalProperties.features) {
-    delete cleanAdditionalProperties.features;
-  }
-  
-  return {
+  // Temel payload oluştur
+  const payload: StandardListingPayload = {
     title: formData.title?.trim() || '',
     description: formData.description?.trim() || '',
     price: Number(formData.price) || 0,
@@ -146,7 +141,62 @@ export const createStandardPayload = (formData: any, additionalProperties?: Reco
     seller_name: formData.seller_name || formData.sellerName || formData.contactName || undefined,
     seller_phone: formData.seller_phone || formData.sellerPhone || formData.contactPhone || undefined,
     images: Array.isArray(formData.images) ? formData.images : [],
-    features: features, // Add features directly to payload
-    properties: Object.keys(cleanAdditionalProperties).length > 0 ? cleanAdditionalProperties : undefined
   };
+
+  // Properties desteği (tüm küçük formlar için)
+  if (formData.properties || additionalProperties) {
+    payload.properties = { ...formData.properties, ...additionalProperties };
+  }
+
+  // Features desteği (Büyük araç formları için)
+  if (formData.features) {
+    payload.features = formData.features;
+  }
+
+  // SafetyFeatures desteği (OtoKurtarici formları için)
+  if (formData.safetyFeatures) {
+    payload.safetyFeatures = formData.safetyFeatures;
+  }
+
+  // Form verilerinden özellik çıkarma (formData'dan direct property'ler)
+  const extractProperties = () => {
+    const props: Record<string, any> = {};
+    
+    // Yaygın teknik özellikler
+    if (formData.genislik) props.genislik = formData.genislik;
+    if (formData.uzunluk) props.uzunluk = formData.uzunluk;
+    if (formData.yukseklik) props.yukseklik = formData.yukseklik;
+    if (formData.lastikDurumu) props.lastikDurumu = formData.lastikDurumu;
+    if (formData.dingilSayisi) props.dingilSayisi = formData.dingilSayisi;
+    if (formData.istiapHaddi) props.istiapHaddi = formData.istiapHaddi;
+    if (formData.devrilmeYonu) props.devrilmeYonu = formData.devrilmeYonu;
+    if (formData.kapakYuksekligi) props.kapakYuksekligi = formData.kapakYuksekligi;
+    if (formData.havuzDerinligi) props.havuzDerinligi = formData.havuzDerinligi;
+    if (formData.havuzGenisligi) props.havuzGenisligi = formData.havuzGenisligi;
+    if (formData.havuzUzunlugu) props.havuzUzunlugu = formData.havuzUzunlugu;
+    
+    // Boolean özellikler
+    if (typeof formData.krikoAyak === 'boolean') props.krikoAyak = formData.krikoAyak;
+    if (typeof formData.takasli === 'boolean') props.takasli = formData.takasli;
+    if (typeof formData.devrilmeArkaya === 'boolean') props.devrilmeArkaya = formData.devrilmeArkaya;
+    if (typeof formData.devrilmeSaga === 'boolean') props.devrilmeSaga = formData.devrilmeSaga;
+    if (typeof formData.devrilmeSola === 'boolean') props.devrilmeSola = formData.devrilmeSola;
+    if (typeof formData.uzatilabilirProfil === 'boolean') props.uzatilabilirProfil = formData.uzatilabilirProfil;
+    if (typeof formData.warranty === 'boolean') props.warranty = formData.warranty;
+    if (typeof formData.negotiable === 'boolean') props.negotiable = formData.negotiable;
+    if (typeof formData.exchange === 'boolean') props.exchange = formData.exchange;
+    if (typeof formData.isExchangeable === 'boolean') props.isExchangeable = formData.isExchangeable;
+    
+    return Object.keys(props).length > 0 ? props : undefined;
+  };
+
+  // Eğer properties yoksa ama form verisinde özellikler varsa, bunları properties'e ekle
+  if (!payload.properties) {
+    const extractedProps = extractProperties();
+    if (extractedProps) {
+      payload.properties = extractedProps;
+    }
+  }
+
+  return payload;
 };

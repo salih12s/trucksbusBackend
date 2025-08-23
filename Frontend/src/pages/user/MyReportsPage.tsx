@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import {
   Box,
   Paper,
@@ -68,6 +68,7 @@ const MyReportsPage: React.FC = () => {
   
   // Status update banner
   const [statusUpdateBanner, setStatusUpdateBanner] = useState<string | null>(null);
+  const bannerTimer = useRef<number | null>(null);
 
   // Check authentication
   useEffect(() => {
@@ -97,12 +98,12 @@ const MyReportsPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [statusFilter, isAuthenticated]);
+  }, [statusFilter, isAuthenticated, showErrorNotification]);
 
   // Load reports on mount and filter changes
   useEffect(() => {
     loadReports(1);
-  }, [statusFilter, isAuthenticated]);
+  }, [loadReports]);
 
   // Socket listener for report status updates
   useEffect(() => {
@@ -115,8 +116,9 @@ const MyReportsPage: React.FC = () => {
         setStatusUpdateBanner(
           `Şikayetiniz ${getStatusLabel(payload.newStatus).toLowerCase()} durumuna geçti.`
         );
-        // Auto-hide banner after 5 seconds
-        setTimeout(() => setStatusUpdateBanner(null), 5000);
+        // Auto-hide banner after 5 seconds with cleanup
+        if (bannerTimer.current) window.clearTimeout(bannerTimer.current);
+        bannerTimer.current = window.setTimeout(() => setStatusUpdateBanner(null), 5000);
         // Refresh the list
         loadReports(page);
       }
@@ -124,6 +126,7 @@ const MyReportsPage: React.FC = () => {
     
     socket.on('user:report:status-update', handleReportUpdate);
     return () => {
+      if (bannerTimer.current) window.clearTimeout(bannerTimer.current);
       socket.off('user:report:status-update', handleReportUpdate);
     };
   }, [socket, user, page, loadReports]);

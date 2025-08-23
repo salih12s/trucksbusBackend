@@ -264,6 +264,7 @@ const CokluAracForm: React.FC = () => {
         vehicle_condition: 'İyi',
         is_exchangeable: formData.isExchangeable === 'yes',
         images: imageUrls,
+        safetyFeatures: formData.safetyFeatures, // safetyFeatures'ı ana objede gönder
         properties: {
           vehicleBrand: formData.vehicleBrand,
           engineVolume: formData.engineVolume,
@@ -275,7 +276,6 @@ const CokluAracForm: React.FC = () => {
           loadCapacity: formData.loadCapacity,
           licensePlate: formData.licensePlate,
           towingEquipment: formData.towingEquipment,
-          safetyFeatures: formData.safetyFeatures,
           vehicleEquipment: formData.vehicleEquipment,
           priceType: formData.priceType,
           currency: formData.currency

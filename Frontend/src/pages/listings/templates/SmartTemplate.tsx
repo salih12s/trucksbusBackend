@@ -1,550 +1,505 @@
+// SmartTemplate - Dynamic template system for listing details
 import React from 'react';
 import {
-  Box,
   Container,
   Typography,
+  Paper,
+  Box,
+  Stack,
   Chip,
-  Card,
-  CardContent,
-  useTheme,
-  useMediaQuery,
-  Divider,
-  Stack
+  Avatar,
+  Button,
+  IconButton
 } from '@mui/material';
-import { getCategoryConfig, commonFormatters } from './registry';
-import MediaGallery from '../components/MediaGallery';
+import {
+  Phone,
+  Email,
+  LocationOn,
+  Visibility,
+  CalendarToday,
+  Share,
+  Check as CheckIcon,
+  FavoriteBorder,
+  Report
+} from '@mui/icons-material';
+import { formatTRY } from '../../../utils/format';
 import { translateField, translateValue } from '../../../utils/fieldTranslations';
+import { getCategoryConfig } from './registry';
+import ImageCarousel from '../components/ImageCarousel';
+import SpecGroup from '../components/SpecGroup';
 
-type DataType = 'TEXT'|'NUMBER'|'BOOLEAN'|'MULTISELECT'|'CURRENCY';
-
-// Tip normalizasyonları
-const toBool = (v: any) => {
-  if (typeof v === 'boolean') return v;
-  if (v === 1 || v === '1') return true;
-  if (typeof v === 'string') {
-    const s = v.trim().toLowerCase();
-    return ['true', 'evet', 'yes', 'on', '1'].includes(s);
-  }
-  return false;
-};
-
-const toArray = (v: any): string[] => {
-  if (Array.isArray(v)) return v.filter(Boolean).map(String);
-  if (v == null) return [];
-  if (typeof v === 'string') {
-    const trimmed = v.trim();
-    if (!trimmed) return [];
-    try { const parsed = JSON.parse(trimmed); if (Array.isArray(parsed)) return parsed.filter(Boolean).map(String); } catch {}
-    return trimmed.split(',').map((s) => s.trim()).filter(Boolean);
-  }
-  return [String(v)];
-};
-
-const formatByType = (dataType: string, value: any, unit?: string) => {
-  switch (dataType) {
-    case 'NUMBER': {
-      const n = Number(value);
-      return Number.isNaN(n) ? '' : new Intl.NumberFormat('tr-TR').format(n) + (unit ? ` ${unit}` : '');
-    }
-    case 'BOOLEAN': return toBool(value) ? 'Evet' : 'Hayır';
-    case 'CURRENCY': {
-      const n = Number(value);
-      return Number.isNaN(n)
-        ? ''
-        : new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY', minimumFractionDigits: 0 }).format(n);
-    }
-    case 'MULTISELECT': {
-      const arr = toArray(value);
-      return arr.length ? arr.map(val => translateValue(val)).join(', ') : '';
-    }
-    default: return translateValue(value ?? '');
-  }
-};
-
-const isFilled = (dataType: string | undefined, v: any): boolean => {
-  if (v === null || v === undefined) return false;
-  if (dataType === 'MULTISELECT') return toArray(v).length > 0;
-  if (dataType === 'BOOLEAN') return true; // bool her zaman gösterilebilir
-  if (dataType === 'NUMBER' || dataType === 'CURRENCY') return String(v).trim() !== '' && !Number.isNaN(Number(v));
-  if (typeof v === 'string') return v.trim() !== '';
-  return true;
-};
-
-interface SmartTemplateProps {
-  base: {
+interface ListingBase {
+  id: string;
+  title: string;
+  description?: string;
+  price: number;
+  status: string;
+  isApproved: boolean;
+  views: number;
+  category: {
     id: string;
-    title: string;
-    description?: string;
-    price?: number;
-    status?: string;
-    isApproved?: boolean;
-    category: { name: string; slug: string };
-    vehicle_type?: { name: string; slug: string };
-    brand?: { name: string };
-    model?: { name: string };
-    variant?: { name: string };
-    year?: number;
-    km?: number;
-    locationText?: string;
-    seller: { name: string; phone?: string; email?: string };
-    media: Array<{ url: string; width?: number; height?: number; alt?: string; sort?: number; }>;
-    createdAt: string;
-    views?: number;
-    features?: Record<string, string | boolean>; // Backend'den gelen işlenmiş features
+    name: string;
+    slug: string;
   };
-  schema: {
-    groups: Array<{
-      key: string;
-      label: string;
-      order: number;
-      attributes: Array<{
-        key: string;
-        label: string;
-        data_type: DataType | string;
-        input_type?: string;
-        unit?: string;
-        icon?: string;
-        order: number;
-        is_required?: boolean;
-      }>;
-    }>;
-    flat: Array<{
-      key: string;
-      label: string;
-      data_type: DataType | string;
-      input_type?: string;
-      unit?: string;
-      icon?: string;
-      order: number;
-      is_required?: boolean;
-    }>;
+  vehicle_type: {
+    id: string;
+    name: string;
+    slug: string;
   };
-  values: Record<string, any>;
+  brand?: {
+    id: string;
+    name: string;
+  };
+  model?: {
+    id: string;
+    name: string;
+  };
+  variant?: {
+    id: string;
+    name: string;
+  };
+  year?: number;
+  km?: number;
+  locationText: string;
+  createdAt: string;
+  updatedAt: string;
+  seller: {
+    name: string;
+    phone?: string;
+    email?: string;
+  };
+  media: Array<{
+    url: string;
+    alt: string;
+    sort: number;
+  }>;
+  features: Record<string, any>;
+  listing_properties?: Array<{
+    key: string;
+    value: string;
+    type: string;
+  }>;
 }
 
-const SmartTemplate: React.FC<SmartTemplateProps> = ({ base, schema, values }) => {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+interface SchemaGroup {
+  key: string;
+  label: string;
+  order: number;
+  attributes: Array<{
+    key: string;
+    label: string;
+    data_type: 'TEXT' | 'NUMBER' | 'BOOLEAN' | 'ENUM' | 'MULTISELECT' | 'STRING';
+    is_required: boolean;
+    order: number;
+  }>;
+}
 
-  // ✅ Aliases (geri uyum)
-  const KEY_ALIASES: Record<string, string> = {
-    uzunluk: 'length',
-    genislik: 'width',
-    lastikDurumu: 'tireCondition',
-    sogutucu: 'coolingUnit',
-    takasli: 'exchangeable',
-    exchange: 'exchangeable',
-    fuelType: 'fuel_type',
-    yakit: 'fuel_type',
-    vites: 'transmission'
-  };
+interface Schema {
+  groups: SchemaGroup[];
+  flat: Array<{
+    key: string;
+    label: string;
+    data_type: string;
+    is_required: boolean;
+    order: number;
+  }>;
+}
 
-  const valuesWithAliases = React.useMemo(() => {
-    const out: Record<string, any> = { ...values };
-    Object.entries(KEY_ALIASES).forEach(([alias, canonical]) => {
-      if (out[alias] != null && out[canonical] == null) out[canonical] = out[alias];
-    });
-    return out;
-  }, [values]);
+interface SmartTemplateProps {
+  base: ListingBase;
+  values: Record<string, any>;
+  schema: Schema;
+}
 
-  // ✅ Kategori config
-  const config = getCategoryConfig(base.category.slug, base.vehicle_type?.slug);
+const SmartTemplate: React.FC<SmartTemplateProps> = ({ base, values, schema }) => {
+  // Get template configuration based on category and vehicle type
+  const categorySlug = base.category?.slug || 'default';
+  const vehicleTypeSlug = base.vehicle_type?.slug || 'default';
+  const templateConfig = getCategoryConfig(categorySlug, vehicleTypeSlug);
 
-  // ✅ schema.groups + schema.flat → tek map
-  const flatAttrsMap = React.useMemo(() => {
-    const g = (schema?.groups ?? []).flatMap((gr) => gr.attributes ?? []);
-    const f = schema?.flat ?? [];
-    const all = [...g, ...f];
-    const map: Record<string, any> = {};
-    all.forEach((attr) => { if (!map[attr.key]) map[attr.key] = attr; });
-    return map;
-  }, [schema]);
+  // Debug: Check if we're receiving properties data
+  console.log('🔍 SmartTemplate Props Debug:', {
+    baseId: base.id,
+    baseTitle: base.title,
+    hasValues: !!values,
+    valuesKeys: Object.keys(values || {}),
+    values: values,
+    hasSchemaGroups: !!schema.groups?.length,
+    schemaGroupsCount: schema.groups?.length || 0,
+    hasBaseFeatures: !!base.features,
+    baseFeatures: base.features
+  });
 
-  // ✅ Öncelikli alanlar
-  const priorityData = (config.priorityFields || [])
-    .map((key) => flatAttrsMap[key])
-    .filter(Boolean)
-    .map((attr: any) => ({ ...attr, value: valuesWithAliases[attr.key] }))
-    .filter((attr: any) => isFilled(String(attr.data_type), attr.value));
+  // Detailed values debug
+  console.log('📊 Values Object Details:', JSON.stringify(values, null, 2));
+  console.log('📋 Schema Object Details:', JSON.stringify(schema, null, 2));
+  console.log('🎯 Base Features Details:', JSON.stringify(base.features, null, 2));
 
-  // ✅ Config grupları
-  const organizedGroups = Object.entries(config.fieldGroups || {})
-    .map(([groupKey, groupCfg]: any) => {
-      const fields = (groupCfg.fields || [])
-        .map((key: string) => flatAttrsMap[key])
-        .filter(Boolean)
-        .map((attr: any) => ({ ...attr, value: valuesWithAliases[attr.key] }))
-        .filter((attr: any) => isFilled(String(attr.data_type), attr.value));
-      return fields.length ? { ...groupCfg, key: groupKey, fields } : null;
-    })
-    .filter(Boolean)
-    .sort((a: any, b: any) => (a.order || 0) - (b.order || 0));
-
-  // ✅ Kalan tüm alanlar
-  const placedKeys = new Set<string>([
-    ...priorityData.map((a: any) => a.key),
-    ...organizedGroups.flatMap((g: any) => g.fields.map((a: any) => a.key)),
-  ]);
-  const leftover = Object.values(flatAttrsMap)
-    .filter((attr: any) => !placedKeys.has(attr.key))
-    .map((attr: any) => ({ ...attr, value: valuesWithAliases[attr.key] }))
-    .filter((attr: any) => isFilled(String(attr.data_type), attr.value))
-    .sort((a: any, b: any) => (a.order || 0) - (b.order || 0));
-
-  const formatFieldValue = (field: any, value: any) => {
-    const custom = (config as any).fieldFormatters?.[field.key];
-    if (typeof custom === 'function') return custom(value);
-    return formatByType(String(field.data_type), value, field.unit);
+  const handleShare = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: base.title,
+        text: `${base.title} - ${formatTRY(base.price)}`,
+        url: window.location.href
+      });
+    } else {
+      // Fallback: Copy to clipboard
+      navigator.clipboard.writeText(window.location.href);
+    }
   };
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4, px: { xs: 2, sm: 3 } }}>
-      {/* Hero Section */}
-      <Card sx={{ mb: 4, borderRadius: 3, overflow: 'hidden', background: `linear-gradient(135deg, ${config.heroColor}15 0%, ${config.heroColor}08 100%)`, boxShadow: 2 }}>
-        <CardContent sx={{ p: { xs: 3, sm: 4 } }}>
-          <Stack direction="row" spacing={2} alignItems="flex-start" mb={2}>
-            {(() => { const Icon = config.icon as any; return <Icon sx={{ color: config.heroColor, fontSize: 40, flexShrink: 0 }} />; })()}
-            <Box flex={1} minWidth={0}>
-              <Typography variant="h4" fontWeight="bold" gutterBottom sx={{ fontSize: { xs: '1.75rem', sm: '2.125rem' }, wordBreak: 'break-word' }}>
-                {base.title}
-              </Typography>
-              <Stack direction="row" spacing={1} flexWrap="wrap" mb={2}>
-                {config.badge && (
-                  <Chip label={config.badge} sx={{ bgcolor: config.heroColor, color: 'white', fontWeight: 'bold' }} />
-                )}
-                {base.brand && <Chip label={base.brand.name} variant="outlined" />}
-                {base.year && <Chip label={base.year} variant="outlined" />}
-                {base.locationText && <Chip label={base.locationText} variant="outlined" />}
-              </Stack>
+    <Container maxWidth="lg" sx={{ py: 3 }}>
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '2fr 1fr' }, gap: 4 }}>
+        {/* Left Column - Main Content */}
+        <Box>
+          {/* Header */}
+          <Box mb={3}>
+            <Stack direction="row" spacing={2} alignItems="flex-start" justifyContent="space-between" mb={2}>
+              <Box flex={1}>
+                <Typography variant="h4" component="h1" gutterBottom>
+                  {base.title}
+                </Typography>
+                
+                <Stack direction="row" spacing={1} alignItems="center" mb={1}>
+                  <Chip
+                    label={base.category?.name}
+                    size="small"
+                    color="primary"
+                    variant="outlined"
+                  />
+                  <Chip
+                    label={base.vehicle_type?.name}
+                    size="small"
+                    color="secondary"
+                    variant="outlined"
+                  />
+                  {base.brand && (
+                    <Chip
+                      label={base.brand.name}
+                      size="small"
+                      variant="outlined"
+                    />
+                  )}
+                  {base.model && (
+                    <Chip
+                      label={base.model.name}
+                      size="small"
+                      variant="outlined"
+                    />
+                  )}
+                </Stack>
+              </Box>
 
-              {/* Priority Fields */}
-              {priorityData.length > 0 && (
-                <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', lg: 'repeat(4, 1fr)' }, gap: 2, mt: 3, p: 2, bgcolor: 'background.paper', borderRadius: 2, border: `1px solid ${config.heroColor}20` }}>
-                  {priorityData.map((field: any) => (
-                    <Box key={field.key} textAlign="center">
-                      <Typography variant="body2" color="text.secondary">{translateField(field.key) || field.label}</Typography>
-                      <Typography variant="h6" fontWeight="bold" color={config.heroColor}>
-                        {formatFieldValue(field, field.value)}
-                      </Typography>
-                    </Box>
-                  ))}
+              <Stack direction="row" spacing={1}>
+                <IconButton onClick={handleShare} size="small">
+                  <Share />
+                </IconButton>
+                <IconButton size="small">
+                  <FavoriteBorder />
+                </IconButton>
+                <IconButton size="small" color="error">
+                  <Report />
+                </IconButton>
+              </Stack>
+            </Stack>
+
+            {/* Basic Info */}
+            <Stack direction="row" spacing={3} flexWrap="wrap" mb={3}>
+              {base.year && (
+                <Box>
+                  <Typography variant="caption" color="text.secondary">
+                    Model Yılı
+                  </Typography>
+                  <Typography variant="body1" fontWeight="medium">
+                    {base.year}
+                  </Typography>
                 </Box>
               )}
-            </Box>
-
-            {/* Fiyat */}
-            {typeof base.price === 'number' && !Number.isNaN(base.price) && (
-              <Box textAlign="right" sx={{ alignSelf: 'flex-start' }}>
-                <Typography variant="h4" fontWeight="bold" color={config.heroColor} sx={{ fontSize: { xs: '1.5rem', sm: '2rem' } }}>
-                  {commonFormatters.currency(base.price)}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">Satış Fiyatı</Typography>
-                {!base.isApproved && (
-                  <Typography variant="caption" color="warning.main" sx={{ display: 'block', mt: 0.5 }}>
-                    ⏳ Onay Bekliyor
+              {base.km && (
+                <Box>
+                  <Typography variant="caption" color="text.secondary">
+                    Kilometre
                   </Typography>
-                )}
-              </Box>
-            )}
-          </Stack>
-        </CardContent>
-      </Card>
+                  <Typography variant="body1" fontWeight="medium">
+                    {base.km.toLocaleString('tr-TR')} km
+                  </Typography>
+                </Box>
+              )}
+            </Stack>
 
-      <Box sx={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '2fr 1fr', gap: { xs: 3, sm: 4 }, alignItems: 'start' }}>
-        {/* Sol */}
-        <Box sx={{ minWidth: 0 }}>
-          {/* Media */}
-          {Array.isArray(base.media) && base.media.length > 0 ? (
-            <Card sx={{ mb: 4, borderRadius: 3, boxShadow: 2 }}>
-              <MediaGallery items={base.media} aspectRatio={isMobile ? '1/1' : '4/3'} />
-            </Card>
-          ) : (
-            <Card sx={{ mb: 4, borderRadius: 3, boxShadow: 2 }}>
-              <Box sx={{ height: 300, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'grey.500', bgcolor: 'grey.50' }}>
-                <Typography variant="h6">Görsel Bulunamadı</Typography>
-              </Box>
-            </Card>
-          )}
-
-          {/* Açıklama */}
-          {base.description && (
-            <Card sx={{ mb: 4, borderRadius: 3 }}>
-              <CardContent>
-                <Typography variant="h6" gutterBottom>Açıklama</Typography>
-                <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>{base.description}</Typography>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Config Grupları */}
-          {organizedGroups.map((group: any) => (
-            <Card key={group.key} sx={{ mb: 3, borderRadius: 3 }}>
-              <CardContent>
-                <Stack direction="row" spacing={1} alignItems="center" mb={2}>
-                  {group.icon && (() => { const GIcon = group.icon as any; return <GIcon sx={{ color: config.heroColor }} />; })()}
-                  <Typography variant="h6" color={config.heroColor}>{group.label}</Typography>
+            {/* Location & Status */}
+            <Stack direction="row" spacing={2} alignItems="center" mb={2}>
+              {base.locationText && (
+                <Stack direction="row" spacing={1} alignItems="center">
+                  <LocationOn fontSize="small" color="action" />
+                  <Typography variant="body2" color="text.secondary">
+                    {base.locationText}
+                  </Typography>
                 </Stack>
+              )}
+              <Stack direction="row" spacing={1} alignItems="center">
+                <Visibility fontSize="small" color="action" />
+                <Typography variant="body2" color="text.secondary">
+                  {base.views || 0} görüntülenme
+                </Typography>
+              </Stack>
+              <Stack direction="row" spacing={1} alignItems="center">
+                <CalendarToday fontSize="small" color="action" />
+                <Typography variant="body2" color="text.secondary">
+                  {new Date(base.createdAt).toLocaleDateString('tr-TR')}
+                </Typography>
+              </Stack>
+            </Stack>
+          </Box>
 
-                <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
-                  {group.fields.map((field: any) => (
-                    <Box key={field.key}>
-                      <Typography variant="body2" color="text.secondary">{translateField(field.key) || field.label}</Typography>
-                      <Typography variant="body1" fontWeight="medium">{formatFieldValue(field, field.value)}</Typography>
-                    </Box>
-                  ))}
-                </Box>
-              </CardContent>
-            </Card>
-          ))}
+          {/* Price & Actions */}
+          <Box textAlign={{ xs: 'left', md: 'right' }}>
+            <Typography variant="h3" color="primary.main" fontWeight="bold" gutterBottom>
+              {formatTRY(base.price)}
+            </Typography>
+          </Box>
 
-          {/* Özellikler (Features) */}
-          {base.features && Object.keys(base.features).length > 0 && (
-            <Card sx={{ mb: 3, borderRadius: 3, overflow: 'hidden' }}>
-              <CardContent sx={{ p: 0 }}>
-                {/* Header */}
-                <Box sx={{ 
-                  p: 3, 
-                  background: `linear-gradient(135deg, ${config.heroColor}20 0%, ${config.heroColor}10 100%)`,
-                  borderBottom: `1px solid ${config.heroColor}15`
-                }}>
-                  <Typography variant="h6" color={config.heroColor} sx={{ 
-                    fontWeight: 'bold',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 1
-                  }}>
-                    ✨ Özellikler
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                    Bu aracın sahip olduğu özellikler
-                  </Typography>
-                </Box>
+          {/* Image Gallery */}
+          <ImageCarousel images={base.media} />
 
-                {/* Features Grid */}
-                <Box sx={{ p: 3 }}>
-                  <Box sx={{ 
-                    display: 'grid', 
-                    gridTemplateColumns: { xs: 'repeat(1, 1fr)', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }, 
-                    gap: 2 
-                  }}>
-                    {Object.entries(base.features).map(([key, value]) => {
-                      // Değer kontrolü - sadece true olan checkbox'ları göster
-                      const isValidFeature = value === true || value === 'true' || (typeof value === 'string' && value !== 'false' && value.trim() !== '');
-                      if (!isValidFeature) return null;
-                      
-                      // Icon belirleme
-                      const getFeatureIcon = (featureKey: string) => {
-                        const iconMap: { [key: string]: string } = {
-                          // Güvenlik
-                          'abs': '🛡️',
-                          'airbag': '🎈',
-                          'esp': '🛡️',
-                          'immobilizer': '🔒',
-                          'centralLocking': '🔐',
-                          
-                          // Konfor
-                          'airConditioning': '❄️',
-                          'heater': '🔥',
-                          'sunroof': '☀️',
-                          'electricWindows': '⚡',
-                          'electricMirrors': '🪞',
-                          'cruiseControl': '🎯',
-                          'bluetooth': '📶',
-                          
-                          // Ses Sistemi
-                          'radio': '📻',
-                          'cdPlayer': '💿',
-                          'radioTape': '📼',
-                          'gps': '🗺️',
-                          'tvNavigation': '📺',
-                          
-                          // Dış Görünüm
-                          'fogLights': '💡',
-                          'xenonLights': '💎',
-                          'ledLights': '✨',
-                          'alloyWheels': '⚙️',
-                          
-                          // Diğer
-                          'parkingSensor': '📍',
-                          'reverseCamera': '📹',
-                          'startStop': '🔄',
-                          'keylessEntry': '🗝️'
-                        };
-                        return iconMap[featureKey] || '🔧';
-                      };
+          {/* Description */}
+          {base.description && (
+            <Box mt={3}>
+              <Typography variant="h6" gutterBottom>
+                İlan Açıklaması
+              </Typography>
+              <Paper sx={{ p: 3 }}>
+                <Typography variant="body1" sx={{ whiteSpace: 'pre-line' }}>
+                  {base.description}
+                </Typography>
+              </Paper>
+            </Box>
+          )}
 
-                      const translatedKey = translateField(key) || key;
-                      const displayValue = (value === true || value === 'true') ? 'Var' : String(value);
+          {/* Technical Specifications */}
+          <Box mt={3}>
+            <Typography variant="h6" gutterBottom>
+              Teknik Özellikler
+            </Typography>
+            
+            <SpecGroup
+              groups={schema.groups
+                .filter(group => group.key !== 'features') // Features'ı ayrı göstereceğiz
+                .map(group => ({
+                  ...group,
+                  attributes: group.attributes
+                    .filter(attr => {
+                      // Sadece checkbox olmayan özellikleri göster
+                      const value = values[attr.key];
+                      return value !== undefined && 
+                             value !== null && 
+                             value !== '' && 
+                             !(value === 'true' || value === 'false') && // String true/false değil
+                             !(typeof value === 'boolean'); // Boolean değil
+                    })
+                    .map(attr => ({
+                      ...attr,
+                      data_type: attr.data_type as 'TEXT' | 'NUMBER' | 'BOOLEAN' | 'ENUM' | 'MULTISELECT'
+                    }))
+              })).filter(group => group.attributes.length > 0)}
+              values={values}
+            />
+          </Box>
 
-                      return (
-                        <Box 
-                          key={key} 
-                          sx={{
-                            p: 2,
-                            border: `1px solid ${config.heroColor}20`,
-                            borderRadius: 2,
-                            backgroundColor: 'background.paper',
-                            transition: 'all 0.2s ease-in-out',
-                            '&:hover': {
-                              transform: 'translateY(-2px)',
-                              boxShadow: `0 4px 12px ${config.heroColor}25`,
-                              borderColor: `${config.heroColor}40`
-                            }
-                          }}
-                        >
-                          <Stack direction="row" spacing={2} alignItems="center">
-                            {/* Icon */}
-                            <Box sx={{
-                              width: 40,
-                              height: 40,
-                              borderRadius: '50%',
-                              backgroundColor: `${config.heroColor}15`,
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              fontSize: '18px'
-                            }}>
-                              {getFeatureIcon(key)}
-                            </Box>
-                            
-                            {/* Text */}
-                            <Box sx={{ minWidth: 0, flex: 1 }}>
-                              <Typography 
-                                variant="body2" 
-                                fontWeight="medium" 
-                                color="text.primary"
-                                sx={{ 
-                                  fontSize: '14px',
-                                  lineHeight: 1.2,
-                                  wordBreak: 'break-word'
-                                }}
-                              >
-                                {translatedKey}
-                              </Typography>
-                              {displayValue !== 'Var' && (
-                                <Typography 
-                                  variant="caption" 
-                                  color="text.secondary"
-                                  sx={{ fontSize: '12px' }}
-                                >
-                                  {displayValue}
-                                </Typography>
-                              )}
-                            </Box>
+          {/* Features/Checkbox Properties */}
+          <Box mt={3}>
+            <Typography variant="h6" gutterBottom>
+              Özellikler
+            </Typography>
+            
+            {(() => {
+              // Checkbox değerlerini filtrele - base.features objesi ve true/false string değerleri
+              console.log('🔍 Filtering checkboxes from:', { 
+                baseFeatures: base.features, 
+                valuesWithTrueFalse: Object.entries(values).filter(([k,v]) => v === 'true' || v === 'false' || v === true || v === false)
+              });
 
-                            {/* Checkmark */}
-                            <Box sx={{
-                              width: 20,
-                              height: 20,
-                              borderRadius: '50%',
-                              backgroundColor: config.heroColor,
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              color: 'white',
-                              fontSize: '12px'
-                            }}>
-                              ✓
-                            </Box>
-                          </Stack>
-                        </Box>
-                      );
-                    })}
-                  </Box>
+              const checkboxValues: Array<[string, boolean]> = [];
+              const allFeatures: Array<{ key: string; label: string; value: string; isSelected: boolean; category: string }> = [];
 
-                  {/* Feature sayısı */}
-                  <Box sx={{ mt: 3, pt: 2, borderTop: `1px solid ${config.heroColor}15` }}>
-                    <Typography variant="caption" color="text.secondary" sx={{ 
-                      display: 'flex', 
-                      alignItems: 'center', 
-                      justifyContent: 'center',
-                      gap: 1 
-                    }}>
-                      📋 Toplam {Object.entries(base.features).filter(([, value]) => {
-                        return value === true || value === 'true' || (typeof value === 'string' && value !== 'false' && value.trim() !== '');
-                      }).length} özellik
+              // Helper function to categorize features
+              function getCategoryForFeature(key: string): string {
+                const safetyFeatures = ['abs', 'esp', 'asr', 'alarm', 'immobilizer', 'retarder', 'havaPastigiSurucu', 'havaPastigiYolcu', 'yanHavaYastigi', 'merkeziKilit', 'ebv', 'adr', 'yokusKalkisDestegi'];
+                const comfortFeatures = ['klima', 'elektrikliCam', 'elektrikliAynalar', 'radioTeyp', 'cdCalar', 'tvNavigasyon', 'hizSabitleyici', 'hidrolikDireksiyon', 'isitmalıKoltuklar', 'havaliKoltuk', 'masa', 'deriDoseme', 'esnekOkumaLambasi', 'yolBilgisayari', 'startStop'];
+                const exteriorFeatures = ['alasimJant', 'sunroof', 'spoyler', 'camRuzgarligi', 'cekiDemiri', 'hafizaliKoltuklar'];
+                const sensorFeatures = ['farSensoru', 'yagmurSensoru', 'sisFari', 'xenonFar', 'farYikamaSistemi', 'parkSensoru', 'geriGorusKamerasi'];
+                
+                const lowerKey = key.toLowerCase();
+                
+                if (safetyFeatures.some(sf => lowerKey.includes(sf))) return 'Güvenlik';
+                if (comfortFeatures.some(cf => lowerKey.includes(cf))) return 'Konfor';
+                if (exteriorFeatures.some(ef => lowerKey.includes(ef))) return 'Dış Donanım';
+                if (sensorFeatures.some(sf => lowerKey.includes(sf))) return 'Sensör & Aydınlatma';
+                
+                return 'Diğer';
+              }
+
+              // 1. base.features'dan checkbox'ları al (backend'den gelen processed features)
+              if (base.features && typeof base.features === 'object') {
+                Object.entries(base.features).forEach(([key, value]) => {
+                  const label = translateField(key);
+                  allFeatures.push({
+                    key,
+                    label,
+                    value: 'Var',
+                    isSelected: Boolean(value),
+                    category: getCategoryForFeature(key)
+                  });
+                  checkboxValues.push([key, Boolean(value)]);
+                });
+              }
+
+              // 2. base.listing_properties'den BOOLEAN type olanları al
+              if (base.listing_properties && Array.isArray(base.listing_properties)) {
+                base.listing_properties.forEach((prop: any) => {
+                  if (prop.type === 'BOOLEAN' || prop.value === 'Var' || prop.value === 'Yok' || prop.value === 'Evet' || prop.value === 'Hayır') {
+                    const isSelected = prop.value === 'Var' || prop.value === 'Evet' || prop.value === 'true';
+                    const label = translateField(prop.key) || prop.key;
+                    
+                    // Duplicate kontrolü
+                    if (!allFeatures.some(f => f.key === prop.key)) {
+                      allFeatures.push({
+                        key: prop.key,
+                        label,
+                        value: prop.value,
+                        isSelected,
+                        category: getCategoryForFeature(prop.key)
+                      });
+                      checkboxValues.push([prop.key, isSelected]);
+                    }
+                  }
+                });
+              }
+
+              // 2. values'dan true/false string değerleri de checkbox olarak ekle
+              Object.entries(values).forEach(([key, value]) => {
+                // Sadece true/false string değerli olanları checkbox olarak kabul et
+                if ((value === 'true' || value === 'false') && !checkboxValues.some(([k]) => k === key)) {
+                  checkboxValues.push([key, value === 'true']);
+                }
+              });
+
+              console.log('🎯 Final checkbox values:', checkboxValues);
+              console.log('🎨 All features with categories:', allFeatures);
+
+              // Kategorize edilmiş features
+              const categorizedFeatures = allFeatures.reduce((acc, feature) => {
+                if (feature.isSelected) {
+                  if (!acc[feature.category]) {
+                    acc[feature.category] = [];
+                  }
+                  acc[feature.category].push(feature.label);
+                }
+                return acc;
+              }, {} as Record<string, string[]>);
+
+              console.log('📊 Categorized features:', categorizedFeatures);
+
+              if (Object.keys(categorizedFeatures).length === 0) {
+                return (
+                  <Paper sx={{ p: 3, textAlign: 'center' }}>
+                    <Typography color="text.secondary">
+                      Bu ilan için özel özellik bilgisi bulunmamaktadır.
                     </Typography>
-                  </Box>
-                </Box>
-              </CardContent>
-            </Card>
-          )}
+                  </Paper>
+                );
+              }
 
-          {/* Kalan Tüm Özellikler */}
-          {leftover.length > 0 && (
-            <Card sx={{ mb: 3, borderRadius: 3 }}>
-              <CardContent>
-                <Typography variant="h6" color={config.heroColor} sx={{ mb: 2 }}>Diğer Özellikler</Typography>
-                <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
-                  {leftover.map((field: any) => (
-                    <Box key={field.key}>
-                      <Typography variant="body2" color="text.secondary">{translateField(field.key) || field.label}</Typography>
-                      <Typography variant="body1" fontWeight="medium">{formatFieldValue(field, field.value)}</Typography>
+              return (
+                <Paper sx={{ p: 3 }}>
+                  {Object.entries(categorizedFeatures).map(([category, features]) => (
+                    <Box key={category} mb={3}>
+                      <Typography 
+                        variant="subtitle1" 
+                        color="primary" 
+                        gutterBottom
+                        sx={{ 
+                          fontWeight: 600,
+                          borderBottom: '2px solid',
+                          borderColor: 'primary.main',
+                          pb: 0.5,
+                          mb: 2
+                        }}
+                      >
+                        {category}
+                      </Typography>
+                      <Box sx={{
+                        display: 'grid',
+                        gridTemplateColumns: {
+                          xs: '1fr',
+                          sm: '1fr 1fr'
+                        },
+                        gap: 1.5
+                      }}>
+                        {features.map((feature, index) => (
+                          <Stack key={`${category}-${index}`} direction="row" spacing={1} alignItems="center">
+                            <CheckIcon color="success" fontSize="small" />
+                            <Typography variant="body2" color="text.primary">
+                              {feature}
+                            </Typography>
+                          </Stack>
+                        ))}
+                      </Box>
                     </Box>
                   ))}
-                </Box>
-              </CardContent>
-            </Card>
-          )}
+                </Paper>
+              );
+            })()}
+          </Box>
         </Box>
 
-        {/* Sağ – Satıcı & Meta */}
-        <Box sx={{ minWidth: 0 }}>
-          <Card sx={{ mb: 3, borderRadius: 3, boxShadow: 2, position: isMobile ? 'static' : 'sticky', top: isMobile ? 'auto' : 24 }}>
-            <CardContent sx={{ p: 3 }}>
-              <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>Satıcı Bilgileri</Typography>
-              <Divider sx={{ mb: 2 }} />
-              <Typography variant="body1" fontWeight="medium" mb={1} sx={{ wordBreak: 'break-word' }}>{base.seller.name}</Typography>
-              {base.seller.phone && (<Typography variant="body2" color="text.secondary" mb={1} sx={{ wordBreak: 'break-all' }}>📞 {base.seller.phone}</Typography>)}
-              {base.seller.email && (<Typography variant="body2" color="text.secondary" mb={2} sx={{ wordBreak: 'break-all' }}>✉️ {base.seller.email}</Typography>)}
-
-              <Stack spacing={1}>
-                <button style={{ width: '100%', padding: '12px', backgroundColor: config.heroColor, color: 'white', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', fontSize: '14px' }}>Ara</button>
-                <button style={{ width: '100%', padding: '12px', backgroundColor: 'transparent', color: config.heroColor, border: `2px solid ${config.heroColor}`, borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', fontSize: '14px' }}>Mesaj Gönder</button>
-              </Stack>
-            </CardContent>
-          </Card>
-
-          <Card sx={{ borderRadius: 3, boxShadow: 2 }}>
-            <CardContent sx={{ p: 3 }}>
-              <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>İlan Bilgileri</Typography>
-              <Divider sx={{ mb: 2 }} />
-              <Stack spacing={2}>
+        {/* Right Column - Seller Info */}
+        <Box>
+          <Paper sx={{ p: 3, position: 'sticky', top: 20 }}>
+            <Typography variant="h6" gutterBottom>
+              Satıcı Bilgileri
+            </Typography>
+            
+            <Stack spacing={2}>
+              <Stack direction="row" spacing={2} alignItems="center">
+                <Avatar sx={{ width: 48, height: 48 }}>
+                  {base.seller.name.charAt(0).toUpperCase()}
+                </Avatar>
                 <Box>
-                  <Typography variant="body2" color="text.secondary">İlan Tarihi</Typography>
-                  <Typography variant="body1">{new Date(base.createdAt).toLocaleDateString('tr-TR')}</Typography>
+                  <Typography variant="body1" fontWeight="medium">
+                    {base.seller.name}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Bireysel Satıcı
+                  </Typography>
                 </Box>
-                {typeof base.views === 'number' && (
-                  <Box>
-                    <Typography variant="body2" color="text.secondary">Görüntülenme</Typography>
-                    <Typography variant="body1">{base.views.toLocaleString('tr-TR')}</Typography>
-                  </Box>
-                )}
-                <Box>
-                  <Typography variant="body2" color="text.secondary">Kategori</Typography>
-                  <Typography variant="body1">{base.category.name}</Typography>
-                </Box>
-                {base.vehicle_type && (
-                  <Box>
-                    <Typography variant="body2" color="text.secondary">Araç Türü</Typography>
-                    <Typography variant="body1">{base.vehicle_type.name}</Typography>
-                  </Box>
-                )}
-                {base.brand && (
-                  <Box>
-                    <Typography variant="body2" color="text.secondary">Marka</Typography>
-                    <Typography variant="body1">{base.brand.name}</Typography>
-                  </Box>
-                )}
-                {base.locationText && (
-                  <Box>
-                    <Typography variant="body2" color="text.secondary">Konum</Typography>
-                    <Typography variant="body1">{base.locationText}</Typography>
-                  </Box>
-                )}
               </Stack>
-            </CardContent>
-          </Card>
+
+              {base.seller.phone && (
+                <Button
+                  variant="contained"
+                  startIcon={<Phone />}
+                  fullWidth
+                  href={`tel:${base.seller.phone}`}
+                  size="large"
+                >
+                  Telefon Numarasını Göster
+                </Button>
+              )}
+
+              {base.seller.email && (
+                <Button
+                  variant="outlined"
+                  startIcon={<Email />}
+                  fullWidth
+                  href={`mailto:${base.seller.email}`}
+                >
+                  Mesaj Gönder
+                </Button>
+              )}
+            </Stack>
+          </Paper>
         </Box>
       </Box>
     </Container>

@@ -540,7 +540,8 @@ const KamyonAdForm = () => {
         district_id: districts.find(district => district.name === formData.district)?.id,
         seller_name: formData.sellerName,
         seller_phone: formData.sellerPhone.replace(/[^\d]/g, ''),
-        images: imageUrls
+        images: imageUrls,
+        features: formData.features  // Features'ı ana objede gönder
       }, {
         // Kamyon-specific properties
         color: formData.color || "Belirtilmemiş",
@@ -557,7 +558,6 @@ const KamyonAdForm = () => {
         drive_type: formData.driveType,
         plate_origin: formData.plateOrigin,
         vehicle_plate: formData.vehiclePlate,
-        features: formData.features,
         damage_record: formData.damageRecord,
         paint_change: formData.paintChange,
         tramer_record: formData.tramerRecord

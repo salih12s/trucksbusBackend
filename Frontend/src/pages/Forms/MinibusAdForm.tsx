@@ -494,7 +494,8 @@ const MinibusAdForm: React.FC = () => {
         district_id: districts.find(district => district.name === formData.district)?.id,
         seller_name: formData.sellerName,
         seller_phone: formData.sellerPhone.replace(/[^\d]/g, ''),
-        images: imageUrls
+        images: imageUrls,
+        features: formData.features  // Features'ı ana objede gönder
       }, {
         // Minibüs-specific properties
         seatCount: formData.seatCount,
@@ -506,8 +507,7 @@ const MinibusAdForm: React.FC = () => {
         fuel_type: formData.fuelType,
         transmission: formData.transmission,
         vehicle_condition: formData.vehicleCondition,
-        is_exchangeable: formData.exchange === 'Evet',
-        features: formData.features
+        is_exchangeable: formData.exchange === 'Evet'
       });
 
       // Validate payload

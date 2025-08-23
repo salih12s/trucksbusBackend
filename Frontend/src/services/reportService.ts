@@ -84,9 +84,9 @@ export const reportService = {
   },
 
   // Admin: Rapor detayı
-  async adminGetReportDetail(id: string) {
+  async adminGetReportDetail(id: string): Promise<Report> {
     const response = await api.get(`/admin/reports/${id}`);
-    return response.data;
+    return response.data.data; // sadece raporu döndür
   },
 
   // Admin: Rapor durumu güncelle

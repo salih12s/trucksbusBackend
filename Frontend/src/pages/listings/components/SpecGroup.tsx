@@ -15,6 +15,7 @@ import {
   Info,
 } from '@mui/icons-material';
 import { AttributeGroup, ListingValues } from '../../../types/listing-detail';
+import { translateField, translateValue } from '../../../utils/fieldTranslations';
 
 interface SpecGroupProps {
   groups: AttributeGroup[];
@@ -49,7 +50,7 @@ const formatValue = (value: any, dataType: string, unit?: string): React.ReactNo
       const boolValue = value === true || value === 'true' || value === '1';
       return (
         <Chip 
-          label={boolValue ? 'Evet' : 'Hayır'} 
+          label={boolValue ? translateValue('true') : translateValue('false')} 
           size="small" 
           color={boolValue ? 'success' : 'default'}
           variant="outlined"
@@ -67,7 +68,7 @@ const formatValue = (value: any, dataType: string, unit?: string): React.ReactNo
           {arrayValue.map((item, index) => (
             <Chip 
               key={index}
-              label={item}
+              label={translateValue(item)}
               size="small"
               variant="outlined"
               color="primary"
@@ -79,7 +80,7 @@ const formatValue = (value: any, dataType: string, unit?: string): React.ReactNo
     case 'ENUM':
     case 'TEXT':
     default:
-      return String(value);
+      return translateValue(String(value));
   }
 };
 
@@ -126,7 +127,7 @@ const SpecGroup: React.FC<SpecGroupProps> = ({ groups, values }) => {
               fontWeight: 600
             }}>
               {getAttributeIcon(group.key)}
-              {group.label}
+              {translateField(group.label)}
             </Typography>
 
             <Box sx={{
@@ -153,7 +154,7 @@ const SpecGroup: React.FC<SpecGroupProps> = ({ groups, values }) => {
                         color="text.secondary"
                         sx={{ fontWeight: 500, mb: 0.5 }}
                       >
-                        {attribute.label}
+                        {translateField(attribute.label)}
                       </Typography>
                       <Box>
                         {formattedValue}

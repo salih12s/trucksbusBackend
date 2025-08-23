@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { prisma } from '../utils/database';
 import { logger } from '../utils/logger';
+import { normalizeFeatures, safeStringify } from '../utils/normalize';
 
 export const createListing = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -20,6 +21,18 @@ export const createListing = async (req: Request, res: Response): Promise<void> 
       properties: req.body.properties,
       propertiesType: typeof req.body.properties,
       propertiesKeys: req.body.properties ? Object.keys(req.body.properties) : 'no keys'
+    });
+    console.log('✨ Features data:', {
+      features: req.body.features,
+      featuresType: typeof req.body.features,
+      featuresKeys: req.body.features ? Object.keys(req.body.features) : 'no keys',
+      trueFeatures: req.body.features ? Object.keys(req.body.features).filter(key => req.body.features[key] === true) : 'no true features'
+    });
+    console.log('🔧 SafetyFeatures data:', {
+      safetyFeatures: req.body.safetyFeatures,
+      safetyFeaturesType: typeof req.body.safetyFeatures,
+      safetyFeaturesLength: req.body.safetyFeatures?.length || 0,
+      safetyFeaturesItems: req.body.safetyFeatures || 'no items'
     });
     
     const {
@@ -63,6 +76,9 @@ export const createListing = async (req: Request, res: Response): Promise<void> 
       damage_record,
       paint_change,
       tramer_record,
+      
+      // Oto Kurtarıcı Taşıyıcı özel alanları
+      safetyFeatures,
       
       // Eski alanlar (backward compatibility)
       mileage,
@@ -164,7 +180,7 @@ export const createListing = async (req: Request, res: Response): Promise<void> 
         tire_condition,
         drive_type,
         plate_origin,
-        features: features || {},
+        features: safeStringify(normalizeFeatures(features)),
         damage_record,
         paint_change,
         tramer_record,
@@ -213,24 +229,61 @@ export const createListing = async (req: Request, res: Response): Promise<void> 
 
     // Property value'larını Türkçeleştiren mapping function
     const getPropertyDisplayValue = (key: string, value: string): string => {
+      // Boolean değerler için genel çeviri
+      if (value === 'true' || value === 'false') {
+        return value === 'true' ? 'Evet' : 'Hayır';
+      }
+      
       const valueMap: { [key: string]: { [value: string]: string } } = {
         'exchangeable': {
           'evet': 'Evet',
           'hayır': 'Hayır',
           'yes': 'Evet',
-          'no': 'Hayır'
+          'no': 'Hayır',
+          'true': 'Evet',
+          'false': 'Hayır'
         },
         'takas': {
           'evet': 'Evet', 
-          'hayır': 'Hayır'
+          'hayır': 'Hayır',
+          'true': 'Evet',
+          'false': 'Hayır'
         },
         'negotiable': {
           'evet': 'Evet',
-          'hayır': 'Hayır'
+          'hayır': 'Hayır',
+          'true': 'Evet',
+          'false': 'Hayır'
         },
         'warranty': {
           'evet': 'Evet',
-          'hayır': 'Hayır'
+          'hayır': 'Hayır',
+          'true': 'Evet',
+          'false': 'Hayır'
+        },
+        'krikoAyak': {
+          'true': 'Var',
+          'false': 'Yok'
+        },
+        'takasli': {
+          'true': 'Evet',
+          'false': 'Hayır'
+        },
+        'devrilmeArkaya': {
+          'true': 'Var',
+          'false': 'Yok'
+        },
+        'devrilmeSaga': {
+          'true': 'Var',
+          'false': 'Yok'
+        },
+        'devrilmeSola': {
+          'true': 'Var',
+          'false': 'Yok'
+        },
+        'uzatilabilirProfil': {
+          'true': 'Var',
+          'false': 'Yok'
         }
       };
       
@@ -268,6 +321,58 @@ export const createListing = async (req: Request, res: Response): Promise<void> 
         'negotiable': 'Pazarlık',
         'warranty': 'Garanti',
         
+        // Güvenlik Features
+        'abs': 'ABS',
+        'adr': 'ADR',
+        'alarm': 'Alarm',
+        'asr': 'ASR (Çekiş Kontrolü)',
+        'ebv': 'EBV (Fren Güçü Dağıtımı)',
+        'esp': 'ESP',
+        'havaPastigiSurucu': 'Hava Yastığı (Sürücü)',
+        'havaPastigiYolcu': 'Hava Yastığı (Yolcu)',
+        'immobilizer': 'Immobilizer',
+        'merkeziKilit': 'Merkezi Kilit',
+        'retarder': 'Retarder',
+        'yokusKalkisDestegi': 'Yokuş Kalkış Desteği',
+        'yanHavaYastigi': 'Yan Hava Yastığı',
+        
+        // İç Donanım Features
+        'cdCalar': 'CD Çalar',
+        'deriDoseme': 'Deri Döşeme',
+        'elektrikliAynalar': 'Elektrikli Aynalar',
+        'elektrikliCam': 'Elektrikli Cam',
+        'esnekOkumaLambasi': 'Esnek Okuma Lambası',
+        'havaliKoltuk': 'Havalı Koltuk',
+        'hizSabitleyici': 'Hız Sabitleyici',
+        'hidrolikDireksiyon': 'Hidrolik Direksiyon',
+        'isitmalıKoltuklar': 'Isıtmalı Koltuklar',
+        'klima': 'Klima',
+        'masa': 'Masa',
+        'radioTeyp': 'Radyo / Teyp',
+        'startStop': 'Start & Stop',
+        'tvNavigasyon': 'TV / Navigasyon',
+        'yolBilgisayari': 'Yol Bilgisayarı',
+        
+        // Dış Donanım Features  
+        'alasimJant': 'Alaşım Jant',
+        'camRuzgarligi': 'Cam Rüzgarlığı',
+        'cekiDemiri': 'Çeki Demiri',
+        'eskneOkumaLambasi': 'Esnek Okuma Lambası',
+        'sunroof': 'Sunroof',
+        'spoyler': 'Spoyler',
+        'hafizaliKoltuklar': 'Hafızalı Koltuklar',
+        
+        // Sensör & Aydınlatma
+        'farSensoru': 'Far Sensörü',
+        'yagmurSensoru': 'Yağmur Sensörü',
+        'sisFari': 'Sis Farı',
+        'xenonFar': 'Xenon Far',
+        'farYikamaSistemi': 'Far Yıkama Sistemi',
+        
+        // Park & Görüntüleme
+        'geriGorusKamerasi': 'Geri Görüş Kamerası',
+        'parkSensoru': 'Park Sensörü',
+        
         // Diğer özellikler
         'year': 'Model Yılı',
         'condition': 'Durum',
@@ -280,24 +385,158 @@ export const createListing = async (req: Request, res: Response): Promise<void> 
 
     // Properties varsa kaydet (Dorse özel bilgileri için)
     if (properties && typeof properties === 'object') {
-      const propertyPromises = Object.entries(properties).map(([key, value]) => {
-        if (value !== undefined && value !== null && value !== '') {
-          return prisma.listing_properties.create({
-            data: {
-              id: `prop_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-              listing_id: listing.id,
-              key: getPropertyDisplayName(key), // Türkçe isim kullan
-              value: getPropertyDisplayValue(key, String(value)), // Türkçe value kullan
-              type: 'STRING' // Default type
+      console.log('🏗️ Processing properties:', Object.keys(properties));
+      
+      try {
+        const propertyPromises = Object.entries(properties).map(async ([key, value], index) => {
+          // Boolean değerleri dahil olmak üzere tüm anlamlı değerleri kaydet
+          // Sadece undefined, null ve boş string değerleri filtrele
+          const shouldSave = value !== undefined && 
+                            value !== null && 
+                            (typeof value === 'boolean' || 
+                             typeof value === 'number' || 
+                             Array.isArray(value) || 
+                             (typeof value === 'string' && value !== ''));
+          
+          if (shouldSave) {
+            // Değerin tipini belirle
+            let propertyType: 'STRING' | 'NUMBER' | 'BOOLEAN' | 'MULTISELECT' = 'STRING';
+            let propertyValue = String(value);
+            
+            if (typeof value === 'boolean') {
+              propertyType = 'BOOLEAN';
+              propertyValue = value ? 'true' : 'false';
+            } else if (typeof value === 'number') {
+              propertyType = 'NUMBER';
+              propertyValue = String(value);
+            } else if (Array.isArray(value)) {
+              propertyType = 'MULTISELECT';
+              propertyValue = value.join(',');
             }
-          });
-        }
-        return null;
-      }).filter(Boolean);
+            
+            // Daha güvenli ID üretimi
+            const uniqueId = `prop_${listing.id}_${Date.now()}_${index}_${Math.random().toString(36).substr(2, 5)}`;
+            
+            console.log(`💾 Saving property: ${key} = ${propertyValue} (${propertyType}) [original: ${value}] [id: ${uniqueId}]`);
+            
+            try {
+              return await prisma.listing_properties.create({
+                data: {
+                  id: uniqueId,
+                  listing_id: listing.id,
+                  key: getPropertyDisplayName(key), // Türkçe isim kullan
+                  value: getPropertyDisplayValue(key, propertyValue), // Türkçe value kullan
+                  type: propertyType // Dinamik tip belirleme
+                }
+              });
+            } catch (propError) {
+              console.error(`❌ Error saving property ${key}:`, propError);
+              return null;
+            }
+          }
+          return null;
+        });
 
-      if (propertyPromises.length > 0) {
-        await Promise.all(propertyPromises);
-        console.log('✅ Properties saved:', Object.keys(properties));
+        const resolvedProperties = await Promise.all(propertyPromises);
+        const successfulProperties = resolvedProperties.filter(Boolean);
+        
+        if (successfulProperties.length > 0) {
+          console.log('✅ Properties saved successfully:', successfulProperties.length, 'out of', Object.keys(properties).length);
+        }
+      } catch (error) {
+        console.error('❌ Error processing properties:', error);
+      }
+    }
+
+    // Features varsa bunları da listing_properties'e kaydet
+    if (features && typeof features === 'object') {
+      console.log('🎯 Processing features for listing_properties:', {
+        totalFeatures: Object.keys(features).length,
+        trueFeatures: Object.keys(features).filter(key => features[key] === true),
+        featuresData: features
+      });
+      
+      try {
+        const featurePromises = Object.entries(features).map(async ([key, value], index) => {
+          // Sadece true olan features'ları kaydet
+          if (value === true) {
+            // Daha güvenli ID üretimi
+            const uniqueId = `feat_${listing.id}_${Date.now()}_${index}_${Math.random().toString(36).substr(2, 5)}`;
+            
+            console.log(`💾 Saving feature: ${key} = true [id: ${uniqueId}]`);
+            
+            try {
+              return await prisma.listing_properties.create({
+                data: {
+                  id: uniqueId,
+                  listing_id: listing.id,
+                  key: getPropertyDisplayName(key), // Türkçe isim kullan
+                  value: 'Var', // True features için "Var" değeri
+                  type: 'BOOLEAN'
+                }
+              });
+            } catch (featError) {
+              console.error(`❌ Error saving feature ${key}:`, featError);
+              return null;
+            }
+          }
+          return null;
+        });
+
+        const resolvedFeatures = await Promise.all(featurePromises);
+        const successfulFeatures = resolvedFeatures.filter(Boolean);
+        
+        if (successfulFeatures.length > 0) {
+          console.log('✅ Features saved to listing_properties successfully:', successfulFeatures.length, 'features');
+        } else {
+          console.log('⚠️ No features were true or saved');
+        }
+      } catch (error) {
+        console.error('❌ Error processing features:', error);
+      }
+    }
+
+    // SafetyFeatures varsa bunları da listing_properties'e kaydet (Oto Kurtarıcı Taşıyıcı için)
+    if (safetyFeatures && Array.isArray(safetyFeatures)) {
+      console.log('🔧 Processing safetyFeatures for listing_properties:', {
+        totalSafetyFeatures: safetyFeatures.length,
+        safetyFeaturesData: safetyFeatures
+      });
+      
+      try {
+        const safetyFeaturePromises = safetyFeatures.map(async (feature: string, index: number) => {
+          if (feature && typeof feature === 'string' && feature.trim() !== '') {
+            // Daha güvenli ID üretimi
+            const uniqueId = `safety_${listing.id}_${Date.now()}_${index}_${Math.random().toString(36).substr(2, 5)}`;
+            
+            console.log(`💾 Saving safetyFeature: ${feature} [id: ${uniqueId}]`);
+            
+            try {
+              return await prisma.listing_properties.create({
+                data: {
+                  id: uniqueId,
+                  listing_id: listing.id,
+                  key: getPropertyDisplayName(feature.trim()), // Türkçe isim kullan
+                  value: 'Var', // Safety features için "Var" değeri
+                  type: 'BOOLEAN'
+                }
+              });
+            } catch (safetyError) {
+              console.error(`❌ Error saving safetyFeature ${feature}:`, safetyError);
+              return null;
+            }
+          }
+          return null;
+        });
+
+        const resolvedSafetyFeatures = await Promise.all(safetyFeaturePromises);
+        const successfulSafetyFeatures = resolvedSafetyFeatures.filter(Boolean);
+        
+        if (successfulSafetyFeatures.length > 0) {
+          console.log('✅ SafetyFeatures saved to listing_properties successfully:', successfulSafetyFeatures.length, 'features');
+        }
+      } catch (error) {
+        console.error('❌ Error processing safetyFeatures:', error);
       }
     }
 
@@ -452,7 +691,14 @@ export const getListings = async (req: Request, res: Response): Promise<void> =>
               name: true
             }
           },
-
+          listing_images: {
+            select: {
+              id: true,
+              url: true,
+              alt: true,
+              sort_order: true
+            }
+          },
           users: {
             select: {
               id: true,
@@ -633,48 +879,42 @@ export const getListingDetails = async (req: Request, res: Response): Promise<vo
       data: { view_count: { increment: 1 } }
     });
 
-    // Schema bilgilerini listing_properties'den çıkartıyoruz
-    const propertyKeys = [...new Set(listing.listing_properties?.map(prop => prop.key) || [])];
-    
-    // Basit schema oluşturmak için property'leri grupluyoruz  
-    const schemaGroups = [{
-      key: 'details',
-      label: 'İlan Detayları',
-      order: 1,
-      attributes: propertyKeys.map((key, index) => ({
-        key,
-        label: key,
-        data_type: 'STRING',
-        is_required: false,
-        order: index
-      }))
-    }];
+    // Get category attributes schema
+    console.log('📋 Listing details query completed:', {
+      listingId: listing.id,
+      hasProperties: !!listing.listing_properties?.length,
+      propertiesCount: listing.listing_properties?.length || 0
+    });
 
-    // Process media from listings.images field (JSON array)
-    const media: any[] = [];
-    
+    // Process media from listings.images field
+    let media = [];
     if (listing.images) {
       try {
-        const imageUrls = typeof listing.images === 'string' 
-          ? JSON.parse(listing.images) 
-          : Array.isArray(listing.images) 
-            ? listing.images 
-            : [];
-            
-        if (Array.isArray(imageUrls)) {
-          media.push(...imageUrls.map((url: string, index: number) => ({
-            url,
-            alt: listing.title,
-            sort: index
-          })));
-        }
+        const imageArray = Array.isArray(listing.images) 
+          ? listing.images 
+          : JSON.parse(String(listing.images));
+        media = imageArray.map((img: any, index: number) => ({
+          url: typeof img === 'string' ? img : img.url || img,
+          alt: listing.title,
+          sort: index
+        }));
       } catch (e) {
-        console.log('Error parsing images from listings.images:', e);
+        console.warn('Failed to parse images:', listing.images);
+        media = [];
       }
     }
 
+    console.log('📸 Media processing:', {
+      listingId: listing.id,
+      hasImages: !!listing.images,
+      rawImages: listing.images,
+      processedMedia: media
+    });
+
     // Convert properties to values with proper types
     const values: Record<string, any> = {};
+    
+    // Process listing_properties
     listing.listing_properties?.forEach(prop => {
       try {
         switch (prop.type) {
@@ -695,38 +935,348 @@ export const getListingDetails = async (req: Request, res: Response): Promise<vo
       }
     });
 
+    // Process features from listings.features field
+    let processedFeatures: Record<string, any> = {};
+    
+    console.log('🎯 Raw features field:', {
+      listingId: listing.id,
+      hasFeatures: !!listing.features,
+      rawFeatures: listing.features,
+      featuresType: typeof listing.features
+    });
+    
+    if (listing.features) {
+      try {
+        let featuresData: any = null;
+        
+        // [object Object] string kontrolü
+        if (typeof listing.features === 'string' && listing.features.includes('[object Object]')) {
+          console.log('⚠️ Features field contains [object Object], skipping JSON parse');
+          featuresData = {};
+        } else if (typeof listing.features === 'string') {
+          // Normal JSON string parse et
+          featuresData = JSON.parse(listing.features);
+        } else if (Array.isArray(listing.features)) {
+          // Zaten array
+          featuresData = listing.features;
+        } else if (typeof listing.features === 'object') {
+          // Zaten object
+          featuresData = listing.features;
+        } else {
+          console.log('⚠️ Unknown features type:', typeof listing.features);
+          featuresData = {};
+        }
+        
+        console.log('🎯 Parsed features data:', featuresData);
+        
+        if (Array.isArray(featuresData)) {
+          // Array format: ["feature1", "feature2"] → {feature1: true, feature2: true}
+          featuresData.forEach(feature => {
+            if (feature && typeof feature === 'string') {
+              processedFeatures[feature] = true;
+            }
+          });
+        } else if (typeof featuresData === 'object' && featuresData !== null) {
+          // Object format - features olarak işle (her key'i true yap)
+          Object.keys(featuresData).forEach(key => {
+            processedFeatures[key] = true;
+          });
+        }
+        
+        console.log('🎯 Features from listings.features:', {
+          listingId: listing.id,
+          rawFeatures: listing.features,
+          parsedFeatures: featuresData,
+          processedFeatures
+        });
+      } catch (e) {
+        console.warn('Failed to parse features:', listing.features, 'Error:', e);
+        processedFeatures = {};
+      }
+    }
+    
+    // BOOLEAN ve checkbox türündeki listing_properties'leri de features olarak ekle
+    const booleanProperties: Record<string, boolean> = {};
+    console.log('🔍 Processing listing_properties for features:', {
+      listingId: listing.id,
+      totalProperties: listing.listing_properties?.length || 0,
+      properties: listing.listing_properties?.map(p => ({ key: p.key, value: p.value, type: p.type }))
+    });
+    
+    // Checkbox özellik isimleri (formda kullanılan) - ARTIK GEREKLİ DEĞİL, DİNAMİK OLARAK ALGILA
+    // const CHECKBOX_FEATURES = [
+    //   'airConditioning', 'abs', 'bluetooth', 'gps', 'sunroof', 'heater',
+    //   'electricWindows', 'electricMirrors', 'cruiseControl', 'parkingSensor',
+    //   'reverseCamera', 'fogLights', 'xenonLights', 'ledLights', 'alloyWheels',
+    //   'radio', 'cdPlayer', 'immobilizer', 'centralLocking', 'keylessEntry',
+    //   'startStop', 'airbag', 'esp', 'radioTape', 'tvNavigation'
+    // ];
+    
+    listing.listing_properties?.forEach(prop => {
+      if (prop.type === 'BOOLEAN') {
+        const boolValue = prop.value === 'true' || prop.value === '1';
+        booleanProperties[prop.key] = boolValue;
+        console.log(`🎯 BOOLEAN Property: ${prop.key} = ${prop.value} → ${boolValue}`);
+        
+        // BOOLEAN tüm özellikler features'a eklenir (true/false fark etmez)
+        processedFeatures[prop.key] = boolValue;
+        console.log(`✅ Added BOOLEAN to features: ${prop.key} = ${boolValue}`);
+        
+      } else if (prop.type === 'STRING' && (prop.value === 'true' || prop.value === 'false')) {
+        // STRING tipinde ama "true"/"false" değeri olan tüm property'ler checkbox'tır
+        const boolValue = prop.value === 'true';
+        console.log(`🎯 CHECKBOX Property (dynamic): ${prop.key} = ${prop.value} → ${boolValue}`);
+        
+        // Checkbox olan tüm özellikler features'a eklenir (true/false fark etmez)
+        processedFeatures[prop.key] = boolValue;
+        console.log(`✅ Added dynamic checkbox to features: ${prop.key} = ${boolValue}`);
+        
+      } else if (prop.type === 'STRING' && prop.key === 'features') {
+        // Features field'ını ayrıca parse et
+        try {
+          const featuresValue = JSON.parse(prop.value);
+          if (typeof featuresValue === 'object' && featuresValue !== null) {
+            Object.entries(featuresValue).forEach(([key, value]) => {
+              if (value === true || value === 'true') {
+                processedFeatures[key] = true;
+                console.log(`✅ Added from features property: ${key} = true`);
+              }
+            });
+          }
+        } catch (e) {
+          console.warn(`Failed to parse features property: ${prop.value}`);
+        }
+      }
+    });
+    
+    console.log('📦 Final processed features:', processedFeatures);
+    values.features = processedFeatures;
+    
+    console.log('🔧 Combined features processing:', {
+      listingId: listing.id,
+      fromFeaturesField: Object.keys(processedFeatures).length,
+      fromBooleanProperties: Object.keys(booleanProperties).filter(k => booleanProperties[k]).length,
+      finalFeatures: processedFeatures
+    });
+
     // Add base vehicle properties
     if (listing.year) values.year = listing.year;
     if (listing.km) values.km = listing.km;
     if (listing.fuel_type) values.fuel_type = listing.fuel_type;
     if (listing.transmission) values.transmission = listing.transmission;
+
+    console.log('🔧 Properties processing:', {
+      listingId: listing.id,
+      hasProperties: !!listing.listing_properties?.length,
+      propertiesCount: listing.listing_properties?.length || 0,
+      hasFeatures: !!listing.features,
+      rawFeatures: listing.features,
+      processedValues: Object.keys(values)
+    });
     if (listing.engine_power) values.engine_power = listing.engine_power;
     if (listing.color) values.color = listing.color;
     if (listing.vehicle_condition) values.vehicle_condition = listing.vehicle_condition;
 
-    // Features'ları işle
-    let processedFeatures: Record<string, string> = {};
-    if (listing.features) {
-      try {
-        const features = typeof listing.features === 'string' 
-          ? JSON.parse(listing.features) 
-          : listing.features;
+    // Türkçe çeviri fonksiyonu
+    const translateToTurkish = (key: string): string => {
+      const translations: Record<string, string> = {
+        // Temel araç bilgileri
+        'color': 'Renk',
+        'plate_origin': 'Plaka Menşei', 
+        'tire_condition': 'Lastik Durumu',
+        'transmission': 'Şanzıman',
+        'vehicle_condition': 'Araç Durumu',
+        'vehicle_plate': 'Araç Plakası',
+        'engine_power': 'Motor Gücü',
+        'engine_volume': 'Motor Hacmi',
+        'fuel_type': 'Yakıt Tipi',
+        'motor_power': 'Motor Gücü',
+        'body_type': 'Gövde Tipi',
+        'cabin_type': 'Kabin Tipi',
+        'damage_record': 'Hasar Kaydı',
+        'paint_change': 'Boya Değişimi',
+        'features': 'Özellikler',
+        'Garanti': 'Garanti',
+        'is_exchangeable': 'Takaslanabilir',
+        'year': 'Model Yılı',
+        'km': 'Kilometre',
+        'price': 'Fiyat',
         
-        if (features && typeof features === 'object') {
-          Object.keys(features).forEach(key => {
-            if (features[key] === true) {
-              processedFeatures[key] = 'Evet';
-            } else if (features[key] === false) {
-              processedFeatures[key] = 'Hayır';
-            } else if (features[key]) {
-              processedFeatures[key] = String(features[key]);
-            }
-          });
-        }
-      } catch (e) {
-        console.log('Error parsing features:', e);
+        // Otobüs özel alanları
+        'passenger_capacity': 'Yolcu Kapasitesi',
+        'seat_layout': 'Koltuk Düzeni',
+        'seat_back_screen': 'Koltuk Arkası Ekran',
+        'gear_type': 'Vites Tipi',
+        'gear_count': 'Vites Sayısı',
+        'fuel_capacity': 'Yakıt Kapasitesi',
+        
+        // Kamyon özel alanları
+        'carrying_capacity': 'Taşıma Kapasitesi',
+        'drive_type': 'Çekiş Türü',
+        'axle_count': 'Dingil Sayısı',
+        'load_capacity': 'Yük Kapasitesi',
+        
+        // Çekici özel alanları
+        'bed_count': 'Yatak Sayısı',
+        'dorse_available': 'Dorse Mevcut',
+        'plate_type': 'Plaka Tipi',
+        
+        // Dorse/Römork alanları (formlardan)
+        'length': 'Uzunluk',
+        'width': 'Genişlik',
+        'height': 'Yükseklik',
+        'volume': 'Hacim',
+        'tipping_direction': 'Devrilme Yönü',
+        'genislik': 'Genişlik',
+        'uzunluk': 'Uzunluk',
+        'lastikDurumu': 'Lastik Durumu',
+        'devrilmeYonu': 'Devrilme Yönü',
+        
+        // Form alanları
+        'title': 'Başlık',
+        'description': 'Açıklama',
+        'productionYear': 'Üretim Yılı',
+        'production_year': 'Üretim Yılı',
+        'has_tent': 'Branda Var',
+        'hasTent': 'Branda Var',
+        'has_damper': 'Dampır Var',
+        'hasDamper': 'Dampır Var',
+        'exchangeable': 'Takaslanabilir',
+        'uploadedImages': 'Yüklenen Resimler',
+        'uploaded_images': 'Yüklenen Resimler',
+        'images': 'Resimler',
+        'priceType': 'Fiyat Tipi',
+        'price_type': 'Fiyat Tipi',
+        
+        // Genel teknik özellikler
+        'brand': 'Marka',
+        'model': 'Model',
+        'variant': 'Varyant',
+        'chassis_type': 'Şasi Tipi',
+        'roof_type': 'Tavan Tipi',
+        'seat_count': 'Koltuk Sayısı',
+        'pull_type': 'Çekiş',
+        
+        // İletişim bilgileri
+        'seller_name': 'Satıcı Adı',
+        'seller_phone': 'Satıcı Telefon',
+        'seller_email': 'Satıcı E-posta',
+        'sellerName': 'Satıcı Adı',
+        'sellerPhone': 'Satıcı Telefon',
+        'sellerEmail': 'Satıcı E-posta',
+        'contact_name': 'İletişim Adı',
+        'contactName': 'İletişim Adı',
+        'phone': 'Telefon',
+        'email': 'E-posta',
+        'is_company': 'Firma',
+        'isCompany': 'Firma',
+        'company_name': 'Firma Adı',
+        'companyName': 'Firma Adı',
+        
+        // Lokasyon
+        'city': 'Şehir',
+        'district': 'İlçe',
+        
+        // Diğer
+        'currency': 'Para Birimi',
+        'negotiable': 'Pazarlıklı',
+        'warranty': 'Garanti',
+        'exchange': 'Takas',
+        
+        // Form-specific fields from attached forms
+        'caseType': 'Kasa Tipi',
+        'case_type': 'Kasa Tipi',
+        'dingilSayisi': 'Dingil Sayısı',
+        'dingil_sayisi': 'Dingil Sayısı',
+        'kapakYuksekligi': 'Kapak Yüksekliği',
+        'kapak_yuksekligi': 'Kapak Yüksekliği',
+        'istiapHaddi': 'İstiap Haddi',
+        'istiap_haddi': 'İstiap Haddi',
+        'krikoAyak': 'Kriko Ayak',
+        'kriko_ayak': 'Kriko Ayak',
+        'takasli': 'Takaslı',
+        'devrilmeArkaya': 'Arkaya Devrilme',
+        'devrilme_arkaya': 'Arkaya Devrilme',
+        'devrilmeSaga': 'Sağa Devrilme',
+        'devrilme_saga': 'Sağa Devrilme',
+        'devrilmeSola': 'Sola Devrilme',
+        'devrilme_sola': 'Sola Devrilme',
+        'havuzDerinligi': 'Havuz Derinliği',
+        'havuz_derinligi': 'Havuz Derinliği',
+        'havuzGenisligi': 'Havuz Genişliği',
+        'havuz_genisligi': 'Havuz Genişliği',
+        'havuzUzunlugu': 'Havuz Uzunluğu',
+        'havuz_uzunlugu': 'Havuz Uzunluğu',
+        'hidrolikSistem': 'Hidrolik Sistem',
+        'hidrolik_sistem': 'Hidrolik Sistem',
+        'uzatilabilirProfil': 'Uzatılabilir Profil',
+        'uzatilabilir_profil': 'Uzatılabilir Profil',
+        'TippingDirection' : 'Devrilme Yönü'
+      };
+      
+      return translations[key] || key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    };
+
+    // listings_properties tablosundan dinamik schema oluştur
+    const dynamicAttributes = listing.listing_properties?.map(prop => ({
+      key: prop.key,
+      label: translateToTurkish(prop.key), // Türkçe çeviri kullan
+      type: prop.type || 'STRING',
+      is_required: false,
+      sort_order: 0,
+      data_type: prop.type || 'STRING'
+    })) || [];
+
+    console.log('🏗️ Dynamic attributes from listings_properties:', {
+      count: dynamicAttributes.length,
+      attributes: dynamicAttributes.map(attr => ({ key: attr.key, label: attr.label, type: attr.type }))
+    });
+
+    // Group attributes by logical groups using dynamic properties
+    const groupedAttributes = dynamicAttributes.reduce((acc, attr) => {
+      // Gelişmiş gruplama mantığı
+      let groupKey = 'specs';
+      const key = attr.key.toLowerCase();
+      
+      if (key.includes('engine') || key.includes('motor') || key.includes('power') || key.includes('fuel') || key.includes('yakıt')) {
+        groupKey = 'engine';
+      } else if (key.includes('dimension') || key.includes('length') || key.includes('width') || key.includes('height') || 
+                 key.includes('boyut') || key.includes('uzunluk') || key.includes('genişlik') || key.includes('yükseklik')) {
+        groupKey = 'dimensions';
+      } else if (key.includes('feature') || key.includes('safety') || key.includes('comfort') || key.includes('özellik') ||
+                 key.includes('güvenlik') || key.includes('konfor') || attr.type === 'BOOLEAN' || 
+                 (attr.type === 'STRING' && (values[attr.key] === 'true' || values[attr.key] === 'false'))) {
+        groupKey = 'features';
+      } else if (key.includes('color') || key.includes('renk') || key.includes('condition') || key.includes('durum') ||
+                 key.includes('transmission') || key.includes('vites') || key.includes('plate') || key.includes('plaka')) {
+        groupKey = 'general';
       }
-    }
+
+      if (!acc[groupKey]) {
+        acc[groupKey] = {
+          key: groupKey,
+          label: groupKey === 'engine' ? 'Motor & Performans' : 
+                 groupKey === 'dimensions' ? 'Boyutlar' :
+                 groupKey === 'features' ? 'Özellikler' : 
+                 groupKey === 'general' ? 'Genel Bilgiler' : 'Teknik Özellikler',
+          order: groupKey === 'general' ? 1 : 
+                 groupKey === 'engine' ? 2 : 
+                 groupKey === 'dimensions' ? 3 : 
+                 groupKey === 'features' ? 4 : 5,
+          attributes: []
+        };
+      }
+
+      acc[groupKey].attributes.push({
+        key: attr.key,
+        label: attr.label,
+        data_type: attr.data_type,
+        is_required: attr.is_required,
+        order: attr.sort_order
+      });
+
+      return acc;
+    }, {} as Record<string, any>);
 
     const response = {
       success: true,
@@ -772,16 +1322,16 @@ export const getListingDetails = async (req: Request, res: Response): Promise<vo
             email: listing.seller_email || listing.users?.email
           },
           media,
-          features: processedFeatures // İşlenmiş features'ı ekle
+          features: values.features || {} // Frontend'de base.features olarak beklendiği için
         },
         schema: {
-          groups: schemaGroups,
-          flat: propertyKeys.map((key, index) => ({
-            key,
-            label: key,
-            data_type: 'STRING',
-            is_required: false,
-            order: index
+          groups: Object.values(groupedAttributes).sort((a, b) => a.order - b.order),
+          flat: dynamicAttributes.map(attr => ({
+            key: attr.key,
+            label: attr.label,
+            data_type: attr.data_type,
+            is_required: attr.is_required,
+            order: attr.sort_order
           }))
         },
         values

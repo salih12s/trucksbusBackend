@@ -23,7 +23,6 @@ import {
   HourglassEmpty,
   Report,
   People,
-  Message,
   Menu as MenuIcon,
   Logout,
   Settings,
@@ -63,7 +62,6 @@ const AdminLayout = () => {
     { text: 'Onay Bekleyen İlanlar', icon: <HourglassEmpty />, path: '/admin/pending-listings' },
     { text: 'Şikayet Yönetimi', icon: <Report />, path: '/admin/reports' },
     { text: 'Kullanıcılar', icon: <People />, path: '/admin/users' },
-    { text: 'Mesajlaşma', icon: <Message />, path: '/admin/messages' },
   ];
 
   const drawer = (

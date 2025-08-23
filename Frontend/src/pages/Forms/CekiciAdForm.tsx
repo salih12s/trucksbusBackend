@@ -464,7 +464,8 @@ const CekiciAdForm: React.FC = () => {
         seller_name: formData.sellerName,
         seller_phone: formData.sellerPhone.replace(/[^\d]/g, ''),
         seller_email: formData.sellerEmail,
-        images: imageUrls
+        images: imageUrls,
+        features: formData.features  // Features'ı ana objede gönder
       }, {
         // Çekici-specific properties
         color: formData.color || "Belirtilmemiş",
@@ -480,7 +481,6 @@ const CekiciAdForm: React.FC = () => {
         tire_condition: formData.tireCondition,
         plate_origin: formData.plateType,
         vehicle_plate: formData.plateNumber,
-        features: formData.features,
         damage_record: formData.damageRecord,
         paint_change: formData.paintChange,
         warranty: formData.warranty
