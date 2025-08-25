@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { prisma } from '../utils/database';
-import type { AuthenticatedRequest } from '../types/auth';
+import { AuthenticatedRequest } from '../types';
 import { ulid } from 'ulid';
 import { emitToAdmins, emitToUser } from '../utils/socket';
 
@@ -13,12 +13,10 @@ export const createFeedback = async (req: AuthenticatedRequest, res: Response) =
 
         if (!userId) {
             return res.status(401).json({ error: 'Kimlik doğrulaması gerekli' });
-            return;
         }
 
         if (!subject || !message) {
-            res.status(400).json({ error: 'Konu ve mesaj alanları gereklidir' });
-            return;
+            return res.status(400).json({ error: 'Konu ve mesaj alanları gereklidir' });
         }
 
         const feedback = await prisma.feedback.create({
@@ -81,14 +79,14 @@ export const createFeedback = async (req: AuthenticatedRequest, res: Response) =
             created_at: new Date()
         });
 
-        res.status(201).json({
+        return res.status(201).json({
             success: true,
             message: 'Geri bildiriminiz başarıyla gönderildi',
             data: feedback
         });
     } catch (error) {
         console.error('Feedback oluşturma hatası:', error);
-        res.status(500).json({ error: 'İç sunucu hatası' });
+        return res.status(500).json({ error: 'İç sunucu hatası' });
     }
 };
 
@@ -98,8 +96,7 @@ export const getUserFeedbacks = async (req: AuthenticatedRequest, res: Response)
         const userId = req.user?.id;
 
         if (!userId) {
-            res.status(401).json({ error: 'Kimlik doğrulaması gerekli' });
-            return;
+            return res.status(401).json({ error: 'Kimlik doğrulaması gerekli' });
         }
 
         const feedbacks = await prisma.feedback.findMany({
@@ -115,13 +112,13 @@ export const getUserFeedbacks = async (req: AuthenticatedRequest, res: Response)
             }
         });
 
-        res.json({ 
+        return res.json({ 
             success: true, 
             data: feedbacks 
         });
     } catch (error) {
         console.error('Feedback listeleme hatası:', error);
-        res.status(500).json({ error: 'İç sunucu hatası' });
+        return res.status(500).json({ error: 'İç sunucu hatası' });
     }
 };
 
