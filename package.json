@@ -8,8 +8,8 @@
   },
   "scripts": {
     "dev": "nodemon src/index.ts",
-    "build": "tsc && npx prisma generate",
-    "start": "node dist/index.js",
+    "build": "npx prisma generate",
+    "start": "npx ts-node src/index.ts",
     "postbuild": "npx prisma generate",
     "db:migrate": "npx prisma migrate deploy",
     "db:seed": "ts-node prisma/seed.ts",
