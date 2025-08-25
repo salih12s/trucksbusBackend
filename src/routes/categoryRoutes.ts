@@ -6,6 +6,7 @@ import {
   getModels,
   getVariants
 } from '../controllers/categoryController';
+import { fixBrandImages } from '../controllers/fixBrandController';
 
 const router = Router();
 
@@ -38,5 +39,8 @@ router.get('/variants', getVariants);
 
 // Model ID'ye göre varyantları getir
 router.get('/models/:modelId/variants', getVariants);
+
+// Admin: Brand image URL'lerini düzelt
+router.post('/fix-brand-images', fixBrandImages);
 
 export default router;
