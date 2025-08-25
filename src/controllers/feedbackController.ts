@@ -5,14 +5,14 @@ import { ulid } from 'ulid';
 import { emitToAdmins, emitToUser } from '../utils/socket';
 
 // Kullanıcı feedback gönderme
-export const createFeedback = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+export const createFeedback = async (req: AuthenticatedRequest, res: Response) => {
     try {
         console.log('createFeedback called with body:', req.body);
         const { type, subject, message, priority } = req.body;
         const userId = req.user?.id;
 
         if (!userId) {
-            res.status(401).json({ error: 'Kimlik doğrulaması gerekli' });
+            return res.status(401).json({ error: 'Kimlik doğrulaması gerekli' });
             return;
         }
 
@@ -93,7 +93,7 @@ export const createFeedback = async (req: AuthenticatedRequest, res: Response): 
 };
 
 // Kullanıcının kendi feedback'lerini getirme
-export const getUserFeedbacks = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+export const getUserFeedbacks = async (req: AuthenticatedRequest, res: Response) => {
     try {
         const userId = req.user?.id;
 
@@ -126,7 +126,7 @@ export const getUserFeedbacks = async (req: AuthenticatedRequest, res: Response)
 };
 
 // Admin: Tüm feedback'leri getirme
-export const getAllFeedbacks = async (req: Request, res: Response): Promise<void> => {
+export const getAllFeedbacks = async (req: Request, res: Response) => {
     try {
         console.log('getAllFeedbacks called with query:', req.query);
         const { page = 1, limit = 10, status, type, priority } = req.query;
@@ -189,7 +189,7 @@ export const getAllFeedbacks = async (req: Request, res: Response): Promise<void
 };
 
 // Admin: Feedback'e yanıt verme
-export const respondToFeedback = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+export const respondToFeedback = async (req: AuthenticatedRequest, res: Response) => {
     try {
         const { id } = req.params;
         const { response, status } = req.body;
@@ -268,7 +268,7 @@ export const respondToFeedback = async (req: AuthenticatedRequest, res: Response
 };
 
 // Admin: Feedback detayı
-export const getFeedbackDetail = async (req: Request, res: Response): Promise<void> => {
+export const getFeedbackDetail = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
 
@@ -308,7 +308,7 @@ export const getFeedbackDetail = async (req: Request, res: Response): Promise<vo
 };
 
 // Admin: Feedback durumu güncelleme
-export const updateFeedbackStatus = async (req: Request, res: Response): Promise<void> => {
+export const updateFeedbackStatus = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
         const { status } = req.body;
@@ -330,7 +330,7 @@ export const updateFeedbackStatus = async (req: Request, res: Response): Promise
 };
 
 // Admin: Dashboard istatistikleri
-export const getFeedbackStats = async (req: Request, res: Response): Promise<void> => {
+export const getFeedbackStats = async (req: Request, res: Response) => {
     try {
         const [
             totalFeedbacks,
