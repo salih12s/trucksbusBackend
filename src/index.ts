@@ -51,7 +51,7 @@ const io = new SocketIOServer(server, {
   }
 });
 
-const PORT = process.env.PORT || 3001;
+const PORT = Number(process.env.PORT) || 3001;
 
 // Rate limiting
 const limiter = rateLimit({
@@ -191,7 +191,13 @@ process.on('SIGINT', async () => {
 // Start server
 async function startServer() {
   try {
-    await connectDatabase();
+    // Try to connect to database but don't fail if it fails
+    try {
+      await connectDatabase();
+      logger.info('✅ Database connected successfully');
+    } catch (dbError) {
+      logger.error('❌ Database connection failed, but server will continue:', dbError);
+    }
     
     // Initialize room-based Socket.IO
     initSocket(io);
