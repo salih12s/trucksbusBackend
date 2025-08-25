@@ -45,17 +45,22 @@ const io = new SocketIOServer(server, {
           "https://trucksbus.com.tr", 
           "https://www.trucksbus.com.tr"
         ]
-      : true, // Development ortamında tüm origin'lere izin ver
+      : ["http://localhost:5173", "http://localhost:5174"],
     methods: ["GET", "POST"],
     credentials: true
   }
 });
 
-// Rate limiting
+// Rate limiting - Production için çok gevşek ayarlar
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
-  message: 'Too many requests from this IP, please try again later.',
+  windowMs: 1 * 60 * 1000, // 1 minute window
+  max: process.env.NODE_ENV === 'production' ? 1000 : 200, // Production'da 1000/dakika, development'ta 200/dakika
+  message: {
+    success: false,
+    message: 'Too many requests from this IP, please try again later.'
+  },
+  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
 });
 
 // Security middleware
@@ -68,7 +73,7 @@ app.use(cors({
         "https://trucksbus.com.tr", 
         "https://www.trucksbus.com.tr"
       ]
-    : true, // Development ortamında tüm origin'lere izin ver
+    : ["http://localhost:5173", "http://localhost:5174"],
   credentials: true
 }));
 app.use(compression());
