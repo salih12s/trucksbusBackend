@@ -45,7 +45,7 @@ const io = new SocketIOServer(server, {
           "https://trucksbus.com.tr", 
           "https://www.trucksbus.com.tr"
         ]
-      : ["http://localhost:5173", "http://localhost:5174"],
+      : true, // Development ortamında tüm origin'lere izin ver
     methods: ["GET", "POST"],
     credentials: true
   }
@@ -68,7 +68,7 @@ app.use(cors({
         "https://trucksbus.com.tr", 
         "https://www.trucksbus.com.tr"
       ]
-    : ["http://localhost:5173", "http://localhost:5174"],
+    : true, // Development ortamında tüm origin'lere izin ver
   credentials: true
 }));
 app.use(compression());
