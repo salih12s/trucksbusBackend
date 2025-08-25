@@ -51,8 +51,6 @@ const io = new SocketIOServer(server, {
   }
 });
 
-const PORT = Number(process.env.PORT) || 3001;
-
 // Rate limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -94,14 +92,15 @@ app.use((req: any, res, next) => {
   next();
 });
 
-// Health check
+// Very simple health check - no dependencies
 app.get('/api/health', (req, res) => {
-  res.status(200).json({ 
-    status: 'OK', 
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
-    environment: process.env.NODE_ENV || 'development'
-  });
+  console.log('Health check called at:', new Date().toISOString());
+  res.status(200).send('OK');
+});
+
+// Also add root endpoint for quick test
+app.get('/', (req, res) => {
+  res.status(200).send('TruckBus Backend is running!');
 });
 
 // API Routes
@@ -190,25 +189,43 @@ process.on('SIGINT', async () => {
 
 // Start server
 async function startServer() {
+  console.log('🔧 Starting server...');
+  console.log('🔧 NODE_ENV:', process.env.NODE_ENV);
+  console.log('🔧 PORT:', process.env.PORT);
+  console.log('🔧 DATABASE_URL exists:', !!process.env.DATABASE_URL);
+  
   try {
     // Try to connect to database but don't fail if it fails
     try {
       await connectDatabase();
+      console.log('✅ Database connected successfully');
       logger.info('✅ Database connected successfully');
     } catch (dbError) {
+      console.error('❌ Database connection failed, but server will continue:', dbError);
       logger.error('❌ Database connection failed, but server will continue:', dbError);
     }
     
     // Initialize room-based Socket.IO
     initSocket(io);
+    console.log('✅ Socket.IO initialized');
     
-    server.listen(PORT, '0.0.0.0', () => {
-      logger.info(`🚀 Server running on 0.0.0.0:${PORT}`);
+    const actualPort = Number(process.env.PORT) || 3001;
+    console.log('🔧 Attempting to listen on port:', actualPort);
+    
+    server.listen(actualPort, '0.0.0.0', () => {
+      console.log(`🚀 Server running on 0.0.0.0:${actualPort}`);
+      console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
+      console.log(`🌐 Frontend URL: ${process.env.FRONTEND_URL || 'http://localhost:5173'}`);
+      console.log(`💬 Socket.IO enabled with room management`);
+      console.log(`🩺 Health check available at /api/health`);
+      
+      logger.info(`🚀 Server running on 0.0.0.0:${actualPort}`);
       logger.info(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
       logger.info(`🌐 Frontend URL: ${process.env.FRONTEND_URL || 'http://localhost:5173'}`);
       logger.info(`💬 Socket.IO enabled with room management`);
     });
   } catch (error) {
+    console.error('💥 Failed to start server:', error);
     logger.error('Failed to start server:', error);
     process.exit(1);
   }
