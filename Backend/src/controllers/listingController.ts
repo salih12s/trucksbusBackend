@@ -1779,6 +1779,8 @@ export const getUserListings = async (req: Request, res: Response): Promise<void
       console.log('🖼️ First listing images field:', listings[0].images);
       console.log('🖼️ First listing_images relation:', listings[0].listing_images);
       console.log('🖼️ First listing raw:', JSON.stringify(listings[0], null, 2));
+    } else {
+      console.log('🖼️ User has no listings');
     }
 
     // Transform data to match frontend interface

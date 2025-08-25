@@ -23,6 +23,7 @@ import reportRoutes from './routes/reportRoutes';
 import notificationRoutes from './routes/notificationRoutes';
 import favoritesRoutes from './routes/favorites';
 import meRoutes from './routes/meRoutes';
+import feedbackRoutes from './routes/feedbackRoutes';
 
 // Import utils
 import { logger } from './utils/logger';
@@ -37,8 +38,16 @@ const server = createServer(app);
 // Socket.IO setup
 const io = new SocketIOServer(server, {
   cors: {
-    origin: ["http://localhost:5173", "http://localhost:5174"],
-    methods: ["GET", "POST"]
+    origin: process.env.NODE_ENV === 'production' 
+      ? [
+          "https://trucksbus.com", 
+          "https://www.trucksbus.com",
+          "https://trucksbus.com.tr", 
+          "https://www.trucksbus.com.tr"
+        ]
+      : ["http://localhost:5173", "http://localhost:5174"],
+    methods: ["GET", "POST"],
+    credentials: true
   }
 });
 
@@ -54,7 +63,14 @@ const limiter = rateLimit({
 // Security middleware
 app.use(helmet());
 app.use(cors({
-  origin: ["http://localhost:5173", "http://localhost:5174"],
+  origin: process.env.NODE_ENV === 'production' 
+    ? [
+        "https://trucksbus.com", 
+        "https://www.trucksbus.com",
+        "https://trucksbus.com.tr", 
+        "https://www.trucksbus.com.tr"
+      ]
+    : ["http://localhost:5173", "http://localhost:5174"],
   credentials: true
 }));
 app.use(compression());
@@ -66,8 +82,9 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Static files serving - uploaded images için  
-// Absolute path kullan
-const uploadsPath = path.resolve('C:/Users/salih/Desktop/TruckBus/Backend/public/uploads');
+const uploadsPath = process.env.NODE_ENV === 'production' 
+  ? path.join(__dirname, '..', 'public', 'uploads')
+  : path.resolve('C:/Users/salih/Desktop/TruckBus/Backend/public/uploads');
 console.log('🖼️ Static uploads path:', uploadsPath);
 app.use('/uploads', express.static(uploadsPath));
 
@@ -106,6 +123,9 @@ app.use('/api/reports', reportRoutes);
 
 // Notifications Routes
 app.use('/api/notifications', notificationRoutes);
+
+// Feedback Routes
+app.use('/api', feedbackRoutes);
 
 // Error handling middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {

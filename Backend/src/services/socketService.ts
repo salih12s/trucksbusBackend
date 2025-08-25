@@ -314,6 +314,41 @@ export class SocketService {
   public getIO(): SocketIOServer {
     return this.io;
   }
+
+  // Send notification to specific user
+  public async sendNotificationToUser(userId: string, notification: any) {
+    const userSocketId = this.connectedUsers.get(userId);
+    if (userSocketId) {
+      this.io.to(userSocketId).emit('notification', notification);
+    }
+  }
+
+  // Send notification to admin users
+  public async sendNotificationToAdmins(notification: any) {
+    // Find all connected admin users
+    for (const [userId, socketId] of this.connectedUsers.entries()) {
+      try {
+        const user = await prisma.users.findUnique({
+          where: { id: userId },
+          select: { role: true }
+        });
+        
+        if (user && user.role === 'ADMIN') {
+          this.io.to(socketId).emit('notification', notification);
+        }
+      } catch (error) {
+        logger.error('Error checking user role for notification:', error);
+      }
+    }
+  }
+
+  // Broadcast feedback status update
+  public broadcastFeedbackUpdate(feedbackId: string, status: string) {
+    this.io.emit('feedback_status_update', {
+      feedbackId,
+      status
+    });
+  }
 }
 
 // Extend Socket interface

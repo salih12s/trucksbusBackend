@@ -323,6 +323,18 @@ try {
   logger.error('Failed to load notification routes:', error);
 }
 
+try {
+  const feedbackRoutes = require('./routes/feedbackRoutes').default;
+  if (!feedbackRoutes) {
+    logger.error('feedback routes is undefined - check export');
+  } else {
+    app.use('/api', feedbackRoutes);
+    logger.info('Feedback routes loaded');
+  }
+} catch (error) {
+  logger.error('Failed to load feedback routes:', error);
+}
+
 // Global error handler
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
   logger.error('Global error:', err);

@@ -3,14 +3,15 @@
   "version": "1.0.0",
   "description": "TruckBus Backend API",
   "main": "dist/index.js",
+  "engines": { 
+    "node": ">=18" 
+  },
   "scripts": {
-    "dev": "nodemon src/simpleIndex.ts",
-    "dev-category": "nodemon src/categoryServer.ts",
-    "build": "tsc",
+    "dev": "nodemon src/index.ts",
+    "build": "tsc && npx prisma generate",
     "start": "node dist/index.js",
-    "db:generate": "prisma generate",
-    "db:push": "prisma db push",
-    "db:migrate": "prisma migrate dev",
+    "postbuild": "npx prisma generate",
+    "db:migrate": "npx prisma migrate deploy",
     "db:seed": "ts-node prisma/seed.ts",
     "db:studio": "prisma studio"
   },

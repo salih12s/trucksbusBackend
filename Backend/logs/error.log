@@ -976,3 +976,603 @@ ConnectorError(ConnectorError { user_facing_error: None, kind: QueryError(Postgr
     at Module.load (node:internal/modules/cjs/loader:1427:32)
     at Module._load (node:internal/modules/cjs/loader:1250:12)
     at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-24 13:23:48 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/routes/feedbackRoutes.ts[0m:[93m17[0m:[93m18[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m17[0m const validate = (req: express.Request, res: express.Response, next: express.NextFunction) => {
+[7m  [0m [91m                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-24 13:24:32 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/adminController.ts[0m:[93m627[0m:[93m7[0m - [91merror[0m[90m TS2322: [0mType '{ user_id: string; type: "LISTING_PUBLISHED"; title: string; message: string; data: { listing_id: string; listing_title: string; }; }' is not assignable to type '(Without<notificationsCreateInput, notificationsUncheckedCreateInput> & notificationsUncheckedCreateInput) | (Without<...> & notificationsCreateInput)'.
+  Type '{ user_id: string; type: "LISTING_PUBLISHED"; title: string; message: string; data: { listing_id: string; listing_title: string; }; }' is not assignable to type 'Without<notificationsCreateInput, notificationsUncheckedCreateInput> & notificationsUncheckedCreateInput'.
+    Property 'id' is missing in type '{ user_id: string; type: "LISTING_PUBLISHED"; title: string; message: string; data: { listing_id: string; listing_title: string; }; }' but required in type 'notificationsUncheckedCreateInput'.
+
+[7m627[0m       data: {
+[7m   [0m [91m      ~~~~[0m
+
+  [96mnode_modules/.prisma/client/index.d.ts[0m:[93m42962[0m:[93m5[0m
+    [7m42962[0m     id: string
+    [7m     [0m [96m    ~~[0m
+    'id' is declared here.
+  [96mnode_modules/.prisma/client/index.d.ts[0m:[93m29458[0m:[93m5[0m
+    [7m29458[0m     data: XOR<notificationsCreateInput, notificationsUncheckedCreateInput>
+    [7m     [0m [96m    ~~~~[0m
+    The expected type comes from property 'data' which is declared here on type '{ select?: notificationsSelect<DefaultArgs> | null | undefined; omit?: notificationsOmit<DefaultArgs> | null | undefined; include?: notificationsInclude<...> | ... 1 more ... | undefined; data: (Without<...> & notificationsUncheckedCreateInput) | (Without<...> & notificationsCreateInput); }'
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-24 13:24:32 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/routes/feedbackRoutes.ts[0m:[93m17[0m:[93m18[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m17[0m const validate = (req: express.Request, res: express.Response, next: express.NextFunction) => {
+[7m  [0m [91m                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-24 13:33:52 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/adminController.ts[0m:[93m627[0m:[93m7[0m - [91merror[0m[90m TS2322: [0mType '{ user_id: string; type: "LISTING_PUBLISHED"; title: string; message: string; data: { listing_id: string; listing_title: string; }; }' is not assignable to type '(Without<notificationsCreateInput, notificationsUncheckedCreateInput> & notificationsUncheckedCreateInput) | (Without<...> & notificationsCreateInput)'.
+  Type '{ user_id: string; type: "LISTING_PUBLISHED"; title: string; message: string; data: { listing_id: string; listing_title: string; }; }' is not assignable to type 'Without<notificationsCreateInput, notificationsUncheckedCreateInput> & notificationsUncheckedCreateInput'.
+    Property 'id' is missing in type '{ user_id: string; type: "LISTING_PUBLISHED"; title: string; message: string; data: { listing_id: string; listing_title: string; }; }' but required in type 'notificationsUncheckedCreateInput'.
+
+[7m627[0m       data: {
+[7m   [0m [91m      ~~~~[0m
+
+  [96mnode_modules/.prisma/client/index.d.ts[0m:[93m42962[0m:[93m5[0m
+    [7m42962[0m     id: string
+    [7m     [0m [96m    ~~[0m
+    'id' is declared here.
+  [96mnode_modules/.prisma/client/index.d.ts[0m:[93m29458[0m:[93m5[0m
+    [7m29458[0m     data: XOR<notificationsCreateInput, notificationsUncheckedCreateInput>
+    [7m     [0m [96m    ~~~~[0m
+    The expected type comes from property 'data' which is declared here on type '{ select?: notificationsSelect<DefaultArgs> | null | undefined; omit?: notificationsOmit<DefaultArgs> | null | undefined; include?: notificationsInclude<...> | ... 1 more ... | undefined; data: (Without<...> & notificationsUncheckedCreateInput) | (Without<...> & notificationsCreateInput); }'
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-24 13:33:53 [error]: Error: Cannot find module '../middleware/auth.js'
+Require stack:
+- C:\Users\salih\Desktop\TruckBus\Backend\src\routes\feedbackRoutes.ts
+- C:\Users\salih\Desktop\TruckBus\Backend\src\simpleIndex.ts
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1369:15)
+    at Module._resolveFilename.sharedData.moduleResolveFilenameHook.installedValue [as _resolveFilename] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@cspotcode\source-map-support\source-map-support.js:811:30)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1025:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1030:22)
+    at Module._load (node:internal/modules/cjs/loader:1179:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Module.require (node:internal/modules/cjs/loader:1449:12)
+    at require (node:internal/modules/helpers:135:16)
+    at Object.<anonymous> (C:\Users\salih\Desktop\TruckBus\Backend\src\routes\feedbackRoutes.ts:2:1)
+2025-08-24 13:34:03 [error]: Error: Cannot find module '../middleware/auth.js'
+Require stack:
+- C:\Users\salih\Desktop\TruckBus\Backend\src\routes\feedbackRoutes.ts
+- C:\Users\salih\Desktop\TruckBus\Backend\src\simpleIndex.ts
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1369:15)
+    at Module._resolveFilename.sharedData.moduleResolveFilenameHook.installedValue [as _resolveFilename] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@cspotcode\source-map-support\source-map-support.js:811:30)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1025:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1030:22)
+    at Module._load (node:internal/modules/cjs/loader:1179:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Module.require (node:internal/modules/cjs/loader:1449:12)
+    at require (node:internal/modules/helpers:135:16)
+    at Object.<anonymous> (C:\Users\salih\Desktop\TruckBus\Backend\src\routes\feedbackRoutes.ts:2:1)
+2025-08-24 13:34:23 [error]: Error: Cannot find module '../middleware/auth.js'
+Require stack:
+- C:\Users\salih\Desktop\TruckBus\Backend\src\routes\feedbackRoutes.ts
+- C:\Users\salih\Desktop\TruckBus\Backend\src\simpleIndex.ts
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1369:15)
+    at Module._resolveFilename.sharedData.moduleResolveFilenameHook.installedValue [as _resolveFilename] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@cspotcode\source-map-support\source-map-support.js:811:30)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1025:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1030:22)
+    at Module._load (node:internal/modules/cjs/loader:1179:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Module.require (node:internal/modules/cjs/loader:1449:12)
+    at require (node:internal/modules/helpers:135:16)
+    at Object.<anonymous> (C:\Users\salih\Desktop\TruckBus\Backend\src\routes\feedbackRoutes.ts:2:1)
+2025-08-24 13:34:35 [error]: Error: Cannot find module '../middleware/auth.js'
+Require stack:
+- C:\Users\salih\Desktop\TruckBus\Backend\src\routes\feedbackRoutes.ts
+- C:\Users\salih\Desktop\TruckBus\Backend\src\simpleIndex.ts
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1369:15)
+    at Module._resolveFilename.sharedData.moduleResolveFilenameHook.installedValue [as _resolveFilename] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@cspotcode\source-map-support\source-map-support.js:811:30)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1025:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1030:22)
+    at Module._load (node:internal/modules/cjs/loader:1179:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Module.require (node:internal/modules/cjs/loader:1449:12)
+    at require (node:internal/modules/helpers:135:16)
+    at Object.<anonymous> (C:\Users\salih\Desktop\TruckBus\Backend\src\routes\feedbackRoutes.ts:2:1)
+2025-08-24 13:35:29 [error]: Error: Cannot find module '../middleware/auth.js'
+Require stack:
+- C:\Users\salih\Desktop\TruckBus\Backend\src\routes\feedbackRoutes.ts
+- C:\Users\salih\Desktop\TruckBus\Backend\src\simpleIndex.ts
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1369:15)
+    at Module._resolveFilename.sharedData.moduleResolveFilenameHook.installedValue [as _resolveFilename] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@cspotcode\source-map-support\source-map-support.js:811:30)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1025:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1030:22)
+    at Module._load (node:internal/modules/cjs/loader:1179:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Module.require (node:internal/modules/cjs/loader:1449:12)
+    at require (node:internal/modules/helpers:135:16)
+    at Object.<anonymous> (C:\Users\salih\Desktop\TruckBus\Backend\src\routes\feedbackRoutes.ts:2:1)
+2025-08-24 13:35:49 [error]: Error: Cannot find module '../controllers/feedbackController.js'
+Require stack:
+- C:\Users\salih\Desktop\TruckBus\Backend\src\routes\feedbackRoutes.ts
+- C:\Users\salih\Desktop\TruckBus\Backend\src\simpleIndex.ts
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1369:15)
+    at Module._resolveFilename.sharedData.moduleResolveFilenameHook.installedValue [as _resolveFilename] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@cspotcode\source-map-support\source-map-support.js:811:30)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1025:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1030:22)
+    at Module._load (node:internal/modules/cjs/loader:1179:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Module.require (node:internal/modules/cjs/loader:1449:12)
+    at require (node:internal/modules/helpers:135:16)
+    at Object.<anonymous> (C:\Users\salih\Desktop\TruckBus\Backend\src\routes\feedbackRoutes.ts:4:1)
+2025-08-24 13:35:58 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/feedbackController.ts[0m:[93m6[0m:[93m31[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m6[0m export const createFeedback = async (req: AuthenticatedRequest, res: Response) => {
+[7m [0m [91m                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/feedbackController.ts[0m:[93m20[0m:[93m13[0m - [91merror[0m[90m TS2322: [0mType '{ user_id: string; type: any; subject: any; message: any; priority: any; }' is not assignable to type '(Without<feedbackCreateInput, feedbackUncheckedCreateInput> & feedbackUncheckedCreateInput) | (Without<...> & feedbackCreateInput)'.
+  Type '{ user_id: string; type: any; subject: any; message: any; priority: any; }' is not assignable to type 'Without<feedbackCreateInput, feedbackUncheckedCreateInput> & feedbackUncheckedCreateInput'.
+    Property 'id' is missing in type '{ user_id: string; type: any; subject: any; message: any; priority: any; }' but required in type 'feedbackUncheckedCreateInput'.
+
+[7m20[0m             data: {
+[7m  [0m [91m            ~~~~[0m
+
+  [96mnode_modules/.prisma/client/index.d.ts[0m:[93m42863[0m:[93m5[0m
+    [7m42863[0m     id: string
+    [7m     [0m [96m    ~~[0m
+    'id' is declared here.
+  [96mnode_modules/.prisma/client/index.d.ts[0m:[93m28346[0m:[93m5[0m
+    [7m28346[0m     data: XOR<feedbackCreateInput, feedbackUncheckedCreateInput>
+    [7m     [0m [96m    ~~~~[0m
+    The expected type comes from property 'data' which is declared here on type '{ select?: feedbackSelect<DefaultArgs> | null | undefined; omit?: feedbackOmit<DefaultArgs> | null | undefined; include?: feedbackInclude<...> | ... 1 more ... | undefined; data: (Without<...> & feedbackUncheckedCreateInput) | (Without<...> & feedbackCreateInput); }'
+[96msrc/controllers/feedbackController.ts[0m:[93m49[0m:[93m33[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m49[0m export const getUserFeedbacks = async (req: AuthenticatedRequest, res: Response) => {
+[7m  [0m [91m                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/feedbackController.ts[0m:[93m133[0m:[93m34[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m133[0m export const respondToFeedback = async (req: AuthenticatedRequest, res: Response) => {
+[7m   [0m [91m                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/feedbackController.ts[0m:[93m170[0m:[93m13[0m - [91merror[0m[90m TS2322: [0mType '{ user_id: string; type: "FEEDBACK_RESPONSE"; title: string; message: string; data: { feedback_id: string; feedback_subject: string; admin_response: any; }; }' is not assignable to type '(Without<notificationsCreateInput, notificationsUncheckedCreateInput> & notificationsUncheckedCreateInput) | (Without<...> & notificationsCreateInput)'.
+  Type '{ user_id: string; type: "FEEDBACK_RESPONSE"; title: string; message: string; data: { feedback_id: string; feedback_subject: string; admin_response: any; }; }' is not assignable to type 'Without<notificationsCreateInput, notificationsUncheckedCreateInput> & notificationsUncheckedCreateInput'.
+    Property 'id' is missing in type '{ user_id: string; type: "FEEDBACK_RESPONSE"; title: string; message: string; data: { feedback_id: string; feedback_subject: string; admin_response: any; }; }' but required in type 'notificationsUncheckedCreateInput'.
+
+[7m170[0m             data: {
+[7m   [0m [91m            ~~~~[0m
+
+  [96mnode_modules/.prisma/client/index.d.ts[0m:[93m42962[0m:[93m5[0m
+    [7m42962[0m     id: string
+    [7m     [0m [96m    ~~[0m
+    'id' is declared here.
+  [96mnode_modules/.prisma/client/index.d.ts[0m:[93m29458[0m:[93m5[0m
+    [7m29458[0m     data: XOR<notificationsCreateInput, notificationsUncheckedCreateInput>
+    [7m     [0m [96m    ~~~~[0m
+    The expected type comes from property 'data' which is declared here on type '{ select?: notificationsSelect<DefaultArgs> | null | undefined; omit?: notificationsOmit<DefaultArgs> | null | undefined; include?: notificationsInclude<...> | ... 1 more ... | undefined; data: (Without<...> & notificationsUncheckedCreateInput) | (Without<...> & notificationsCreateInput); }'
+[96msrc/controllers/feedbackController.ts[0m:[93m194[0m:[93m34[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m194[0m export const getFeedbackDetail = async (req: Request, res: Response) => {
+[7m   [0m [91m                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-24 13:40:39 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/routes/feedbackRoutes.ts[0m:[93m2[0m:[93m49[0m - [91merror[0m[90m TS5097: [0mAn import path can only end with a '.ts' extension when 'allowImportingTsExtensions' is enabled.
+
+[7m2[0m import { authMiddleware, adminMiddleware } from '../middleware/auth.ts';
+[7m [0m [91m                                                ~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-24 13:40:46 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/feedbackController.ts[0m:[93m6[0m:[93m31[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m6[0m export const createFeedback = async (req: AuthenticatedRequest, res: Response) => {
+[7m [0m [91m                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/feedbackController.ts[0m:[93m20[0m:[93m13[0m - [91merror[0m[90m TS2322: [0mType '{ user_id: string; type: any; subject: any; message: any; priority: any; }' is not assignable to type '(Without<feedbackCreateInput, feedbackUncheckedCreateInput> & feedbackUncheckedCreateInput) | (Without<...> & feedbackCreateInput)'.
+  Type '{ user_id: string; type: any; subject: any; message: any; priority: any; }' is not assignable to type 'Without<feedbackCreateInput, feedbackUncheckedCreateInput> & feedbackUncheckedCreateInput'.
+    Property 'id' is missing in type '{ user_id: string; type: any; subject: any; message: any; priority: any; }' but required in type 'feedbackUncheckedCreateInput'.
+
+[7m20[0m             data: {
+[7m  [0m [91m            ~~~~[0m
+
+  [96mnode_modules/.prisma/client/index.d.ts[0m:[93m42863[0m:[93m5[0m
+    [7m42863[0m     id: string
+    [7m     [0m [96m    ~~[0m
+    'id' is declared here.
+  [96mnode_modules/.prisma/client/index.d.ts[0m:[93m28346[0m:[93m5[0m
+    [7m28346[0m     data: XOR<feedbackCreateInput, feedbackUncheckedCreateInput>
+    [7m     [0m [96m    ~~~~[0m
+    The expected type comes from property 'data' which is declared here on type '{ select?: feedbackSelect<DefaultArgs> | null | undefined; omit?: feedbackOmit<DefaultArgs> | null | undefined; include?: feedbackInclude<...> | ... 1 more ... | undefined; data: (Without<...> & feedbackUncheckedCreateInput) | (Without<...> & feedbackCreateInput); }'
+[96msrc/controllers/feedbackController.ts[0m:[93m49[0m:[93m33[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m49[0m export const getUserFeedbacks = async (req: AuthenticatedRequest, res: Response) => {
+[7m  [0m [91m                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/feedbackController.ts[0m:[93m133[0m:[93m34[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m133[0m export const respondToFeedback = async (req: AuthenticatedRequest, res: Response) => {
+[7m   [0m [91m                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/feedbackController.ts[0m:[93m170[0m:[93m13[0m - [91merror[0m[90m TS2322: [0mType '{ user_id: string; type: "FEEDBACK_RESPONSE"; title: string; message: string; data: { feedback_id: string; feedback_subject: string; admin_response: any; }; }' is not assignable to type '(Without<notificationsCreateInput, notificationsUncheckedCreateInput> & notificationsUncheckedCreateInput) | (Without<...> & notificationsCreateInput)'.
+  Type '{ user_id: string; type: "FEEDBACK_RESPONSE"; title: string; message: string; data: { feedback_id: string; feedback_subject: string; admin_response: any; }; }' is not assignable to type 'Without<notificationsCreateInput, notificationsUncheckedCreateInput> & notificationsUncheckedCreateInput'.
+    Property 'id' is missing in type '{ user_id: string; type: "FEEDBACK_RESPONSE"; title: string; message: string; data: { feedback_id: string; feedback_subject: string; admin_response: any; }; }' but required in type 'notificationsUncheckedCreateInput'.
+
+[7m170[0m             data: {
+[7m   [0m [91m            ~~~~[0m
+
+  [96mnode_modules/.prisma/client/index.d.ts[0m:[93m42962[0m:[93m5[0m
+    [7m42962[0m     id: string
+    [7m     [0m [96m    ~~[0m
+    'id' is declared here.
+  [96mnode_modules/.prisma/client/index.d.ts[0m:[93m29458[0m:[93m5[0m
+    [7m29458[0m     data: XOR<notificationsCreateInput, notificationsUncheckedCreateInput>
+    [7m     [0m [96m    ~~~~[0m
+    The expected type comes from property 'data' which is declared here on type '{ select?: notificationsSelect<DefaultArgs> | null | undefined; omit?: notificationsOmit<DefaultArgs> | null | undefined; include?: notificationsInclude<...> | ... 1 more ... | undefined; data: (Without<...> & notificationsUncheckedCreateInput) | (Without<...> & notificationsCreateInput); }'
+[96msrc/controllers/feedbackController.ts[0m:[93m194[0m:[93m34[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m194[0m export const getFeedbackDetail = async (req: Request, res: Response) => {
+[7m   [0m [91m                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-24 13:40:55 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/adminController.ts[0m:[93m645[0m:[93m28[0m - [91merror[0m[90m TS2304: [0mCannot find name 'id'.
+
+[7m645[0m     logger.info(`Listing ${id} approved and notification sent`);
+[7m   [0m [91m                           ~~[0m
+[96msrc/controllers/adminController.ts[0m:[93m647[0m:[93m5[0m - [91merror[0m[90m TS2304: [0mCannot find name 'res'.
+
+[7m647[0m     res.json({
+[7m   [0m [91m    ~~~[0m
+[96msrc/controllers/adminController.ts[0m:[93m650[0m:[93m29[0m - [91merror[0m[90m TS2304: [0mCannot find name 'listing'.
+
+[7m650[0m       data: serializeBigInt(listing)
+[7m   [0m [91m                            ~~~~~~~[0m
+[96msrc/controllers/adminController.ts[0m:[93m655[0m:[93m5[0m - [91merror[0m[90m TS2304: [0mCannot find name 'res'.
+
+[7m655[0m     res.status(500).json({
+[7m   [0m [91m    ~~~[0m
+[96msrc/controllers/adminController.ts[0m:[93m642[0m:[93m7[0m - [91merror[0m[90m TS1472: [0m'catch' or 'finally' expected.
+
+[7m642[0m       }
+[7m   [0m [91m      ~[0m
+[96msrc/controllers/adminController.ts[0m:[93m643[0m:[93m5[0m - [91merror[0m[90m TS1128: [0mDeclaration or statement expected.
+
+[7m643[0m     });
+[7m   [0m [91m    ~[0m
+[96msrc/controllers/adminController.ts[0m:[93m643[0m:[93m6[0m - [91merror[0m[90m TS1128: [0mDeclaration or statement expected.
+
+[7m643[0m     });
+[7m   [0m [91m     ~[0m
+[96msrc/controllers/adminController.ts[0m:[93m653[0m:[93m3[0m - [91merror[0m[90m TS1128: [0mDeclaration or statement expected.
+
+[7m653[0m   } catch (error: any) {
+[7m   [0m [91m  ~[0m
+[96msrc/controllers/adminController.ts[0m:[93m653[0m:[93m5[0m - [91merror[0m[90m TS1005: [0m'try' expected.
+
+[7m653[0m   } catch (error: any) {
+[7m   [0m [91m    ~~~~~[0m
+[96msrc/controllers/adminController.ts[0m:[93m661[0m:[93m1[0m - [91merror[0m[90m TS1128: [0mDeclaration or statement expected.
+
+[7m661[0m };
+[7m   [0m [91m~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-24 13:40:56 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/feedbackController.ts[0m:[93m6[0m:[93m31[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m6[0m export const createFeedback = async (req: AuthenticatedRequest, res: Response) => {
+[7m [0m [91m                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/feedbackController.ts[0m:[93m20[0m:[93m13[0m - [91merror[0m[90m TS2322: [0mType '{ user_id: string; type: any; subject: any; message: any; priority: any; }' is not assignable to type '(Without<feedbackCreateInput, feedbackUncheckedCreateInput> & feedbackUncheckedCreateInput) | (Without<...> & feedbackCreateInput)'.
+  Type '{ user_id: string; type: any; subject: any; message: any; priority: any; }' is not assignable to type 'Without<feedbackCreateInput, feedbackUncheckedCreateInput> & feedbackUncheckedCreateInput'.
+    Property 'id' is missing in type '{ user_id: string; type: any; subject: any; message: any; priority: any; }' but required in type 'feedbackUncheckedCreateInput'.
+
+[7m20[0m             data: {
+[7m  [0m [91m            ~~~~[0m
+
+  [96mnode_modules/.prisma/client/index.d.ts[0m:[93m42863[0m:[93m5[0m
+    [7m42863[0m     id: string
+    [7m     [0m [96m    ~~[0m
+    'id' is declared here.
+  [96mnode_modules/.prisma/client/index.d.ts[0m:[93m28346[0m:[93m5[0m
+    [7m28346[0m     data: XOR<feedbackCreateInput, feedbackUncheckedCreateInput>
+    [7m     [0m [96m    ~~~~[0m
+    The expected type comes from property 'data' which is declared here on type '{ select?: feedbackSelect<DefaultArgs> | null | undefined; omit?: feedbackOmit<DefaultArgs> | null | undefined; include?: feedbackInclude<...> | ... 1 more ... | undefined; data: (Without<...> & feedbackUncheckedCreateInput) | (Without<...> & feedbackCreateInput); }'
+[96msrc/controllers/feedbackController.ts[0m:[93m49[0m:[93m33[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m49[0m export const getUserFeedbacks = async (req: AuthenticatedRequest, res: Response) => {
+[7m  [0m [91m                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/feedbackController.ts[0m:[93m133[0m:[93m34[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m133[0m export const respondToFeedback = async (req: AuthenticatedRequest, res: Response) => {
+[7m   [0m [91m                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/feedbackController.ts[0m:[93m170[0m:[93m13[0m - [91merror[0m[90m TS2322: [0mType '{ user_id: string; type: "FEEDBACK_RESPONSE"; title: string; message: string; data: { feedback_id: string; feedback_subject: string; admin_response: any; }; }' is not assignable to type '(Without<notificationsCreateInput, notificationsUncheckedCreateInput> & notificationsUncheckedCreateInput) | (Without<...> & notificationsCreateInput)'.
+  Type '{ user_id: string; type: "FEEDBACK_RESPONSE"; title: string; message: string; data: { feedback_id: string; feedback_subject: string; admin_response: any; }; }' is not assignable to type 'Without<notificationsCreateInput, notificationsUncheckedCreateInput> & notificationsUncheckedCreateInput'.
+    Property 'id' is missing in type '{ user_id: string; type: "FEEDBACK_RESPONSE"; title: string; message: string; data: { feedback_id: string; feedback_subject: string; admin_response: any; }; }' but required in type 'notificationsUncheckedCreateInput'.
+
+[7m170[0m             data: {
+[7m   [0m [91m            ~~~~[0m
+
+  [96mnode_modules/.prisma/client/index.d.ts[0m:[93m42962[0m:[93m5[0m
+    [7m42962[0m     id: string
+    [7m     [0m [96m    ~~[0m
+    'id' is declared here.
+  [96mnode_modules/.prisma/client/index.d.ts[0m:[93m29458[0m:[93m5[0m
+    [7m29458[0m     data: XOR<notificationsCreateInput, notificationsUncheckedCreateInput>
+    [7m     [0m [96m    ~~~~[0m
+    The expected type comes from property 'data' which is declared here on type '{ select?: notificationsSelect<DefaultArgs> | null | undefined; omit?: notificationsOmit<DefaultArgs> | null | undefined; include?: notificationsInclude<...> | ... 1 more ... | undefined; data: (Without<...> & notificationsUncheckedCreateInput) | (Without<...> & notificationsCreateInput); }'
+[96msrc/controllers/feedbackController.ts[0m:[93m194[0m:[93m34[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m194[0m export const getFeedbackDetail = async (req: Request, res: Response) => {
+[7m   [0m [91m                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-24 13:41:11 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/feedbackController.ts[0m:[93m6[0m:[93m31[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m6[0m export const createFeedback = async (req: AuthenticatedRequest, res: Response) => {
+[7m [0m [91m                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/feedbackController.ts[0m:[93m20[0m:[93m13[0m - [91merror[0m[90m TS2322: [0mType '{ user_id: string; type: any; subject: any; message: any; priority: any; }' is not assignable to type '(Without<feedbackCreateInput, feedbackUncheckedCreateInput> & feedbackUncheckedCreateInput) | (Without<...> & feedbackCreateInput)'.
+  Type '{ user_id: string; type: any; subject: any; message: any; priority: any; }' is not assignable to type 'Without<feedbackCreateInput, feedbackUncheckedCreateInput> & feedbackUncheckedCreateInput'.
+    Property 'id' is missing in type '{ user_id: string; type: any; subject: any; message: any; priority: any; }' but required in type 'feedbackUncheckedCreateInput'.
+
+[7m20[0m             data: {
+[7m  [0m [91m            ~~~~[0m
+
+  [96mnode_modules/.prisma/client/index.d.ts[0m:[93m42863[0m:[93m5[0m
+    [7m42863[0m     id: string
+    [7m     [0m [96m    ~~[0m
+    'id' is declared here.
+  [96mnode_modules/.prisma/client/index.d.ts[0m:[93m28346[0m:[93m5[0m
+    [7m28346[0m     data: XOR<feedbackCreateInput, feedbackUncheckedCreateInput>
+    [7m     [0m [96m    ~~~~[0m
+    The expected type comes from property 'data' which is declared here on type '{ select?: feedbackSelect<DefaultArgs> | null | undefined; omit?: feedbackOmit<DefaultArgs> | null | undefined; include?: feedbackInclude<...> | ... 1 more ... | undefined; data: (Without<...> & feedbackUncheckedCreateInput) | (Without<...> & feedbackCreateInput); }'
+[96msrc/controllers/feedbackController.ts[0m:[93m49[0m:[93m33[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m49[0m export const getUserFeedbacks = async (req: AuthenticatedRequest, res: Response) => {
+[7m  [0m [91m                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/feedbackController.ts[0m:[93m133[0m:[93m34[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m133[0m export const respondToFeedback = async (req: AuthenticatedRequest, res: Response) => {
+[7m   [0m [91m                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/feedbackController.ts[0m:[93m170[0m:[93m13[0m - [91merror[0m[90m TS2322: [0mType '{ user_id: string; type: "FEEDBACK_RESPONSE"; title: string; message: string; data: { feedback_id: string; feedback_subject: string; admin_response: any; }; }' is not assignable to type '(Without<notificationsCreateInput, notificationsUncheckedCreateInput> & notificationsUncheckedCreateInput) | (Without<...> & notificationsCreateInput)'.
+  Type '{ user_id: string; type: "FEEDBACK_RESPONSE"; title: string; message: string; data: { feedback_id: string; feedback_subject: string; admin_response: any; }; }' is not assignable to type 'Without<notificationsCreateInput, notificationsUncheckedCreateInput> & notificationsUncheckedCreateInput'.
+    Property 'id' is missing in type '{ user_id: string; type: "FEEDBACK_RESPONSE"; title: string; message: string; data: { feedback_id: string; feedback_subject: string; admin_response: any; }; }' but required in type 'notificationsUncheckedCreateInput'.
+
+[7m170[0m             data: {
+[7m   [0m [91m            ~~~~[0m
+
+  [96mnode_modules/.prisma/client/index.d.ts[0m:[93m42962[0m:[93m5[0m
+    [7m42962[0m     id: string
+    [7m     [0m [96m    ~~[0m
+    'id' is declared here.
+  [96mnode_modules/.prisma/client/index.d.ts[0m:[93m29458[0m:[93m5[0m
+    [7m29458[0m     data: XOR<notificationsCreateInput, notificationsUncheckedCreateInput>
+    [7m     [0m [96m    ~~~~[0m
+    The expected type comes from property 'data' which is declared here on type '{ select?: notificationsSelect<DefaultArgs> | null | undefined; omit?: notificationsOmit<DefaultArgs> | null | undefined; include?: notificationsInclude<...> | ... 1 more ... | undefined; data: (Without<...> & notificationsUncheckedCreateInput) | (Without<...> & notificationsCreateInput); }'
+[96msrc/controllers/feedbackController.ts[0m:[93m194[0m:[93m34[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m194[0m export const getFeedbackDetail = async (req: Request, res: Response) => {
+[7m   [0m [91m                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-24 13:57:42 [error]: Error: Cannot find module '../utils/database.js'
+Require stack:
+- C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\feedbackController.ts
+- C:\Users\salih\Desktop\TruckBus\Backend\src\routes\feedbackRoutes.ts
+- C:\Users\salih\Desktop\TruckBus\Backend\src\simpleIndex.ts
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1369:15)
+    at Module._resolveFilename.sharedData.moduleResolveFilenameHook.installedValue [as _resolveFilename] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@cspotcode\source-map-support\source-map-support.js:811:30)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1025:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1030:22)
+    at Module._load (node:internal/modules/cjs/loader:1179:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Module.require (node:internal/modules/cjs/loader:1449:12)
+    at require (node:internal/modules/helpers:135:16)
+    at Object.<anonymous> (C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\feedbackController.ts:2:1)
+2025-08-24 14:02:31 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/feedbackController.ts[0m:[93m22[0m:[93m39[0m - [91merror[0m[90m TS2551: [0mProperty 'Feedback' does not exist on type 'PrismaClient<{ log: ({ emit: "event"; level: "query"; } | { emit: "event"; level: "error"; } | { emit: "event"; level: "warn"; })[]; }, "error" | "query" | "warn", DefaultArgs>'. Did you mean 'feedback'?
+
+[7m22[0m         const feedback = await prisma.Feedback.create({
+[7m  [0m [91m                                      ~~~~~~~~[0m
+
+  [96mnode_modules/.prisma/client/index.d.ts[0m:[93m716[0m:[93m7[0m
+    [7m716[0m   get feedback(): Prisma.feedbackDelegate<ExtArgs, ClientOptions>;
+    [7m   [0m [96m      ~~~~~~~~[0m
+    'feedback' is declared here.
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-24 15:12:07 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/routes/listingRoutes.ts[0m:[93m2[0m:[93m1[0m - [91merror[0m[90m TS2552: [0mCannot find name 'irouter'. Did you mean 'router'?
+
+[7m2[0m irouter.post(
+[7m [0m [91m~~~~~~~[0m
+
+  [96msrc/routes/listingRoutes.ts[0m:[93m26[0m:[93m7[0m
+    [7m26[0m const router = Router();
+    [7m  [0m [96m      ~~~~~~[0m
+    'router' is declared here.
+[96msrc/routes/listingRoutes.ts[0m:[93m4[0m:[93m3[0m - [91merror[0m[90m TS2448: [0mBlock-scoped variable 'upload' used before its declaration.
+
+[7m4[0m   upload.fields([{ name: 'images', maxCount: 15 }]), // hem dosyayı hem metni parse eder
+[7m [0m [91m  ~~~~~~[0m
+
+  [96msrc/routes/listingRoutes.ts[0m:[93m27[0m:[93m7[0m
+    [7m27[0m const upload = multer({ storage: multer.memoryStorage() });
+    [7m  [0m [96m      ~~~~~~[0m
+    'upload' is declared here.
+[96msrc/routes/listingRoutes.ts[0m:[93m8[0m:[93m1[0m - [91merror[0m[90m TS2448: [0mBlock-scoped variable 'router' used before its declaration.
+
+[7m8[0m router.put('/:id', updateListing);  // PUT /api/listings/:id
+[7m [0m [91m~~~~~~[0m
+
+  [96msrc/routes/listingRoutes.ts[0m:[93m26[0m:[93m7[0m
+    [7m26[0m const router = Router();
+    [7m  [0m [96m      ~~~~~~[0m
+    'router' is declared here.
+[96msrc/routes/listingRoutes.ts[0m:[93m8[0m:[93m1[0m - [91merror[0m[90m TS2454: [0mVariable 'router' is used before being assigned.
+
+[7m8[0m router.put('/:id', updateListing);  // PUT /api/listings/:id
+[7m [0m [91m~~~~~~[0m
+[96msrc/routes/listingRoutes.ts[0m:[93m9[0m:[93m1[0m - [91merror[0m[90m TS2448: [0mBlock-scoped variable 'router' used before its declaration.
+
+[7m9[0m router.delete('/:id', deleteListing);  // DELETE /api/listings/:id from 'multer';
+[7m [0m [91m~~~~~~[0m
+
+  [96msrc/routes/listingRoutes.ts[0m:[93m26[0m:[93m7[0m
+    [7m26[0m const router = Router();
+    [7m  [0m [96m      ~~~~~~[0m
+    'router' is declared here.
+[96msrc/routes/listingRoutes.ts[0m:[93m9[0m:[93m1[0m - [91merror[0m[90m TS2454: [0mVariable 'router' is used before being assigned.
+
+[7m9[0m router.delete('/:id', deleteListing);  // DELETE /api/listings/:id from 'multer';
+[7m [0m [91m~~~~~~[0m
+[96msrc/routes/listingRoutes.ts[0m:[93m27[0m:[93m16[0m - [91merror[0m[90m TS2304: [0mCannot find name 'multer'.
+
+[7m27[0m const upload = multer({ storage: multer.memoryStorage() });
+[7m  [0m [91m               ~~~~~~[0m
+[96msrc/routes/listingRoutes.ts[0m:[93m27[0m:[93m34[0m - [91merror[0m[90m TS2304: [0mCannot find name 'multer'.
+
+[7m27[0m const upload = multer({ storage: multer.memoryStorage() });
+[7m  [0m [91m                                 ~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-24 15:12:29 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/routes/listingRoutes.ts[0m:[93m48[0m:[93m16[0m - [91merror[0m[90m TS2528: [0mA module cannot have multiple default exports.
+
+[7m48[0m export default router;
+[7m  [0m [91m               ~~~~~~[0m
+
+  [96msrc/routes/listingRoutes.ts[0m:[93m55[0m:[93m16[0m
+    [7m55[0m export default router;
+    [7m  [0m [96m               ~~~~~~[0m
+    Another export default is here.
+[96msrc/routes/listingRoutes.ts[0m:[93m55[0m:[93m16[0m - [91merror[0m[90m TS2528: [0mA module cannot have multiple default exports.
+
+[7m55[0m export default router;
+[7m  [0m [91m               ~~~~~~[0m
+
+  [96msrc/routes/listingRoutes.ts[0m:[93m48[0m:[93m16[0m
+    [7m48[0m export default router;
+    [7m  [0m [96m               ~~~~~~[0m
+    The first export default is here.
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)

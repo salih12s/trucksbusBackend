@@ -125,9 +125,9 @@ model conversations {
   greatest_user_id             String
   created_at                   DateTime                       @default(now())
   conversation_counters        conversation_counters?
+  conversation_hidden          conversation_hidden[]
   conversation_participants    conversation_participants[]
   conversation_unread_counters conversation_unread_counters[]
-  conversation_hidden          conversation_hidden[]
   listings                     listings?                      @relation(fields: [listing_id], references: [id], onDelete: Cascade)
   message_reads                message_reads[]
   messages                     messages[]
@@ -211,7 +211,6 @@ model listings {
   model_id           String?
   variant_id         String?
   status             ListingStatus        @default(DRAFT)
-  moderation_status  ModerationStatus     @default(ACTIVE)
   is_active          Boolean              @default(true)
   is_approved        Boolean              @default(false)
   is_pending         Boolean              @default(true)
@@ -239,20 +238,18 @@ model listings {
   neighborhood_id    String?
   transmission       String?
   vehicle_condition  String?
-  
-  // Kamyon özel alanları
-  body_type          String?              // Üst Yapı
-  carrying_capacity  String?              // Taşıma Kapasitesi (KG)
-  cabin_type         String?              // Kabin Türü  
-  tire_condition     String?              // Lastik Durumu (%)
-  drive_type         String?              // Çekiş Türü
-  plate_origin       String?              // Plaka/Uyruk
-  features           Json?                @default("{}") // Konfor özellikleri
-  damage_record      String?              // Hasar Kaydı
-  paint_change       String?              // Boya Değişimi
-  tramer_record      String?              // Tramer Kaydı
-  
   images             Json?                @default("[]")
+  moderation_status  ModerationStatus     @default(ACTIVE)
+  body_type          String?
+  cabin_type         String?
+  carrying_capacity  String?
+  damage_record      String?
+  drive_type         String?
+  features           Json?                @default("{}")
+  paint_change       String?
+  plate_origin       String?
+  tire_condition     String?
+  tramer_record      String?
   complaints         complaints[]
   conversations      conversations[]
   favorites          favorites[]
@@ -310,6 +307,26 @@ model models {
   variants   variants[]
 }
 
+model feedback {
+  id             String         @id
+  user_id        String
+  type           FeedbackType   @default(GENERAL)
+  subject        String
+  message        String
+  priority       Priority       @default(MEDIUM)
+  status         FeedbackStatus @default(OPEN)
+  admin_response String?
+  admin_id       String?
+  responded_at   DateTime?
+  created_at     DateTime       @default(now())
+  updated_at     DateTime       @updatedAt
+  admin          users?         @relation("FeedbackAdmin", fields: [admin_id], references: [id])
+  user           users          @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([status, created_at])
+  @@index([user_id])
+}
+
 model notifications {
   id         String           @id
   user_id    String
@@ -358,19 +375,21 @@ model users {
   avatar                                      String?
   complaints_complaints_target_user_idTousers complaints[]                   @relation("complaints_target_user_idTousers")
   complaints_complaints_user_idTousers        complaints[]                   @relation("complaints_user_idTousers")
+  conversation_hidden                         conversation_hidden[]
   conversation_participants                   conversation_participants[]
   conversation_unread_counters                conversation_unread_counters[]
-  conversation_hidden                         conversation_hidden[]
   favorites                                   favorites[]
+  feedback_admin                              feedback[]                     @relation("FeedbackAdmin")
+  feedback                                    feedback[]
   listings                                    listings[]
   message_reads                               message_reads[]
   messages                                    messages[]
   notifications                               notifications[]
-  user_unread_counters                        user_unread_counters?
-  reports_as_reporter                         reports[]                      @relation("ReportsByReporter")
-  reports_as_owner                            reports[]                      @relation("ReportsToOwner") 
-  reports_reviewed                            reports[]                      @relation("ReportsReviewed")
   report_history                              report_history[]
+  reports_as_owner                            reports[]                      @relation("ReportsToOwner")
+  reports_as_reporter                         reports[]                      @relation("ReportsByReporter")
+  reports_reviewed                            reports[]                      @relation("ReportsReviewed")
+  user_unread_counters                        user_unread_counters?
 }
 
 model variants {
@@ -395,6 +414,54 @@ model vehicle_types {
   feature_groups      feature_groups[]
   listings            listings[]
   categories          categories            @relation(fields: [category_id], references: [id], onDelete: Cascade)
+}
+
+model conversation_hidden {
+  id              String        @id
+  conversation_id String
+  user_id         String
+  hidden_at       DateTime      @default(now())
+  conversations   conversations @relation(fields: [conversation_id], references: [id], onDelete: Cascade)
+  users           users         @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([conversation_id, user_id])
+}
+
+model reports {
+  id              String           @id @default(cuid())
+  listing_id      String
+  reporter_id     String
+  owner_id        String
+  reason          ReportReason
+  description     String
+  status          ReportStatus     @default(OPEN)
+  resolution_note String?
+  reviewer_id     String?
+  created_at      DateTime         @default(now())
+  updated_at      DateTime         @updatedAt
+  history         report_history[]
+  listing         listings         @relation(fields: [listing_id], references: [id])
+  owner           users            @relation("ReportsToOwner", fields: [owner_id], references: [id])
+  reporter        users            @relation("ReportsByReporter", fields: [reporter_id], references: [id])
+  reviewer        users?           @relation("ReportsReviewed", fields: [reviewer_id], references: [id])
+
+  @@index([status, created_at])
+  @@index([listing_id])
+  @@index([reporter_id])
+  @@index([owner_id])
+}
+
+model report_history {
+  id          String        @id @default(cuid())
+  report_id   String
+  actor_id    String?
+  action      ReportAction
+  from_status ReportStatus?
+  to_status   ReportStatus?
+  note        String?
+  created_at  DateTime      @default(now())
+  actor       users?        @relation(fields: [actor_id], references: [id])
+  report      reports       @relation(fields: [report_id], references: [id])
 }
 
 enum ComplaintCategory {
@@ -475,6 +542,31 @@ enum NotificationType {
   REPORT_RESOLVED_ACCEPTED
   REPORT_RESOLVED_REJECTED
   LISTING_REMOVED
+  FEEDBACK_RESPONSE
+  LISTING_PUBLISHED
+  FEEDBACK_NEW
+}
+
+enum FeedbackType {
+  COMPLAINT
+  SUGGESTION
+  BUG_REPORT
+  FEATURE_REQUEST
+  GENERAL
+}
+
+enum FeedbackStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
 }
 
 enum PropertyType {
@@ -489,54 +581,4 @@ enum UserRole {
   USER
   ADMIN
   CORPORATE
-}
-
-model conversation_hidden {
-  id              String        @id
-  conversation_id String
-  user_id         String
-  hidden_at       DateTime      @default(now())
-  conversations   conversations @relation(fields: [conversation_id], references: [id], onDelete: Cascade)
-  users           users         @relation(fields: [user_id], references: [id], onDelete: Cascade)
-
-  @@unique([conversation_id, user_id])
-}
-
-model reports {
-  id              String          @id @default(cuid())
-  listing_id      String
-  reporter_id     String
-  owner_id        String
-  reason          ReportReason
-  description     String
-  status          ReportStatus    @default(OPEN)
-  resolution_note String?
-  reviewer_id     String?
-  created_at      DateTime        @default(now())
-  updated_at      DateTime        @updatedAt
-
-  listing         listings        @relation(fields: [listing_id], references: [id])
-  reporter        users           @relation("ReportsByReporter", fields: [reporter_id], references: [id])
-  owner           users           @relation("ReportsToOwner", fields: [owner_id], references: [id])
-  reviewer        users?          @relation("ReportsReviewed", fields: [reviewer_id], references: [id])
-  history         report_history[]
-
-  @@index([status, created_at])
-  @@index([listing_id])
-  @@index([reporter_id])
-  @@index([owner_id])
-}
-
-model report_history {
-  id          String        @id @default(cuid())
-  report_id   String
-  actor_id    String?
-  action      ReportAction
-  from_status ReportStatus?
-  to_status   ReportStatus?
-  note        String?
-  created_at  DateTime      @default(now())
-
-  report      reports       @relation(fields: [report_id], references: [id])
-  actor       users?        @relation(fields: [actor_id], references: [id])
 }

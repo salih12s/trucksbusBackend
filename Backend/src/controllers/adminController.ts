@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { ulid } from 'ulid';
 import { prisma } from '../utils/prisma';
 import { logger } from '../utils/logger';
 
@@ -610,14 +611,38 @@ export const approveListing = async (req: Request, res: Response): Promise<void>
         is_active: true,
         approved_at: new Date(),
         status: 'ACTIVE'
+      },
+      include: {
+        users: {
+          select: {
+            id: true,
+            first_name: true,
+            last_name: true
+          }
+        }
       }
     });
 
-    logger.info(`Listing ${id} approved`);
+    // Kullanıcıya bildirim gönder
+    await prisma.notifications.create({
+      data: {
+        id: ulid(), // Prisma ID gereksinimi için
+        user_id: listing.user_id,
+        type: 'LISTING_APPROVED',
+        title: 'İlanınız Yayınlandı!',
+        message: `"${listing.title}" başlıklı ilanınız onaylanarak yayınlandı.`,
+        data: {
+          listing_id: listing.id,
+          listing_title: listing.title
+        }
+      }
+    });
+
+    logger.info(`Listing ${id} approved and notification sent`);
 
     res.json({
       success: true,
-      message: 'İlan onaylandı',
+      message: 'İlan onaylandı ve kullanıcıya bildirim gönderildi',
       data: serializeBigInt(listing)
     });
 
