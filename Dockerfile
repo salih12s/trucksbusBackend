@@ -1,31 +1,24 @@
-# Railway için optimized Dockerfile
-
 FROM node:20-alpine
 
-# Çalışma dizini
 WORKDIR /app
 
-# Package files kopyala
+# 1) Package files kopyala ve dependencies yükle
 COPY package*.json ./
+RUN npm ci
 
-# Dependencies yükle (production only)
-RUN npm ci --omit=dev
-
-# Prisma schema kopyala ve generate et
+# 2) Prisma client generate
 COPY prisma ./prisma/
 RUN npx prisma generate
 
-# Source code kopyala
+# 3) Source code kopyala
 COPY . .
 
-# TypeScript build
-RUN npm run build
+# 4) TypeScript compile
+RUN npx tsc
 
 # Production environment
 ENV NODE_ENV=production
-
-# Railway kendi PORT'unu verir
 EXPOSE 3000
 
-# Start command
-CMD ["npm", "start"]
+# Compiled JS'den çalıştır
+CMD ["node", "dist/index.js"]

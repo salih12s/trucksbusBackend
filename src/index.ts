@@ -170,7 +170,8 @@ async function connectDatabase() {
     logger.info('✅ Database connected successfully');
   } catch (error) {
     logger.error('❌ Database connection failed:', error);
-    process.exit(1);
+    // Don't exit - let the caller decide
+    throw error;
   }
 }
 

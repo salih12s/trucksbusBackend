@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { prisma } from '../utils/database';
-import { AuthenticatedRequest } from '../types/auth';
+import type { AuthenticatedRequest } from '../types/auth';
 import { ulid } from 'ulid';
 import { emitToAdmins, emitToUser } from '../utils/socket';
 
