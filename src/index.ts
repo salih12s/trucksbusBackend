@@ -217,9 +217,11 @@ async function startServer() {
     console.log('✅ Socket.IO initialized');
     
     // Initialize SocketService for messaging - PASS EXISTING IO INSTANCE
+    console.log('🔥 Creating SocketService...');
     const socketService = new SocketService(server, io);  // ✅ PASS IO INSTANCE
     app.set('socketService', socketService);
     console.log('✅ SocketService initialized with shared IO instance');
+    console.log('🔥 SocketService setup complete, event handlers should be active');
     
     const actualPort = Number(process.env.PORT) || 3001;
     console.log('🔧 Attempting to listen on port:', actualPort);
