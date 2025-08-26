@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useConfirmDialog } from '../../hooks/useConfirmDialog';
+import { useEditListing } from '../../hooks/useEditListing';
 import { createStandardPayload, validateListingPayload } from '../../services/apiNormalizer';
 import { listingService } from '../../services/listingService';
 import {
@@ -87,6 +88,7 @@ const FrigofirikForm: React.FC = () => {
   const navigate = useNavigate();
   const { variantId } = useParams<{ variantId: string }>();
   const { confirm } = useConfirmDialog();
+  const { isEditMode, editData, editLoading, fillFormWithEditData } = useEditListing();
   const [activeStep, setActiveStep] = useState(0);
   const [cities, setCities] = useState<City[]>([]);
   const [districts, setDistricts] = useState<District[]>([]);
@@ -145,6 +147,13 @@ const FrigofirikForm: React.FC = () => {
       }));
     }
   }, [user]);
+
+  // Edit modu için veri yükle
+  useEffect(() => {
+    if (isEditMode && editData && !editLoading) {
+      fillFormWithEditData(setFormData);
+    }
+  }, [isEditMode, editData, editLoading]);
 
   const handleCityChange = async (cityId: string, cityName: string) => {
     console.log('City changed:', { cityId, cityName });
@@ -316,23 +325,39 @@ const FrigofirikForm: React.FC = () => {
         return;
       }
 
-      console.log('Frigofirik ilanı oluşturuluyor:', standardPayload);
-
-      // Use standardized listing service - MinibüsForm uyumlu
-      const response = await listingService.createStandardListing(standardPayload);
-      console.log('API Response:', response);
-      
-      if (response.success) {
-        await confirm({
-          title: 'Başarılı',
-          description: 'Frigofirik ilanınız başarıyla oluşturuldu! Admin onayından sonra yayınlanacaktır.',
-          severity: 'success',
-          confirmText: 'Tamam',
-          cancelText: ''
-        });
-        navigate('/user/my-listings');
+      // Edit mode or create mode handling
+      if (isEditMode && editData) {
+        console.log('Frigofirik ilanı güncelleniyor:', standardPayload);
+        const response = await listingService.updateStandardListing(editData.id, standardPayload);
+        
+        if (response.success) {
+          await confirm({
+            title: 'Başarılı',
+            description: 'Frigofirik ilanınız başarıyla güncellendi! Admin onayından sonra yeniden yayınlanacaktır.',
+            severity: 'success',
+            confirmText: 'Tamam',
+            cancelText: ''
+          });
+          navigate('/user/my-listings');
+        } else {
+          throw new Error(response.message || 'İlan güncellenemedi');
+        }
       } else {
-        throw new Error(response.message || 'İlan oluşturulamadı');
+        console.log('Frigofirik ilanı oluşturuluyor:', standardPayload);
+        const response = await listingService.createStandardListing(standardPayload);
+        
+        if (response.success) {
+          await confirm({
+            title: 'Başarılı',
+            description: 'Frigofirik ilanınız başarıyla oluşturuldu! Admin onayından sonra yayınlanacaktır.',
+            severity: 'success',
+            confirmText: 'Tamam',
+            cancelText: ''
+          });
+          navigate('/user/my-listings');
+        } else {
+          throw new Error(response.message || 'İlan oluşturulamadı');
+        }
       }
       
     } catch (err: any) {
@@ -347,7 +372,8 @@ const FrigofirikForm: React.FC = () => {
       } else if (err.response?.status === 401) {
         setError('Yetkilendirme hatası. Lütfen giriş yapın.');
       } else {
-        const errorMessage = err.response?.data?.message || err.message || 'İlan oluşturulurken bir hata oluştu';
+        const errorMessage = err.response?.data?.message || err.message || 
+          `İlan ${isEditMode ? 'güncellenirken' : 'oluşturulurken'} bir hata oluştu`;
         setError(errorMessage);
       }
     } finally {

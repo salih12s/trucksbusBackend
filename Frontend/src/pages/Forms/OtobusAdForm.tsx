@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useConfirmDialog } from '../../hooks/useConfirmDialog';
+import { useEditListing } from '../../hooks/useEditListing';
 import { createStandardPayload, validateListingPayload } from '../../services/apiNormalizer';
 import { listingService } from '../../services/listingService';
 import {
@@ -77,6 +78,7 @@ const OtobusAdForm = () => {
   const selectedModel = location.state?.model;
   const selectedVariant = location.state?.variant;
   const { confirm } = useConfirmDialog();
+  const { isEditMode, editData, editLoading, fillFormWithEditData } = useEditListing();
   const [activeStep, setActiveStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [uploadedImages, setUploadedImages] = useState<File[]>([]);
@@ -204,6 +206,13 @@ const OtobusAdForm = () => {
       }));
     }
   }, [user]);
+
+  // Edit modu için veri yükle
+  useEffect(() => {
+    if (isEditMode && editData && !editLoading) {
+      fillFormWithEditData(setFormData);
+    }
+  }, [isEditMode, editData, editLoading]);
 
   const handleInputChange = (field: string, value: string | number | boolean) => {
     // Kilometre formatını düzelt
@@ -414,23 +423,39 @@ const OtobusAdForm = () => {
         return;
       }
 
-      console.log('Otobüs ilanı oluşturuluyor:', standardPayload);
-
-      // Use standardized listing service - MinibüsForm uyumlu
-      const response = await listingService.createStandardListing(standardPayload);
-      console.log('API Response:', response);
-      
-      if (response.success) {
-        await confirm({
-          title: 'Başarılı',
-          description: 'Otobüs ilanınız başarıyla oluşturuldu! Admin onayından sonra yayınlanacaktır.',
-          severity: 'success',
-          confirmText: 'Tamam',
-          cancelText: ''
-        });
-        navigate('/user/my-listings');
+      // Edit mode or create mode handling
+      if (isEditMode && editData) {
+        console.log('Otobüs ilanı güncelleniyor:', standardPayload);
+        const response = await listingService.updateStandardListing(editData.id, standardPayload);
+        
+        if (response.success) {
+          await confirm({
+            title: 'Başarılı',
+            description: 'Otobüs ilanınız başarıyla güncellendi! Admin onayından sonra yeniden yayınlanacaktır.',
+            severity: 'success',
+            confirmText: 'Tamam',
+            cancelText: ''
+          });
+          navigate('/user/my-listings');
+        } else {
+          throw new Error(response.message || 'İlan güncellenemedi');
+        }
       } else {
-        throw new Error(response.message || 'İlan oluşturulamadı');
+        console.log('Otobüs ilanı oluşturuluyor:', standardPayload);
+        const response = await listingService.createStandardListing(standardPayload);
+        
+        if (response.success) {
+          await confirm({
+            title: 'Başarılı',
+            description: 'Otobüs ilanınız başarıyla oluşturuldu! Admin onayından sonra yayınlanacaktır.',
+            severity: 'success',
+            confirmText: 'Tamam',
+            cancelText: ''
+          });
+          navigate('/user/my-listings');
+        } else {
+          throw new Error(response.message || 'İlan oluşturulamadı');
+        }
       }
       
     } catch (error: any) {
@@ -445,7 +470,8 @@ const OtobusAdForm = () => {
       } else if (error.response?.status === 401) {
         setError('Yetkilendirme hatası. Lütfen giriş yapın.');
       } else {
-        const errorMessage = error.response?.data?.message || error.message || 'İlan oluşturulurken bir hata oluştu';
+        const errorMessage = error.response?.data?.message || error.message || 
+          `İlan ${isEditMode ? 'güncellenirken' : 'oluşturulurken'} bir hata oluştu`;
         setError(errorMessage);
       }
     } finally {

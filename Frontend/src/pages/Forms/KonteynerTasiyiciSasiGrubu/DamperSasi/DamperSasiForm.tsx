@@ -4,6 +4,7 @@ import { useAuth } from '../../../../context/AuthContext';
 import { useLocation } from 'react-router-dom';
 import { useConfirmDialog } from '../../../../hooks/useConfirmDialog';
 import { locationService, City, District } from '../../../../services/locationService';
+import { useEditListing } from '../../../../hooks/useEditListing';
 import { createStandardPayload } from '../../../../services/apiNormalizer';
 import { listingService } from '../../../../services/listingService';
 import {
@@ -41,6 +42,7 @@ const DamperSasiForm: React.FC = () => {
   const { user } = useAuth();
   const location = useLocation();
   const { confirm } = useConfirmDialog();
+  const { isEditMode, editData, editLoading, fillFormWithEditData } = useEditListing();
   
   // Parse location state
   const selectedBrand = location.state?.brand;
@@ -104,6 +106,15 @@ const DamperSasiForm: React.FC = () => {
       }));
     }
   }, [user]);
+
+  // Edit modunda veri yükle
+  useEffect(() => {
+    if (isEditMode && editData && !editLoading) {
+      fillFormWithEditData(editData, setFormData, (files: File[]) => {
+        setFormData(prev => ({ ...prev, images: files }));
+      });
+    }
+  }, [isEditMode, editData, editLoading, fillFormWithEditData]);
 
   // Generic input change handler
   const handleInputChange = (field: string, value: any) => {
@@ -206,13 +217,20 @@ const DamperSasiForm: React.FC = () => {
       console.log('Submitting:', payload);
       
       // Use standard listing service
-      const response = await listingService.createStandardListing(payload);
+      let response;
+      if (isEditMode && editData) {
+        response = await listingService.updateStandardListing(editData.id, payload);
+      } else {
+        response = await listingService.createStandardListing(payload);
+      }
       
       if (response.success) {
         console.log('✅ Damper Şasi ilanı başarıyla oluşturuldu:', response.data);
         await confirm({
           title: 'Başarılı',
-          description: 'İlanınız başarıyla oluşturuldu! Admin onayından sonra yayınlanacaktır.',
+          description: isEditMode 
+            ? 'İlanınız başarıyla güncellendi ve admin onayına gönderildi!' 
+            : 'İlanınız başarıyla oluşturuldu! Admin onayından sonra yayınlanacaktır.',
           severity: 'success',
           confirmText: 'Tamam',
           cancelText: ''

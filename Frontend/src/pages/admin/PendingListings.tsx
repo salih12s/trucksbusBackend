@@ -17,8 +17,7 @@ import {
   Card,
   CardHeader,
   CardContent,
-  Paper,
-  Divider,
+
   Avatar,
   CircularProgress,
 } from '@mui/material';
@@ -30,18 +29,17 @@ import {
   PendingActions,
   Assignment,
   Schedule,
-  Person,
-  LocationOn,
-  Category,
-  Euro,
+
 } from '@mui/icons-material';
 
 import { 
-  usePendingListings, 
-  useApproveListing, 
+  usePendingListings
+} from '../../hooks/admin/usePendingListings';
+import { 
+  useApproveListing,
   useRejectListing,
-  type AdminListing 
-} from '../../hooks/admin';
+  type AdminListing
+} from '../../hooks/admin/useAdminListings';
 import { useConfirmDialog } from '../../hooks/useConfirmDialog';
 import { formatTRY, formatDateTR } from '../../utils/format';
 import AdminGuard from '../../components/admin/AdminGuard';
@@ -83,7 +81,7 @@ const PendingListings: React.FC = () => {
     error, 
     refetch 
   } = usePendingListings({
-    page: page + 1, // DataTable uses 0-based, backend uses 1-based
+    page: page + 1, // Keep this - DataTable uses 0-based, hook expects 1-based 
     pageSize,
     sort,
     order

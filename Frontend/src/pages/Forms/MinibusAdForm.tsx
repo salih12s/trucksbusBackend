@@ -44,6 +44,7 @@ import {
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { locationService, City, District } from '../../services/locationService';
+import { useEditListing } from '../../hooks/useEditListing';
 
 // Renk seçenekleri
 const colorOptions = [
@@ -80,6 +81,7 @@ const MinibusAdForm: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { confirm } = useConfirmDialog();
+  const { isEditMode, editData, editLoading, fillFormWithEditData } = useEditListing();
   const [activeStep, setActiveStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [uploadedImages, setUploadedImages] = useState<File[]>([]);
@@ -215,6 +217,14 @@ const MinibusAdForm: React.FC = () => {
     loadCities();
   }, []);
 
+  // Edit mode: Fill form with existing data
+  useEffect(() => {
+    if (isEditMode && editData && !editLoading) {
+      console.log('📝 Edit mode: Filling MinibusAdForm with data:', editData);
+      fillFormWithEditData(setFormData);
+    }
+  }, [isEditMode, editData, editLoading]);
+
   // Load districts when city changes
   const handleCityChange = async (cityId: string, cityName: string) => {
     try {
@@ -263,6 +273,43 @@ const MinibusAdForm: React.FC = () => {
       }));
     }
   }, [user]);
+
+  // Edit mode için mevcut ilan verilerini yükle
+  useEffect(() => {
+    const urlParams = new URLSearchParams(location.search);
+    const editListingId = urlParams.get('edit');
+    
+    if (editListingId) {
+      console.log('🔧 Edit mode detected for listing:', editListingId);
+      const savedListingData = localStorage.getItem(`edit_listing_${editListingId}`);
+      
+      if (savedListingData) {
+        try {
+          const listingData = JSON.parse(savedListingData);
+          console.log('📋 Loading existing listing data:', listingData);
+          
+          // Form verilerini doldur
+          setFormData(prev => ({
+            ...prev,
+            title: listingData.title || '',
+            description: listingData.description || '',
+            price: listingData.price?.toString() || '',
+            year: listingData.year?.toString() || '',
+            km: listingData.km?.toString() || '',
+            brand: listingData.brands?.name || selectedBrand?.name || '',
+            model: listingData.models?.name || selectedModel?.name || '',
+            variant: listingData.variants?.name || selectedVariant?.name || '',
+            // Diğer alanlar da eklenebilir...
+          }));
+          
+          // localStorage'ı temizle
+          localStorage.removeItem(`edit_listing_${editListingId}`);
+        } catch (error) {
+          console.error('❌ Error loading edit data:', error);
+        }
+      }
+    }
+  }, [location.search, selectedBrand, selectedModel, selectedVariant]);
 
   const handleInputChange = (field: string, value: string | number | boolean) => {
     // Kilometre formatını düzelt
@@ -466,6 +513,11 @@ const MinibusAdForm: React.FC = () => {
       setLoading(true);
       setError('');
 
+      // Edit mode kontrolü
+      const urlParams = new URLSearchParams(location.search);
+      const editListingId = urlParams.get('edit');
+      const isEditMode = !!editListingId;
+
       // Convert uploaded images to data URLs for backend
       const imageUrls = await Promise.all(
         uploadedImages.map(file => {
@@ -517,23 +569,32 @@ const MinibusAdForm: React.FC = () => {
         return;
       }
 
-      console.log('Minibüs ilanı oluşturuluyor:', standardPayload);
+      console.log(isEditMode ? 'Minibüs ilanı güncelleniyor:' : 'Minibüs ilanı oluşturuluyor:', standardPayload);
 
-      // Use standardized listing service
-      const response = await listingService.createStandardListing(standardPayload);
+      let response;
+      if (isEditMode) {
+        // Edit mode - PUT request
+        response = await listingService.updateStandardListing(editListingId, standardPayload);
+      } else {
+        // Create mode - POST request  
+        response = await listingService.createStandardListing(standardPayload);
+      }
+      
       console.log('API Response:', response);
       
       if (response.success) {
         await confirm({
           title: 'Başarılı',
-          description: 'Minibüs ilanınız başarıyla oluşturuldu! Admin onayından sonra yayınlanacaktır.',
+          description: isEditMode 
+            ? 'Minibüs ilanınız başarıyla güncellendi! Admin onayından sonra yeniden yayınlanacaktır.'
+            : 'Minibüs ilanınız başarıyla oluşturuldu! Admin onayından sonra yayınlanacaktır.',
           severity: 'success',
           confirmText: 'Tamam',
           cancelText: ''
         });
-        navigate('/user/my-listings'); // Navigate to MyListings to show PENDING status
+        navigate('/my-listings'); // Navigate to MyListings to show PENDING status
       } else {
-        throw new Error(response.message || 'İlan oluşturulamadı');
+        throw new Error(response.message || (isEditMode ? 'İlan güncellenemedi' : 'İlan oluşturulamadı'));
       }
 
     } catch (error: any) {
@@ -1248,8 +1309,13 @@ const MinibusAdForm: React.FC = () => {
         {/* Header */}
         <Box sx={{ mb: 4, textAlign: 'center' }}>
           <Typography variant="h4" component="h1" gutterBottom>
-             Minibüs & Midibüs İlanı Oluştur
+            {isEditMode ? 'Minibüs & Midibüs İlanını Düzenle' : 'Minibüs & Midibüs İlanı Oluştur'}
           </Typography>
+          {isEditMode && (
+            <Alert severity="info" sx={{ mb: 2, maxWidth: 600, mx: 'auto' }}>
+              İlan düzenleme modundasınız. Değişiklikler admin onayından sonra yayınlanacaktır.
+            </Alert>
+          )}
           {selectedVariant && (
             <Typography variant="h6" color="primary" sx={{ mb: 2 }}>
               {selectedBrand?.name} {selectedModel?.name} {selectedVariant?.name}

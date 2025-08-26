@@ -45,6 +45,7 @@ import {
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { locationService, City, District } from '../../services/locationService';
+import { useEditListing } from '../../hooks/useEditListing';
 
 // Renk seçenekleri
 const colorOptions = [
@@ -113,6 +114,7 @@ const CekiciAdForm: React.FC = () => {
   const selectedModel = location.state?.model;
   const selectedVariant = location.state?.variant;
   const { confirm } = useConfirmDialog();
+  const { isEditMode, editId, editData, editLoading, editError, fillFormWithEditData } = useEditListing();
 
   const [activeStep, setActiveStep] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -242,6 +244,14 @@ const CekiciAdForm: React.FC = () => {
 
     loadCities();
   }, []);
+
+  // Edit mode: Fill form with existing data
+  useEffect(() => {
+    if (isEditMode && editData && !editLoading) {
+      console.log('📝 Edit mode: Filling CekiciAdForm with data:', editData);
+      fillFormWithEditData(setFormData);
+    }
+  }, [isEditMode, editData, editLoading]);
 
   // URL'den gelen araç seçim bilgilerini yükle
   useEffect(() => {
@@ -493,23 +503,30 @@ const CekiciAdForm: React.FC = () => {
         return;
       }
 
-      console.log('Çekici ilanı oluşturuluyor:', standardPayload);
+      console.log(isEditMode ? 'Çekici ilanı güncelleniyor:' : 'Çekici ilanı oluşturuluyor:', standardPayload);
 
-      // Use standardized listing service - MinibüsForm uyumlu
-      const response = await listingService.createStandardListing(standardPayload);
+      // Use standardized listing service
+      let response;
+      if (isEditMode && editId) {
+        response = await listingService.updateStandardListing(editId, standardPayload);
+      } else {
+        response = await listingService.createStandardListing(standardPayload);
+      }
       console.log('API Response:', response);
       
       if (response.success) {
         await confirm({
           title: 'Başarılı',
-          description: 'Çekici ilanınız başarıyla oluşturuldu! Admin onayından sonra yayınlanacaktır.',
+          description: isEditMode 
+            ? 'Çekici ilanınız başarıyla güncellendi! Admin onayından sonra yeniden yayınlanacaktır.'
+            : 'Çekici ilanınız başarıyla oluşturuldu! Admin onayından sonra yayınlanacaktır.',
           severity: 'success',
           confirmText: 'Tamam',
           cancelText: ''
         });
-        navigate('/user/my-listings');
+        navigate('/my-listings');
       } else {
-        throw new Error(response.message || 'İlan oluşturulamadı');
+        throw new Error(response.message || (isEditMode ? 'İlan güncellenemedi' : 'İlan oluşturulamadı'));
       }
 
     } catch (error: any) {
@@ -1192,14 +1209,19 @@ const CekiciAdForm: React.FC = () => {
       {/* Header */}
       <Box sx={{ mb: 4, textAlign: 'center' }}>
         <Typography variant="h4" component="h1" gutterBottom>
-          🚛 Çekici İlanı Oluştur
-          </Typography>
-          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', justifyContent: 'center' }}>
-            <Chip label="Çekici" color="primary" variant="outlined" />
-            {formData.brand && <Chip label={formData.brand} variant="outlined" />}
-            {formData.model && <Chip label={formData.model} variant="outlined" />}
-            {formData.variant && <Chip label={formData.variant} variant="outlined" />}
-          </Box>
+          {isEditMode ? '🚛 Çekici İlanını Düzenle' : '🚛 Çekici İlanı Oluştur'}
+        </Typography>
+        {isEditMode && (
+          <Alert severity="info" sx={{ mb: 2, maxWidth: 600, mx: 'auto' }}>
+            İlan düzenleme modundasınız. Değişiklikler admin onayından sonra yayınlanacaktır.
+          </Alert>
+        )}
+        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', justifyContent: 'center' }}>
+          <Chip label="Çekici" color="primary" variant="outlined" />
+          {formData.brand && <Chip label={formData.brand} variant="outlined" />}
+          {formData.model && <Chip label={formData.model} variant="outlined" />}
+          {formData.variant && <Chip label={formData.variant} variant="outlined" />}
+        </Box>
         </Box>
 
         {/* Stepper */}

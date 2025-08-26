@@ -5,6 +5,7 @@ import { listingService } from '../../../services/listingService';
 import { createStandardPayload, validateListingPayload } from '../../../services/apiNormalizer';
 import { useConfirmDialog } from '../../../hooks/useConfirmDialog';
 import { locationService, City, District } from '../../../services/locationService';
+import { useEditListing } from '../../../hooks/useEditListing';
 import { Box, Button, TextField, Typography, Stepper, Step, StepLabel, Card, CardContent, FormControlLabel, Checkbox, FormControl, FormLabel, RadioGroup, Radio, MenuItem, Stack, Chip, InputAdornment, Alert, Autocomplete } from '@mui/material';
 import { AttachMoney, Upload, LocationOn, Person, Phone, Email } from '@mui/icons-material';
 
@@ -17,6 +18,7 @@ const steps = ['İlan Detayları', 'Fotoğraflar', 'İletişim & Fiyat'];
 const SeyehatRomorkForm: React.FC = () => {
   const { user } = useAuth();
   const { confirm } = useConfirmDialog();
+  const { isEditMode, editData, editLoading, fillFormWithEditData } = useEditListing();
   const location = useLocation();
   const [activeStep, setActiveStep] = useState(0);
   
@@ -90,6 +92,15 @@ const SeyehatRomorkForm: React.FC = () => {
       }
     }
   }, [user, cities]);
+
+  // Edit modunda veri yükle
+  useEffect(() => {
+    if (isEditMode && editData && !editLoading) {
+      fillFormWithEditData(editData, setFormData, (files: File[]) => {
+        setFormData(prev => ({ ...prev, uploadedImages: files }));
+      });
+    }
+  }, [isEditMode, editData, editLoading, fillFormWithEditData]);
 
   const handleNext = () => setActiveStep((prev) => prev + 1);
   const handleBack = () => setActiveStep((prev) => prev - 1);
@@ -183,12 +194,19 @@ const SeyehatRomorkForm: React.FC = () => {
         return;
       }
 
-      const response = await listingService.createStandardListing(payload);
+      let response;
+      if (isEditMode && editData) {
+        response = await listingService.updateStandardListing(editData.id, payload);
+      } else {
+        response = await listingService.createStandardListing(payload);
+      }
       
       if (response.success) {
         await confirm({
           title: 'Başarılı',
-          description: 'İlanınız başarıyla oluşturuldu! Admin onayından sonra yayınlanacaktır.',
+          description: isEditMode 
+            ? 'İlanınız başarıyla güncellendi ve admin onayına gönderildi!' 
+            : 'İlanınız başarıyla oluşturuldu! Admin onayından sonra yayınlanacaktır.',
           severity: 'success'
         });
       } else {

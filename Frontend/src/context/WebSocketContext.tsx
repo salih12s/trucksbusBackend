@@ -181,8 +181,8 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
     const token = localStorage.getItem('token');
     if (!token) return;
 
-    // 🔧 Standardized environment variable usage
-    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3005/api';
+    // 🔧 Standardized environment variable usage (Railway production)
+    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://trucksbusbackend-production-0e23.up.railway.app/api';
     const serverUrl = new URL(API_BASE_URL).origin;
     
     if (import.meta.env.DEV) console.log('🔌 Initializing WebSocket connection to:', serverUrl);

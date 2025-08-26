@@ -22,12 +22,12 @@ export interface LocationApiResponse {
 }
 
 class LocationService {
-  private baseURL = 'http://localhost:3005/api/locations';
+  private baseURL = import.meta.env.VITE_API_BASE_URL || 'https://trucksbusbackend-production-0e23.up.railway.app/api';
 
   async getCities(): Promise<City[]> {
     try {
       console.log('🏙️ LocationService: Şehirler getiriliyor...');
-      const response = await fetch(`${this.baseURL}/cities`);
+      const response = await fetch(`${this.baseURL}/locations/cities`);
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -51,7 +51,7 @@ class LocationService {
   async getDistrictsByCity(cityId: string): Promise<District[]> {
     try {
       console.log('🏘️ LocationService: İlçeler getiriliyor, cityId:', cityId);
-      const response = await fetch(`${this.baseURL}/cities/${cityId}/districts`);
+      const response = await fetch(`${this.baseURL}/locations/cities/${cityId}/districts`);
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);

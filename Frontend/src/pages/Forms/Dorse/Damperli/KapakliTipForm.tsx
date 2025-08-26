@@ -3,6 +3,7 @@ import { useDropzone } from 'react-dropzone';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../../context/AuthContext';
 import { useConfirmDialog } from '../../../../hooks/useConfirmDialog';
+import { useEditListing } from '../../../../hooks/useEditListing';
 import { listingService } from '../../../../services/listingService';
 import { createStandardPayload, validateListingPayload } from '../../../../services/apiNormalizer';
 import {
@@ -99,6 +100,7 @@ const KapakliTipDorseAdForm: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { confirm } = useConfirmDialog();
+  const { isEditMode, editData, editLoading, fillFormWithEditData } = useEditListing();
   const selectedBrand = location.state?.brand;
   const selectedModel = location.state?.model;
   const selectedVariant = location.state?.variant;
@@ -163,6 +165,13 @@ const KapakliTipDorseAdForm: React.FC = () => {
       }));
     }
   }, [user]);
+
+  // Edit modunda veri yükle
+  useEffect(() => {
+    if (isEditMode && editData && !editLoading) {
+      fillFormWithEditData(editData, setFormData, setPhotos);
+    }
+  }, [isEditMode, editData, editLoading, fillFormWithEditData]);
 
   // Dropzone callbacks
   const onDrop = useCallback((acceptedFiles: File[]) => {
@@ -353,13 +362,20 @@ const KapakliTipDorseAdForm: React.FC = () => {
       console.log('🚀 Kapaklı Tip Dorse ilanı oluşturuluyor...', payload);
 
       // Use standard listing service
-      const response = await listingService.createStandardListing(payload);
+      let response;
+      if (isEditMode && editData) {
+        response = await listingService.updateStandardListing(editData.id, payload);
+      } else {
+        response = await listingService.createStandardListing(payload);
+      }
       
       if (response.success) {
         console.log('✅ Kapaklı Tip Dorse ilanı başarıyla oluşturuldu:', response.data);
         await confirm({
           title: 'Başarılı',
-          description: 'İlanınız başarıyla oluşturuldu! Admin onayından sonra yayınlanacaktır.',
+          description: isEditMode 
+            ? 'İlanınız başarıyla güncellendi ve admin onayına gönderildi!' 
+            : 'İlanınız başarıyla oluşturuldu! Admin onayından sonra yayınlanacaktır.',
           severity: 'success',
           confirmText: 'Tamam',
           cancelText: ''
@@ -745,7 +761,7 @@ const KapakliTipDorseAdForm: React.FC = () => {
         {/* Header */}
         <Box sx={{ mb: 4, textAlign: 'center' }}>
           <Typography variant="h4" component="h1" gutterBottom>
-            Kapaklı Tip Damperli Dorse İlanı Oluştur
+            {isEditMode ? 'Kapaklı Tip Damperli Dorse İlanını Düzenle' : 'Kapaklı Tip Damperli Dorse İlanı Oluştur'}
           </Typography>
         </Box>
 
@@ -792,7 +808,10 @@ const KapakliTipDorseAdForm: React.FC = () => {
                 endIcon={<Upload />}
                 size="large"
               >
-                {loading ? 'İlan Oluşturuluyor...' : 'İlanı Yayınla'}
+                {loading 
+                  ? (isEditMode ? 'İlan Güncelleniyor...' : 'İlan Oluşturuluyor...') 
+                  : (isEditMode ? 'Değişiklikleri Kaydet' : 'İlanı Yayınla')
+                }
               </Button>
             ) : (
               <Button

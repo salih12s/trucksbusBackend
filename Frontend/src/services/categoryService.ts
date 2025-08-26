@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:3005/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://trucksbusbackend-production-0e23.up.railway.app/api';
 
 // API client with default config
 const apiClient = axios.create({
@@ -56,6 +56,7 @@ export interface Brand {
   id: string;
   name: string;
   vehicle_type_id: string;
+  image_url?: string;
   models?: Model[];
 }
 

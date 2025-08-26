@@ -26,14 +26,27 @@ interface VehicleType {
 
 // Kategori isimleri ve resim dosyalarının eşleşmesi
 const categoryImageMap: { [key: string]: string } = {
-  'Çekici': '/CategoryImage/Çekici.png',
+  'Çekici': '/CategoryImage/cekici.png',
   'Dorse': '/CategoryImage/Dorse.png',
   'Kamyon & Kamyonet': '/CategoryImage/KamyonKamyonet.png',
-  'Karoser & Üst Yapı': '/CategoryImage/KarosetÜstYapı.png',
-  'Minibüs & Midibüs': '/CategoryImage/MinibüsMidibüs.png',
-  'Otobüs': '/CategoryImage/Otobüs.png',
-  'Oto Kurtarıcı & Taşıyıcı': '/CategoryImage/OtoKurtarıcıTaşıyıcı.png',
-  'Römork': '/CategoryImage/Römork.png',
+  'Karoser & Üst Yapı': '/CategoryImage/karoser-ust-yapi.png',
+  'Minibüs & Midibüs': '/CategoryImage/minibus-midibus.png',
+  'Otobüs': '/CategoryImage/otobus.png',
+  'Oto Kurtarıcı & Taşıyıcı': '/CategoryImage/oto-kurtarici-tasiyici.png',
+  'Römork': '/CategoryImage/romork.png',
+};
+
+// Fallback resim fonksiyonu
+const getCategoryImageSrc = (categoryName: string): string => {
+  return categoryImageMap[categoryName] || '/TruckBus.png';
+};
+
+// Resim yüklenme hatası için fallback
+const handleImageError = (event: React.SyntheticEvent<HTMLImageElement>) => {
+  const img = event.currentTarget;
+  if (img.src !== `${window.location.origin}/TruckBus.png`) {
+    img.src = '/TruckBus.png';
+  }
 };
 
 const CategorySelection: React.FC = () => {
@@ -90,20 +103,8 @@ const CategorySelection: React.FC = () => {
   };
 
   const getImagePath = (vehicleTypeName: string): string => {
-    // Exact match first
-    if (categoryImageMap[vehicleTypeName]) {
-      return categoryImageMap[vehicleTypeName];
-    }
-
-    // Partial match
-    for (const [key, imagePath] of Object.entries(categoryImageMap)) {
-      if (vehicleTypeName.toLowerCase().includes(key.toLowerCase())) {
-        return imagePath;
-      }
-    }
-
-    // Varsayılan resim
-    return '/CategoryImage/KamyonKamyonet.png';
+    // getCategoryImageSrc fonksiyonunu kullan
+    return getCategoryImageSrc(vehicleTypeName);
   };
 
   if (loading) {
@@ -201,10 +202,7 @@ const CategorySelection: React.FC = () => {
                   component="img"
                   src={vehicleType.image_url || getImagePath(vehicleType.name)}
                   alt={vehicleType.name}
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.src = getImagePath(vehicleType.name);
-                  }}
+                  onError={handleImageError}
                   sx={{
                     width: '100%',
                     height: '100%',

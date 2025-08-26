@@ -5,6 +5,7 @@ import { listingService } from '../../../services/listingService';
 import { createStandardPayload, validateListingPayload } from '../../../services/apiNormalizer';
 import { useConfirmDialog } from '../../../hooks/useConfirmDialog';
 import { locationService, City, District } from '../../../services/locationService';
+import { useEditListing } from '../../../hooks/useEditListing';
 import { Box, Button, TextField, Typography, Stepper, Step, StepLabel, Card, CardContent, FormControlLabel, Checkbox, FormControl, FormLabel, RadioGroup, Radio, MenuItem, Stack, Chip, InputAdornment, Alert, Autocomplete } from '@mui/material';
 import { AttachMoney, Upload, LocationOn, Person, Phone, Email } from '@mui/icons-material';
 
@@ -19,6 +20,7 @@ const PlatformRomorkForm: React.FC = () => {
   const { user } = useAuth();
   const location = useLocation();
   const { confirm } = useConfirmDialog();
+  const { isEditMode, editData, editLoading, fillFormWithEditData } = useEditListing();
   
   // Parse location state for brand/model/variant data
   const selectedBrand = location.state?.brand;

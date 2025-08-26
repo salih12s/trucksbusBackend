@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
 import { useConfirmDialog } from '../../../hooks/useConfirmDialog';
+import { useEditListing } from '../../../hooks/useEditListing';
 import { listingService } from '../../../services/listingService';
 import { createStandardPayload, validateListingPayload } from '../../../services/apiNormalizer';
 import { locationService, City, District } from '../../../services/locationService';
@@ -47,6 +48,7 @@ const KamyonRomorkForm: React.FC = () => {
   const location = useLocation();
   const { user } = useAuth();
   const { confirm } = useConfirmDialog();
+  const { isEditMode, editData, editLoading, fillFormWithEditData } = useEditListing();
   
   // Location state'den gelen veriler
   const selectedBrand = location.state?.brand;
@@ -157,6 +159,13 @@ const KamyonRomorkForm: React.FC = () => {
       }));
     }
   }, [user]);
+
+  // Edit modu için veri yükle
+  useEffect(() => {
+    if (isEditMode && editData && !editLoading) {
+      fillFormWithEditData(setFormData);
+    }
+  }, [isEditMode, editData, editLoading]);
 
   const handleNext = () => {
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -292,23 +301,45 @@ const KamyonRomorkForm: React.FC = () => {
         return;
       }
 
-      // API'ye gönder
-      const response = await listingService.createStandardListing(payload);
-      
-      if (response.success) {
-        console.log('✅ Kamyon Römorku ilanı başarıyla oluşturuldu:', response.data);
-        const shouldNavigate = await confirm({
-          title: 'İlan Başarıyla Oluşturuldu! 🎉',
-          description: 'İlanınız başarıyla oluşturuldu ve inceleme sürecine alındı. Onaylandıktan sonra yayına alınacak. Ana sayfaya dönmek istiyor musunuz?',
-          severity: 'success',
-          confirmText: 'Ana Sayfaya Git',
-          cancelText: 'Bu Sayfada Kal'
-        });
-        if (shouldNavigate) {
-          navigate('/');
+      // Edit mode or create mode handling
+      if (isEditMode && editData) {
+        console.log('✅ Kamyon Römorku ilanı güncelleniyor:', payload);
+        const response = await listingService.updateStandardListing(editData.id, payload);
+        
+        if (response.success) {
+          console.log('✅ Kamyon Römorku ilanı başarıyla güncellendi:', response.data);
+          const shouldNavigate = await confirm({
+            title: 'İlan Başarıyla Güncellendi! 🎉',
+            description: 'İlanınız başarıyla güncellendi ve tekrar inceleme sürecine alındı. Onaylandıktan sonra yayına alınacak. İlanlarım sayfasına gitmek istiyor musunuz?',
+            severity: 'success',
+            confirmText: 'İlanlarım',
+            cancelText: 'Bu Sayfada Kal'
+          });
+          if (shouldNavigate) {
+            navigate('/user/my-listings');
+          }
+        } else {
+          throw new Error(response.message || 'İlan güncellenemedi');
         }
       } else {
-        throw new Error(response.message || 'İlan oluşturulamadı');
+        console.log('✅ Kamyon Römorku ilanı oluşturuluyor:', payload);
+        const response = await listingService.createStandardListing(payload);
+        
+        if (response.success) {
+          console.log('✅ Kamyon Römorku ilanı başarıyla oluşturuldu:', response.data);
+          const shouldNavigate = await confirm({
+            title: 'İlan Başarıyla Oluşturuldu! 🎉',
+            description: 'İlanınız başarıyla oluşturuldu ve inceleme sürecine alındı. Onaylandıktan sonra yayına alınacak. Ana sayfaya dönmek istiyor musunuz?',
+            severity: 'success',
+            confirmText: 'Ana Sayfaya Git',
+            cancelText: 'Bu Sayfada Kal'
+          });
+          if (shouldNavigate) {
+            navigate('/');
+          }
+        } else {
+          throw new Error(response.message || 'İlan oluşturulamadı');
+        }
       }
 
     } catch (error) {

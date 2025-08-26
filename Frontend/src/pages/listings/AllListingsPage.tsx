@@ -343,7 +343,7 @@ const AllListingsPage: React.FC = () => {
   }
 
   return (
-    <Container maxWidth="xl" sx={{ py: 2, px: { xs: 2, md: 3 } }}> {/* ✅ grid ile aynı padding */}
+    <Container maxWidth="xl" sx={{ py: { xs: 1, md: 2 }, px: { xs: 1, sm: 2, md: 3 } }}> {/* Mobile'da daha az padding */}
       {loading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
           <CircularProgress />
@@ -351,23 +351,35 @@ const AllListingsPage: React.FC = () => {
         </Box>
       ) : (
         <>
-          <Typography variant="h6" sx={{ mb: 2, px: 0 }}> {/* ✅ extra padding kaldır */}
+          <Typography 
+            variant="h6" 
+            sx={{ 
+              mb: { xs: 1.5, md: 2 }, 
+              px: 0,
+              fontSize: { xs: '1.1rem', md: '1.25rem' } // Mobile'da küçük başlık
+            }}
+          > 
             Toplam {listings.length} ilan bulundu
           </Typography>
           
-          {/* İlan Kartları - Yatay Grid */}
+          {/* İlan Kartları - Responsive Grid */}
           <Box 
             sx={{ 
               display: 'grid',
               gridTemplateColumns: {
-                xs: '1fr',
-                md: 'repeat(2, 1fr)',
-                lg: 'repeat(2, 1fr)',
-                xl: 'repeat(3, 1fr)'
+                xs: '1fr',                    // Mobile: 1 kolon
+                sm: '1fr',                    // Small tablet: 1 kolon
+                md: 'repeat(2, 1fr)',         // Medium tablet: 2 kolon
+                lg: 'repeat(2, 1fr)',         // Desktop: 2 kolon
+                xl: 'repeat(3, 1fr)'          // Large desktop: 3 kolon
               },
-              gap: { xs: 2, md: 3 }, // ✅ nefes
+              gap: { xs: 1.5, sm: 2, md: 2.5, lg: 3 }, // Responsive gap
               alignItems: "stretch", // ✅ yükseklikleri eşitle
-              mb: 4
+              mb: 4,
+              // Mobile'da daha kompakt görünüm
+              '& .MuiCard-root': {
+                maxWidth: { xs: '100%', md: 420 }
+              }
             }}
           >
             {listings.filter(listing => listing !== null).map(listing => (
@@ -385,13 +397,18 @@ const AllListingsPage: React.FC = () => {
 
           {/* Sayfalama */}
           {totalPages > 1 && (
-            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'center', mt: { xs: 3, md: 4 } }}>
               <Pagination
                 count={totalPages}
                 page={currentPage}
                 onChange={handlePageChange}
                 color="primary"
-                size="large"
+                size="medium" // Tek size kullan
+                sx={{
+                  '& .MuiPaginationItem-root': {
+                    fontSize: { xs: '0.875rem', md: '1rem' }
+                  }
+                }}
               />
             </Box>
           )}

@@ -4,6 +4,7 @@ import { useAuth } from '../../../context/AuthContext';
 import { listingService } from '../../../services/listingService';
 import { createStandardPayload, validateListingPayload } from '../../../services/apiNormalizer';
 import { useConfirmDialog } from '../../../hooks/useConfirmDialog';
+import { useEditListing } from '../../../hooks/useEditListing';
 import { locationService, City, District } from '../../../services/locationService';
 import { Box, Button, TextField, Typography, Stepper, Step, StepLabel, Card, CardContent, FormControlLabel, Checkbox, FormControl, FormLabel, RadioGroup, Radio, MenuItem, Stack, Chip, InputAdornment, Alert, Autocomplete } from '@mui/material';
 import { AttachMoney, Upload, LocationOn, Person, Phone, Email } from '@mui/icons-material';
@@ -17,6 +18,7 @@ const steps = ['İlan Detayları', 'Fotoğraflar', 'İletişim & Fiyat'];
 const VasitaRomorkForm: React.FC = () => {
   const { user } = useAuth();
   const { confirm } = useConfirmDialog();
+  const { isEditMode, editData, editLoading, fillFormWithEditData } = useEditListing();
   const location = useLocation();
   const [activeStep, setActiveStep] = useState(0);
   
@@ -82,6 +84,13 @@ const VasitaRomorkForm: React.FC = () => {
       }));
     }
   }, [user]);
+
+  // Edit modu için veri yükle
+  useEffect(() => {
+    if (isEditMode && editData && !editLoading) {
+      fillFormWithEditData(setFormData);
+    }
+  }, [isEditMode, editData, editLoading]);
 
   const handleNext = () => setActiveStep((prev) => prev + 1);
   const handleBack = () => setActiveStep((prev) => prev - 1);

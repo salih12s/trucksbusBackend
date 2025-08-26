@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
 import { useConfirmDialog } from '../../../hooks/useConfirmDialog';
+import { useEditListing } from '../../../hooks/useEditListing';
 import { listingService } from '../../../services/listingService';
 import { createStandardPayload, validateListingPayload } from '../../../services/apiNormalizer';
 import { locationService, City, District } from '../../../services/locationService';
@@ -58,6 +59,7 @@ const YukRomorkForm: React.FC = () => {
   const { user } = useAuth();
   const location = useLocation();
   const { confirm } = useConfirmDialog();
+  const { isEditMode, editData, editLoading, fillFormWithEditData } = useEditListing();
   const selectedBrand = location.state?.brand;
   const selectedModel = location.state?.model;
   const selectedVariant = location.state?.variant;
@@ -133,6 +135,15 @@ const YukRomorkForm: React.FC = () => {
       }));
     }
   }, [user]);
+
+  // Edit modunda veri yükle
+  useEffect(() => {
+    if (isEditMode && editData && !editLoading) {
+      fillFormWithEditData(editData, setFormData, (files: File[]) => {
+        setFormData(prev => ({ ...prev, uploadedImages: files }));
+      });
+    }
+  }, [isEditMode, editData, editLoading, fillFormWithEditData]);
 
   const handleNext = () => setActiveStep((prev) => prev + 1);
   const handleBack = () => setActiveStep((prev) => prev - 1);
@@ -210,12 +221,19 @@ const YukRomorkForm: React.FC = () => {
         return;
       }
 
-      const response = await listingService.createStandardListing(payload);
+      let response;
+      if (isEditMode && editData) {
+        response = await listingService.updateStandardListing(editData.id, payload);
+      } else {
+        response = await listingService.createStandardListing(payload);
+      }
       
       if (response.success) {
         await confirm({
           title: 'Başarılı',
-          description: 'İlanınız başarıyla oluşturuldu! Admin onayından sonra yayınlanacaktır.',
+          description: isEditMode 
+            ? 'İlanınız başarıyla güncellendi ve admin onayına gönderildi!' 
+            : 'İlanınız başarıyla oluşturuldu! Admin onayından sonra yayınlanacaktır.',
           severity: 'success'
         });
       } else {

@@ -10,7 +10,8 @@ import {
   PersonAdd, PostAdd, Schedule
 } from '@mui/icons-material';
 
-import { useDashboardStats, useRecentActivities } from '../../hooks/admin';
+import { useDashboardStats } from "../../hooks/admin/useDashboardStats";
+import { useRecentActivities } from "../../hooks/admin/useRecentActivities";
 import { formatTRY, formatNumber } from '../../utils/format';
 import AdminGuard from '../../components/admin/AdminGuard';
 

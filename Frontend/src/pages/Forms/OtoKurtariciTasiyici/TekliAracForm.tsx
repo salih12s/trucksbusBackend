@@ -4,6 +4,7 @@ import { Box, Button, TextField, Typography, Stepper, Step, StepLabel, Card, Car
 import { AttachMoney, Upload, LocationOn, Person, Phone, Email, DirectionsCar, Build, Security } from '@mui/icons-material';
 import { useAuth } from '../../../context/AuthContext';
 import { useConfirmDialog } from '../../../hooks/useConfirmDialog';
+import { useEditListing } from '../../../hooks/useEditListing';
 import { locationService, City, District } from '../../../services/locationService';
 import { categoryService } from '../../../services/categoryService';
 import { createStandardPayload, validateListingPayload } from '../../../services/apiNormalizer';
@@ -62,6 +63,9 @@ const steps = ['İlan Detayları', 'Araç Bilgileri', 'Detaylı Bilgi', 'Fotoğr
 
 const TekliAracForm: React.FC = () => {
   const { confirm } = useConfirmDialog();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const { isEditMode, editData, editLoading, fillFormWithEditData } = useEditListing();
   const [activeStep, setActiveStep] = useState(0);
   const [formData, setFormData] = useState<TekliAracFormData>({
     title: '',
@@ -93,14 +97,10 @@ const TekliAracForm: React.FC = () => {
     district: ''
   });
 
-  const { user } = useAuth();
-  const navigate = useNavigate();
   const [cities, setCities] = useState<City[]>([]);
   const [districts, setDistricts] = useState<District[]>([]);
   const [submitError, setSubmitError] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  
-
   const [loadingCities, setLoadingCities] = useState(true);
   const [loadingDistricts, setLoadingDistricts] = useState(false);
 
@@ -162,6 +162,13 @@ const TekliAracForm: React.FC = () => {
       }));
     }
   }, [user]);
+
+  // Edit modu için veri yükle
+  useEffect(() => {
+    if (isEditMode && editData && !editLoading) {
+      fillFormWithEditData(setFormData);
+    }
+  }, [isEditMode, editData, editLoading]);
 
   // Load cities on component mount - MinibüsForm uyumlu
   useEffect(() => {
@@ -333,21 +340,40 @@ const TekliAracForm: React.FC = () => {
 
       console.log('Oto Kurtarıcı ilanı oluşturuluyor:', standardPayload);
 
-      // Use standardized listing service - MinibüsForm uyumlu
-      const response = await listingService.createStandardListing(standardPayload);
-      console.log('API Response:', response);
-      
-      if (response.success) {
-        await confirm({
-          title: 'Başarılı',
-          description: 'Oto Kurtarıcı ilanınız başarıyla oluşturuldu! Admin onayından sonra yayınlanacaktır.',
-          severity: 'success',
-          confirmText: 'Tamam',
-          cancelText: ''
-        });
-        navigate('/user/my-listings');
+      // Edit mode or create mode handling
+      if (isEditMode && editData) {
+        console.log('Oto Kurtarıcı ilanı güncelleniyor:', standardPayload);
+        const response = await listingService.updateStandardListing(editData.id, standardPayload);
+        
+        if (response.success) {
+          await confirm({
+            title: 'Başarılı',
+            description: 'Oto Kurtarıcı ilanınız başarıyla güncellendi! Admin onayından sonra yeniden yayınlanacaktır.',
+            severity: 'success',
+            confirmText: 'Tamam',
+            cancelText: ''
+          });
+          navigate('/user/my-listings');
+        } else {
+          throw new Error(response.message || 'İlan güncellenemedi');
+        }
       } else {
-        throw new Error(response.message || 'İlan oluşturulamadı');
+        // Use standardized listing service - MinibüsForm uyumlu
+        const response = await listingService.createStandardListing(standardPayload);
+        console.log('API Response:', response);
+        
+        if (response.success) {
+          await confirm({
+            title: 'Başarılı',
+            description: 'Oto Kurtarıcı ilanınız başarıyla oluşturuldu! Admin onayından sonra yayınlanacaktır.',
+            severity: 'success',
+            confirmText: 'Tamam',
+            cancelText: ''
+          });
+          navigate('/user/my-listings');
+        } else {
+          throw new Error(response.message || 'İlan oluşturulamadı');
+        }
       }
 
     } catch (error: any) {
@@ -362,7 +388,8 @@ const TekliAracForm: React.FC = () => {
       } else if (error.response?.status === 401) {
         setSubmitError('Yetkilendirme hatası. Lütfen giriş yapın.');
       } else {
-        const errorMessage = error.response?.data?.message || error.message || 'İlan oluşturulurken bir hata oluştu';
+        const errorMessage = error.response?.data?.message || error.message || 
+          `İlan ${isEditMode ? 'güncellenirken' : 'oluşturulurken'} bir hata oluştu`;
         setSubmitError(errorMessage);
       }
     } finally {

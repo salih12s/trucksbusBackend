@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import { useWebSocketContext } from "../../context/WebSocketContext";
 
 import {
   AppBar,
@@ -35,10 +34,13 @@ import ChatBubbleRounded from "@mui/icons-material/ChatBubbleRounded";
 import PersonOutlineRounded from "@mui/icons-material/PersonOutlineRounded";
 import StorefrontRounded from "@mui/icons-material/StorefrontRounded";
 import ReportGmailerrorredRounded from "@mui/icons-material/ReportGmailerrorredRounded";
-import SettingsRounded from "@mui/icons-material/SettingsRounded";
 import LogoutRounded from "@mui/icons-material/LogoutRounded";
 import BookmarkIcon from '@mui/icons-material/Bookmark';
+import FeedbackRounded from '@mui/icons-material/FeedbackRounded';
+import NotificationDetailModal from "../modals/NotificationDetailModal";
 import { useFavorites } from '../../context/FavoritesContext';
+import FeedbackModal from '../modals/FeedbackModal';
+import { useNotifications } from '../../hooks/useNotifications';
 
 // 🎨 YENİ PALET — Logo ile %100 Uyumlu
 const PRIMARY_DARK = "#2D3748"; // Logonun antrasit/füme tonu
@@ -48,13 +50,16 @@ const LOGO_RED_HOVER = "#D34237"; // Kırmızı hover tonu
 const UserHeader: React.FC = () => {
   const navigate = useNavigate();
   const { user, isAuthenticated, logout } = useAuth();
-  const { unreadCount, notifications, markAsRead } = useWebSocketContext();
   const { favoritesCount } = useFavorites();
+  const { notifications, unreadCount, markAsRead } = useNotifications();
 
   const [query, setQuery] = useState("");
   const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
   const [anchorElMobile, setAnchorElMobile] = useState<null | HTMLElement>(null);
   const [notificationAnchor, setNotificationAnchor] = useState<null | HTMLElement>(null);
+  const [selectedNotification, setSelectedNotification] = useState<any>(null);
+  const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
 
   // Auto-logout timer (30 dakika = 1800000 ms)
   const logoutTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -117,14 +122,28 @@ const UserHeader: React.FC = () => {
   };
   
   const handleNotificationClose = () => setNotificationAnchor(null);
-  const handleMarkAllAsRead = () => markAsRead?.();
+  const handleMarkAllAsRead = () => markAsRead();
   const handleNotificationItemClick = (n: any) => {
-    if (n.type === "message" && n.conversationId) {
+    // İlan yayınlandı bildirimlerinde ilana git
+    if (n.type === "LISTING_PUBLISHED" && n.data?.listing_id) {
+      navigate(`/listings/${n.data.listing_id}`);
+    } 
+    // Feedback yanıtı bildirimlerinde modal aç
+    else if (n.type === "FEEDBACK_RESPONSE") {
+      setSelectedNotification(n);
+      setIsNotificationModalOpen(true);
+      setNotificationAnchor(null); // Notification dropdown'unu kapat
+    } 
+    // Mesaj bildirimlerinde konuşmaya git
+    else if (n.type === "message" && n.conversationId) {
       navigate(`/real-time-messages?conversation=${n.conversationId}`);
-    } else {
+    } 
+    // Diğer durumlarda mesajlar sayfasına git
+    else {
       navigate("/real-time-messages");
     }
-    markAsRead?.(n.id);
+    
+    markAsRead(n.id);
     setNotificationAnchor(null);
   };
   
@@ -164,9 +183,10 @@ const UserHeader: React.FC = () => {
   disableGutters
   sx={{
     minHeight: { xs: 64, md: 76 },
-    gap: 2,
+    gap: { xs: 0.5, sm: 2 },
     justifyContent: "space-between",
-    alignItems: "center", // 👈
+    alignItems: "center",
+    px: { xs: 1, sm: 2 }, // Mobile'da daha az padding
   }}
 >
           {/* --- DEĞİŞİKLİK: LOGO BÜYÜTME VE "FLOATING" EFEKTİ --- */}
@@ -212,82 +232,10 @@ const UserHeader: React.FC = () => {
     }}
   />
 </Box>
-          {/* Search - Desktop */}
-          <Box
-            component="form"
-            onSubmit={handleSearch}
-            sx={{
-              display: { xs: "none", md: "flex" },
-              flex: 1,
-              justifyContent: "center", // ✅ merkezde konumlandır
-              maxWidth: 680, // ✅ maksimum genişlik kilit
-            }}
-          >
-            <TextField
-              fullWidth
-              variant="outlined"
-              placeholder="Araç veya yedek parça ara…"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton 
-                      type="submit" 
-                      edge="end"
-                      sx={{
-                        color: alpha('#ffffff', 0.8), // ✅ beyaz icon
-                        '&:hover': {
-                          backgroundColor: alpha('#ffffff', 0.1), // ✅ yumuşak hover
-                          color: '#ffffff',
-                        },
-                        '&:focus-visible': {
-                          outline: `2px solid #ffffff`,
-                          outlineOffset: 2,
-                        },
-                      }}
-                    >
-                      <SearchRounded />
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-              sx={{
-                width: "100%",
-                maxWidth: 680, // ✅ sabitle
-                borderRadius: 999, // ✅ tam yuvarlak
-                "& .MuiOutlinedInput-root": { 
-                  height: 44, // ✅ yükseklik kilit
-                  fontWeight: 400,
-                  backgroundColor: 'transparent', // ✅ arka plan kaldır
-                  "& fieldset": { 
-                    borderColor: alpha('#ffffff', 0.15), // ✅ sadece ince border
-                    transition: 'all 0.2s ease-in-out',
-                  },
-                  "&:hover fieldset": {
-                    borderColor: alpha('#ffffff', 0.3),
-                  },
-                  "&.Mui-focused fieldset": {
-                    borderColor: '#ffffff',
-                    borderWidth: '1px', // ✅ 2px'den 1px'e
-                  },
-                  px: 2,
-                  "& input": {
-                    fontSize: '0.95rem',
-                    fontWeight: 400,
-                    color: '#ffffff', // ✅ beyaz yazı
-                    "&::placeholder": { 
-                      opacity: 0.7,
-                      color: alpha('#ffffff', 0.7), // ✅ beyaz placeholder
-                    },
-                  },
-                },
-              }}
-            />
-          </Box>
+      
 
           {/* Right */}
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, ml: 2 }}> {/* ✅ gap: 12px, İLAN VER ile ikonlar arası ml: 2 */}
+          <Box sx={{ display: "flex", alignItems: "center", gap: { xs: 0.5, sm: 1.5 }, ml: { xs: 1, sm: 2 } }}>
             {/* Mobile Search */}
             <IconButton
               sx={{
@@ -301,17 +249,18 @@ const UserHeader: React.FC = () => {
                 },
                 transition: 'all 0.2s ease',
                 borderRadius: 2,
+                p: { xs: 0.5, sm: 1 },
               }}
             >
-              <SearchRounded />
+              <SearchRounded sx={{ fontSize: { xs: 20, sm: 24 } }} />
             </IconButton>
 
             {/* Desktop Icons Container */}
             <Box sx={{ 
               display: { xs: "none", sm: "flex" }, 
               alignItems: "center", 
-              gap: 1.5,
-              mr: 2,
+              gap: { sm: 1, md: 1.5 },
+              mr: { sm: 1, md: 2 },
             }}>
               {isAuthenticated && (
                 <>
@@ -337,6 +286,26 @@ const UserHeader: React.FC = () => {
                     </IconButton>
                   </Tooltip>
                   
+                  {/* Feedback */}
+                  <Tooltip title="Geri Bildirim">
+                    <IconButton
+                      sx={{ 
+                        color: "white", 
+                        opacity: 0.9, 
+                        "&:hover": { 
+                          opacity: 1, 
+                          bgcolor: alpha("#fff", 0.1),
+                          transform: 'scale(1.05)',
+                        },
+                        transition: 'all 0.2s ease',
+                        borderRadius: 2,
+                      }}
+                      onClick={() => setFeedbackOpen(true)}
+                    >
+                      <FeedbackRounded />
+                    </IconButton>
+                  </Tooltip>
+
                   {/* Notifications */}
                   <Tooltip title="Bildirimler">
                     <IconButton
@@ -353,7 +322,7 @@ const UserHeader: React.FC = () => {
                       }}
                       onClick={(e) => setNotificationAnchor(e.currentTarget)}
                     >
-                      <Badge badgeContent={0} sx={{ "& .MuiBadge-badge": { bgcolor: LOGO_RED } }}>
+                                            <Badge badgeContent={unreadCount} sx={{ "& .MuiBadge-badge": { bgcolor: LOGO_RED } }}>
                         <NotificationsRounded />
                       </Badge>
                     </IconButton>
@@ -399,17 +368,20 @@ const UserHeader: React.FC = () => {
                   transform: 'translateY(-1px)',
                   boxShadow: `0 6px 16px rgba(225, 77, 67, 0.3)`,
                 },
-                minWidth: 140,
+                minWidth: { sm: 100, md: 140 },
                 fontWeight: 700,
                 letterSpacing: 0.4,
                 borderRadius: 999,
-                px: 2.4,
+                px: { sm: 1.5, md: 2.4 },
                 py: 1,
+                fontSize: { sm: '0.8rem', md: '0.875rem' },
                 transition: 'all 0.2s ease',
                 boxShadow: `0 2px 8px rgba(225, 77, 67, 0.2)`,
               }}
             >
-              İLAN VER
+              {/* Mobile'da kısa metin */}
+              <Box sx={{ display: { sm: 'block', md: 'none' } }}>İLAN</Box>
+              <Box sx={{ display: { xs: 'none', md: 'block' } }}>İLAN VER</Box>
             </Button>
 
             {/* Mobile Add */}
@@ -424,10 +396,11 @@ const UserHeader: React.FC = () => {
                 },
                 transition: 'all 0.2s ease',
                 borderRadius: 2,
+                p: { xs: 0.5 },
               }}
               onClick={handleCreateAdClick}
             >
-              <AddCircleRounded />
+              <AddCircleRounded sx={{ fontSize: { xs: 20 } }} />
             </IconButton>
 
             {isAuthenticated ? (
@@ -437,7 +410,7 @@ const UserHeader: React.FC = () => {
                   <IconButton
                     onClick={handleUserMenuOpen}
                     sx={{ 
-                      p: 0.5,
+                      p: { xs: 0.3, sm: 0.5 },
                       "&:hover": {
                         bgcolor: alpha("#fff", 0.1),
                         transform: 'scale(1.05)',
@@ -448,10 +421,10 @@ const UserHeader: React.FC = () => {
                   >
                     <Avatar
                       sx={{
-                        width: 36,
-                        height: 36,
+                        width: { xs: 32, sm: 36 },
+                        height: { xs: 32, sm: 36 },
                         bgcolor: LOGO_RED,
-                        fontSize: 13,
+                        fontSize: { xs: 12, sm: 13 },
                         fontWeight: 800,
                         border: `2px solid ${alpha("#ffffff", 0.8)}`,
                         boxShadow: `0 2px 8px rgba(0,0,0,0.15)`,
@@ -471,13 +444,15 @@ const UserHeader: React.FC = () => {
                   onClick={() => navigate("/auth/login")}
                   sx={{ 
                     fontWeight: 700, 
-                    minWidth: { xs: 60, sm: 80 }, 
+                    minWidth: { xs: 50, sm: 80 }, 
+                    fontSize: { xs: '0.8rem', sm: '0.875rem' },
                     "&:hover": { 
                       bgcolor: alpha("#fff", 0.1),
                       transform: 'translateY(-1px)',
                     },
                     transition: 'all 0.2s ease',
                     borderRadius: 2,
+                    px: { xs: 1, sm: 2 },
                   }}
                 >
                   Giriş
@@ -495,12 +470,15 @@ const UserHeader: React.FC = () => {
                     }, 
                     fontWeight: 700, 
                     minWidth: { xs: 60, sm: 100 },
+                    fontSize: { xs: '0.8rem', sm: '0.875rem' },
                     borderRadius: 2,
                     transition: 'all 0.2s ease',
                     boxShadow: `0 2px 8px rgba(225, 77, 67, 0.2)`,
+                    px: { xs: 1, sm: 2 },
                   }}
                 >
-                  Kayıt Ol
+                  <Box sx={{ display: { xs: 'block', sm: 'none' } }}>Kayıt</Box>
+                  <Box sx={{ display: { xs: 'none', sm: 'block' } }}>Kayıt Ol</Box>
                 </Button>
               </>
             )}
@@ -570,9 +548,6 @@ const UserHeader: React.FC = () => {
         <MenuItem onClick={() => navigate("/my-reports")}>
           <ReportGmailerrorredRounded sx={{ mr: 1.5 }} /> Şikayetlerim
         </MenuItem>
-        <MenuItem onClick={() => navigate("/settings")}>
-          <SettingsRounded sx={{ mr: 1.5 }} /> Ayarlar
-        </MenuItem>
         <Divider />
         <MenuItem onClick={handleLogout}>
           <LogoutRounded sx={{ mr: 1.5 }} /> Çıkış Yap
@@ -592,7 +567,7 @@ const UserHeader: React.FC = () => {
         <Box sx={{ p: 2, borderBottom: "1px solid #eee" }}> 
           <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}> 
             <Typography variant="h6" sx={{ fontWeight: 800 }}>Bildirimler</Typography> 
-            {notifications && notifications.filter((n: any) => !n.isRead).length > 0 && ( 
+            {notifications && notifications.filter((n: any) => !n.is_read).length > 0 && ( 
               <Button size="small" onClick={handleMarkAllAsRead}>Tümünü Oku</Button> 
             )} 
           </Box> 
@@ -608,26 +583,41 @@ const UserHeader: React.FC = () => {
                 key={n.id} 
                 onClick={() => handleNotificationItemClick(n)} 
                 sx={{ 
-                  backgroundColor: n.isRead ? "transparent" : alpha(LOGO_RED, 0.08), 
+                  backgroundColor: n.is_read ? "transparent" : alpha(LOGO_RED, 0.08), 
                   borderBottom: "1px solid #eee", 
                   "&:hover": { backgroundColor: alpha(LOGO_RED, 0.12) }, 
                   cursor: "pointer" 
                 }}
               > 
                 <ListItemAvatar>
-                  <Avatar sx={{ bgcolor: n.type === "message" ? PRIMARY_DARK : LOGO_RED }}>
-                    {n.type === "message" ? <ChatBubbleRounded /> : <NotificationsRounded />}
+                  <Avatar sx={{ bgcolor: n.type === "FEEDBACK_RESPONSE" ? "#4CAF50" : n.type === "LISTING_PUBLISHED" ? LOGO_RED : PRIMARY_DARK }}>
+                    {n.type === "FEEDBACK_RESPONSE" ? <FeedbackRounded /> : 
+                     n.type === "LISTING_PUBLISHED" ? <NotificationsRounded /> : 
+                     <ChatBubbleRounded />}
                   </Avatar>
                 </ListItemAvatar> 
                 <ListItemText 
-                  primary={<Typography variant="subtitle2" sx={{ fontWeight: n.isRead ? 500 : 800 }}>{n.title}</Typography>} 
-                  secondary={n.content} 
+                  primary={<Typography variant="subtitle2" sx={{ fontWeight: n.is_read ? 500 : 800 }}>{n.title}</Typography>} 
+                  secondary={n.message} 
                 /> 
               </ListItem> 
             ))} 
           </List> 
         )} 
       </Popover>
+
+      {/* Feedback Modal */}
+      <FeedbackModal 
+        open={feedbackOpen}
+        onClose={() => setFeedbackOpen(false)}
+      />
+
+      {/* Notification Detail Modal */}
+      <NotificationDetailModal
+        open={isNotificationModalOpen}
+        onClose={() => setIsNotificationModalOpen(false)}
+        notification={selectedNotification}
+      />
     </AppBar>
   );
 };

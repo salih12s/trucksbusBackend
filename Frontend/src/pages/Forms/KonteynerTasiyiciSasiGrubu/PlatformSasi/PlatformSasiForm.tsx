@@ -5,6 +5,7 @@ import { useLocation } from 'react-router-dom';
 import { locationService, City, District } from '../../../../services/locationService';
 import { useConfirmDialog } from '../../../../hooks/useConfirmDialog';
 import { listingService } from '../../../../services/listingService';
+import { useEditListing } from '../../../../hooks/useEditListing';
 import {
   Box,
   Stepper,
@@ -40,6 +41,7 @@ const PlatformSasiForm: React.FC = () => {
   const { user } = useAuth();
   const location = useLocation();
   const { confirm } = useConfirmDialog();
+  const { isEditMode, editData, editLoading, fillFormWithEditData } = useEditListing();
   
 
   

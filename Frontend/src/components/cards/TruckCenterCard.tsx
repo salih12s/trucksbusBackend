@@ -1,6 +1,6 @@
 import { Card, CardContent, Typography, Box } from '@mui/material';
 import { alpha, useTheme } from '@mui/material/styles';
-import { Person, Phone, CalendarToday, Visibility, Chat, Flag, Bookmark, Check, Close } from '@mui/icons-material';
+import { Person, Phone, CalendarToday, Visibility, Chat, Flag, Bookmark, Check, Close, Edit } from '@mui/icons-material';
 import { SimpleListing } from '../../context/ListingContext';
 import { useAuth } from '../../context/AuthContext';
 import { useFavorites } from '../../context/FavoritesContext';
@@ -29,6 +29,7 @@ interface TruckCenterCardProps {
   onSendMessage?: (id: string) => void;
   onReport?: (id: string) => void;
   onDelete?: (id: string) => void;
+  onEdit?: (id: string) => void;
   isAdminView?: boolean;
   onApprove?: (id: string) => void;
   onReject?: (id: string) => void;
@@ -45,14 +46,14 @@ const ActionButton: React.FC<{
   const theme = useTheme();
   
   const base = {
-    fontSize: compact ? 9 : 12,
+    fontSize: { xs: compact ? 8 : 10, md: compact ? 9 : 12 }, // Mobile'da küçük font
     fontWeight: 600, // Slightly bolder for better readability
     borderRadius: '12px', // Theme'den alınan border radius
-    px: compact ? 0.8 : 1.2,
-    py: compact ? 0.5 : 0.7,
-    minWidth: compact ? '72px' : 'auto',
-    width: compact ? '72px' : '100%',
-    height: compact ? '30px' : 'auto',
+    px: { xs: compact ? 0.5 : 1, md: compact ? 0.8 : 1.2 }, // Mobile'da küçük padding
+    py: { xs: compact ? 0.3 : 0.5, md: compact ? 0.5 : 0.7 },
+    minWidth: { xs: compact ? '60px' : 'auto', md: compact ? '72px' : 'auto' }, // Mobile'da küçük
+    width: { xs: compact ? '60px' : '100%', md: compact ? '72px' : '100%' },
+    height: { xs: compact ? '26px' : 'auto', md: compact ? '30px' : 'auto' },
     border: '1px solid',
     display: 'inline-flex',
     alignItems: 'center',
@@ -122,8 +123,16 @@ const ActionButton: React.FC<{
       onClick={(e) => { e.stopPropagation(); onClick?.(); }}
       title={label}
     >
-      {icon && <Box sx={{ fontSize: compact ? '12px' : '16px', display: 'flex', alignItems: 'center' }}>{icon}</Box>}
-      {label && <Box sx={{ fontSize: compact ? '9px' : '12px', fontWeight: 600, lineHeight: 1 }}>{label}</Box>}
+      {icon && <Box sx={{ 
+        fontSize: { xs: compact ? '10px' : '14px', md: compact ? '12px' : '16px' }, 
+        display: 'flex', 
+        alignItems: 'center' 
+      }}>{icon}</Box>}
+      {label && <Box sx={{ 
+        fontSize: { xs: compact ? 7 : 9, md: compact ? 9 : 12 }, 
+        fontWeight: 600, 
+        lineHeight: 1 
+      }}>{label}</Box>}
     </Box>
   );
 };
@@ -135,6 +144,8 @@ const TruckCenterCard: React.FC<TruckCenterCardProps> = ({
   onViewDetails,
   onSendMessage,
   onReport,
+  onDelete,
+  onEdit,
   isAdminView = false,
   onApprove,
   onReject,
@@ -175,13 +186,18 @@ const TruckCenterCard: React.FC<TruckCenterCardProps> = ({
 
   return (
     <Card
-      onClick={handleViewDetails}
+      onClick={(e) => {
+        e.stopPropagation();
+        handleViewDetails();
+      }}
       sx={{
         // Premium kart stili - yeni gölge sistemi
         width: '100%',
-        maxWidth: 420,
-        height: 280, // ✅ 260'tan 280'e yükselttik
+        maxWidth: { xs: '100%', md: 420 }, // Mobile'da tam genişlik
+        height: { xs: 'auto', md: 280 }, // Mobile'da otomatik yükseklik
+        minHeight: { xs: 200, md: 280 }, // Mobile için minimum yükseklik
         display: 'flex',
+        flexDirection: { xs: 'column', md: 'row' }, // Mobile'da dikey, desktop'ta yatay
         borderRadius: 0, // ✅ border radius kaldırıldı (düz kare)
         border: `1px solid #EEF2F7`, // ✅ yeni bölücü rengi
         bgcolor: 'background.paper',
@@ -202,16 +218,18 @@ const TruckCenterCard: React.FC<TruckCenterCardProps> = ({
     >
       {/* SOL: Görsel + Aksiyonlar */}
       <Box sx={{ 
-        width: '48%', // ✅ %50'den %48'e düşürdük
+        width: { xs: '100%', md: '48%' }, // Mobile'da tam genişlik, desktop'ta %48
         display: 'flex', 
         flexDirection: 'column', 
-        borderRight: `1px solid #EEF2F7` // ✅ yeni bölücü rengi
+        borderRight: { xs: 'none', md: `1px solid #EEF2F7` }, // Mobile'da border yok
+        borderBottom: { xs: `1px solid #EEF2F7`, md: 'none' } // Mobile'da alt border
       }}>
         <Box sx={{ 
           position: 'relative', 
-          aspectRatio: '4/3', // ✅ 16:9'dan 4:3'e düşürdük (daha kısa)
+          aspectRatio: { xs: '16/9', md: '4/3' }, // Mobile'da 16:9, desktop'ta 4:3
           overflow: 'hidden',
           borderTopLeftRadius: 0, // ✅ border radius kaldırıldı
+          borderTopRightRadius: { xs: 0, md: 0 }, // Mobile'da sağ üst köşe de düz
           bgcolor: theme.palette.grey[100]
         }}>
           <Box 
@@ -233,7 +251,8 @@ const TruckCenterCard: React.FC<TruckCenterCardProps> = ({
 
         <Box sx={{ 
           p: 1, 
-          flex: 1, 
+          flex: { xs: 0, md: 1 }, // Mobile'da flex yok, desktop'ta flex
+          minHeight: { xs: 50, md: 'auto' }, // Mobile için minimum yükseklik
           display: 'flex', 
           alignItems: 'center', 
           justifyContent: 'center', 
@@ -250,12 +269,24 @@ const TruckCenterCard: React.FC<TruckCenterCardProps> = ({
             </Box>
           ) : (
             <Box
-              sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0.75, width: '100%', height: '64px' }}
+              sx={{ 
+                display: 'grid', 
+                gridTemplateColumns: { xs: 'repeat(4, 1fr)', md: '1fr 1fr' }, // Mobile'da 4 kolon
+                gap: 0.75, 
+                width: '100%', 
+                height: { xs: 'auto', md: '64px' } // Mobile'da otomatik yükseklik
+              }}
             >
               {isAdminView ? (
                 <>
                   <ActionButton label="Onayla" icon={<Check />} variant="primary" compact onClick={() => onApprove?.(listing.id)} />
                   <ActionButton label="Reddet" icon={<Close />} variant="soft" compact onClick={() => onReject?.(listing.id)} />
+                </>
+              ) : isOwn ? (
+                // Kendi ilanları için özel butonlar
+                <>
+                  <ActionButton label="Detaylar" icon={<Visibility />} variant="primary" compact onClick={() => onViewDetails?.(listing.id)} />
+                  <ActionButton label="Düzenle" icon={<Edit />} variant="secondary" compact onClick={() => onEdit?.(listing.id)} />
                 </>
               ) : (
                 <>
@@ -278,17 +309,18 @@ const TruckCenterCard: React.FC<TruckCenterCardProps> = ({
 
       {/* SAĞ: Bilgi alanı */}
       <CardContent sx={{ 
-        width: '52%', // ✅ %50'den %52'ye artırdık
-        p: 1.5, // ✅ padding'i 2'den 1.5'e düşürdük
+        width: { xs: '100%', md: '52%' }, // Mobile'da tam genişlik, desktop'ta %52
+        p: { xs: 1.5, md: 1.5 }, // Padding aynı
         display: 'flex', 
         flexDirection: 'column', 
-        justifyContent: 'space-between' 
+        justifyContent: 'space-between',
+        minHeight: { xs: 120, md: 'auto' } // Mobile için minimum yükseklik
       }}>
         <Box>
           <Typography 
             component="h3" 
             sx={{ 
-              fontSize: 14, // ✅ 15'ten 14'e düşürdük
+              fontSize: { xs: 16, md: 14 }, // Mobile'da daha büyük font
               fontWeight: 700, 
               color: theme.palette.text.primary, 
               mb: 0.75, // ✅ margin'i 1'den 0.75'e düşürdük
@@ -304,7 +336,7 @@ const TruckCenterCard: React.FC<TruckCenterCardProps> = ({
           
           {/* Fiyat stili - daha yumuşak renk */}
           <Typography sx={{ 
-            fontSize: 22, 
+            fontSize: { xs: 24, md: 22 }, // Mobile'da daha büyük fiyat
             fontWeight: 800, 
             color: theme.palette.text.primary, // ✅ kırmızı yerine koyu gri
             mb: 1.5, // ✅ 12px (fiyat → meta)

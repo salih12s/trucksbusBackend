@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
 import { useConfirmDialog } from '../../../hooks/useConfirmDialog';
 import { listingService } from '../../../services/listingService';
+import { useEditListing } from '../../../hooks/useEditListing';
 import { createStandardPayload, validateListingPayload } from '../../../services/apiNormalizer';
 import { locationService, City, District } from '../../../services/locationService';
 import {
@@ -56,6 +57,7 @@ const HayvanRomorkForm: React.FC = () => {
   const { user } = useAuth();
   const location = useLocation();
   const { confirm } = useConfirmDialog();
+  const { isEditMode, editData, editLoading, fillFormWithEditData } = useEditListing();
   
   // Parse location state for brand/model/variant data
   const selectedBrand = location.state?.brand;

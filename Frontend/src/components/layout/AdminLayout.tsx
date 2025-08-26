@@ -27,6 +27,7 @@ import {
   Logout,
   Settings,
   AccountCircle,
+  Feedback,
 } from '@mui/icons-material';
 
 const drawerWidth = 240;
@@ -61,6 +62,7 @@ const AdminLayout = () => {
     { text: 'Tüm İlanlar', icon: <Assignment />, path: '/admin/all-listings' },
     { text: 'Onay Bekleyen İlanlar', icon: <HourglassEmpty />, path: '/admin/pending-listings' },
     { text: 'Şikayet Yönetimi', icon: <Report />, path: '/admin/reports' },
+    { text: 'Geri Bildirim Yönetimi', icon: <Feedback />, path: '/admin/feedback' },
     { text: 'Kullanıcılar', icon: <People />, path: '/admin/users' },
   ];
 

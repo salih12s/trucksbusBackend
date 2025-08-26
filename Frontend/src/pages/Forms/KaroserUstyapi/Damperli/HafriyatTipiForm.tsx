@@ -3,6 +3,7 @@ import { useAuth } from '../../../../context/AuthContext';
 import { useLocation } from 'react-router-dom';
 import { useConfirmDialog } from '../../../../hooks/useConfirmDialog';
 import { listingService } from '../../../../services/listingService';
+import { useEditListing } from '../../../../hooks/useEditListing';
 import { createStandardPayload, validateListingPayload } from '../../../../services/apiNormalizer';
 import { locationService, City, District } from '../../../../services/locationService';
 import { Box, Button, TextField, Typography, Stepper, Step, StepLabel, Card, CardContent, MenuItem, Stack, Chip, InputAdornment, Alert, FormControl, FormLabel, RadioGroup, FormControlLabel, Radio, Autocomplete } from '@mui/material';
@@ -32,6 +33,7 @@ const HafriyatTipiForm: React.FC = () => {
   const { user } = useAuth();
   const location = useLocation();
   const { confirm } = useConfirmDialog();
+  const { isEditMode, editData, editLoading, fillFormWithEditData } = useEditListing();
   const selectedBrand = location.state?.brand;
   const selectedModel = location.state?.model;
   const selectedVariant = location.state?.variant;

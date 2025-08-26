@@ -5,6 +5,7 @@ import { createStandardPayload, validateListingPayload } from '../../../../servi
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useConfirmDialog } from '../../../../hooks/useConfirmDialog';
 import { locationService } from '../../../../services/locationService';
+import { useEditListing } from '../../../../hooks/useEditListing';
 import {
   Box,
   Stepper,
@@ -46,6 +47,7 @@ const KapaliKasaForm: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { confirm } = useConfirmDialog();
+  const { isEditMode, editData, editLoading, fillFormWithEditData } = useEditListing();
   
   // Location state'den gelen veriler
   const selectedBrand = location.state?.brand;

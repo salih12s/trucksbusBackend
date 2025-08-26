@@ -3,6 +3,7 @@ import { useDropzone } from 'react-dropzone';
 import { useAuth } from '../../../../context/AuthContext';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useConfirmDialog } from '../../../../hooks/useConfirmDialog';
+import { useEditListing } from '../../../../hooks/useEditListing';
 import { listingService } from '../../../../services/listingService';
 import { createStandardPayload, validateListingPayload } from '../../../../services/apiNormalizer';
 import {
@@ -99,6 +100,7 @@ const KayaTipiDorseAdForm: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { confirm } = useConfirmDialog();
+  const { isEditMode, editData, editLoading, fillFormWithEditData } = useEditListing();
   const selectedBrand = location.state?.brand;
   const selectedModel = location.state?.model;
   const selectedVariant = location.state?.variant;
@@ -170,6 +172,13 @@ const KayaTipiDorseAdForm: React.FC = () => {
       }));
     }
   }, [user]);
+
+  // Edit modunda veri yükle
+  useEffect(() => {
+    if (isEditMode && editData && !editLoading) {
+      fillFormWithEditData(editData, setFormData, setPhotos);
+    }
+  }, [isEditMode, editData, editLoading, fillFormWithEditData]);
 
   // Dropzone callbacks
   const onDrop = useCallback((acceptedFiles: File[]) => {
@@ -360,13 +369,20 @@ const KayaTipiDorseAdForm: React.FC = () => {
       console.log('🚀 Kaya Tipi Dorse ilanı oluşturuluyor...', payload);
 
       // Use standard listing service
-      const response = await listingService.createStandardListing(payload);
+      let response;
+      if (isEditMode && editData) {
+        response = await listingService.updateStandardListing(editData.id, payload);
+      } else {
+        response = await listingService.createStandardListing(payload);
+      }
       
       if (response.success) {
         console.log('✅ Kaya Tipi Dorse ilanı başarıyla oluşturuldu:', response.data);
         await confirm({
           title: 'Başarılı',
-          description: 'İlanınız başarıyla oluşturuldu! Admin onayından sonra yayınlanacaktır.',
+          description: isEditMode 
+            ? 'İlanınız başarıyla güncellendi ve admin onayına gönderildi!' 
+            : 'İlanınız başarıyla oluşturuldu! Admin onayından sonra yayınlanacaktır.',
           severity: 'success',
           confirmText: 'Tamam',
           cancelText: ''

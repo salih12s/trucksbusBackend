@@ -19,22 +19,93 @@ const CategoryPage: React.FC = () => {
   // Kategoriye göre resim mapping'i
   const getCategoryImage = (categoryName: string) => {
     const imageMap: { [key: string]: string } = {
-      'Çekici': '/CategoryImage/Çekici.png',
+      'Çekici': '/CategoryImage/cekici.png',
       'Dorse': '/CategoryImage/Dorse.png',
       'Kamyon & Kamyonet': '/CategoryImage/KamyonKamyonet.png',
-      'Karoser & Üst Yapı': '/CategoryImage/KarosetÜstYapı.png',
-      'Minibüs & Midibüs': '/CategoryImage/MinibüsMidibüs.png',
-      'Otobüs': '/CategoryImage/Otobüs.png',
-      'Oto Kurtarıcı & Taşıyıcı': '/CategoryImage/OtoKurtarıcıTaşıyıcı.png',
-      'Römork': '/CategoryImage/Römork.png'
+      'Karoser & Üst Yapı': '/CategoryImage/karoser-ust-yapi.png',
+      'Minibüs & Midibüs': '/CategoryImage/minibus-midibus.png',
+      'Otobüs': '/CategoryImage/otobus.png',
+      'Oto Kurtarıcı & Taşıyıcı': '/CategoryImage/oto-kurtarici-tasiyici.png',
+      'Römork': '/CategoryImage/romork.png'
     };
-    return imageMap[categoryName] || '/CategoryImage/default.png';
+    return imageMap[categoryName] || '/TruckBus.png';
   };
 
   // Model resmini al
   const getModelImage = (modelName: string) => {
-    const formattedName = modelName.replace(/\s+/g, '');
-    return `/ModelImage/${formattedName}.png`;
+    // Model adı düzenleme map'i - Tüm varyasyonları kapsayacak şekilde mevcut dosyalara yönlendir
+    const modelImageMap: { [key: string]: string } = {
+      // Scania varyasyonları - mevcut dosya: Scania.png
+      'Scanıa': '/ModelImage/Scania.png',
+      'Scania': '/ModelImage/Scania.png',
+      'SCANIA': '/ModelImage/Scania.png',
+      'scania': '/ModelImage/Scania.png',
+      
+      // Irizar varyasyonları - mevcut dosya yoksa fallback
+      'Irızar': '/TruckBus.png',
+      'Irizar': '/TruckBus.png',
+      'IRIZAR': '/TruckBus.png',
+      'irizar': '/TruckBus.png',
+      
+      // Türkkar varyasyonları - mevcut dosya: Turkkar.png
+      'Türkkar': '/ModelImage/Turkkar.png',
+      'Turkkar': '/ModelImage/Turkkar.png',
+      'TÜRKKAR': '/ModelImage/Turkkar.png',
+      'turkkar': '/ModelImage/Turkkar.png',
+      
+      // Avia varyasyonları - mevcut dosya: Avia.png
+      'Avıa': '/ModelImage/Avia.png',
+      'Avia': '/ModelImage/Avia.png',
+      'AVIA': '/ModelImage/Avia.png',
+      'avia': '/ModelImage/Avia.png',
+      
+      // Musatti varyasyonları - mevcut dosya: Musatti.png
+      'MUSATTİ': '/ModelImage/Musatti.png',
+      'MUSATTI': '/ModelImage/Musatti.png',
+      'Musatti': '/ModelImage/Musatti.png',
+      'musatti': '/ModelImage/Musatti.png',
+      'Mussatti': '/ModelImage/Musatti.png',
+      'MUSSATTI': '/ModelImage/Musatti.png',
+      
+      // Kuruyük varyasyonları
+      'Kuruyük': '/ModelImage/kuruyuk.png',
+      'Kuruyuk': '/ModelImage/kuruyuk.png',
+      'KURUYÜK': '/ModelImage/kuruyuk.png',
+      'kuruyuk': '/ModelImage/kuruyuk.png',
+      
+      // Özel dorseler
+      'Özel Amaçlı dorseler': '/ModelImage/ozel-amacli-dorseler.png',
+      'Özel Amaçlı Römorklar': '/ModelImage/Özel Amaçlı Römorklar.png'
+    };
+    
+    console.log(`🔍 Model resmi aranan: "${modelName}"`);
+    
+    // Önce tam eşleşme ara
+    if (modelImageMap[modelName]) {
+      console.log(`✅ Tam eşleşme bulundu: ${modelImageMap[modelName]}`);
+      return modelImageMap[modelName];
+    }
+    
+    // Case insensitive arama
+    const lowerName = modelName.toLowerCase();
+    for (const [key, value] of Object.entries(modelImageMap)) {
+      if (key.toLowerCase() === lowerName) {
+        console.log(`✅ Case insensitive eşleşme: ${value}`);
+        return value;
+      }
+    }
+    
+    // Kısmi eşleşme ara (içerme)
+    for (const [key, value] of Object.entries(modelImageMap)) {
+      if (key.toLowerCase().includes(lowerName) || lowerName.includes(key.toLowerCase())) {
+        console.log(`✅ Kısmi eşleşme: ${value}`);
+        return value;
+      }
+    }
+    
+    // Son çare: fallback
+    console.log(`⚠️ Eşleşme bulunamadı, fallback kullanılıyor: /TruckBus.png`);
+    return `/TruckBus.png`;
   };
 
   useEffect(() => {
@@ -263,7 +334,7 @@ const CategoryPage: React.FC = () => {
                       alt={category.name}
                       className="w-24 h-24 object-contain"
                       onError={(e) => {
-                        e.currentTarget.src = '/CategoryImage/default.png';
+                        e.currentTarget.src = '/TruckBus.png';
                       }}
                     />
                   </div>
@@ -322,14 +393,42 @@ const CategoryPage: React.FC = () => {
                   className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer overflow-hidden"
                 >
                   <div className="aspect-square bg-gray-100 flex items-center justify-center">
-                    <img
-                      src={getModelImage(brand.name)}
-                      alt={brand.name}
-                      className="w-24 h-24 object-contain"
-                      onError={(e) => {
-                        e.currentTarget.src = '/ModelImage/DigerMarkalar.png';
-                      }}
-                    />
+                    {brand.image_url ? (
+                      <img
+                        src={brand.image_url}
+                        alt={brand.name}
+                        className="w-24 h-24 object-contain"
+                        onError={(e) => {
+                          // Resim yüklenemezse text placeholder göster
+                          const target = e.currentTarget;
+                          const parent = target.parentElement!;
+                          parent.innerHTML = `
+                            <div class="text-center p-4">
+                              <div class="w-16 h-16 mx-auto bg-green-500 rounded-full flex items-center justify-center mb-2">
+                                <span class="text-white text-xl font-bold">
+                                  ${brand.name.charAt(0).toUpperCase()}
+                                </span>
+                              </div>
+                              <div class="text-sm font-medium text-gray-600">
+                                ${brand.name}
+                              </div>
+                            </div>
+                          `;
+                        }}
+                      />
+                    ) : (
+                      // Database'de image_url yoksa direkt text placeholder
+                      <div className="text-center p-4">
+                        <div className="w-16 h-16 mx-auto bg-green-500 rounded-full flex items-center justify-center mb-2">
+                          <span className="text-white text-xl font-bold">
+                            {brand.name.charAt(0).toUpperCase()}
+                          </span>
+                        </div>
+                        <div className="text-sm font-medium text-gray-600">
+                          {brand.name}
+                        </div>
+                      </div>
+                    )}
                   </div>
                   <div className="p-4">
                     <h3 className="text-lg font-semibold text-gray-900 text-center">
@@ -354,14 +453,17 @@ const CategoryPage: React.FC = () => {
                   className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer overflow-hidden"
                 >
                   <div className="aspect-square bg-gray-100 flex items-center justify-center">
-                    <img
-                      src={getModelImage(model.name)}
-                      alt={model.name}
-                      className="w-24 h-24 object-contain"
-                      onError={(e) => {
-                        e.currentTarget.src = '/ModelImage/DigerMarkalar.png';
-                      }}
-                    />
+                    {/* Resim yerine sadece model adı */}
+                    <div className="text-center p-4">
+                      <div className="w-16 h-16 mx-auto bg-blue-500 rounded-full flex items-center justify-center mb-2">
+                        <span className="text-white text-xl font-bold">
+                          {model.name.charAt(0).toUpperCase()}
+                        </span>
+                      </div>
+                      <div className="text-sm font-medium text-gray-600">
+                        {model.name}
+                      </div>
+                    </div>
                   </div>
                   <div className="p-4">
                     <h3 className="text-lg font-semibold text-gray-900 text-center">
@@ -386,10 +488,16 @@ const CategoryPage: React.FC = () => {
                   className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer overflow-hidden"
                 >
                   <div className="aspect-square bg-gray-100 flex items-center justify-center">
-                    <div className="w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center">
-                      <span className="text-3xl font-bold text-blue-600">
-                        {variant.name.charAt(0)}
-                      </span>
+                    {/* Varyantlar için farklı renk placeholder */}
+                    <div className="text-center p-4">
+                      <div className="w-16 h-16 mx-auto bg-purple-500 rounded-full flex items-center justify-center mb-2">
+                        <span className="text-white text-xl font-bold">
+                          {variant.name.charAt(0).toUpperCase()}
+                        </span>
+                      </div>
+                      <div className="text-sm font-medium text-gray-600">
+                        {variant.name}
+                      </div>
                     </div>
                   </div>
                   <div className="p-4">

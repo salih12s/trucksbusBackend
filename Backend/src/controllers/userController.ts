@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
-import { AuthenticatedRequest } from '../types/auth';
+import { AuthenticatedRequest } from '../types';
 import bcryptjs from 'bcryptjs';
 
 const prisma = new PrismaClient();
@@ -35,8 +35,7 @@ export class UserController {
         return res.status(404).json({ error: 'User not found' });
       }
 
-      res.json(user);
-      return;
+      return res.json(user);
     } catch (error) {
       console.error('Get profile error:', error);
       return res.status(500).json({ error: 'Internal server error' });
@@ -73,8 +72,7 @@ export class UserController {
         },
       });
 
-      res.json(updatedUser);
-      return;
+      return res.json(updatedUser);
     } catch (error) {
       console.error('Update profile error:', error);
       return res.status(500).json({ error: 'Internal server error' });
@@ -116,13 +114,12 @@ export class UserController {
         },
       });
 
-      res.json({
+      return res.json({
         totalListings,
         activeListings,
         totalViews: 0, // Şimdilik 0, ileride views tablosu eklenebilir
         joinDate: user?.created_at || new Date(),
       });
-      return;
     } catch (error) {
       console.error('Get stats error:', error);
       return res.status(500).json({ error: 'Internal server error' });
@@ -168,8 +165,7 @@ export class UserController {
         data: { password: hashedNewPassword }
       });
 
-      res.json({ message: 'Password changed successfully' });
-      return;
+      return res.json({ message: 'Password changed successfully' });
     } catch (error) {
       console.error('Change password error:', error);
       return res.status(500).json({ error: 'Internal server error' });

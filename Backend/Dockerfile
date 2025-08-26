@@ -1,32 +1,24 @@
-# Railway için Dockerfile (opsiyonel - Node.js detect edilir)
+FROM node:20-alpine
 
-FROM node:18-alpine
-
-# Çalışma dizini
 WORKDIR /app
 
-# Package files kopyala
+# 1) Package files kopyala ve dependencies yükle
 COPY package*.json ./
+RUN npm ci
+
+# 2) Prisma client generate
 COPY prisma ./prisma/
-
-# Dependencies yükle
-RUN npm ci --only=production
-
-# Source code kopyala
-COPY . .
-
-# TypeScript build
-RUN npm run build
-
-# Prisma generate
 RUN npx prisma generate
 
-# Port expose
-EXPOSE 3005
+# 3) Source code kopyala
+COPY . .
 
-# Healthcheck
-HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-  CMD curl -f http://localhost:3005/api/health || exit 1
+# 4) TypeScript compile
+RUN npx tsc
 
-# Start command
-CMD ["npm", "start"]
+# Production environment
+ENV NODE_ENV=production
+EXPOSE 3000
+
+# Compiled JS'den çalıştır
+CMD ["node", "dist/index.js"]

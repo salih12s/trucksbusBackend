@@ -4,6 +4,7 @@ import { useAuth } from '../../../../context/AuthContext';
 import { useLocation } from 'react-router-dom';
 import { useConfirmDialog } from '../../../../hooks/useConfirmDialog';
 import { locationService, City, District } from '../../../../services/locationService';
+import { useEditListing } from '../../../../hooks/useEditListing';
 import { createStandardPayload } from '../../../../services/apiNormalizer';
 import { listingService } from '../../../../services/listingService';
 import {
@@ -40,6 +41,7 @@ const TankerSasiForm: React.FC = () => {
   const { user } = useAuth();
   const location = useLocation();
   const { confirm } = useConfirmDialog();
+  const { isEditMode, editData, editLoading, fillFormWithEditData } = useEditListing();
   
   // Parse location state
   const selectedBrand = location.state?.brand;

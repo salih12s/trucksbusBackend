@@ -178,6 +178,10 @@ const MyListings: React.FC = () => {
     navigate(`/edit-listing/${id}`);
   };
 
+  const handleEdit = (id: string) => {
+    navigate(`/edit-listing/${id}`);
+  };
+
   const handleDelete = (id: string) => {
     const listing = listings.find(l => l.id === id);
     if (listing) {
@@ -344,6 +348,7 @@ const MyListings: React.FC = () => {
                 onSendMessage={handleSendMessage}
                 onReport={handleReport}
                 onDelete={handleDelete}
+                onEdit={handleEdit}
               />
             ))}
           </Box>

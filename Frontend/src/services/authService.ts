@@ -1,7 +1,7 @@
 import axios, { AxiosResponse } from 'axios';
 import { User, LoginRequest, RegisterRequest, AuthResponse, ApiResponse } from '../types';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3005/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://trucksbusbackend-production-0e23.up.railway.app/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,

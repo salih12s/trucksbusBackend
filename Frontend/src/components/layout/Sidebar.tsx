@@ -10,6 +10,8 @@ import {
   IconButton,
   Tooltip,
   Typography,
+  Drawer,
+  ListSubheader,
 } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 
@@ -30,17 +32,20 @@ const TEXT_PRIMARY = "#111827";
 const TEXT_SECONDARY = "#6B7280";
 
 /** Gruplar ve başlıklar */
-const GROUP_TITLES: Record<string, string> = {
+const groupLabels: Record<string, string> = {
+  "ana": "ANA",
   "agir-ticari": "AĞIR TİCARİ",
   "yolcu-tasima": "YOLCU TAŞIMA",
   "ozel-araclar": "ÖZEL ARAÇLAR",
 };
 
+const PRIMARY = "#19313B";
+
 type Item = {
   text: string;
   icon: React.ReactNode;
   path: string;
-  group: keyof typeof GROUP_TITLES;
+  group: string;
 };
 
 const sidebarItems: Item[] = [
@@ -61,34 +66,156 @@ const sidebarItems: Item[] = [
 const Sidebar: React.FC = () => {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(true);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const toggleSidebar = () => setIsOpen((p) => !p);
+  const toggleMobileSidebar = () => setMobileOpen((p) => !p);
 
   const isRouteActive = (path: string) =>
     path === "/" ? location.pathname === "/" : location.pathname.startsWith(path);
 
   return (
+    <>
+      {/* Mobile Toggle Button */}
+      <IconButton
+        onClick={toggleMobileSidebar}
+        sx={{
+          position: 'fixed',
+          top: 84,
+          left: 8,
+          zIndex: 1300,
+          display: { xs: 'flex', md: 'none' },
+          bgcolor: '#19313B',
+          color: 'white',
+          '&:hover': { bgcolor: '#243a47' },
+          boxShadow: 2,
+          width: 40,
+          height: 40,
+        }}
+      >
+        <MenuIcon sx={{ fontSize: 20 }} />
+      </IconButton>
+
+      {/* Mobile Drawer */}
+      <Drawer
+        anchor="left"
+        open={mobileOpen}
+        onClose={toggleMobileSidebar}
+        sx={{
+          display: { xs: 'block', md: 'none' },
+          '& .MuiDrawer-paper': {
+            width: 280,
+            boxSizing: 'border-box',
+            top: 76,
+            height: 'calc(100vh - 76px)',
+            bgcolor: "white",
+            border: `1px solid ${BORDER}`,
+            boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+          },
+        }}
+      >
+        {/* Mobile Header */}
+        <Box sx={{ 
+          px: 2, 
+          py: 1.5, 
+          borderBottom: `1px solid ${BORDER}`,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}>
+          <Typography variant="h6" sx={{ fontWeight: 800, color: PRIMARY }}>
+            Kategoriler
+          </Typography>
+          <IconButton onClick={toggleMobileSidebar} size="small">
+            <ChevronLeftIcon />
+          </IconButton>
+        </Box>
+
+        {/* Mobile Menu Items */}
+        <List sx={{ p: 0, overflowY: "auto", flex: 1 }}>
+          {sidebarItems.map((item, i) => {
+            const isActive = isRouteActive(item.path);
+            const prev = sidebarItems[i - 1];
+            const showGroupHeader = i === 0 || !prev || prev.group !== item.group;
+
+            return (
+              <React.Fragment key={item.path}>
+                {showGroupHeader && (
+                  <ListSubheader
+                    sx={{
+                      bgcolor: alpha(PRIMARY, 0.05),
+                      color: alpha(PRIMARY, 0.7),
+                      lineHeight: "32px",
+                      fontSize: 13,
+                      fontWeight: 600,
+                      px: 2,
+                    }}
+                  >
+                    {groupLabels[item.group]}
+                  </ListSubheader>
+                )}
+                <ListItemButton
+                  component={Link}
+                  to={item.path}
+                  selected={isActive}
+                  onClick={toggleMobileSidebar}
+                  sx={{
+                    height: 48,
+                    px: 2,
+                    "&.Mui-selected": {
+                      bgcolor: alpha(PRIMARY, 0.12),
+                      borderRight: `3px solid ${PRIMARY}`,
+                      "& .MuiListItemIcon-root": { color: PRIMARY },
+                      "& .MuiListItemText-primary": { 
+                        color: PRIMARY, 
+                        fontWeight: 700,
+                      },
+                    },
+                    "&:hover": {
+                      bgcolor: alpha(PRIMARY, 0.08),
+                    },
+                  }}
+                >
+                  <ListItemIcon sx={{ color: alpha(PRIMARY, 0.6), minWidth: 40 }}>
+                    {item.icon}
+                  </ListItemIcon>
+                  <ListItemText 
+                    primary={item.text}
+                    sx={{
+                      "& .MuiListItemText-primary": {
+                        fontSize: 14,
+                        fontWeight: 500,
+                      },
+                    }}
+                  />
+                </ListItemButton>
+              </React.Fragment>
+            );
+          })}
+        </List>
+      </Drawer>
+
+      {/* Desktop Sidebar */}
     <Box
       component="aside"
       sx={{
-        position: "sticky", // ✅ sticky
-        top: 76, // ✅ header yüksekliği
-        width: isOpen ? 280 : 88, // ✅ 300 → 280
-        height: "calc(100vh - 76px)", // ✅ sticky için yükseklik
+        position: "sticky",
+        top: 76,
+        display: { xs: 'none', md: 'flex' },
+        width: isOpen ? 280 : 88,
+        height: "calc(100vh - 76px)",
         bgcolor: "white",
         border: `1px solid ${BORDER}`,
         boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
-        display: "flex",
         flexDirection: "column",
-        overflow: "hidden",               // ✅ taşmaları kes
+        overflow: "hidden",
         boxSizing: "border-box",
         transition: "width .3s cubic-bezier(0.4, 0, 0.2, 1)",
-        // Scrollbar'ları gizle
         '&::-webkit-scrollbar': {
           display: 'none',
         },
         '&': {
-          scrollbarWidth: 'none', // Firefox için
-          msOverflowStyle: 'none', // IE/Edge için
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
         },
       }}
     >
@@ -225,7 +352,7 @@ const Sidebar: React.FC = () => {
                     fontWeight: 700,
                   }}
                 >
-                  {GROUP_TITLES[item.group]}
+                  {groupLabels[item.group]}
                 </Typography>
               )}
 
@@ -243,6 +370,7 @@ const Sidebar: React.FC = () => {
         })}
       </List>
     </Box>
+    </>
   );
 };
 

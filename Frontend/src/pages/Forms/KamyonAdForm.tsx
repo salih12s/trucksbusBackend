@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { api } from '../../services/api';
 import { listingService } from '../../services/listingService';
 import { createStandardPayload, validateListingPayload } from '../../services/apiNormalizer';
 import { useConfirmDialog } from '../../hooks/useConfirmDialog';
@@ -45,6 +44,7 @@ import {
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { locationService, City, District } from '../../services/locationService';
+import { useEditListing } from '../../hooks/useEditListing';
 
 // Renk seçenekleri
 const colorOptions = [
@@ -114,6 +114,7 @@ const KamyonAdForm = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { confirm } = useConfirmDialog();
+  const { isEditMode, editData, editLoading, fillFormWithEditData } = useEditListing();
   
   // Location state'den gelen varyant bilgilerini al
   const selectedVariant = location.state?.selectedVariant;
@@ -306,6 +307,13 @@ const KamyonAdForm = () => {
       console.log('⚠️ Araç bilgileri bulunamadı');
     }
   }, [location.state, selectedVariant, selectedModel, selectedBrand]);
+
+  // Edit modu için veri yükle
+  useEffect(() => {
+    if (isEditMode && editData && !editLoading) {
+      fillFormWithEditData(setFormData);
+    }
+  }, [isEditMode, editData, editLoading]);
 
   // Kullanıcı bilgilerini yükle
   useEffect(() => {
@@ -570,23 +578,39 @@ const KamyonAdForm = () => {
         return;
       }
 
-      console.log('Kamyon ilanı oluşturuluyor:', standardPayload);
-
-      // Use standardized listing service
-      const response = await listingService.createStandardListing(standardPayload);
-      console.log('API Response:', response);
-      
-      if (response.success) {
-        await confirm({
-          title: 'Başarılı',
-          description: 'Kamyon ilanınız başarıyla oluşturuldu! Admin onayından sonra yayınlanacaktır.',
-          severity: 'success',
-          confirmText: 'Tamam',
-          cancelText: ''
-        });
-        navigate('/user/my-listings'); // Navigate to MyListings to show PENDING status
+      // Edit mode or create mode handling
+      if (isEditMode && editData) {
+        console.log('Kamyon ilanı güncelleniyor:', standardPayload);
+        const response = await listingService.updateStandardListing(editData.id, standardPayload);
+        
+        if (response.success) {
+          await confirm({
+            title: 'Başarılı',
+            description: 'Kamyon ilanınız başarıyla güncellendi! Admin onayından sonra yeniden yayınlanacaktır.',
+            severity: 'success',
+            confirmText: 'Tamam',
+            cancelText: ''
+          });
+          navigate('/user/my-listings');
+        } else {
+          throw new Error(response.message || 'İlan güncellenemedi');
+        }
       } else {
-        throw new Error(response.message || 'İlan oluşturulamadı');
+        console.log('Kamyon ilanı oluşturuluyor:', standardPayload);
+        const response = await listingService.createStandardListing(standardPayload);
+        
+        if (response.success) {
+          await confirm({
+            title: 'Başarılı',
+            description: 'Kamyon ilanınız başarıyla oluşturuldu! Admin onayından sonra yayınlanacaktır.',
+            severity: 'success',
+            confirmText: 'Tamam',
+            cancelText: ''
+          });
+          navigate('/user/my-listings');
+        } else {
+          throw new Error(response.message || 'İlan oluşturulamadı');
+        }
       }
 
     } catch (error: any) {
@@ -601,7 +625,8 @@ const KamyonAdForm = () => {
       } else if (error.response?.status === 401) {
         setError('Yetkilendirme hatası. Lütfen giriş yapın.');
       } else {
-        const errorMessage = error.response?.data?.message || error.message || 'İlan oluşturulurken bir hata oluştu';
+        const errorMessage = error.response?.data?.message || error.message || 
+          `İlan ${isEditMode ? 'güncellenirken' : 'oluşturulurken'} bir hata oluştu`;
         setError(errorMessage);
       }
     } finally {

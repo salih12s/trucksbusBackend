@@ -73,12 +73,14 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import AllListings from './pages/admin/AllListings';
 import PendingListings from './pages/admin/PendingListings';
 import AdminReportsPage from './pages/admin/AdminReportsPage';
+import FeedbackManagement from './pages/admin/FeedbackManagement';
 import Users from './pages/admin/Users';
 // 🔧 Admin messages kaldırıldı - tek mimari
 import RealTimeMessagesPage from './pages/messages/RealTimeMessagesPage';
 import MyReportsPage from './pages/user/MyReportsPage';
 import FavoritesPage from './pages/user/FavoritesPage';
 import DetailOrchestrator from './pages/listings/DetailOrchestrator';
+import EditListingOrchestrator from './pages/listings/EditListingOrchestrator';
 import Profile from './pages/user/Profile';
 import MyListings from './pages/user/MyListings';
 import Login from './pages/auth/Login';
@@ -117,6 +119,7 @@ const App: React.FC = () => {
                 <Route path="category/:id/vehicle-type/:vehicleTypeId/brand/:brandId" element={<NewCategoryPage />} />
                 <Route path="category/:id/vehicle-type/:vehicleTypeId/brand/:brandId/model/:modelId" element={<NewCategoryPage />} />
                 <Route path="listing/:id" element={<DetailOrchestrator />} />
+                <Route path="edit-listing/:id" element={<EditListingOrchestrator />} />
                 <Route path="messages" element={<RealTimeMessagesPage />} />
                 <Route path="favorites" element={<FavoritesPage />} />
                 <Route path="my-reports" element={<MyReportsPage />} />
@@ -215,6 +218,7 @@ const App: React.FC = () => {
                 <Route path="all-listings" element={<AllListings />} />
                 <Route path="pending-listings" element={<PendingListings />} />
                 <Route path="reports" element={<AdminReportsPage />} />
+                <Route path="feedback" element={<FeedbackManagement />} />
                 <Route path="users" element={<Users />} />
                 {/* 🔧 Admin messages kaldırıldı - tek mimari */}
               </Route>

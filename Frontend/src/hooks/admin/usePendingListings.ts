@@ -13,18 +13,22 @@ export const usePendingListings = (params: UsePendingListingsParams) => {
   return useQuery({
     queryKey: ['admin', 'pendingListings', params],
     queryFn: async (): Promise<AdminListingsResponse> => {
+      const requestParams = {
+        ...params,
+        status: 'PENDING'
+      };
+      
       const response = await api.get('/admin/listings', {
-        params: {
-          ...params,
-          page: params.page + 1, // Convert 0-based to 1-based
-          status: 'PENDING'
-        }
+        params: requestParams
       });
       
-      return response.data.data;
+      return {
+        data: response.data.data.listings,
+        count: response.data.data.pagination.totalCount
+      };
     },
-    staleTime: 0, // Always refetch pending listings
-    refetchInterval: 30000, // Auto-refresh every 30 seconds
+    staleTime: 60000, // Cache for 1 minute
+    refetchInterval: 300000, // Auto-refresh every 5 minutes instead of 30 seconds
   });
 };
 

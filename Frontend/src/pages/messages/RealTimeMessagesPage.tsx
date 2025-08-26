@@ -24,6 +24,7 @@ import {
   Send as SendIcon,
   Search as SearchIcon,
   Info as InfoIcon,
+  ArrowBack as ArrowBackIcon,
 } from '@mui/icons-material';
 import { ThemeProvider, createTheme, alpha } from '@mui/material/styles';
 
@@ -585,14 +586,14 @@ const RealTimeMessagesPage: React.FC = () => {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Container maxWidth="xl" sx={{ py: 2 }}>
+      <Container maxWidth="xl" sx={{ py: { xs: 1, md: 2 }, px: { xs: 1, md: 2 } }}>
         <Paper
           elevation={0}
           sx={{
             height: 'calc(100vh - 108px)',
-            display: 'grid',
-            gridTemplateColumns: { xs: '1fr', md: '320px 1fr' },
-            gap: 16,
+            display: 'flex',
+            flexDirection: { xs: 'column', md: 'row' },
+            gap: { xs: 0, md: 2 },
             bgcolor: 'transparent',
           }}
         >
@@ -600,8 +601,10 @@ const RealTimeMessagesPage: React.FC = () => {
           <Paper
             elevation={0}
             sx={{
-              display: 'flex',
+              display: { xs: activeConversation ? 'none' : 'flex', md: 'flex' },
               flexDirection: 'column',
+              width: { xs: '100%', md: '320px' },
+              minWidth: { md: '320px' },
               border: '1px solid',
               borderColor: 'divider',
               bgcolor: 'background.paper',
@@ -731,8 +734,9 @@ const RealTimeMessagesPage: React.FC = () => {
           <Paper
             elevation={0}
             sx={{
-              display: 'flex',
+              display: { xs: activeConversation ? 'flex' : 'none', md: 'flex' },
               flexDirection: 'column',
+              flex: 1,
               border: '1px solid',
               borderColor: 'divider',
               bgcolor: 'background.paper',
@@ -745,7 +749,7 @@ const RealTimeMessagesPage: React.FC = () => {
                 {/* Chat Header */}
                 <Box
                   sx={{
-                    p: 2,
+                    p: { xs: 1.5, md: 2 },
                     borderBottom: '1px solid',
                     borderColor: 'divider',
                     display: 'flex',
@@ -757,12 +761,37 @@ const RealTimeMessagesPage: React.FC = () => {
                     bgcolor: 'background.paper',
                   }}
                 >
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <Avatar sx={{ bgcolor: '#19313B', color: '#fff' }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, md: 2 } }}>
+                    {/* Back button for mobile */}
+                    <IconButton
+                      onClick={() => setActiveConversation(null)}
+                      sx={{
+                        display: { xs: 'flex', md: 'none' },
+                        p: 0.5,
+                        mr: 0.5,
+                      }}
+                    >
+                      <ArrowBackIcon />
+                    </IconButton>
+                    
+                    <Avatar 
+                      sx={{ 
+                        bgcolor: '#19313B', 
+                        color: '#fff',
+                        width: { xs: 36, md: 40 },
+                        height: { xs: 36, md: 40 },
+                      }}
+                    >
                       {activeConversation.otherParticipant?.first_name?.charAt(0) ?? '?'}
                     </Avatar>
                     <Box>
-                      <Typography variant="h6">
+                      <Typography 
+                        variant="h6" 
+                        sx={{ 
+                          fontSize: { xs: '1rem', md: '1.25rem' },
+                          fontWeight: 600,
+                        }}
+                      >
                         {`${activeConversation.otherParticipant?.first_name ?? 'Bilinmeyen'} ${
                           activeConversation.otherParticipant?.last_name ?? ''
                         }`.trim()}
@@ -909,7 +938,7 @@ const RealTimeMessagesPage: React.FC = () => {
                 {/* Message Input */}
                 <Box
                   sx={{
-                    p: 2,
+                    p: { xs: 1.5, md: 2 },
                     borderTop: '1px solid',
                     borderColor: 'divider',
                     position: 'sticky',
@@ -917,7 +946,7 @@ const RealTimeMessagesPage: React.FC = () => {
                     bgcolor: 'background.paper',
                   }}
                 >
-                  <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-end' }}>
+                  <Box sx={{ display: 'flex', gap: { xs: 0.5, md: 1 }, alignItems: 'flex-end' }}>
                     <TextField
                       fullWidth
                       placeholder="Mesajınızı yazın..."
@@ -932,10 +961,12 @@ const RealTimeMessagesPage: React.FC = () => {
                       multiline
                       maxRows={4}
                       disabled={sendingMessage}
+                      size={window.innerWidth < 768 ? 'small' : 'medium'}
                       sx={{
                         '& .MuiOutlinedInput-root': {
                           borderRadius: 2,
-                          pr: 1,
+                          pr: { xs: 0.5, md: 1 },
+                          fontSize: { xs: '0.875rem', md: '1rem' },
                         },
                       }}
                     />
@@ -946,11 +977,16 @@ const RealTimeMessagesPage: React.FC = () => {
                         bgcolor: '#19313B',
                         color: '#FFFFFF',
                         '&:hover': { bgcolor: '#14262E' },
-                        width: 46,
-                        height: 46,
+                        width: { xs: 40, md: 46 },
+                        height: { xs: 40, md: 46 },
+                        flexShrink: 0,
                       }}
                     >
-                      {sendingMessage ? <CircularProgress size={20} /> : <SendIcon />}
+                      {sendingMessage ? (
+                        <CircularProgress size={window.innerWidth < 768 ? 16 : 20} />
+                      ) : (
+                        <SendIcon sx={{ fontSize: { xs: 18, md: 24 } }} />
+                      )}
                     </IconButton>
                   </Box>
                 </Box>

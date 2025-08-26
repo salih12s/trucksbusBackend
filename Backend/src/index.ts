@@ -10,6 +10,7 @@ import { createServer } from 'http';
 import { Server as SocketIOServer } from 'socket.io';
 import { setupSocketIO } from './middleware/socket';
 import { initSocket } from './utils/socket';
+import { SocketService } from './services/socketService';
 
 // Import routes
 import authRoutes from './routes/authRoutes';
@@ -51,13 +52,16 @@ const io = new SocketIOServer(server, {
   }
 });
 
-const PORT = process.env.PORT || 3001;
-
-// Rate limiting
+// Rate limiting - Production için çok gevşek ayarlar
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
-  message: 'Too many requests from this IP, please try again later.',
+  windowMs: 1 * 60 * 1000, // 1 minute window
+  max: process.env.NODE_ENV === 'production' ? 1000 : 200, // Production'da 1000/dakika, development'ta 200/dakika
+  message: {
+    success: false,
+    message: 'Too many requests from this IP, please try again later.'
+  },
+  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
 });
 
 // Security middleware
@@ -94,14 +98,15 @@ app.use((req: any, res, next) => {
   next();
 });
 
-// Health check
-app.get('/health', (req, res) => {
-  res.status(200).json({ 
-    status: 'OK', 
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
-    environment: process.env.NODE_ENV || 'development'
-  });
+// Very simple health check - no dependencies
+app.get('/api/health', (req, res) => {
+  console.log('Health check called at:', new Date().toISOString());
+  res.status(200).send('OK');
+});
+
+// Also add root endpoint for quick test
+app.get('/', (req, res) => {
+  res.status(200).send('TruckBus Backend is running!');
 });
 
 // API Routes
@@ -171,7 +176,8 @@ async function connectDatabase() {
     logger.info('✅ Database connected successfully');
   } catch (error) {
     logger.error('❌ Database connection failed:', error);
-    process.exit(1);
+    // Don't exit - let the caller decide
+    throw error;
   }
 }
 
@@ -190,19 +196,48 @@ process.on('SIGINT', async () => {
 
 // Start server
 async function startServer() {
+  console.log('🔧 Starting server...');
+  console.log('🔧 NODE_ENV:', process.env.NODE_ENV);
+  console.log('🔧 PORT:', process.env.PORT);
+  console.log('🔧 DATABASE_URL exists:', !!process.env.DATABASE_URL);
+  
   try {
-    await connectDatabase();
+    // Try to connect to database but don't fail if it fails
+    try {
+      await connectDatabase();
+      console.log('✅ Database connected successfully');
+      logger.info('✅ Database connected successfully');
+    } catch (dbError) {
+      console.error('❌ Database connection failed, but server will continue:', dbError);
+      logger.error('❌ Database connection failed, but server will continue:', dbError);
+    }
     
     // Initialize room-based Socket.IO
     initSocket(io);
+    console.log('✅ Socket.IO initialized');
     
-    server.listen(PORT, () => {
-      logger.info(`🚀 Server running on port ${PORT}`);
+    // Initialize SocketService for messaging
+    const socketService = new SocketService(server);
+    app.set('socketService', socketService);
+    console.log('✅ SocketService initialized');
+    
+    const actualPort = Number(process.env.PORT) || 3001;
+    console.log('🔧 Attempting to listen on port:', actualPort);
+    
+    server.listen(actualPort, '0.0.0.0', () => {
+      console.log(`🚀 Server running on 0.0.0.0:${actualPort}`);
+      console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
+      console.log(`🌐 Frontend URL: ${process.env.FRONTEND_URL || 'http://localhost:5173'}`);
+      console.log(`💬 Socket.IO enabled with room management`);
+      console.log(`🩺 Health check available at /api/health`);
+      
+      logger.info(`🚀 Server running on 0.0.0.0:${actualPort}`);
       logger.info(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
       logger.info(`🌐 Frontend URL: ${process.env.FRONTEND_URL || 'http://localhost:5173'}`);
       logger.info(`💬 Socket.IO enabled with room management`);
     });
   } catch (error) {
+    console.error('💥 Failed to start server:', error);
     logger.error('Failed to start server:', error);
     process.exit(1);
   }

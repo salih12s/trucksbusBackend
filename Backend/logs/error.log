@@ -1576,3 +1576,322 @@ Require stack:
     at Module.load (node:internal/modules/cjs/loader:1427:32)
     at Module._load (node:internal/modules/cjs/loader:1250:12)
     at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-25 16:03:54 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/feedbackController.ts[0m:[93m3[0m:[93m38[0m - [91merror[0m[90m TS2307: [0mCannot find module '../types/auth' or its corresponding type declarations.
+
+[7m3[0m import { AuthenticatedRequest } from '../types/auth';
+[7m [0m [91m                                     ~~~~~~~~~~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-25 16:04:03 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/feedbackController.ts[0m:[93m3[0m:[93m38[0m - [91merror[0m[90m TS2306: [0mFile 'C:/Users/salih/Desktop/TruckBus/Backend/src/types/auth.ts' is not a module.
+
+[7m3[0m import { AuthenticatedRequest } from '../types/auth';
+[7m [0m [91m                                     ~~~~~~~~~~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-25 16:06:52 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/feedbackController.ts[0m:[93m3[0m:[93m38[0m - [91merror[0m[90m TS2306: [0mFile 'C:/Users/salih/Desktop/TruckBus/Backend/src/types/auth.ts' is not a module.
+
+[7m3[0m import { AuthenticatedRequest } from '../types/auth';
+[7m [0m [91m                                     ~~~~~~~~~~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-25 16:07:02 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/feedbackController.ts[0m:[93m3[0m:[93m38[0m - [91merror[0m[90m TS2306: [0mFile 'C:/Users/salih/Desktop/TruckBus/Backend/src/types/auth.ts' is not a module.
+
+[7m3[0m import { AuthenticatedRequest } from '../types/auth';
+[7m [0m [91m                                     ~~~~~~~~~~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-25 16:07:14 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/feedbackController.ts[0m:[93m3[0m:[93m38[0m - [91merror[0m[90m TS2306: [0mFile 'C:/Users/salih/Desktop/TruckBus/Backend/src/types/auth.ts' is not a module.
+
+[7m3[0m import { AuthenticatedRequest } from '../types/auth';
+[7m [0m [91m                                     ~~~~~~~~~~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-25 16:07:24 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/feedbackController.ts[0m:[93m3[0m:[93m38[0m - [91merror[0m[90m TS2306: [0mFile 'C:/Users/salih/Desktop/TruckBus/Backend/src/types/auth.ts' is not a module.
+
+[7m3[0m import { AuthenticatedRequest } from '../types/auth';
+[7m [0m [91m                                     ~~~~~~~~~~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-25 16:07:36 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/feedbackController.ts[0m:[93m3[0m:[93m38[0m - [91merror[0m[90m TS2306: [0mFile 'C:/Users/salih/Desktop/TruckBus/Backend/src/types/auth.ts' is not a module.
+
+[7m3[0m import { AuthenticatedRequest } from '../types/auth';
+[7m [0m [91m                                     ~~~~~~~~~~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-25 16:33:04 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/feedbackController.ts[0m:[93m3[0m:[93m38[0m - [91merror[0m[90m TS2306: [0mFile 'C:/Users/salih/Desktop/TruckBus/Backend/src/types/auth.ts' is not a module.
+
+[7m3[0m import { AuthenticatedRequest } from '../types/auth';
+[7m [0m [91m                                     ~~~~~~~~~~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-25 16:33:17 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/feedbackController.ts[0m:[93m3[0m:[93m38[0m - [91merror[0m[90m TS2306: [0mFile 'C:/Users/salih/Desktop/TruckBus/Backend/src/types/auth.ts' is not a module.
+
+[7m3[0m import { AuthenticatedRequest } from '../types/auth';
+[7m [0m [91m                                     ~~~~~~~~~~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-25 17:01:21 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/feedbackController.ts[0m:[93m3[0m:[93m38[0m - [91merror[0m[90m TS2306: [0mFile 'C:/Users/salih/Desktop/TruckBus/Backend/src/types/auth.ts' is not a module.
+
+[7m3[0m import { AuthenticatedRequest } from '../types/auth';
+[7m [0m [91m                                     ~~~~~~~~~~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-25 18:04:57 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/feedbackController.ts[0m:[93m3[0m:[93m38[0m - [91merror[0m[90m TS2306: [0mFile 'C:/Users/salih/Desktop/TruckBus/Backend/src/types/auth.ts' is not a module.
+
+[7m3[0m import { AuthenticatedRequest } from '../types/auth';
+[7m [0m [91m                                     ~~~~~~~~~~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-25 18:04:58 [error]: PrismaClientInitializationError: Can't reach database server at `ballast.proxy.rlwy.net:19163`
+
+Please make sure your database server is running at `ballast.proxy.rlwy.net:19163`.
+    at r (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\core\engines\library\LibraryEngine.ts:440:17)
+    at async startServer (C:\Users\salih\Desktop\TruckBus\Backend\src\simpleIndex.ts:372:5)
+2025-08-25 18:19:36 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/feedbackController.ts[0m:[93m3[0m:[93m38[0m - [91merror[0m[90m TS2306: [0mFile 'C:/Users/salih/Desktop/TruckBus/Backend/src/types/auth.ts' is not a module.
+
+[7m3[0m import { AuthenticatedRequest } from '../types/auth';
+[7m [0m [91m                                     ~~~~~~~~~~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-25 18:19:36 [error]: PrismaClientInitializationError: Can't reach database server at `ballast.proxy.rlwy.net:19163`
+
+Please make sure your database server is running at `ballast.proxy.rlwy.net:19163`.
+    at r (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\core\engines\library\LibraryEngine.ts:440:17)
+    at async startServer (C:\Users\salih\Desktop\TruckBus\Backend\src\simpleIndex.ts:372:5)
+2025-08-25 18:20:14 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/feedbackController.ts[0m:[93m3[0m:[93m38[0m - [91merror[0m[90m TS2306: [0mFile 'C:/Users/salih/Desktop/TruckBus/Backend/src/types/auth.ts' is not a module.
+
+[7m3[0m import { AuthenticatedRequest } from '../types/auth';
+[7m [0m [91m                                     ~~~~~~~~~~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-25 18:20:14 [error]: PrismaClientInitializationError: Can't reach database server at `ballast.proxy.rlwy.net:19163`
+
+Please make sure your database server is running at `ballast.proxy.rlwy.net:19163`.
+    at r (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\core\engines\library\LibraryEngine.ts:440:17)
+    at async startServer (C:\Users\salih\Desktop\TruckBus\Backend\src\simpleIndex.ts:372:5)
+2025-08-25 18:29:56 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/feedbackController.ts[0m:[93m3[0m:[93m38[0m - [91merror[0m[90m TS2306: [0mFile 'C:/Users/salih/Desktop/TruckBus/Backend/src/types/auth.ts' is not a module.
+
+[7m3[0m import { AuthenticatedRequest } from '../types/auth';
+[7m [0m [91m                                     ~~~~~~~~~~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-25 18:29:56 [error]: PrismaClientInitializationError: Can't reach database server at `ballast.proxy.rlwy.net:19163`
+
+Please make sure your database server is running at `ballast.proxy.rlwy.net:19163`.
+    at r (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\core\engines\library\LibraryEngine.ts:440:17)
+    at async startServer (C:\Users\salih\Desktop\TruckBus\Backend\src\simpleIndex.ts:372:5)
+2025-08-25 18:35:39 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/feedbackController.ts[0m:[93m3[0m:[93m38[0m - [91merror[0m[90m TS2306: [0mFile 'C:/Users/salih/Desktop/TruckBus/Backend/src/types/auth.ts' is not a module.
+
+[7m3[0m import { AuthenticatedRequest } from '../types/auth';
+[7m [0m [91m                                     ~~~~~~~~~~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-25 18:35:40 [error]: PrismaClientInitializationError: Can't reach database server at `ballast.proxy.rlwy.net:19163`
+
+Please make sure your database server is running at `ballast.proxy.rlwy.net:19163`.
+    at r (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\core\engines\library\LibraryEngine.ts:440:17)
+    at async startServer (C:\Users\salih\Desktop\TruckBus\Backend\src\simpleIndex.ts:372:5)
+2025-08-25 18:36:02 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/feedbackController.ts[0m:[93m3[0m:[93m38[0m - [91merror[0m[90m TS2306: [0mFile 'C:/Users/salih/Desktop/TruckBus/Backend/src/types/auth.ts' is not a module.
+
+[7m3[0m import { AuthenticatedRequest } from '../types/auth';
+[7m [0m [91m                                     ~~~~~~~~~~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-25 18:36:03 [error]: PrismaClientInitializationError: Can't reach database server at `ballast.proxy.rlwy.net:19163`
+
+Please make sure your database server is running at `ballast.proxy.rlwy.net:19163`.
+    at r (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\core\engines\library\LibraryEngine.ts:440:17)
+    at async startServer (C:\Users\salih\Desktop\TruckBus\Backend\src\simpleIndex.ts:372:5)
+2025-08-25 18:37:10 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/feedbackController.ts[0m:[93m3[0m:[93m38[0m - [91merror[0m[90m TS2306: [0mFile 'C:/Users/salih/Desktop/TruckBus/Backend/src/types/auth.ts' is not a module.
+
+[7m3[0m import { AuthenticatedRequest } from '../types/auth';
+[7m [0m [91m                                     ~~~~~~~~~~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-25 18:37:10 [error]: PrismaClientInitializationError: Can't reach database server at `ballast.proxy.rlwy.net:19163`
+
+Please make sure your database server is running at `ballast.proxy.rlwy.net:19163`.
+    at r (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\core\engines\library\LibraryEngine.ts:440:17)
+    at async startServer (C:\Users\salih\Desktop\TruckBus\Backend\src\simpleIndex.ts:372:5)
+2025-08-25 20:02:57 [error]: PrismaClientInitializationError: Can't reach database server at `ballast.proxy.rlwy.net:19163`
+
+Please make sure your database server is running at `ballast.proxy.rlwy.net:19163`.
+    at r (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\core\engines\library\LibraryEngine.ts:440:17)
+    at async connectDatabase (C:\Users\salih\Desktop\TruckBus\Backend\src\index.ts:169:5)
+    at async startServer (C:\Users\salih\Desktop\TruckBus\Backend\src\index.ts:201:7)
+2025-08-25 20:02:57 [error]: PrismaClientInitializationError: Can't reach database server at `ballast.proxy.rlwy.net:19163`
+
+Please make sure your database server is running at `ballast.proxy.rlwy.net:19163`.
+    at r (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\core\engines\library\LibraryEngine.ts:440:17)
+    at async connectDatabase (C:\Users\salih\Desktop\TruckBus\Backend\src\index.ts:169:5)
+    at async startServer (C:\Users\salih\Desktop\TruckBus\Backend\src\index.ts:201:7)

@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
 import { useConfirmDialog } from '../../../hooks/useConfirmDialog';
+import { useEditListing } from '../../../hooks/useEditListing';
+import { listingService } from '../../../services/listingService';
+import { createStandardPayload, validateListingPayload } from '../../../services/apiNormalizer';
 import {
   Box,
   Container,
@@ -39,7 +42,6 @@ import {
   AttachMoney,
 } from '@mui/icons-material';
 import { locationService, City, District } from '../../../services/locationService';
-import { api } from '../../../services/api';
 
 interface TankerFormData {
   // Temel Bilgiler
@@ -87,6 +89,7 @@ const TankerForm: React.FC = () => {
   const navigate = useNavigate();
   const { variantId } = useParams();
   const { confirm } = useConfirmDialog();
+  const { isEditMode, editData, editLoading, fillFormWithEditData } = useEditListing();
   const [activeStep, setActiveStep] = useState(0);
   const [cities, setCities] = useState<City[]>([]);
   const [districts, setDistricts] = useState<District[]>([]);
@@ -149,6 +152,13 @@ const TankerForm: React.FC = () => {
     }
   }, [user]);
 
+  // Edit modu için veri yükle
+  useEffect(() => {
+    if (isEditMode && editData && !editLoading) {
+      fillFormWithEditData(setFormData);
+    }
+  }, [isEditMode, editData, editLoading]);
+
   // Fotoğraf yükleme için dropzone
   const removePhoto = (index: number) => {
     setFormData(prev => ({
@@ -203,10 +213,11 @@ const TankerForm: React.FC = () => {
         imageDataUrls.push(dataUrl);
       }
 
-      const listingData = {
+      // Create standardized payload
+      const standardPayload = createStandardPayload({
         title: formData.title,
         description: formData.description,
-        price: parseFloat(formData.price),
+        price: formData.price,
         year: formData.year,
         category_id: 'vehicle-category-001',
         vehicle_type_id: 'cme633w8v0001981ksnpl6dj5',
@@ -218,33 +229,64 @@ const TankerForm: React.FC = () => {
         district: formData.district,
         is_exchangeable: formData.exchange,
         images: imageDataUrls,
-        properties: {
-          dorseType: 'Tanker',
-          hacim: formData.hacim.toString(),
-          gozSayisi: formData.gozSayisi.toString(),
-          lastikDurumu: formData.lastikDurumu.toString(),
-          renk: formData.renk,
-          takasli: formData.takasli,
-          warranty: formData.warranty ? 'Evet' : 'Hayır',
-          negotiable: formData.negotiable ? 'Evet' : 'Hayır'
-        }
-      };
+      }, {
+        // Tanker specific properties
+        dorseType: 'Tanker',
+        hacim: formData.hacim.toString(),
+        gozSayisi: formData.gozSayisi.toString(),
+        lastikDurumu: formData.lastikDurumu.toString(),
+        renk: formData.renk,
+        takasli: formData.takasli,
+        warranty: formData.warranty ? 'Evet' : 'Hayır',
+        negotiable: formData.negotiable ? 'Evet' : 'Hayır'
+      });
 
-      const response = await api.post('/listings', listingData);
-      
-      if (response.data) {
-        await confirm({
-          title: 'Başarılı',
-          description: 'İlanınız başarıyla oluşturuldu! Admin onayından sonra yayınlanacaktır.',
-          severity: 'success',
-          confirmText: 'Tamam',
-          cancelText: ''
-        });
-        navigate('/');
+      // Validate payload
+      const validation = validateListingPayload(standardPayload);
+      if (!validation.isValid) {
+        setError(validation.errors.join(', '));
+        return;
+      }
+
+      // Edit mode or create mode handling
+      if (isEditMode && editData) {
+        console.log('Tanker ilanı güncelleniyor:', standardPayload);
+        const response = await listingService.updateStandardListing(editData.id, standardPayload);
+        
+        if (response.success) {
+          await confirm({
+            title: 'Başarılı',
+            description: 'Tanker ilanınız başarıyla güncellendi! Admin onayından sonra yeniden yayınlanacaktır.',
+            severity: 'success',
+            confirmText: 'Tamam',
+            cancelText: ''
+          });
+          navigate('/user/my-listings');
+        } else {
+          throw new Error(response.message || 'İlan güncellenemedi');
+        }
+      } else {
+        console.log('Tanker ilanı oluşturuluyor:', standardPayload);
+        const response = await listingService.createStandardListing(standardPayload);
+        
+        if (response.success) {
+          await confirm({
+            title: 'Başarılı',
+            description: 'Tanker ilanınız başarıyla oluşturuldu! Admin onayından sonra yayınlanacaktır.',
+            severity: 'success',
+            confirmText: 'Tamam',
+            cancelText: ''
+          });
+          navigate('/user/my-listings');
+        } else {
+          throw new Error(response.message || 'İlan oluşturulamadı');
+        }
       }
     } catch (err: any) {
       console.error('İlan oluşturma hatası:', err);
-      setError(err.response?.data?.message || 'İlan oluşturulurken hata oluştu');
+      const errorMessage = err.response?.data?.message || err.message || 
+        `İlan ${isEditMode ? 'güncellenirken' : 'oluşturulurken'} bir hata oluştu`;
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

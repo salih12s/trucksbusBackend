@@ -3,6 +3,7 @@ import { useAuth } from '../../../context/AuthContext';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useConfirmDialog } from '../../../hooks/useConfirmDialog';
 import { listingService } from '../../../services/listingService';
+import { useEditListing } from '../../../hooks/useEditListing';
 import { createStandardPayload, validateListingPayload } from '../../../services/apiNormalizer';
 import { locationService } from '../../../services/locationService';
 import {
@@ -53,6 +54,7 @@ const TarimTankerForm: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { confirm } = useConfirmDialog();
+  const { isEditMode, editData, editLoading, fillFormWithEditData } = useEditListing();
   
   // Location state'den gelen veriler
   const selectedBrand = location.state?.brand;
@@ -127,6 +129,15 @@ const TarimTankerForm: React.FC = () => {
 
     loadInitialData();
   }, [user]);
+
+  // Edit modunda veri yükle
+  useEffect(() => {
+    if (isEditMode && editData && !editLoading) {
+      fillFormWithEditData(editData, setFormData, (files: File[]) => {
+        setFormData(prev => ({ ...prev, uploadedImages: files }));
+      });
+    }
+  }, [isEditMode, editData, editLoading, fillFormWithEditData]);
 
   const [formData, setFormData] = useState<TarimTankerFormData>({
     title: '',
@@ -328,13 +339,20 @@ const TarimTankerForm: React.FC = () => {
       }
 
       // API'ye gönder
-      const response = await listingService.createStandardListing(payload);
+      let response;
+      if (isEditMode && editData) {
+        response = await listingService.updateStandardListing(editData.id, payload);
+      } else {
+        response = await listingService.createStandardListing(payload);
+      }
       
       if (response.success) {
         console.log('✅ Tarım Tanker ilanı başarıyla oluşturuldu:', response.data);
         const shouldNavigate = await confirm({
-          title: 'İlan Başarıyla Oluşturuldu! 🎉',
-          description: 'İlanınız başarıyla oluşturuldu ve inceleme sürecine alındı. Onaylandıktan sonra yayına alınacak. Ana sayfaya dönmek istiyor musunuz?',
+          title: isEditMode ? 'İlan Başarıyla Güncellendi! 🎉' : 'İlan Başarıyla Oluşturuldu! 🎉',
+          description: isEditMode 
+            ? 'İlanınız başarıyla güncellendi ve admin onayına gönderildi. Ana sayfaya dönmek istiyor musunuz?'
+            : 'İlanınız başarıyla oluşturuldu ve inceleme sürecine alındı. Onaylandıktan sonra yayına alınacak. Ana sayfaya dönmek istiyor musunuz?',
           severity: 'success',
           confirmText: 'Ana Sayfaya Git',
           cancelText: 'Bu Sayfada Kal'
