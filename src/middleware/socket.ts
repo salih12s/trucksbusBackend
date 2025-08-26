@@ -4,7 +4,14 @@ import { Server as HttpServer } from 'http';
 export function setupSocketIO(server: HttpServer) {
   const io = new Server(server, {
     cors: {
-      origin: "http://localhost:5173",
+      origin: process.env.NODE_ENV === 'production' 
+        ? [
+            "https://trucksbus.com", 
+            "https://www.trucksbus.com",
+            "https://trucksbus.com.tr", 
+            "https://www.trucksbus.com.tr"
+          ]
+        : "*", // Development - all origins
       methods: ["GET", "POST"],
       credentials: true
     }

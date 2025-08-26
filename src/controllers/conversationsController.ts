@@ -310,15 +310,24 @@ export class ConversationsController {
       // SOCKET yayınları
       const socketService = req.app.get('socketService') as SocketService;
       if (socketService) {
+        // Sender bilgisini de ekle
+        const sender = await prisma.users.findUnique({
+          where: { id: userId },
+          select: { id: true, first_name: true, last_name: true, username: true }
+        });
+
         const formattedMessage = {
           id: result.message.id,
           conversation_id: result.message.conversation_id,
           sender_id: result.message.sender_id,
           content: result.message.body,
-          created_at: result.message.created_at
+          created_at: result.message.created_at,
+          users: sender // ✅ Frontend'in beklediği sender bilgisi
         };
 
-        // 1) Sohbet odasına mesaj
+        console.log(`🔔 Broadcasting message to conversation:${conversationId}`, formattedMessage);
+
+        // 1) Sohbet odasına mesaj - RESTful yayını
         socketService.getIO()
           .to(`conversation:${conversationId}`)
           .emit('message:new', { conversation_id: conversationId, message: formattedMessage });

@@ -1564,8 +1564,49 @@ export const getListingById = async (req: Request, res: Response): Promise<void>
 
 export const updateListing = async (req: Request, res: Response): Promise<void> => {
   try {
-    // TODO: Implement update listing
-    res.status(501).json({ error: 'Update listing endpoint not implemented yet' });
+    const listingId = req.params.id;
+    const userId = (req as any).user?.id;
+
+    if (!userId) {
+      res.status(401).json({ error: 'Authentication required' });
+      return;
+    }
+
+    // İlanın varlığını ve sahipliğini kontrol et
+    const existingListing = await prisma.listings.findFirst({
+      where: {
+        id: listingId,
+        user_id: userId // Sadece kendi ilanını düzenleyebilir
+      }
+    });
+
+    if (!existingListing) {
+      res.status(404).json({ error: 'Listing not found or you are not authorized to edit it' });
+      return;
+    }
+
+    const updateData: any = { ...req.body };
+    
+    // Düzenleme yapıldığında tekrar onay sürecine sokulur
+    updateData.is_pending = true;
+    updateData.is_approved = false;
+    updateData.is_active = false; // Onay beklerken aktif değil
+    updateData.updated_at = new Date();
+
+    // Güncellenmiş ilanı kaydet
+    const updatedListing = await prisma.listings.update({
+      where: { id: listingId },
+      data: updateData
+    });
+
+    logger.info(`Listing ${listingId} updated by user ${userId} and moved to pending approval`);
+
+    res.json({
+      success: true,
+      message: 'İlan başarıyla güncellendi. Admin onayından sonra yayınlanacaktır.',
+      data: updatedListing
+    });
+
   } catch (error) {
     logger.error('Error in updateListing:', error);
     res.status(500).json({ error: 'Internal server error' });

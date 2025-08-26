@@ -5,28 +5,11 @@ let io: Server;
 export const initSocket = (socketServer: Server) => {
   io = socketServer;
   
-  console.log('🔌 Socket.IO initialized with room management');
+  console.log('🔌 Socket.IO initialized for utility functions only');
+  console.log('⚠️  Main socket handlers are in SocketService, not here');
   
-  io.on("connection", (socket: any) => {
-    console.log(`🔌 Socket connected: ${socket.id}`);
-    
-    // Handle user joining their personal room
-    socket.on("user:join", (data: { user_id: string }) => {
-      const room = `user:${data.user_id}`;
-      socket.join(room);
-      console.log(`🏠 Socket ${socket.id} joined user room: ${room}`);
-    });
-    
-    // Handle admin joining admin room
-    socket.on("join", (data: { room: string }) => {
-      console.log(`🏠 Socket ${socket.id} joining room: ${data.room}`);
-      socket.join(data.room);
-    });
-
-    socket.on('disconnect', () => {
-      console.log(`🔌 Socket disconnected: ${socket.id}`);
-    });
-  });
+  // SocketService handles all connection events
+  // This is just for utility functions
   
   return io;
 }

@@ -11,13 +11,27 @@ export class SocketService {
   private io: SocketIOServer;
   private connectedUsers: Map<string, string> = new Map(); // userId -> socketId
 
-  constructor(server: HTTPServer) {
-    this.io = new SocketIOServer(server, {
-      cors: { 
-        origin: ["http://localhost:5173"], 
-        credentials: true 
-      }
-    });
+  constructor(server: HTTPServer, existingIO?: SocketIOServer) {
+    // Use existing IO instance if provided, otherwise create new one
+    if (existingIO) {
+      this.io = existingIO;
+      console.log('✅ SocketService using shared IO instance');
+    } else {
+      this.io = new SocketIOServer(server, {
+        cors: { 
+          origin: process.env.NODE_ENV === 'production' 
+            ? [
+                "https://trucksbus.com", 
+                "https://www.trucksbus.com",
+                "https://trucksbus.com.tr", 
+                "https://www.trucksbus.com.tr"
+              ]
+            : "*", // Development - all origins
+          credentials: true 
+        }
+      });
+      console.log('⚠️ SocketService created new IO instance');
+    }
 
     this.setupMiddleware();
     this.setupEventHandlers();
@@ -133,16 +147,21 @@ export class SocketService {
       try {
         const token = socket.handshake.auth?.token;
         
+        console.log(`🔐 Socket auth attempt, token exists: ${!!token}`);
+        
         if (!token) {
+          console.error('❌ No token provided in socket auth');
           return next(new Error('NO_TOKEN'));
         }
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key') as any;
         socket.userId = decoded.id; // Ensure we're using decoded.id
         
+        console.log(`✅ Socket authenticated for user: ${decoded.id}`);
         logger.info(`Socket authenticated for user: ${decoded.id}`);
         next();
       } catch (error) {
+        console.error('❌ Socket authentication failed:', error);
         logger.error('Socket authentication failed:', error);
         next(new Error('BAD_TOKEN'));
       }
@@ -151,52 +170,84 @@ export class SocketService {
 
   private setupEventHandlers() {
     this.io.on('connection', (socket) => {
+      console.log(`🔌 NEW SOCKET CONNECTION: ${socket.id}`);
+      
       const userId = socket.userId;
       
+      console.log(`🔍 Socket userId from auth: ${userId}`);
+      
       if (!userId) {
+        console.error(`❌ No userId found, disconnecting socket: ${socket.id}`);
         socket.disconnect();
         return;
       }
       
       // Store user connection
       this.connectedUsers.set(userId, socket.id);
+      console.log(`✅ User ${userId} connected with socket ${socket.id}`);
       logger.info(`User ${userId} connected with socket ${socket.id}`);
 
       // Join user to their personal room
       socket.join(`user:${userId}`);
+      console.log(`🏠 User ${userId} joined personal room: user:${userId}`);
       logger.info(`User ${userId} connected with socket ${socket.id}`);
 
+      // 🏠 Handle user joining their personal room (explicit)
+      socket.on("user:join", (data: { user_id: string }) => {
+        const room = `user:${data.user_id}`;
+        socket.join(room);
+        logger.info(`🏠 Socket ${socket.id} joined user room: ${room}`);
+      });
+      
+      // 🏠 Handle generic room joining (admin, etc.)
+      socket.on("join", (data: { room: string }) => {
+        logger.info(`🏠 Socket ${socket.id} joining room: ${data.room}`);
+        socket.join(data.room);
+      });
+
       // 🔒 Güvenli conversation join
-      socket.on('conversation:join', async ({ conversation_id }: { conversation_id: string }) => {
+      socket.on('conversation:join', async ({ conversation_id }: { conversation_id: string }, cb?: (r:any)=>void) => {
         try {
-          if (!conversation_id) return;
+          if (!conversation_id) {
+            cb?.({ ok: false, reason: 'no_conversation_id' });
+            return;
+          }
           const ok = await this.isParticipant(userId, conversation_id);
           if (!ok) {
             logger.warn(`🚫 Forbidden join attempt by ${userId} to ${conversation_id}`);
             socket.emit('error:forbidden', { resource: 'conversation', id: conversation_id });
+            cb?.({ ok: false, reason: 'forbidden' });
             return;
           }
           socket.join(`conversation:${conversation_id}`);
+          cb?.({ ok: true });
           logger.info(`✅ User ${userId} joined conversation: ${conversation_id}`);
         } catch (error) {
           logger.error('join error:', error);
+          cb?.({ ok: false, reason: 'error' });
         }
       });
 
       // 🔒 Legacy alias for join_conversation - güvenli
-      socket.on('join_conversation', async (conversationId: string) => {
+      socket.on('join_conversation', async (conversationId: string, cb?: (r:any)=>void) => {
         try {
-          if (!conversationId) return;
+          if (!conversationId) {
+            cb?.({ ok: false, reason: 'no_conversation_id' });
+            return;
+          }
           const ok = await this.isParticipant(userId, conversationId);
           if (!ok) {
             logger.warn(`🚫 Forbidden legacy join attempt by ${userId} to ${conversationId}`);
             socket.emit('error:forbidden', { resource: 'conversation', id: conversationId });
+            cb?.({ ok: false, reason: 'forbidden' });
             return;
           }
           socket.join(`conversation:${conversationId}`);
+          cb?.({ ok: true });
           logger.info(`✅ User ${userId} joined conversation (legacy): ${conversationId}`);
         } catch (error) {
           logger.error('legacy join error:', error);
+          cb?.({ ok: false, reason: 'error' });
         }
       });
 
@@ -249,10 +300,13 @@ export class SocketService {
 
       // 🔒 Güvenli mesaj gönderme - ana handler
       socket.on('message:send', async (payload: { conversation_id: string; body: string }, cb?: (ack: any) => void) => {
+        console.log(`🔥 message:send received from user ${userId}:`, payload);
         try {
           const res = await this.createAndBroadcastMessage(payload.conversation_id, userId, payload.body);
+          console.log(`✅ message:send success, sending ack:`, { ok: true, message: res });
           cb?.({ ok: true, message: res });
         } catch (err: any) {
+          console.error(`❌ message:send error for user ${userId}:`, err);
           logger.error('message:send error:', err);
           cb?.({ ok: false, error: err?.message || 'Failed to send' });
         }
@@ -260,11 +314,14 @@ export class SocketService {
 
       // 🔒 Legacy alias - güvenli
       socket.on('send_message', async (payload: { conversationId: string; content?: string; body?: string }, cb?: (ack: any) => void) => {
+        console.log(`🔥 send_message received from user ${userId}:`, payload);
         try {
           const messageBody = payload.content || payload.body || '';
           const res = await this.createAndBroadcastMessage(payload.conversationId, userId, messageBody);
+          console.log(`✅ send_message success, sending ack:`, { ok: true, message: res });
           cb?.({ ok: true, message: res });
         } catch (err: any) {
+          console.error(`❌ send_message error for user ${userId}:`, err);
           logger.error('send_message error:', err);
           cb?.({ ok: false, error: err?.message || 'Failed to send' });
         }

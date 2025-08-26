@@ -10,6 +10,7 @@ import { createServer } from 'http';
 import { Server as SocketIOServer } from 'socket.io';
 import { setupSocketIO } from './middleware/socket';
 import { initSocket } from './utils/socket';
+import { SocketService } from './services/socketService';
 
 // Import routes
 import authRoutes from './routes/authRoutes';
@@ -45,7 +46,7 @@ const io = new SocketIOServer(server, {
           "https://trucksbus.com.tr", 
           "https://www.trucksbus.com.tr"
         ]
-      : ["http://localhost:5173", "http://localhost:5174"],
+      : "*", // Development - all origins
     methods: ["GET", "POST"],
     credentials: true
   }
@@ -73,7 +74,7 @@ app.use(cors({
         "https://trucksbus.com.tr", 
         "https://www.trucksbus.com.tr"
       ]
-    : ["http://localhost:5173", "http://localhost:5174"],
+    : "*", // Development - all origins
   credentials: true
 }));
 app.use(compression());
@@ -215,19 +216,24 @@ async function startServer() {
     initSocket(io);
     console.log('✅ Socket.IO initialized');
     
+    // Initialize SocketService for messaging - PASS EXISTING IO INSTANCE
+    const socketService = new SocketService(server, io);  // ✅ PASS IO INSTANCE
+    app.set('socketService', socketService);
+    console.log('✅ SocketService initialized with shared IO instance');
+    
     const actualPort = Number(process.env.PORT) || 3001;
     console.log('🔧 Attempting to listen on port:', actualPort);
     
     server.listen(actualPort, '0.0.0.0', () => {
       console.log(`🚀 Server running on 0.0.0.0:${actualPort}`);
       console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
-      console.log(`🌐 Frontend URL: ${process.env.FRONTEND_URL || 'http://localhost:5173'}`);
+      console.log(`🌐 Frontend URL: ${process.env.FRONTEND_URL || 'https://trucksbus.com'}`);
       console.log(`💬 Socket.IO enabled with room management`);
       console.log(`🩺 Health check available at /api/health`);
       
       logger.info(`🚀 Server running on 0.0.0.0:${actualPort}`);
       logger.info(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
-      logger.info(`🌐 Frontend URL: ${process.env.FRONTEND_URL || 'http://localhost:5173'}`);
+      logger.info(`🌐 Frontend URL: ${process.env.FRONTEND_URL || 'https://trucksbus.com'}`);
       logger.info(`💬 Socket.IO enabled with room management`);
     });
   } catch (error) {
