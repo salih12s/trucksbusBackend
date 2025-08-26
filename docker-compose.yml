@@ -1,0 +1,78 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: truckbus_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER:-truckbus}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-truckbus123}
+      POSTGRES_DB: ${DB_NAME:-truckbus_db}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - truckbus_network
+
+  # Backend API
+  backend:
+    build: 
+      context: ./Backend
+      dockerfile: Dockerfile
+    container_name: truckbus_backend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3005
+      DATABASE_URL: postgresql://${DB_USER:-truckbus}:${DB_PASSWORD:-truckbus123}@postgres:5432/${DB_NAME:-truckbus_db}
+      JWT_SECRET: ${JWT_SECRET}
+      SOCKET_CORS_ORIGIN: ${FRONTEND_URL:-http://localhost:3000}
+    ports:
+      - "3005:3005"
+    depends_on:
+      - postgres
+    networks:
+      - truckbus_network
+    volumes:
+      - ./Backend/public/uploads:/app/public/uploads
+
+  # Frontend
+  frontend:
+    build: 
+      context: ./Frontend
+      dockerfile: Dockerfile
+    container_name: truckbus_frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - truckbus_network
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: truckbus_nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - truckbus_network
+
+volumes:
+  postgres_data:
+
+networks:
+  truckbus_network:
+    driver: bridge

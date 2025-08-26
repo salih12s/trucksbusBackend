@@ -1,0 +1,1897 @@
+2025-08-23 02:49:42 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/listingController.ts[0m:[93m580[0m:[93m13[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'slug' does not exist in type 'vehicle_typesSelect<DefaultArgs>'.
+
+[7m580[0m             slug: true
+[7m   [0m [91m            ~~~~[0m
+[96msrc/controllers/listingController.ts[0m:[93m667[0m:[93m27[0m - [91merror[0m[90m TS2339: [0mProperty 'listing_images' does not exist on type '{ images: JsonValue; category_id: string; vehicle_type_id: string; brand_id: string | null; model_id: string | null; city_id: string | null; district_id: string | null; ... 42 more ...; tramer_record: string | null; }'.
+
+[7m667[0m     const media = listing.listing_images?.length > 0
+[7m   [0m [91m                          ~~~~~~~~~~~~~~[0m
+[96msrc/controllers/listingController.ts[0m:[93m668[0m:[93m17[0m - [91merror[0m[90m TS2339: [0mProperty 'listing_images' does not exist on type '{ images: JsonValue; category_id: string; vehicle_type_id: string; brand_id: string | null; model_id: string | null; city_id: string | null; district_id: string | null; ... 42 more ...; tramer_record: string | null; }'.
+
+[7m668[0m       ? listing.listing_images.map(img => ({
+[7m   [0m [91m                ~~~~~~~~~~~~~~[0m
+[96msrc/controllers/listingController.ts[0m:[93m668[0m:[93m36[0m - [91merror[0m[90m TS7006: [0mParameter 'img' implicitly has an 'any' type.
+
+[7m668[0m       ? listing.listing_images.map(img => ({
+[7m   [0m [91m                                   ~~~[0m
+[96msrc/controllers/listingController.ts[0m:[93m677[0m:[93m13[0m - [91merror[0m[90m TS2339: [0mProperty 'listing_properties' does not exist on type '{ images: JsonValue; category_id: string; vehicle_type_id: string; brand_id: string | null; model_id: string | null; city_id: string | null; district_id: string | null; ... 42 more ...; tramer_record: string | null; }'.
+
+[7m677[0m     listing.listing_properties?.forEach(prop => {
+[7m   [0m [91m            ~~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/listingController.ts[0m:[93m677[0m:[93m41[0m - [91merror[0m[90m TS7006: [0mParameter 'prop' implicitly has an 'any' type.
+
+[7m677[0m     listing.listing_properties?.forEach(prop => {
+[7m   [0m [91m                                        ~~~~[0m
+[96msrc/controllers/listingController.ts[0m:[93m752[0m:[93m25[0m - [91merror[0m[90m TS2339: [0mProperty 'categories' does not exist on type '{ images: JsonValue; category_id: string; vehicle_type_id: string; brand_id: string | null; model_id: string | null; city_id: string | null; district_id: string | null; ... 42 more ...; tramer_record: string | null; }'.
+
+[7m752[0m             id: listing.categories?.id || listing.category_id,
+[7m   [0m [91m                        ~~~~~~~~~~[0m
+[96msrc/controllers/listingController.ts[0m:[93m753[0m:[93m27[0m - [91merror[0m[90m TS2339: [0mProperty 'categories' does not exist on type '{ images: JsonValue; category_id: string; vehicle_type_id: string; brand_id: string | null; model_id: string | null; city_id: string | null; district_id: string | null; ... 42 more ...; tramer_record: string | null; }'.
+
+[7m753[0m             name: listing.categories?.name || 'Kategori',
+[7m   [0m [91m                          ~~~~~~~~~~[0m
+[96msrc/controllers/listingController.ts[0m:[93m754[0m:[93m27[0m - [91merror[0m[90m TS2339: [0mProperty 'categories' does not exist on type '{ images: JsonValue; category_id: string; vehicle_type_id: string; brand_id: string | null; model_id: string | null; city_id: string | null; district_id: string | null; ... 42 more ...; tramer_record: string | null; }'.
+
+[7m754[0m             slug: listing.categories?.name?.toLowerCase().replace(/\s+/g, '-') || 'kategori'
+[7m   [0m [91m                          ~~~~~~~~~~[0m
+[96msrc/controllers/listingController.ts[0m:[93m757[0m:[93m25[0m - [91merror[0m[90m TS2551: [0mProperty 'vehicle_types' does not exist on type '{ images: JsonValue; category_id: string; vehicle_type_id: string; brand_id: string | null; model_id: string | null; city_id: string | null; district_id: string | null; ... 42 more ...; tramer_record: string | null; }'. Did you mean 'vehicle_type_id'?
+
+[7m757[0m             id: listing.vehicle_types?.id || listing.vehicle_type_id,
+[7m   [0m [91m                        ~~~~~~~~~~~~~[0m
+[96msrc/controllers/listingController.ts[0m:[93m758[0m:[93m27[0m - [91merror[0m[90m TS2551: [0mProperty 'vehicle_types' does not exist on type '{ images: JsonValue; category_id: string; vehicle_type_id: string; brand_id: string | null; model_id: string | null; city_id: string | null; district_id: string | null; ... 42 more ...; tramer_record: string | null; }'. Did you mean 'vehicle_type_id'?
+
+[7m758[0m             name: listing.vehicle_types?.name || 'Tür',
+[7m   [0m [91m                          ~~~~~~~~~~~~~[0m
+[96msrc/controllers/listingController.ts[0m:[93m759[0m:[93m27[0m - [91merror[0m[90m TS2551: [0mProperty 'vehicle_types' does not exist on type '{ images: JsonValue; category_id: string; vehicle_type_id: string; brand_id: string | null; model_id: string | null; city_id: string | null; district_id: string | null; ... 42 more ...; tramer_record: string | null; }'. Did you mean 'vehicle_type_id'?
+
+[7m759[0m             slug: listing.vehicle_types?.slug || listing.vehicle_types?.name?.toLowerCase().replace(/\s+/g, '-') || 'vehicle'
+[7m   [0m [91m                          ~~~~~~~~~~~~~[0m
+[96msrc/controllers/listingController.ts[0m:[93m759[0m:[93m58[0m - [91merror[0m[90m TS2551: [0mProperty 'vehicle_types' does not exist on type '{ images: JsonValue; category_id: string; vehicle_type_id: string; brand_id: string | null; model_id: string | null; city_id: string | null; district_id: string | null; ... 42 more ...; tramer_record: string | null; }'. Did you mean 'vehicle_type_id'?
+
+[7m759[0m             slug: listing.vehicle_types?.slug || listing.vehicle_types?.name?.toLowerCase().replace(/\s+/g, '-') || 'vehicle'
+[7m   [0m [91m                                                         ~~~~~~~~~~~~~[0m
+[96msrc/controllers/listingController.ts[0m:[93m761[0m:[93m26[0m - [91merror[0m[90m TS2339: [0mProperty 'brands' does not exist on type '{ images: JsonValue; category_id: string; vehicle_type_id: string; brand_id: string | null; model_id: string | null; city_id: string | null; district_id: string | null; ... 42 more ...; tramer_record: string | null; }'.
+
+[7m761[0m           brand: listing.brands ? {
+[7m   [0m [91m                         ~~~~~~[0m
+[96msrc/controllers/listingController.ts[0m:[93m762[0m:[93m25[0m - [91merror[0m[90m TS2339: [0mProperty 'brands' does not exist on type '{ images: JsonValue; category_id: string; vehicle_type_id: string; brand_id: string | null; model_id: string | null; city_id: string | null; district_id: string | null; ... 42 more ...; tramer_record: string | null; }'.
+
+[7m762[0m             id: listing.brands.id,
+[7m   [0m [91m                        ~~~~~~[0m
+[96msrc/controllers/listingController.ts[0m:[93m763[0m:[93m27[0m - [91merror[0m[90m TS2339: [0mProperty 'brands' does not exist on type '{ images: JsonValue; category_id: string; vehicle_type_id: string; brand_id: string | null; model_id: string | null; city_id: string | null; district_id: string | null; ... 42 more ...; tramer_record: string | null; }'.
+
+[7m763[0m             name: listing.brands.name
+[7m   [0m [91m                          ~~~~~~[0m
+[96msrc/controllers/listingController.ts[0m:[93m765[0m:[93m26[0m - [91merror[0m[90m TS2339: [0mProperty 'models' does not exist on type '{ images: JsonValue; category_id: string; vehicle_type_id: string; brand_id: string | null; model_id: string | null; city_id: string | null; district_id: string | null; ... 42 more ...; tramer_record: string | null; }'.
+
+[7m765[0m           model: listing.models ? {
+[7m   [0m [91m                         ~~~~~~[0m
+[96msrc/controllers/listingController.ts[0m:[93m766[0m:[93m25[0m - [91merror[0m[90m TS2339: [0mProperty 'models' does not exist on type '{ images: JsonValue; category_id: string; vehicle_type_id: string; brand_id: string | null; model_id: string | null; city_id: string | null; district_id: string | null; ... 42 more ...; tramer_record: string | null; }'.
+
+[7m766[0m             id: listing.models.id,
+[7m   [0m [91m                        ~~~~~~[0m
+[96msrc/controllers/listingController.ts[0m:[93m767[0m:[93m27[0m - [91merror[0m[90m TS2339: [0mProperty 'models' does not exist on type '{ images: JsonValue; category_id: string; vehicle_type_id: string; brand_id: string | null; model_id: string | null; city_id: string | null; district_id: string | null; ... 42 more ...; tramer_record: string | null; }'.
+
+[7m767[0m             name: listing.models.name
+[7m   [0m [91m                          ~~~~~~[0m
+[96msrc/controllers/listingController.ts[0m:[93m769[0m:[93m28[0m - [91merror[0m[90m TS2339: [0mProperty 'variants' does not exist on type '{ images: JsonValue; category_id: string; vehicle_type_id: string; brand_id: string | null; model_id: string | null; city_id: string | null; district_id: string | null; ... 42 more ...; tramer_record: string | null; }'.
+
+[7m769[0m           variant: listing.variants ? {
+[7m   [0m [91m                           ~~~~~~~~[0m
+[96msrc/controllers/listingController.ts[0m:[93m770[0m:[93m25[0m - [91merror[0m[90m TS2339: [0mProperty 'variants' does not exist on type '{ images: JsonValue; category_id: string; vehicle_type_id: string; brand_id: string | null; model_id: string | null; city_id: string | null; district_id: string | null; ... 42 more ...; tramer_record: string | null; }'.
+
+[7m770[0m             id: listing.variants.id,
+[7m   [0m [91m                        ~~~~~~~~[0m
+[96msrc/controllers/listingController.ts[0m:[93m771[0m:[93m27[0m - [91merror[0m[90m TS2339: [0mProperty 'variants' does not exist on type '{ images: JsonValue; category_id: string; vehicle_type_id: string; brand_id: string | null; model_id: string | null; city_id: string | null; district_id: string | null; ... 42 more ...; tramer_record: string | null; }'.
+
+[7m771[0m             name: listing.variants.name
+[7m   [0m [91m                          ~~~~~~~~[0m
+[96msrc/controllers/listingController.ts[0m:[93m775[0m:[93m36[0m - [91merror[0m[90m TS2339: [0mProperty 'districts' does not exist on type '{ images: JsonValue; category_id: string; vehicle_type_id: string; brand_id: string | null; model_id: string | null; city_id: string | null; district_id: string | null; ... 42 more ...; tramer_record: string | null; }'.
+
+[7m775[0m           locationText: `${listing.districts?.name || ''}, ${listing.cities?.name || ''}`.replace(/^, |, $/, '') || 'Konum belirtilmemiş',
+[7m   [0m [91m                                   ~~~~~~~~~[0m
+[96msrc/controllers/listingController.ts[0m:[93m775[0m:[93m70[0m - [91merror[0m[90m TS2339: [0mProperty 'cities' does not exist on type '{ images: JsonValue; category_id: string; vehicle_type_id: string; brand_id: string | null; model_id: string | null; city_id: string | null; district_id: string | null; ... 42 more ...; tramer_record: string | null; }'.
+
+[7m775[0m           locationText: `${listing.districts?.name || ''}, ${listing.cities?.name || ''}`.replace(/^, |, $/, '') || 'Konum belirtilmemiş',
+[7m   [0m [91m                                                                     ~~~~~~[0m
+[96msrc/controllers/listingController.ts[0m:[93m779[0m:[93m53[0m - [91merror[0m[90m TS2339: [0mProperty 'users' does not exist on type '{ images: JsonValue; category_id: string; vehicle_type_id: string; brand_id: string | null; model_id: string | null; city_id: string | null; district_id: string | null; ... 42 more ...; tramer_record: string | null; }'.
+
+[7m779[0m             name: listing.seller_name || `${listing.users?.first_name} ${listing.users?.last_name}`.trim(),
+[7m   [0m [91m                                                    ~~~~~[0m
+[96msrc/controllers/listingController.ts[0m:[93m779[0m:[93m82[0m - [91merror[0m[90m TS2339: [0mProperty 'users' does not exist on type '{ images: JsonValue; category_id: string; vehicle_type_id: string; brand_id: string | null; model_id: string | null; city_id: string | null; district_id: string | null; ... 42 more ...; tramer_record: string | null; }'.
+
+[7m779[0m             name: listing.seller_name || `${listing.users?.first_name} ${listing.users?.last_name}`.trim(),
+[7m   [0m [91m                                                                                 ~~~~~[0m
+[96msrc/controllers/listingController.ts[0m:[93m780[0m:[93m52[0m - [91merror[0m[90m TS2339: [0mProperty 'users' does not exist on type '{ images: JsonValue; category_id: string; vehicle_type_id: string; brand_id: string | null; model_id: string | null; city_id: string | null; district_id: string | null; ... 42 more ...; tramer_record: string | null; }'.
+
+[7m780[0m             phone: listing.seller_phone || listing.users?.phone,
+[7m   [0m [91m                                                   ~~~~~[0m
+[96msrc/controllers/listingController.ts[0m:[93m781[0m:[93m52[0m - [91merror[0m[90m TS2339: [0mProperty 'users' does not exist on type '{ images: JsonValue; category_id: string; vehicle_type_id: string; brand_id: string | null; model_id: string | null; city_id: string | null; district_id: string | null; ... 42 more ...; tramer_record: string | null; }'.
+
+[7m781[0m             email: listing.seller_email || listing.users?.email
+[7m   [0m [91m                                                   ~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-23 02:49:50 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/listingController.ts[0m:[93m758[0m:[93m42[0m - [91merror[0m[90m TS2339: [0mProperty 'slug' does not exist on type '{ id: string; name: string; }'.
+
+[7m758[0m             slug: listing.vehicle_types?.slug || listing.vehicle_types?.name?.toLowerCase().replace(/\s+/g, '-') || 'vehicle'
+[7m   [0m [91m                                         ~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-23 02:58:40 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/listingController.ts[0m:[93m563[0m:[93m14[0m - [91merror[0m[90m TS2451: [0mCannot redeclare block-scoped variable 'getListingDetails'.
+
+[7m563[0m export const getListingDetails = async (req: Request, res: Response): Promise<void> => {
+[7m   [0m [91m             ~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/listingController.ts[0m:[93m1304[0m:[93m14[0m - [91merror[0m[90m TS2451: [0mCannot redeclare block-scoped variable 'getListingDetails'.
+
+[7m1304[0m export const getListingDetails = async (req: Request, res: Response): Promise<void> => {
+[7m    [0m [91m             ~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/listingController.ts[0m:[93m1321[0m:[93m13[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'full_name' does not exist in type 'usersSelect<DefaultArgs>'.
+
+[7m1321[0m             full_name: true,
+[7m    [0m [91m            ~~~~~~~~~[0m
+[96msrc/controllers/listingController.ts[0m:[93m1341[0m:[93m36[0m - [91merror[0m[90m TS2339: [0mProperty 'dynamic_schema' does not exist on type 'PrismaClient<{ log: ({ emit: "event"; level: "query"; } | { emit: "event"; level: "error"; } | { emit: "event"; level: "warn"; })[]; }, "error" | "query" | "warn", DefaultArgs>'.
+
+[7m1341[0m       dynamicSchema = await prisma.dynamic_schema.findFirst({
+[7m    [0m [91m                                   ~~~~~~~~~~~~~~[0m
+[96msrc/controllers/listingController.ts[0m:[93m1365[0m:[93m54[0m - [91merror[0m[90m TS7006: [0mParameter 'group' implicitly has an 'any' type.
+
+[7m1365[0m     const groups = dynamicSchema?.schema_groups?.map(group => ({
+[7m    [0m [91m                                                     ~~~~~[0m
+[96msrc/controllers/listingController.ts[0m:[93m1369[0m:[93m46[0m - [91merror[0m[90m TS7006: [0mParameter 'ga' implicitly has an 'any' type.
+
+[7m1369[0m       attributes: group.group_attributes.map(ga => ({
+[7m    [0m [91m                                             ~~[0m
+[96msrc/controllers/listingController.ts[0m:[93m1382[0m:[93m43[0m - [91merror[0m[90m TS7006: [0mParameter 'g' implicitly has an 'any' type.
+
+[7m1382[0m     const flatAttributes = groups.flatMap(g => g.attributes);
+[7m    [0m [91m                                          ~[0m
+[96msrc/controllers/listingController.ts[0m:[93m1387[0m:[93m17[0m - [91merror[0m[90m TS2339: [0mProperty 'listing_properties' does not exist on type '{ images: JsonValue; category_id: string; vehicle_type_id: string; brand_id: string | null; model_id: string | null; city_id: string | null; district_id: string | null; ... 42 more ...; tramer_record: string | null; }'.
+
+[7m1387[0m     if (listing.listing_properties && listing.listing_properties.length > 0) {
+[7m    [0m [91m                ~~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/listingController.ts[0m:[93m1387[0m:[93m47[0m - [91merror[0m[90m TS2339: [0mProperty 'listing_properties' does not exist on type '{ images: JsonValue; category_id: string; vehicle_type_id: string; brand_id: string | null; model_id: string | null; city_id: string | null; district_id: string | null; ... 42 more ...; tramer_record: string | null; }'.
+
+[7m1387[0m     if (listing.listing_properties && listing.listing_properties.length > 0) {
+[7m    [0m [91m                                              ~~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/listingController.ts[0m:[93m1388[0m:[93m15[0m - [91merror[0m[90m TS2339: [0mProperty 'listing_properties' does not exist on type '{ images: JsonValue; category_id: string; vehicle_type_id: string; brand_id: string | null; model_id: string | null; city_id: string | null; district_id: string | null; ... 42 more ...; tramer_record: string | null; }'.
+
+[7m1388[0m       listing.listing_properties.forEach(prop => {
+[7m    [0m [91m              ~~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/listingController.ts[0m:[93m1388[0m:[93m42[0m - [91merror[0m[90m TS7006: [0mParameter 'prop' implicitly has an 'any' type.
+
+[7m1388[0m       listing.listing_properties.forEach(prop => {
+[7m    [0m [91m                                         ~~~~[0m
+[96msrc/controllers/listingController.ts[0m:[93m1414[0m:[93m21[0m - [91merror[0m[90m TS2339: [0mProperty 'categories' does not exist on type '{ images: JsonValue; category_id: string; vehicle_type_id: string; brand_id: string | null; model_id: string | null; city_id: string | null; district_id: string | null; ... 42 more ...; tramer_record: string | null; }'.
+
+[7m1414[0m         id: listing.categories.id,
+[7m    [0m [91m                    ~~~~~~~~~~[0m
+[96msrc/controllers/listingController.ts[0m:[93m1415[0m:[93m23[0m - [91merror[0m[90m TS2339: [0mProperty 'categories' does not exist on type '{ images: JsonValue; category_id: string; vehicle_type_id: string; brand_id: string | null; model_id: string | null; city_id: string | null; district_id: string | null; ... 42 more ...; tramer_record: string | null; }'.
+
+[7m1415[0m         name: listing.categories.name,
+[7m    [0m [91m                      ~~~~~~~~~~[0m
+[96msrc/controllers/listingController.ts[0m:[93m1416[0m:[93m23[0m - [91merror[0m[90m TS2339: [0mProperty 'categories' does not exist on type '{ images: JsonValue; category_id: string; vehicle_type_id: string; brand_id: string | null; model_id: string | null; city_id: string | null; district_id: string | null; ... 42 more ...; tramer_record: string | null; }'.
+
+[7m1416[0m         slug: listing.categories.slug
+[7m    [0m [91m                      ~~~~~~~~~~[0m
+[96msrc/controllers/listingController.ts[0m:[93m1418[0m:[93m29[0m - [91merror[0m[90m TS2551: [0mProperty 'vehicle_types' does not exist on type '{ images: JsonValue; category_id: string; vehicle_type_id: string; brand_id: string | null; model_id: string | null; city_id: string | null; district_id: string | null; ... 42 more ...; tramer_record: string | null; }'. Did you mean 'vehicle_type_id'?
+
+[7m1418[0m       vehicle_type: listing.vehicle_types ? {
+[7m    [0m [91m                            ~~~~~~~~~~~~~[0m
+[96msrc/controllers/listingController.ts[0m:[93m1419[0m:[93m21[0m - [91merror[0m[90m TS2551: [0mProperty 'vehicle_types' does not exist on type '{ images: JsonValue; category_id: string; vehicle_type_id: string; brand_id: string | null; model_id: string | null; city_id: string | null; district_id: string | null; ... 42 more ...; tramer_record: string | null; }'. Did you mean 'vehicle_type_id'?
+
+[7m1419[0m         id: listing.vehicle_types.id,
+[7m    [0m [91m                    ~~~~~~~~~~~~~[0m
+[96msrc/controllers/listingController.ts[0m:[93m1420[0m:[93m23[0m - [91merror[0m[90m TS2551: [0mProperty 'vehicle_types' does not exist on type '{ images: JsonValue; category_id: string; vehicle_type_id: string; brand_id: string | null; model_id: string | null; city_id: string | null; district_id: string | null; ... 42 more ...; tramer_record: string | null; }'. Did you mean 'vehicle_type_id'?
+
+[7m1420[0m         name: listing.vehicle_types.name,
+[7m    [0m [91m                      ~~~~~~~~~~~~~[0m
+[96msrc/controllers/listingController.ts[0m:[93m1421[0m:[93m23[0m - [91merror[0m[90m TS2551: [0mProperty 'vehicle_types' does not exist on type '{ images: JsonValue; category_id: string; vehicle_type_id: string; brand_id: string | null; model_id: string | null; city_id: string | null; district_id: string | null; ... 42 more ...; tramer_record: string | null; }'. Did you mean 'vehicle_type_id'?
+
+[7m1421[0m         slug: listing.vehicle_types.slug
+[7m    [0m [91m                      ~~~~~~~~~~~~~[0m
+[96msrc/controllers/listingController.ts[0m:[93m1423[0m:[93m22[0m - [91merror[0m[90m TS2339: [0mProperty 'brands' does not exist on type '{ images: JsonValue; category_id: string; vehicle_type_id: string; brand_id: string | null; model_id: string | null; city_id: string | null; district_id: string | null; ... 42 more ...; tramer_record: string | null; }'.
+
+[7m1423[0m       brand: listing.brands ? {
+[7m    [0m [91m                     ~~~~~~[0m
+[96msrc/controllers/listingController.ts[0m:[93m1424[0m:[93m21[0m - [91merror[0m[90m TS2339: [0mProperty 'brands' does not exist on type '{ images: JsonValue; category_id: string; vehicle_type_id: string; brand_id: string | null; model_id: string | null; city_id: string | null; district_id: string | null; ... 42 more ...; tramer_record: string | null; }'.
+
+[7m1424[0m         id: listing.brands.id,
+[7m    [0m [91m                    ~~~~~~[0m
+[96msrc/controllers/listingController.ts[0m:[93m1425[0m:[93m23[0m - [91merror[0m[90m TS2339: [0mProperty 'brands' does not exist on type '{ images: JsonValue; category_id: string; vehicle_type_id: string; brand_id: string | null; model_id: string | null; city_id: string | null; district_id: string | null; ... 42 more ...; tramer_record: string | null; }'.
+
+[7m1425[0m         name: listing.brands.name
+[7m    [0m [91m                      ~~~~~~[0m
+[96msrc/controllers/listingController.ts[0m:[93m1427[0m:[93m22[0m - [91merror[0m[90m TS2339: [0mProperty 'models' does not exist on type '{ images: JsonValue; category_id: string; vehicle_type_id: string; brand_id: string | null; model_id: string | null; city_id: string | null; district_id: string | null; ... 42 more ...; tramer_record: string | null; }'.
+
+[7m1427[0m       model: listing.models ? {
+[7m    [0m [91m                     ~~~~~~[0m
+[96msrc/controllers/listingController.ts[0m:[93m1428[0m:[93m21[0m - [91merror[0m[90m TS2339: [0mProperty 'models' does not exist on type '{ images: JsonValue; category_id: string; vehicle_type_id: string; brand_id: string | null; model_id: string | null; city_id: string | null; district_id: string | null; ... 42 more ...; tramer_record: string | null; }'.
+
+[7m1428[0m         id: listing.models.id,
+[7m    [0m [91m                    ~~~~~~[0m
+[96msrc/controllers/listingController.ts[0m:[93m1429[0m:[93m23[0m - [91merror[0m[90m TS2339: [0mProperty 'models' does not exist on type '{ images: JsonValue; category_id: string; vehicle_type_id: string; brand_id: string | null; model_id: string | null; city_id: string | null; district_id: string | null; ... 42 more ...; tramer_record: string | null; }'.
+
+[7m1429[0m         name: listing.models.name
+[7m    [0m [91m                      ~~~~~~[0m
+[96msrc/controllers/listingController.ts[0m:[93m1431[0m:[93m24[0m - [91merror[0m[90m TS2339: [0mProperty 'variants' does not exist on type '{ images: JsonValue; category_id: string; vehicle_type_id: string; brand_id: string | null; model_id: string | null; city_id: string | null; district_id: string | null; ... 42 more ...; tramer_record: string | null; }'.
+
+[7m1431[0m       variant: listing.variants ? {
+[7m    [0m [91m                       ~~~~~~~~[0m
+[96msrc/controllers/listingController.ts[0m:[93m1432[0m:[93m21[0m - [91merror[0m[90m TS2339: [0mProperty 'variants' does not exist on type '{ images: JsonValue; category_id: string; vehicle_type_id: string; brand_id: string | null; model_id: string | null; city_id: string | null; district_id: string | null; ... 42 more ...; tramer_record: string | null; }'.
+
+[7m1432[0m         id: listing.variants.id,
+[7m    [0m [91m                    ~~~~~~~~[0m
+[96msrc/controllers/listingController.ts[0m:[93m1433[0m:[93m23[0m - [91merror[0m[90m TS2339: [0mProperty 'variants' does not exist on type '{ images: JsonValue; category_id: string; vehicle_type_id: string; brand_id: string | null; model_id: string | null; city_id: string | null; district_id: string | null; ... 42 more ...; tramer_record: string | null; }'.
+
+[7m1433[0m         name: listing.variants.name
+[7m    [0m [91m                      ~~~~~~~~[0m
+[96msrc/controllers/listingController.ts[0m:[93m1437[0m:[93m30[0m - [91merror[0m[90m TS2339: [0mProperty 'city' does not exist on type '{ images: JsonValue; category_id: string; vehicle_type_id: string; brand_id: string | null; model_id: string | null; city_id: string | null; district_id: string | null; ... 42 more ...; tramer_record: string | null; }'.
+
+[7m1437[0m       locationText: [listing.city, listing.district].filter(Boolean).join(', '),
+[7m    [0m [91m                             ~~~~[0m
+[96msrc/controllers/listingController.ts[0m:[93m1437[0m:[93m44[0m - [91merror[0m[90m TS2339: [0mProperty 'district' does not exist on type '{ images: JsonValue; category_id: string; vehicle_type_id: string; brand_id: string | null; model_id: string | null; city_id: string | null; district_id: string | null; ... 42 more ...; tramer_record: string | null; }'.
+
+[7m1437[0m       locationText: [listing.city, listing.district].filter(Boolean).join(', '),
+[7m    [0m [91m                                           ~~~~~~~~[0m
+[96msrc/controllers/listingController.ts[0m:[93m1441[0m:[93m23[0m - [91merror[0m[90m TS2339: [0mProperty 'users' does not exist on type '{ images: JsonValue; category_id: string; vehicle_type_id: string; brand_id: string | null; model_id: string | null; city_id: string | null; district_id: string | null; ... 42 more ...; tramer_record: string | null; }'.
+
+[7m1441[0m         name: listing.users?.full_name || 'İsimsiz Kullanıcı',
+[7m    [0m [91m                      ~~~~~[0m
+[96msrc/controllers/listingController.ts[0m:[93m1442[0m:[93m24[0m - [91merror[0m[90m TS2339: [0mProperty 'users' does not exist on type '{ images: JsonValue; category_id: string; vehicle_type_id: string; brand_id: string | null; model_id: string | null; city_id: string | null; district_id: string | null; ... 42 more ...; tramer_record: string | null; }'.
+
+[7m1442[0m         phone: listing.users?.phone || null,
+[7m    [0m [91m                       ~~~~~[0m
+[96msrc/controllers/listingController.ts[0m:[93m1443[0m:[93m24[0m - [91merror[0m[90m TS2339: [0mProperty 'users' does not exist on type '{ images: JsonValue; category_id: string; vehicle_type_id: string; brand_id: string | null; model_id: string | null; city_id: string | null; district_id: string | null; ... 42 more ...; tramer_record: string | null; }'.
+
+[7m1443[0m         email: listing.users?.email || null
+[7m    [0m [91m                       ~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-23 03:05:52 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/listingController.ts[0m:[93m305[0m:[93m45[0m - [91merror[0m[90m TS2551: [0mProperty 'attribute_definitions' does not exist on type 'PrismaClient<{ log: ({ emit: "event"; level: "query"; } | { emit: "event"; level: "error"; } | { emit: "event"; level: "warn"; })[]; }, "error" | "query" | "warn", DefaultArgs>'. Did you mean 'feature_definitions'?
+
+[7m305[0m           const attributeDef = await prisma.attribute_definitions.findUnique({
+[7m   [0m [91m                                            ~~~~~~~~~~~~~~~~~~~~~[0m
+
+  [96mnode_modules/.prisma/client/index.d.ts[0m:[93m586[0m:[93m7[0m
+    [7m586[0m   get feature_definitions(): Prisma.feature_definitionsDelegate<ExtArgs, ClientOptions>;
+    [7m   [0m [96m      ~~~~~~~~~~~~~~~~~~~[0m
+    'feature_definitions' is declared here.
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-23 03:06:16 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/listingController.ts[0m:[93m320[0m:[93m15[0m - [91merror[0m[90m TS2322: [0mType 'string' is not assignable to type 'PropertyType'.
+
+[7m320[0m               type: dataType // ✅ Doğru data type
+[7m   [0m [91m              ~~~~[0m
+
+  [96mnode_modules/.prisma/client/index.d.ts[0m:[93m40681[0m:[93m5[0m
+    [7m40681[0m     type: $Enums.PropertyType
+    [7m     [0m [96m    ~~~~[0m
+    The expected type comes from property 'type' which is declared here on type '(Without<listing_propertiesCreateInput, listing_propertiesUncheckedCreateInput> & listing_propertiesUncheckedCreateInput) | (Without<...> & listing_propertiesCreateInput)'
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-23 05:17:48 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/listingController.ts[0m:[93m656[0m:[93m27[0m - [91merror[0m[90m TS2339: [0mProperty 'listing_images' does not exist on type '{ listing_properties: { key: string; value: string; type: PropertyType; }[]; brands: { id: string; name: string; image_url: string | null; } | null; categories: { id: string; name: string; }; ... 5 more ...; vehicle_types: { ...; }; } & { ...; }'.
+
+[7m656[0m     const media = listing.listing_images?.length > 0
+[7m   [0m [91m                          ~~~~~~~~~~~~~~[0m
+[96msrc/controllers/listingController.ts[0m:[93m657[0m:[93m17[0m - [91merror[0m[90m TS2339: [0mProperty 'listing_images' does not exist on type '{ listing_properties: { key: string; value: string; type: PropertyType; }[]; brands: { id: string; name: string; image_url: string | null; } | null; categories: { id: string; name: string; }; ... 5 more ...; vehicle_types: { ...; }; } & { ...; }'.
+
+[7m657[0m       ? listing.listing_images.map(img => ({
+[7m   [0m [91m                ~~~~~~~~~~~~~~[0m
+[96msrc/controllers/listingController.ts[0m:[93m657[0m:[93m36[0m - [91merror[0m[90m TS7006: [0mParameter 'img' implicitly has an 'any' type.
+
+[7m657[0m       ? listing.listing_images.map(img => ({
+[7m   [0m [91m                                   ~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-23 05:18:24 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/listingController.ts[0m:[93m725[0m:[93m31[0m - [91merror[0m[90m TS2304: [0mCannot find name 'categoryAttributes'.
+
+[7m725[0m     const groupedAttributes = categoryAttributes.reduce((acc, attr) => {
+[7m   [0m [91m                              ~~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/listingController.ts[0m:[93m725[0m:[93m58[0m - [91merror[0m[90m TS7006: [0mParameter 'acc' implicitly has an 'any' type.
+
+[7m725[0m     const groupedAttributes = categoryAttributes.reduce((acc, attr) => {
+[7m   [0m [91m                                                         ~~~[0m
+[96msrc/controllers/listingController.ts[0m:[93m725[0m:[93m63[0m - [91merror[0m[90m TS7006: [0mParameter 'attr' implicitly has an 'any' type.
+
+[7m725[0m     const groupedAttributes = categoryAttributes.reduce((acc, attr) => {
+[7m   [0m [91m                                                              ~~~~[0m
+[96msrc/controllers/listingController.ts[0m:[93m804[0m:[93m67[0m - [91merror[0m[90m TS18046: [0m'a' is of type 'unknown'.
+
+[7m804[0m           groups: Object.values(groupedAttributes).sort((a, b) => a.order - b.order),
+[7m   [0m [91m                                                                  ~[0m
+[96msrc/controllers/listingController.ts[0m:[93m804[0m:[93m77[0m - [91merror[0m[90m TS18046: [0m'b' is of type 'unknown'.
+
+[7m804[0m           groups: Object.values(groupedAttributes).sort((a, b) => a.order - b.order),
+[7m   [0m [91m                                                                            ~[0m
+[96msrc/controllers/listingController.ts[0m:[93m805[0m:[93m17[0m - [91merror[0m[90m TS2304: [0mCannot find name 'categoryAttributes'.
+
+[7m805[0m           flat: categoryAttributes.map(attr => ({
+[7m   [0m [91m                ~~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/listingController.ts[0m:[93m805[0m:[93m40[0m - [91merror[0m[90m TS7006: [0mParameter 'attr' implicitly has an 'any' type.
+
+[7m805[0m           flat: categoryAttributes.map(attr => ({
+[7m   [0m [91m                                       ~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-23 05:18:44 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/listingController.ts[0m:[93m725[0m:[93m19[0m - [91merror[0m[90m TS2695: [0mLeft side of comma operator is unused and has no side effects.
+
+[7m725[0m           groups: schemaGroups,
+[7m   [0m [91m                  ~~~~~~~~~~~~[0m
+[96msrc/controllers/listingController.ts[0m:[93m726[0m:[93m11[0m - [91merror[0m[90m TS2304: [0mCannot find name 'flat'.
+
+[7m726[0m           flat: propertyKeys.map((key, index) => ({
+[7m   [0m [91m          ~~~~[0m
+[96msrc/controllers/listingController.ts[0m:[93m738[0m:[93m5[0m - [91merror[0m[90m TS2304: [0mCannot find name 'res'.
+
+[7m738[0m     res.json(response);
+[7m   [0m [91m    ~~~[0m
+[96msrc/controllers/listingController.ts[0m:[93m738[0m:[93m14[0m - [91merror[0m[90m TS2552: [0mCannot find name 'response'. Did you mean 'Response'?
+
+[7m738[0m     res.json(response);
+[7m   [0m [91m             ~~~~~~~~[0m
+
+  [96mnode_modules/@types/node/globals.d.ts[0m:[93m304[0m:[93m9[0m
+    [7m304[0m     var Response: typeof globalThis extends {
+    [7m   [0m [96m        ~~~~~~~~[0m
+    'Response' is declared here.
+[96msrc/controllers/listingController.ts[0m:[93m741[0m:[93m5[0m - [91merror[0m[90m TS2304: [0mCannot find name 'res'.
+
+[7m741[0m     res.status(500).json({ success: false, error: 'Internal server error' });
+[7m   [0m [91m    ~~~[0m
+[96msrc/controllers/listingController.ts[0m:[93m726[0m:[93m15[0m - [91merror[0m[90m TS1005: [0m';' expected.
+
+[7m726[0m           flat: propertyKeys.map((key, index) => ({
+[7m   [0m [91m              ~[0m
+[96msrc/controllers/listingController.ts[0m:[93m733[0m:[93m10[0m - [91merror[0m[90m TS1128: [0mDeclaration or statement expected.
+
+[7m733[0m         },
+[7m   [0m [91m         ~[0m
+[96msrc/controllers/listingController.ts[0m:[93m736[0m:[93m5[0m - [91merror[0m[90m TS1472: [0m'catch' or 'finally' expected.
+
+[7m736[0m     };
+[7m   [0m [91m    ~[0m
+[96msrc/controllers/listingController.ts[0m:[93m739[0m:[93m3[0m - [91merror[0m[90m TS1128: [0mDeclaration or statement expected.
+
+[7m739[0m   } catch (error) {
+[7m   [0m [91m  ~[0m
+[96msrc/controllers/listingController.ts[0m:[93m739[0m:[93m5[0m - [91merror[0m[90m TS1005: [0m'try' expected.
+
+[7m739[0m   } catch (error) {
+[7m   [0m [91m    ~~~~~[0m
+[96msrc/controllers/listingController.ts[0m:[93m743[0m:[93m1[0m - [91merror[0m[90m TS1128: [0mDeclaration or statement expected.
+
+[7m743[0m };
+[7m   [0m [91m~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-23 05:20:48 [error]: Database error: 
+Invalid `prisma.listings.findMany()` invocation in
+C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\listingController.ts:383:23
+
+  380 }
+  381 
+  382 const [listings, total] = await Promise.all([
+→ 383   prisma.listings.findMany(
+The table `public.listing_images` does not exist in the current database.
+2025-08-23 05:20:48 [error]: PrismaClientKnownRequestError: 
+Invalid `prisma.listings.findMany()` invocation in
+C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\listingController.ts:383:23
+
+  380 }
+  381 
+  382 const [listings, total] = await Promise.all([
+→ 383   prisma.listings.findMany(
+The table `public.listing_images` does not exist in the current database.
+    at ei.handleRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:228:13)
+    at ei.handleAndLogRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:174:12)
+    at ei.request (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:143:12)
+    at async a (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:833:24)
+    at async Promise.all (index 0)
+    at async getListings (C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\listingController.ts:382:31)
+2025-08-23 05:21:22 [error]: Database error: 
+Invalid `prisma.listings.findMany()` invocation in
+C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\listingController.ts:383:23
+
+  380 }
+  381 
+  382 const [listings, total] = await Promise.all([
+→ 383   prisma.listings.findMany(
+The table `public.listing_images` does not exist in the current database.
+2025-08-23 05:21:22 [error]: PrismaClientKnownRequestError: 
+Invalid `prisma.listings.findMany()` invocation in
+C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\listingController.ts:383:23
+
+  380 }
+  381 
+  382 const [listings, total] = await Promise.all([
+→ 383   prisma.listings.findMany(
+The table `public.listing_images` does not exist in the current database.
+    at ei.handleRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:228:13)
+    at ei.handleAndLogRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:174:12)
+    at ei.request (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:143:12)
+    at async a (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:833:24)
+    at async Promise.all (index 0)
+    at async getListings (C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\listingController.ts:382:31)
+2025-08-23 05:22:04 [error]: PrismaClientKnownRequestError: 
+Invalid `prisma.listings.findMany()` invocation in
+C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\adminController.ts:275:23
+
+  272 
+  273 // Get listings with relations
+  274 const [listings, totalCount] = await Promise.all([
+→ 275   prisma.listings.findMany(
+The table `public.listing_images` does not exist in the current database.
+    at ei.handleRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:228:13)
+    at ei.handleAndLogRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:174:12)
+    at ei.request (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:143:12)
+    at async a (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:833:24)
+    at async Promise.all (index 0)
+    at async getListings (C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\adminController.ts:274:36)
+2025-08-23 05:22:05 [error]: PrismaClientKnownRequestError: 
+Invalid `prisma.listings.findMany()` invocation in
+C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\adminController.ts:275:23
+
+  272 
+  273 // Get listings with relations
+  274 const [listings, totalCount] = await Promise.all([
+→ 275   prisma.listings.findMany(
+The table `public.listing_images` does not exist in the current database.
+    at ei.handleRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:228:13)
+    at ei.handleAndLogRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:174:12)
+    at ei.request (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:143:12)
+    at async a (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:833:24)
+    at async Promise.all (index 0)
+    at async getListings (C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\adminController.ts:274:36)
+2025-08-23 05:23:05 [error]: Database error: 
+Invalid `prisma.listings.findMany()` invocation in
+C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\listingController.ts:383:23
+
+  380 }
+  381 
+  382 const [listings, total] = await Promise.all([
+→ 383   prisma.listings.findMany(
+The table `public.listing_images` does not exist in the current database.
+2025-08-23 05:23:05 [error]: PrismaClientKnownRequestError: 
+Invalid `prisma.listings.findMany()` invocation in
+C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\listingController.ts:383:23
+
+  380 }
+  381 
+  382 const [listings, total] = await Promise.all([
+→ 383   prisma.listings.findMany(
+The table `public.listing_images` does not exist in the current database.
+    at ei.handleRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:228:13)
+    at ei.handleAndLogRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:174:12)
+    at ei.request (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:143:12)
+    at async a (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:833:24)
+    at async Promise.all (index 0)
+    at async getListings (C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\listingController.ts:382:31)
+2025-08-23 05:23:43 [error]: Database error: 
+Invalid `prisma.listings.findMany()` invocation in
+C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\listingController.ts:383:23
+
+  380 }
+  381 
+  382 const [listings, total] = await Promise.all([
+→ 383   prisma.listings.findMany(
+The table `public.listing_images` does not exist in the current database.
+2025-08-23 05:23:43 [error]: PrismaClientKnownRequestError: 
+Invalid `prisma.listings.findMany()` invocation in
+C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\listingController.ts:383:23
+
+  380 }
+  381 
+  382 const [listings, total] = await Promise.all([
+→ 383   prisma.listings.findMany(
+The table `public.listing_images` does not exist in the current database.
+    at ei.handleRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:228:13)
+    at ei.handleAndLogRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:174:12)
+    at ei.request (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:143:12)
+    at async a (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:833:24)
+    at async Promise.all (index 0)
+    at async getListings (C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\listingController.ts:382:31)
+2025-08-23 05:25:09 [error]: Database error: 
+Invalid `prisma.listings.findMany()` invocation in
+C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\listingController.ts:383:23
+
+  380 }
+  381 
+  382 const [listings, total] = await Promise.all([
+→ 383   prisma.listings.findMany(
+The table `public.listing_images` does not exist in the current database.
+2025-08-23 05:25:09 [error]: PrismaClientKnownRequestError: 
+Invalid `prisma.listings.findMany()` invocation in
+C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\listingController.ts:383:23
+
+  380 }
+  381 
+  382 const [listings, total] = await Promise.all([
+→ 383   prisma.listings.findMany(
+The table `public.listing_images` does not exist in the current database.
+    at ei.handleRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:228:13)
+    at ei.handleAndLogRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:174:12)
+    at ei.request (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:143:12)
+    at async a (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:833:24)
+    at async Promise.all (index 0)
+    at async getListings (C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\listingController.ts:382:31)
+2025-08-23 05:25:22 [error]: Database error: 
+Invalid `prisma.listings.findMany()` invocation in
+C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\listingController.ts:383:23
+
+  380 }
+  381 
+  382 const [listings, total] = await Promise.all([
+→ 383   prisma.listings.findMany(
+The table `public.listing_images` does not exist in the current database.
+2025-08-23 05:25:22 [error]: PrismaClientKnownRequestError: 
+Invalid `prisma.listings.findMany()` invocation in
+C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\listingController.ts:383:23
+
+  380 }
+  381 
+  382 const [listings, total] = await Promise.all([
+→ 383   prisma.listings.findMany(
+The table `public.listing_images` does not exist in the current database.
+    at ei.handleRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:228:13)
+    at ei.handleAndLogRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:174:12)
+    at ei.request (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:143:12)
+    at async a (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:833:24)
+    at async Promise.all (index 0)
+    at async getListings (C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\listingController.ts:382:31)
+2025-08-23 05:25:54 [error]: Database error: 
+Invalid `prisma.listings.findMany()` invocation in
+C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\listingController.ts:383:23
+
+  380 }
+  381 
+  382 const [listings, total] = await Promise.all([
+→ 383   prisma.listings.findMany(
+The table `public.listing_images` does not exist in the current database.
+2025-08-23 05:25:54 [error]: PrismaClientKnownRequestError: 
+Invalid `prisma.listings.findMany()` invocation in
+C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\listingController.ts:383:23
+
+  380 }
+  381 
+  382 const [listings, total] = await Promise.all([
+→ 383   prisma.listings.findMany(
+The table `public.listing_images` does not exist in the current database.
+    at ei.handleRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:228:13)
+    at ei.handleAndLogRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:174:12)
+    at ei.request (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:143:12)
+    at async a (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:833:24)
+    at async Promise.all (index 0)
+    at async getListings (C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\listingController.ts:382:31)
+2025-08-23 06:08:52 [error]: PrismaClientKnownRequestError: 
+Invalid `prisma.listings.findMany()` invocation in
+C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\adminController.ts:275:23
+
+  272 
+  273 // Get listings with relations
+  274 const [listings, totalCount] = await Promise.all([
+→ 275   prisma.listings.findMany(
+The table `public.listing_images` does not exist in the current database.
+    at ei.handleRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:228:13)
+    at ei.handleAndLogRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:174:12)
+    at ei.request (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:143:12)
+    at async a (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:833:24)
+    at async Promise.all (index 0)
+    at async getListings (C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\adminController.ts:274:36)
+2025-08-23 06:08:53 [error]: PrismaClientKnownRequestError: 
+Invalid `prisma.listings.findMany()` invocation in
+C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\adminController.ts:275:23
+
+  272 
+  273 // Get listings with relations
+  274 const [listings, totalCount] = await Promise.all([
+→ 275   prisma.listings.findMany(
+The table `public.listing_images` does not exist in the current database.
+    at ei.handleRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:228:13)
+    at ei.handleAndLogRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:174:12)
+    at ei.request (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:143:12)
+    at async a (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:833:24)
+    at async Promise.all (index 0)
+    at async getListings (C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\adminController.ts:274:36)
+2025-08-23 06:09:10 [error]: PrismaClientKnownRequestError: 
+Invalid `prisma.listings.findMany()` invocation in
+C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\adminController.ts:275:23
+
+  272 
+  273 // Get listings with relations
+  274 const [listings, totalCount] = await Promise.all([
+→ 275   prisma.listings.findMany(
+The table `public.listing_images` does not exist in the current database.
+    at ei.handleRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:228:13)
+    at ei.handleAndLogRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:174:12)
+    at ei.request (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:143:12)
+    at async a (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:833:24)
+    at async Promise.all (index 0)
+    at async getListings (C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\adminController.ts:274:36)
+2025-08-23 06:09:11 [error]: PrismaClientKnownRequestError: 
+Invalid `prisma.listings.findMany()` invocation in
+C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\adminController.ts:275:23
+
+  272 
+  273 // Get listings with relations
+  274 const [listings, totalCount] = await Promise.all([
+→ 275   prisma.listings.findMany(
+The table `public.listing_images` does not exist in the current database.
+    at ei.handleRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:228:13)
+    at ei.handleAndLogRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:174:12)
+    at ei.request (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:143:12)
+    at async a (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:833:24)
+    at async Promise.all (index 0)
+    at async getListings (C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\adminController.ts:274:36)
+2025-08-23 06:09:13 [error]: PrismaClientKnownRequestError: 
+Invalid `prisma.listings.findMany()` invocation in
+C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\adminController.ts:275:23
+
+  272 
+  273 // Get listings with relations
+  274 const [listings, totalCount] = await Promise.all([
+→ 275   prisma.listings.findMany(
+The table `public.listing_images` does not exist in the current database.
+    at ei.handleRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:228:13)
+    at ei.handleAndLogRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:174:12)
+    at ei.request (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:143:12)
+    at async a (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:833:24)
+    at async Promise.all (index 0)
+    at async getListings (C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\adminController.ts:274:36)
+2025-08-23 06:09:14 [error]: PrismaClientKnownRequestError: 
+Invalid `prisma.listings.findMany()` invocation in
+C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\adminController.ts:275:23
+
+  272 
+  273 // Get listings with relations
+  274 const [listings, totalCount] = await Promise.all([
+→ 275   prisma.listings.findMany(
+The table `public.listing_images` does not exist in the current database.
+    at ei.handleRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:228:13)
+    at ei.handleAndLogRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:174:12)
+    at ei.request (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:143:12)
+    at async a (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:833:24)
+    at async Promise.all (index 0)
+    at async getListings (C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\adminController.ts:274:36)
+2025-08-23 06:09:15 [error]: PrismaClientKnownRequestError: 
+Invalid `prisma.listings.findMany()` invocation in
+C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\adminController.ts:275:23
+
+  272 
+  273 // Get listings with relations
+  274 const [listings, totalCount] = await Promise.all([
+→ 275   prisma.listings.findMany(
+The table `public.listing_images` does not exist in the current database.
+    at ei.handleRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:228:13)
+    at ei.handleAndLogRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:174:12)
+    at ei.request (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:143:12)
+    at async a (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:833:24)
+    at async Promise.all (index 0)
+    at async getListings (C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\adminController.ts:274:36)
+2025-08-23 06:09:57 [error]: PrismaClientKnownRequestError: 
+Invalid `prisma.listings.findMany()` invocation in
+C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\adminController.ts:275:23
+
+  272 
+  273 // Get listings with relations
+  274 const [listings, totalCount] = await Promise.all([
+→ 275   prisma.listings.findMany(
+The table `public.listing_images` does not exist in the current database.
+    at ei.handleRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:228:13)
+    at ei.handleAndLogRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:174:12)
+    at ei.request (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:143:12)
+    at async a (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:833:24)
+    at async Promise.all (index 0)
+    at async getListings (C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\adminController.ts:274:36)
+2025-08-23 06:09:58 [error]: PrismaClientKnownRequestError: 
+Invalid `prisma.listings.findMany()` invocation in
+C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\adminController.ts:275:23
+
+  272 
+  273 // Get listings with relations
+  274 const [listings, totalCount] = await Promise.all([
+→ 275   prisma.listings.findMany(
+The table `public.listing_images` does not exist in the current database.
+    at ei.handleRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:228:13)
+    at ei.handleAndLogRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:174:12)
+    at ei.request (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:143:12)
+    at async a (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:833:24)
+    at async Promise.all (index 0)
+    at async getListings (C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\adminController.ts:274:36)
+2025-08-23 06:10:58 [error]: PrismaClientKnownRequestError: 
+Invalid `prisma.listings.findMany()` invocation in
+C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\adminController.ts:275:23
+
+  272 
+  273 // Get listings with relations
+  274 const [listings, totalCount] = await Promise.all([
+→ 275   prisma.listings.findMany(
+The table `public.listing_images` does not exist in the current database.
+    at ei.handleRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:228:13)
+    at ei.handleAndLogRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:174:12)
+    at ei.request (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:143:12)
+    at async a (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:833:24)
+    at async Promise.all (index 0)
+    at async getListings (C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\adminController.ts:274:36)
+2025-08-23 06:11:02 [error]: PrismaClientKnownRequestError: 
+Invalid `prisma.listings.findMany()` invocation in
+C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\adminController.ts:275:23
+
+  272 
+  273 // Get listings with relations
+  274 const [listings, totalCount] = await Promise.all([
+→ 275   prisma.listings.findMany(
+The table `public.listing_images` does not exist in the current database.
+    at ei.handleRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:228:13)
+    at ei.handleAndLogRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:174:12)
+    at ei.request (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:143:12)
+    at async a (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:833:24)
+    at async Promise.all (index 0)
+    at async getListings (C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\adminController.ts:274:36)
+2025-08-23 06:11:03 [error]: PrismaClientKnownRequestError: 
+Invalid `prisma.listings.findMany()` invocation in
+C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\adminController.ts:275:23
+
+  272 
+  273 // Get listings with relations
+  274 const [listings, totalCount] = await Promise.all([
+→ 275   prisma.listings.findMany(
+The table `public.listing_images` does not exist in the current database.
+    at ei.handleRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:228:13)
+    at ei.handleAndLogRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:174:12)
+    at ei.request (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:143:12)
+    at async a (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:833:24)
+    at async Promise.all (index 0)
+    at async getListings (C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\adminController.ts:274:36)
+2025-08-23 06:57:48 [error]: Database error: 
+Invalid `prisma.listings.create()` invocation in
+C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\listingController.ts:143:43
+
+  140 }
+  141 
+  142 // Ilan oluştur
+→ 143 const listing = await prisma.listings.create(
+Error occurred during query execution:
+ConnectorError(ConnectorError { user_facing_error: None, kind: QueryError(PostgresError { code: "22003", message: "numeric field overflow", severity: "ERROR", detail: Some("A field with precision 12, scale 2 must round to an absolute value less than 10^10."), column: None, hint: None }), transient: false })
+2025-08-23 06:57:48 [error]: PrismaClientUnknownRequestError: 
+Invalid `prisma.listings.create()` invocation in
+C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\listingController.ts:143:43
+
+  140 }
+  141 
+  142 // Ilan oluştur
+→ 143 const listing = await prisma.listings.create(
+Error occurred during query execution:
+ConnectorError(ConnectorError { user_facing_error: None, kind: QueryError(PostgresError { code: "22003", message: "numeric field overflow", severity: "ERROR", detail: Some("A field with precision 12, scale 2 must round to an absolute value less than 10^10."), column: None, hint: None }), transient: false })
+    at ei.handleRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:237:13)
+    at ei.handleAndLogRequestError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:174:12)
+    at ei.request (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:143:12)
+    at async a (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:833:24)
+    at async createListing (C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\listingController.ts:143:21)
+2025-08-23 08:30:22 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/listingController.ts[0m:[93m669[0m:[93m88[0m - [91merror[0m[90m TS2345: [0mArgument of type 'string | number | true | JsonObject' is not assignable to parameter of type 'string'.
+  Type 'number' is not assignable to type 'string'.
+
+[7m669[0m         const imageArray = Array.isArray(listing.images) ? listing.images : JSON.parse(listing.images);
+[7m   [0m [91m                                                                                       ~~~~~~~~~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-23 08:32:21 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/listingController.ts[0m:[93m686[0m:[93m36[0m - [91merror[0m[90m TS2448: [0mBlock-scoped variable 'values' used before its declaration.
+
+[7m686[0m       processedValues: Object.keys(values)
+[7m   [0m [91m                                   ~~~~~~[0m
+
+  [96msrc/controllers/listingController.ts[0m:[93m690[0m:[93m11[0m
+    [7m690[0m     const values: Record<string, any> = {};
+    [7m   [0m [96m          ~~~~~~[0m
+    'values' is declared here.
+[96msrc/controllers/listingController.ts[0m:[93m686[0m:[93m36[0m - [91merror[0m[90m TS2454: [0mVariable 'values' is used before being assigned.
+
+[7m686[0m       processedValues: Object.keys(values)
+[7m   [0m [91m                                   ~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-23 08:32:41 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/listingController.ts[0m:[93m686[0m:[93m36[0m - [91merror[0m[90m TS2448: [0mBlock-scoped variable 'values' used before its declaration.
+
+[7m686[0m       processedValues: Object.keys(values)
+[7m   [0m [91m                                   ~~~~~~[0m
+
+  [96msrc/controllers/listingController.ts[0m:[93m690[0m:[93m11[0m
+    [7m690[0m     const values: Record<string, any> = {};
+    [7m   [0m [96m          ~~~~~~[0m
+    'values' is declared here.
+[96msrc/controllers/listingController.ts[0m:[93m686[0m:[93m36[0m - [91merror[0m[90m TS2454: [0mVariable 'values' is used before being assigned.
+
+[7m686[0m       processedValues: Object.keys(values)
+[7m   [0m [91m                                   ~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-23 08:48:44 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/listingController.ts[0m:[93m757[0m:[93m9[0m - [91merror[0m[90m TS1128: [0mDeclaration or statement expected.
+
+[7m757[0m     }); else {
+[7m   [0m [91m        ~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-23 16:18:46 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/listingController.ts[0m:[93m957[0m:[93m9[0m - [91merror[0m[90m TS1117: [0mAn object literal cannot have multiple properties with the same name.
+
+[7m957[0m         'is_exchangeable': 'Takaslanabilir',
+[7m   [0m [91m        ~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/listingController.ts[0m:[93m959[0m:[93m9[0m - [91merror[0m[90m TS1117: [0mAn object literal cannot have multiple properties with the same name.
+
+[7m959[0m         'axle_count': 'Dingil Sayısı',
+[7m   [0m [91m        ~~~~~~~~~~~~[0m
+[96msrc/controllers/listingController.ts[0m:[93m961[0m:[93m9[0m - [91merror[0m[90m TS1117: [0mAn object literal cannot have multiple properties with the same name.
+
+[7m961[0m         'tire_condition': 'Lastik Durumu',
+[7m   [0m [91m        ~~~~~~~~~~~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-23 16:21:47 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/listingController.ts[0m:[93m315[0m:[93m15[0m - [91merror[0m[90m TS2322: [0mType 'string' is not assignable to type 'PropertyType'.
+
+[7m315[0m               type: propertyType // Dinamik tip belirleme
+[7m   [0m [91m              ~~~~[0m
+
+  [96mnode_modules/.prisma/client/index.d.ts[0m:[93m40681[0m:[93m5[0m
+    [7m40681[0m     type: $Enums.PropertyType
+    [7m     [0m [96m    ~~~~[0m
+    The expected type comes from property 'type' which is declared here on type '(Without<listing_propertiesCreateInput, listing_propertiesUncheckedCreateInput> & listing_propertiesUncheckedCreateInput) | (Without<...> & listing_propertiesCreateInput)'
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-24 13:23:48 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/routes/feedbackRoutes.ts[0m:[93m17[0m:[93m18[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m17[0m const validate = (req: express.Request, res: express.Response, next: express.NextFunction) => {
+[7m  [0m [91m                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-24 13:24:32 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/adminController.ts[0m:[93m627[0m:[93m7[0m - [91merror[0m[90m TS2322: [0mType '{ user_id: string; type: "LISTING_PUBLISHED"; title: string; message: string; data: { listing_id: string; listing_title: string; }; }' is not assignable to type '(Without<notificationsCreateInput, notificationsUncheckedCreateInput> & notificationsUncheckedCreateInput) | (Without<...> & notificationsCreateInput)'.
+  Type '{ user_id: string; type: "LISTING_PUBLISHED"; title: string; message: string; data: { listing_id: string; listing_title: string; }; }' is not assignable to type 'Without<notificationsCreateInput, notificationsUncheckedCreateInput> & notificationsUncheckedCreateInput'.
+    Property 'id' is missing in type '{ user_id: string; type: "LISTING_PUBLISHED"; title: string; message: string; data: { listing_id: string; listing_title: string; }; }' but required in type 'notificationsUncheckedCreateInput'.
+
+[7m627[0m       data: {
+[7m   [0m [91m      ~~~~[0m
+
+  [96mnode_modules/.prisma/client/index.d.ts[0m:[93m42962[0m:[93m5[0m
+    [7m42962[0m     id: string
+    [7m     [0m [96m    ~~[0m
+    'id' is declared here.
+  [96mnode_modules/.prisma/client/index.d.ts[0m:[93m29458[0m:[93m5[0m
+    [7m29458[0m     data: XOR<notificationsCreateInput, notificationsUncheckedCreateInput>
+    [7m     [0m [96m    ~~~~[0m
+    The expected type comes from property 'data' which is declared here on type '{ select?: notificationsSelect<DefaultArgs> | null | undefined; omit?: notificationsOmit<DefaultArgs> | null | undefined; include?: notificationsInclude<...> | ... 1 more ... | undefined; data: (Without<...> & notificationsUncheckedCreateInput) | (Without<...> & notificationsCreateInput); }'
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-24 13:24:32 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/routes/feedbackRoutes.ts[0m:[93m17[0m:[93m18[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m17[0m const validate = (req: express.Request, res: express.Response, next: express.NextFunction) => {
+[7m  [0m [91m                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-24 13:33:52 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/adminController.ts[0m:[93m627[0m:[93m7[0m - [91merror[0m[90m TS2322: [0mType '{ user_id: string; type: "LISTING_PUBLISHED"; title: string; message: string; data: { listing_id: string; listing_title: string; }; }' is not assignable to type '(Without<notificationsCreateInput, notificationsUncheckedCreateInput> & notificationsUncheckedCreateInput) | (Without<...> & notificationsCreateInput)'.
+  Type '{ user_id: string; type: "LISTING_PUBLISHED"; title: string; message: string; data: { listing_id: string; listing_title: string; }; }' is not assignable to type 'Without<notificationsCreateInput, notificationsUncheckedCreateInput> & notificationsUncheckedCreateInput'.
+    Property 'id' is missing in type '{ user_id: string; type: "LISTING_PUBLISHED"; title: string; message: string; data: { listing_id: string; listing_title: string; }; }' but required in type 'notificationsUncheckedCreateInput'.
+
+[7m627[0m       data: {
+[7m   [0m [91m      ~~~~[0m
+
+  [96mnode_modules/.prisma/client/index.d.ts[0m:[93m42962[0m:[93m5[0m
+    [7m42962[0m     id: string
+    [7m     [0m [96m    ~~[0m
+    'id' is declared here.
+  [96mnode_modules/.prisma/client/index.d.ts[0m:[93m29458[0m:[93m5[0m
+    [7m29458[0m     data: XOR<notificationsCreateInput, notificationsUncheckedCreateInput>
+    [7m     [0m [96m    ~~~~[0m
+    The expected type comes from property 'data' which is declared here on type '{ select?: notificationsSelect<DefaultArgs> | null | undefined; omit?: notificationsOmit<DefaultArgs> | null | undefined; include?: notificationsInclude<...> | ... 1 more ... | undefined; data: (Without<...> & notificationsUncheckedCreateInput) | (Without<...> & notificationsCreateInput); }'
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-24 13:33:53 [error]: Error: Cannot find module '../middleware/auth.js'
+Require stack:
+- C:\Users\salih\Desktop\TruckBus\Backend\src\routes\feedbackRoutes.ts
+- C:\Users\salih\Desktop\TruckBus\Backend\src\simpleIndex.ts
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1369:15)
+    at Module._resolveFilename.sharedData.moduleResolveFilenameHook.installedValue [as _resolveFilename] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@cspotcode\source-map-support\source-map-support.js:811:30)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1025:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1030:22)
+    at Module._load (node:internal/modules/cjs/loader:1179:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Module.require (node:internal/modules/cjs/loader:1449:12)
+    at require (node:internal/modules/helpers:135:16)
+    at Object.<anonymous> (C:\Users\salih\Desktop\TruckBus\Backend\src\routes\feedbackRoutes.ts:2:1)
+2025-08-24 13:34:03 [error]: Error: Cannot find module '../middleware/auth.js'
+Require stack:
+- C:\Users\salih\Desktop\TruckBus\Backend\src\routes\feedbackRoutes.ts
+- C:\Users\salih\Desktop\TruckBus\Backend\src\simpleIndex.ts
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1369:15)
+    at Module._resolveFilename.sharedData.moduleResolveFilenameHook.installedValue [as _resolveFilename] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@cspotcode\source-map-support\source-map-support.js:811:30)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1025:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1030:22)
+    at Module._load (node:internal/modules/cjs/loader:1179:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Module.require (node:internal/modules/cjs/loader:1449:12)
+    at require (node:internal/modules/helpers:135:16)
+    at Object.<anonymous> (C:\Users\salih\Desktop\TruckBus\Backend\src\routes\feedbackRoutes.ts:2:1)
+2025-08-24 13:34:23 [error]: Error: Cannot find module '../middleware/auth.js'
+Require stack:
+- C:\Users\salih\Desktop\TruckBus\Backend\src\routes\feedbackRoutes.ts
+- C:\Users\salih\Desktop\TruckBus\Backend\src\simpleIndex.ts
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1369:15)
+    at Module._resolveFilename.sharedData.moduleResolveFilenameHook.installedValue [as _resolveFilename] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@cspotcode\source-map-support\source-map-support.js:811:30)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1025:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1030:22)
+    at Module._load (node:internal/modules/cjs/loader:1179:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Module.require (node:internal/modules/cjs/loader:1449:12)
+    at require (node:internal/modules/helpers:135:16)
+    at Object.<anonymous> (C:\Users\salih\Desktop\TruckBus\Backend\src\routes\feedbackRoutes.ts:2:1)
+2025-08-24 13:34:35 [error]: Error: Cannot find module '../middleware/auth.js'
+Require stack:
+- C:\Users\salih\Desktop\TruckBus\Backend\src\routes\feedbackRoutes.ts
+- C:\Users\salih\Desktop\TruckBus\Backend\src\simpleIndex.ts
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1369:15)
+    at Module._resolveFilename.sharedData.moduleResolveFilenameHook.installedValue [as _resolveFilename] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@cspotcode\source-map-support\source-map-support.js:811:30)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1025:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1030:22)
+    at Module._load (node:internal/modules/cjs/loader:1179:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Module.require (node:internal/modules/cjs/loader:1449:12)
+    at require (node:internal/modules/helpers:135:16)
+    at Object.<anonymous> (C:\Users\salih\Desktop\TruckBus\Backend\src\routes\feedbackRoutes.ts:2:1)
+2025-08-24 13:35:29 [error]: Error: Cannot find module '../middleware/auth.js'
+Require stack:
+- C:\Users\salih\Desktop\TruckBus\Backend\src\routes\feedbackRoutes.ts
+- C:\Users\salih\Desktop\TruckBus\Backend\src\simpleIndex.ts
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1369:15)
+    at Module._resolveFilename.sharedData.moduleResolveFilenameHook.installedValue [as _resolveFilename] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@cspotcode\source-map-support\source-map-support.js:811:30)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1025:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1030:22)
+    at Module._load (node:internal/modules/cjs/loader:1179:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Module.require (node:internal/modules/cjs/loader:1449:12)
+    at require (node:internal/modules/helpers:135:16)
+    at Object.<anonymous> (C:\Users\salih\Desktop\TruckBus\Backend\src\routes\feedbackRoutes.ts:2:1)
+2025-08-24 13:35:49 [error]: Error: Cannot find module '../controllers/feedbackController.js'
+Require stack:
+- C:\Users\salih\Desktop\TruckBus\Backend\src\routes\feedbackRoutes.ts
+- C:\Users\salih\Desktop\TruckBus\Backend\src\simpleIndex.ts
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1369:15)
+    at Module._resolveFilename.sharedData.moduleResolveFilenameHook.installedValue [as _resolveFilename] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@cspotcode\source-map-support\source-map-support.js:811:30)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1025:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1030:22)
+    at Module._load (node:internal/modules/cjs/loader:1179:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Module.require (node:internal/modules/cjs/loader:1449:12)
+    at require (node:internal/modules/helpers:135:16)
+    at Object.<anonymous> (C:\Users\salih\Desktop\TruckBus\Backend\src\routes\feedbackRoutes.ts:4:1)
+2025-08-24 13:35:58 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/feedbackController.ts[0m:[93m6[0m:[93m31[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m6[0m export const createFeedback = async (req: AuthenticatedRequest, res: Response) => {
+[7m [0m [91m                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/feedbackController.ts[0m:[93m20[0m:[93m13[0m - [91merror[0m[90m TS2322: [0mType '{ user_id: string; type: any; subject: any; message: any; priority: any; }' is not assignable to type '(Without<feedbackCreateInput, feedbackUncheckedCreateInput> & feedbackUncheckedCreateInput) | (Without<...> & feedbackCreateInput)'.
+  Type '{ user_id: string; type: any; subject: any; message: any; priority: any; }' is not assignable to type 'Without<feedbackCreateInput, feedbackUncheckedCreateInput> & feedbackUncheckedCreateInput'.
+    Property 'id' is missing in type '{ user_id: string; type: any; subject: any; message: any; priority: any; }' but required in type 'feedbackUncheckedCreateInput'.
+
+[7m20[0m             data: {
+[7m  [0m [91m            ~~~~[0m
+
+  [96mnode_modules/.prisma/client/index.d.ts[0m:[93m42863[0m:[93m5[0m
+    [7m42863[0m     id: string
+    [7m     [0m [96m    ~~[0m
+    'id' is declared here.
+  [96mnode_modules/.prisma/client/index.d.ts[0m:[93m28346[0m:[93m5[0m
+    [7m28346[0m     data: XOR<feedbackCreateInput, feedbackUncheckedCreateInput>
+    [7m     [0m [96m    ~~~~[0m
+    The expected type comes from property 'data' which is declared here on type '{ select?: feedbackSelect<DefaultArgs> | null | undefined; omit?: feedbackOmit<DefaultArgs> | null | undefined; include?: feedbackInclude<...> | ... 1 more ... | undefined; data: (Without<...> & feedbackUncheckedCreateInput) | (Without<...> & feedbackCreateInput); }'
+[96msrc/controllers/feedbackController.ts[0m:[93m49[0m:[93m33[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m49[0m export const getUserFeedbacks = async (req: AuthenticatedRequest, res: Response) => {
+[7m  [0m [91m                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/feedbackController.ts[0m:[93m133[0m:[93m34[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m133[0m export const respondToFeedback = async (req: AuthenticatedRequest, res: Response) => {
+[7m   [0m [91m                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/feedbackController.ts[0m:[93m170[0m:[93m13[0m - [91merror[0m[90m TS2322: [0mType '{ user_id: string; type: "FEEDBACK_RESPONSE"; title: string; message: string; data: { feedback_id: string; feedback_subject: string; admin_response: any; }; }' is not assignable to type '(Without<notificationsCreateInput, notificationsUncheckedCreateInput> & notificationsUncheckedCreateInput) | (Without<...> & notificationsCreateInput)'.
+  Type '{ user_id: string; type: "FEEDBACK_RESPONSE"; title: string; message: string; data: { feedback_id: string; feedback_subject: string; admin_response: any; }; }' is not assignable to type 'Without<notificationsCreateInput, notificationsUncheckedCreateInput> & notificationsUncheckedCreateInput'.
+    Property 'id' is missing in type '{ user_id: string; type: "FEEDBACK_RESPONSE"; title: string; message: string; data: { feedback_id: string; feedback_subject: string; admin_response: any; }; }' but required in type 'notificationsUncheckedCreateInput'.
+
+[7m170[0m             data: {
+[7m   [0m [91m            ~~~~[0m
+
+  [96mnode_modules/.prisma/client/index.d.ts[0m:[93m42962[0m:[93m5[0m
+    [7m42962[0m     id: string
+    [7m     [0m [96m    ~~[0m
+    'id' is declared here.
+  [96mnode_modules/.prisma/client/index.d.ts[0m:[93m29458[0m:[93m5[0m
+    [7m29458[0m     data: XOR<notificationsCreateInput, notificationsUncheckedCreateInput>
+    [7m     [0m [96m    ~~~~[0m
+    The expected type comes from property 'data' which is declared here on type '{ select?: notificationsSelect<DefaultArgs> | null | undefined; omit?: notificationsOmit<DefaultArgs> | null | undefined; include?: notificationsInclude<...> | ... 1 more ... | undefined; data: (Without<...> & notificationsUncheckedCreateInput) | (Without<...> & notificationsCreateInput); }'
+[96msrc/controllers/feedbackController.ts[0m:[93m194[0m:[93m34[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m194[0m export const getFeedbackDetail = async (req: Request, res: Response) => {
+[7m   [0m [91m                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-24 13:40:39 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/routes/feedbackRoutes.ts[0m:[93m2[0m:[93m49[0m - [91merror[0m[90m TS5097: [0mAn import path can only end with a '.ts' extension when 'allowImportingTsExtensions' is enabled.
+
+[7m2[0m import { authMiddleware, adminMiddleware } from '../middleware/auth.ts';
+[7m [0m [91m                                                ~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-24 13:40:46 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/feedbackController.ts[0m:[93m6[0m:[93m31[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m6[0m export const createFeedback = async (req: AuthenticatedRequest, res: Response) => {
+[7m [0m [91m                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/feedbackController.ts[0m:[93m20[0m:[93m13[0m - [91merror[0m[90m TS2322: [0mType '{ user_id: string; type: any; subject: any; message: any; priority: any; }' is not assignable to type '(Without<feedbackCreateInput, feedbackUncheckedCreateInput> & feedbackUncheckedCreateInput) | (Without<...> & feedbackCreateInput)'.
+  Type '{ user_id: string; type: any; subject: any; message: any; priority: any; }' is not assignable to type 'Without<feedbackCreateInput, feedbackUncheckedCreateInput> & feedbackUncheckedCreateInput'.
+    Property 'id' is missing in type '{ user_id: string; type: any; subject: any; message: any; priority: any; }' but required in type 'feedbackUncheckedCreateInput'.
+
+[7m20[0m             data: {
+[7m  [0m [91m            ~~~~[0m
+
+  [96mnode_modules/.prisma/client/index.d.ts[0m:[93m42863[0m:[93m5[0m
+    [7m42863[0m     id: string
+    [7m     [0m [96m    ~~[0m
+    'id' is declared here.
+  [96mnode_modules/.prisma/client/index.d.ts[0m:[93m28346[0m:[93m5[0m
+    [7m28346[0m     data: XOR<feedbackCreateInput, feedbackUncheckedCreateInput>
+    [7m     [0m [96m    ~~~~[0m
+    The expected type comes from property 'data' which is declared here on type '{ select?: feedbackSelect<DefaultArgs> | null | undefined; omit?: feedbackOmit<DefaultArgs> | null | undefined; include?: feedbackInclude<...> | ... 1 more ... | undefined; data: (Without<...> & feedbackUncheckedCreateInput) | (Without<...> & feedbackCreateInput); }'
+[96msrc/controllers/feedbackController.ts[0m:[93m49[0m:[93m33[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m49[0m export const getUserFeedbacks = async (req: AuthenticatedRequest, res: Response) => {
+[7m  [0m [91m                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/feedbackController.ts[0m:[93m133[0m:[93m34[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m133[0m export const respondToFeedback = async (req: AuthenticatedRequest, res: Response) => {
+[7m   [0m [91m                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/feedbackController.ts[0m:[93m170[0m:[93m13[0m - [91merror[0m[90m TS2322: [0mType '{ user_id: string; type: "FEEDBACK_RESPONSE"; title: string; message: string; data: { feedback_id: string; feedback_subject: string; admin_response: any; }; }' is not assignable to type '(Without<notificationsCreateInput, notificationsUncheckedCreateInput> & notificationsUncheckedCreateInput) | (Without<...> & notificationsCreateInput)'.
+  Type '{ user_id: string; type: "FEEDBACK_RESPONSE"; title: string; message: string; data: { feedback_id: string; feedback_subject: string; admin_response: any; }; }' is not assignable to type 'Without<notificationsCreateInput, notificationsUncheckedCreateInput> & notificationsUncheckedCreateInput'.
+    Property 'id' is missing in type '{ user_id: string; type: "FEEDBACK_RESPONSE"; title: string; message: string; data: { feedback_id: string; feedback_subject: string; admin_response: any; }; }' but required in type 'notificationsUncheckedCreateInput'.
+
+[7m170[0m             data: {
+[7m   [0m [91m            ~~~~[0m
+
+  [96mnode_modules/.prisma/client/index.d.ts[0m:[93m42962[0m:[93m5[0m
+    [7m42962[0m     id: string
+    [7m     [0m [96m    ~~[0m
+    'id' is declared here.
+  [96mnode_modules/.prisma/client/index.d.ts[0m:[93m29458[0m:[93m5[0m
+    [7m29458[0m     data: XOR<notificationsCreateInput, notificationsUncheckedCreateInput>
+    [7m     [0m [96m    ~~~~[0m
+    The expected type comes from property 'data' which is declared here on type '{ select?: notificationsSelect<DefaultArgs> | null | undefined; omit?: notificationsOmit<DefaultArgs> | null | undefined; include?: notificationsInclude<...> | ... 1 more ... | undefined; data: (Without<...> & notificationsUncheckedCreateInput) | (Without<...> & notificationsCreateInput); }'
+[96msrc/controllers/feedbackController.ts[0m:[93m194[0m:[93m34[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m194[0m export const getFeedbackDetail = async (req: Request, res: Response) => {
+[7m   [0m [91m                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-24 13:40:55 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/adminController.ts[0m:[93m645[0m:[93m28[0m - [91merror[0m[90m TS2304: [0mCannot find name 'id'.
+
+[7m645[0m     logger.info(`Listing ${id} approved and notification sent`);
+[7m   [0m [91m                           ~~[0m
+[96msrc/controllers/adminController.ts[0m:[93m647[0m:[93m5[0m - [91merror[0m[90m TS2304: [0mCannot find name 'res'.
+
+[7m647[0m     res.json({
+[7m   [0m [91m    ~~~[0m
+[96msrc/controllers/adminController.ts[0m:[93m650[0m:[93m29[0m - [91merror[0m[90m TS2304: [0mCannot find name 'listing'.
+
+[7m650[0m       data: serializeBigInt(listing)
+[7m   [0m [91m                            ~~~~~~~[0m
+[96msrc/controllers/adminController.ts[0m:[93m655[0m:[93m5[0m - [91merror[0m[90m TS2304: [0mCannot find name 'res'.
+
+[7m655[0m     res.status(500).json({
+[7m   [0m [91m    ~~~[0m
+[96msrc/controllers/adminController.ts[0m:[93m642[0m:[93m7[0m - [91merror[0m[90m TS1472: [0m'catch' or 'finally' expected.
+
+[7m642[0m       }
+[7m   [0m [91m      ~[0m
+[96msrc/controllers/adminController.ts[0m:[93m643[0m:[93m5[0m - [91merror[0m[90m TS1128: [0mDeclaration or statement expected.
+
+[7m643[0m     });
+[7m   [0m [91m    ~[0m
+[96msrc/controllers/adminController.ts[0m:[93m643[0m:[93m6[0m - [91merror[0m[90m TS1128: [0mDeclaration or statement expected.
+
+[7m643[0m     });
+[7m   [0m [91m     ~[0m
+[96msrc/controllers/adminController.ts[0m:[93m653[0m:[93m3[0m - [91merror[0m[90m TS1128: [0mDeclaration or statement expected.
+
+[7m653[0m   } catch (error: any) {
+[7m   [0m [91m  ~[0m
+[96msrc/controllers/adminController.ts[0m:[93m653[0m:[93m5[0m - [91merror[0m[90m TS1005: [0m'try' expected.
+
+[7m653[0m   } catch (error: any) {
+[7m   [0m [91m    ~~~~~[0m
+[96msrc/controllers/adminController.ts[0m:[93m661[0m:[93m1[0m - [91merror[0m[90m TS1128: [0mDeclaration or statement expected.
+
+[7m661[0m };
+[7m   [0m [91m~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-24 13:40:56 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/feedbackController.ts[0m:[93m6[0m:[93m31[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m6[0m export const createFeedback = async (req: AuthenticatedRequest, res: Response) => {
+[7m [0m [91m                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/feedbackController.ts[0m:[93m20[0m:[93m13[0m - [91merror[0m[90m TS2322: [0mType '{ user_id: string; type: any; subject: any; message: any; priority: any; }' is not assignable to type '(Without<feedbackCreateInput, feedbackUncheckedCreateInput> & feedbackUncheckedCreateInput) | (Without<...> & feedbackCreateInput)'.
+  Type '{ user_id: string; type: any; subject: any; message: any; priority: any; }' is not assignable to type 'Without<feedbackCreateInput, feedbackUncheckedCreateInput> & feedbackUncheckedCreateInput'.
+    Property 'id' is missing in type '{ user_id: string; type: any; subject: any; message: any; priority: any; }' but required in type 'feedbackUncheckedCreateInput'.
+
+[7m20[0m             data: {
+[7m  [0m [91m            ~~~~[0m
+
+  [96mnode_modules/.prisma/client/index.d.ts[0m:[93m42863[0m:[93m5[0m
+    [7m42863[0m     id: string
+    [7m     [0m [96m    ~~[0m
+    'id' is declared here.
+  [96mnode_modules/.prisma/client/index.d.ts[0m:[93m28346[0m:[93m5[0m
+    [7m28346[0m     data: XOR<feedbackCreateInput, feedbackUncheckedCreateInput>
+    [7m     [0m [96m    ~~~~[0m
+    The expected type comes from property 'data' which is declared here on type '{ select?: feedbackSelect<DefaultArgs> | null | undefined; omit?: feedbackOmit<DefaultArgs> | null | undefined; include?: feedbackInclude<...> | ... 1 more ... | undefined; data: (Without<...> & feedbackUncheckedCreateInput) | (Without<...> & feedbackCreateInput); }'
+[96msrc/controllers/feedbackController.ts[0m:[93m49[0m:[93m33[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m49[0m export const getUserFeedbacks = async (req: AuthenticatedRequest, res: Response) => {
+[7m  [0m [91m                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/feedbackController.ts[0m:[93m133[0m:[93m34[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m133[0m export const respondToFeedback = async (req: AuthenticatedRequest, res: Response) => {
+[7m   [0m [91m                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/feedbackController.ts[0m:[93m170[0m:[93m13[0m - [91merror[0m[90m TS2322: [0mType '{ user_id: string; type: "FEEDBACK_RESPONSE"; title: string; message: string; data: { feedback_id: string; feedback_subject: string; admin_response: any; }; }' is not assignable to type '(Without<notificationsCreateInput, notificationsUncheckedCreateInput> & notificationsUncheckedCreateInput) | (Without<...> & notificationsCreateInput)'.
+  Type '{ user_id: string; type: "FEEDBACK_RESPONSE"; title: string; message: string; data: { feedback_id: string; feedback_subject: string; admin_response: any; }; }' is not assignable to type 'Without<notificationsCreateInput, notificationsUncheckedCreateInput> & notificationsUncheckedCreateInput'.
+    Property 'id' is missing in type '{ user_id: string; type: "FEEDBACK_RESPONSE"; title: string; message: string; data: { feedback_id: string; feedback_subject: string; admin_response: any; }; }' but required in type 'notificationsUncheckedCreateInput'.
+
+[7m170[0m             data: {
+[7m   [0m [91m            ~~~~[0m
+
+  [96mnode_modules/.prisma/client/index.d.ts[0m:[93m42962[0m:[93m5[0m
+    [7m42962[0m     id: string
+    [7m     [0m [96m    ~~[0m
+    'id' is declared here.
+  [96mnode_modules/.prisma/client/index.d.ts[0m:[93m29458[0m:[93m5[0m
+    [7m29458[0m     data: XOR<notificationsCreateInput, notificationsUncheckedCreateInput>
+    [7m     [0m [96m    ~~~~[0m
+    The expected type comes from property 'data' which is declared here on type '{ select?: notificationsSelect<DefaultArgs> | null | undefined; omit?: notificationsOmit<DefaultArgs> | null | undefined; include?: notificationsInclude<...> | ... 1 more ... | undefined; data: (Without<...> & notificationsUncheckedCreateInput) | (Without<...> & notificationsCreateInput); }'
+[96msrc/controllers/feedbackController.ts[0m:[93m194[0m:[93m34[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m194[0m export const getFeedbackDetail = async (req: Request, res: Response) => {
+[7m   [0m [91m                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-24 13:41:11 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/feedbackController.ts[0m:[93m6[0m:[93m31[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m6[0m export const createFeedback = async (req: AuthenticatedRequest, res: Response) => {
+[7m [0m [91m                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/feedbackController.ts[0m:[93m20[0m:[93m13[0m - [91merror[0m[90m TS2322: [0mType '{ user_id: string; type: any; subject: any; message: any; priority: any; }' is not assignable to type '(Without<feedbackCreateInput, feedbackUncheckedCreateInput> & feedbackUncheckedCreateInput) | (Without<...> & feedbackCreateInput)'.
+  Type '{ user_id: string; type: any; subject: any; message: any; priority: any; }' is not assignable to type 'Without<feedbackCreateInput, feedbackUncheckedCreateInput> & feedbackUncheckedCreateInput'.
+    Property 'id' is missing in type '{ user_id: string; type: any; subject: any; message: any; priority: any; }' but required in type 'feedbackUncheckedCreateInput'.
+
+[7m20[0m             data: {
+[7m  [0m [91m            ~~~~[0m
+
+  [96mnode_modules/.prisma/client/index.d.ts[0m:[93m42863[0m:[93m5[0m
+    [7m42863[0m     id: string
+    [7m     [0m [96m    ~~[0m
+    'id' is declared here.
+  [96mnode_modules/.prisma/client/index.d.ts[0m:[93m28346[0m:[93m5[0m
+    [7m28346[0m     data: XOR<feedbackCreateInput, feedbackUncheckedCreateInput>
+    [7m     [0m [96m    ~~~~[0m
+    The expected type comes from property 'data' which is declared here on type '{ select?: feedbackSelect<DefaultArgs> | null | undefined; omit?: feedbackOmit<DefaultArgs> | null | undefined; include?: feedbackInclude<...> | ... 1 more ... | undefined; data: (Without<...> & feedbackUncheckedCreateInput) | (Without<...> & feedbackCreateInput); }'
+[96msrc/controllers/feedbackController.ts[0m:[93m49[0m:[93m33[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m49[0m export const getUserFeedbacks = async (req: AuthenticatedRequest, res: Response) => {
+[7m  [0m [91m                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/feedbackController.ts[0m:[93m133[0m:[93m34[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m133[0m export const respondToFeedback = async (req: AuthenticatedRequest, res: Response) => {
+[7m   [0m [91m                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/controllers/feedbackController.ts[0m:[93m170[0m:[93m13[0m - [91merror[0m[90m TS2322: [0mType '{ user_id: string; type: "FEEDBACK_RESPONSE"; title: string; message: string; data: { feedback_id: string; feedback_subject: string; admin_response: any; }; }' is not assignable to type '(Without<notificationsCreateInput, notificationsUncheckedCreateInput> & notificationsUncheckedCreateInput) | (Without<...> & notificationsCreateInput)'.
+  Type '{ user_id: string; type: "FEEDBACK_RESPONSE"; title: string; message: string; data: { feedback_id: string; feedback_subject: string; admin_response: any; }; }' is not assignable to type 'Without<notificationsCreateInput, notificationsUncheckedCreateInput> & notificationsUncheckedCreateInput'.
+    Property 'id' is missing in type '{ user_id: string; type: "FEEDBACK_RESPONSE"; title: string; message: string; data: { feedback_id: string; feedback_subject: string; admin_response: any; }; }' but required in type 'notificationsUncheckedCreateInput'.
+
+[7m170[0m             data: {
+[7m   [0m [91m            ~~~~[0m
+
+  [96mnode_modules/.prisma/client/index.d.ts[0m:[93m42962[0m:[93m5[0m
+    [7m42962[0m     id: string
+    [7m     [0m [96m    ~~[0m
+    'id' is declared here.
+  [96mnode_modules/.prisma/client/index.d.ts[0m:[93m29458[0m:[93m5[0m
+    [7m29458[0m     data: XOR<notificationsCreateInput, notificationsUncheckedCreateInput>
+    [7m     [0m [96m    ~~~~[0m
+    The expected type comes from property 'data' which is declared here on type '{ select?: notificationsSelect<DefaultArgs> | null | undefined; omit?: notificationsOmit<DefaultArgs> | null | undefined; include?: notificationsInclude<...> | ... 1 more ... | undefined; data: (Without<...> & notificationsUncheckedCreateInput) | (Without<...> & notificationsCreateInput); }'
+[96msrc/controllers/feedbackController.ts[0m:[93m194[0m:[93m34[0m - [91merror[0m[90m TS7030: [0mNot all code paths return a value.
+
+[7m194[0m export const getFeedbackDetail = async (req: Request, res: Response) => {
+[7m   [0m [91m                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-24 13:57:42 [error]: Error: Cannot find module '../utils/database.js'
+Require stack:
+- C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\feedbackController.ts
+- C:\Users\salih\Desktop\TruckBus\Backend\src\routes\feedbackRoutes.ts
+- C:\Users\salih\Desktop\TruckBus\Backend\src\simpleIndex.ts
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1369:15)
+    at Module._resolveFilename.sharedData.moduleResolveFilenameHook.installedValue [as _resolveFilename] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@cspotcode\source-map-support\source-map-support.js:811:30)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1025:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1030:22)
+    at Module._load (node:internal/modules/cjs/loader:1179:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Module.require (node:internal/modules/cjs/loader:1449:12)
+    at require (node:internal/modules/helpers:135:16)
+    at Object.<anonymous> (C:\Users\salih\Desktop\TruckBus\Backend\src\controllers\feedbackController.ts:2:1)
+2025-08-24 14:02:31 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/feedbackController.ts[0m:[93m22[0m:[93m39[0m - [91merror[0m[90m TS2551: [0mProperty 'Feedback' does not exist on type 'PrismaClient<{ log: ({ emit: "event"; level: "query"; } | { emit: "event"; level: "error"; } | { emit: "event"; level: "warn"; })[]; }, "error" | "query" | "warn", DefaultArgs>'. Did you mean 'feedback'?
+
+[7m22[0m         const feedback = await prisma.Feedback.create({
+[7m  [0m [91m                                      ~~~~~~~~[0m
+
+  [96mnode_modules/.prisma/client/index.d.ts[0m:[93m716[0m:[93m7[0m
+    [7m716[0m   get feedback(): Prisma.feedbackDelegate<ExtArgs, ClientOptions>;
+    [7m   [0m [96m      ~~~~~~~~[0m
+    'feedback' is declared here.
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-24 15:12:07 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/routes/listingRoutes.ts[0m:[93m2[0m:[93m1[0m - [91merror[0m[90m TS2552: [0mCannot find name 'irouter'. Did you mean 'router'?
+
+[7m2[0m irouter.post(
+[7m [0m [91m~~~~~~~[0m
+
+  [96msrc/routes/listingRoutes.ts[0m:[93m26[0m:[93m7[0m
+    [7m26[0m const router = Router();
+    [7m  [0m [96m      ~~~~~~[0m
+    'router' is declared here.
+[96msrc/routes/listingRoutes.ts[0m:[93m4[0m:[93m3[0m - [91merror[0m[90m TS2448: [0mBlock-scoped variable 'upload' used before its declaration.
+
+[7m4[0m   upload.fields([{ name: 'images', maxCount: 15 }]), // hem dosyayı hem metni parse eder
+[7m [0m [91m  ~~~~~~[0m
+
+  [96msrc/routes/listingRoutes.ts[0m:[93m27[0m:[93m7[0m
+    [7m27[0m const upload = multer({ storage: multer.memoryStorage() });
+    [7m  [0m [96m      ~~~~~~[0m
+    'upload' is declared here.
+[96msrc/routes/listingRoutes.ts[0m:[93m8[0m:[93m1[0m - [91merror[0m[90m TS2448: [0mBlock-scoped variable 'router' used before its declaration.
+
+[7m8[0m router.put('/:id', updateListing);  // PUT /api/listings/:id
+[7m [0m [91m~~~~~~[0m
+
+  [96msrc/routes/listingRoutes.ts[0m:[93m26[0m:[93m7[0m
+    [7m26[0m const router = Router();
+    [7m  [0m [96m      ~~~~~~[0m
+    'router' is declared here.
+[96msrc/routes/listingRoutes.ts[0m:[93m8[0m:[93m1[0m - [91merror[0m[90m TS2454: [0mVariable 'router' is used before being assigned.
+
+[7m8[0m router.put('/:id', updateListing);  // PUT /api/listings/:id
+[7m [0m [91m~~~~~~[0m
+[96msrc/routes/listingRoutes.ts[0m:[93m9[0m:[93m1[0m - [91merror[0m[90m TS2448: [0mBlock-scoped variable 'router' used before its declaration.
+
+[7m9[0m router.delete('/:id', deleteListing);  // DELETE /api/listings/:id from 'multer';
+[7m [0m [91m~~~~~~[0m
+
+  [96msrc/routes/listingRoutes.ts[0m:[93m26[0m:[93m7[0m
+    [7m26[0m const router = Router();
+    [7m  [0m [96m      ~~~~~~[0m
+    'router' is declared here.
+[96msrc/routes/listingRoutes.ts[0m:[93m9[0m:[93m1[0m - [91merror[0m[90m TS2454: [0mVariable 'router' is used before being assigned.
+
+[7m9[0m router.delete('/:id', deleteListing);  // DELETE /api/listings/:id from 'multer';
+[7m [0m [91m~~~~~~[0m
+[96msrc/routes/listingRoutes.ts[0m:[93m27[0m:[93m16[0m - [91merror[0m[90m TS2304: [0mCannot find name 'multer'.
+
+[7m27[0m const upload = multer({ storage: multer.memoryStorage() });
+[7m  [0m [91m               ~~~~~~[0m
+[96msrc/routes/listingRoutes.ts[0m:[93m27[0m:[93m34[0m - [91merror[0m[90m TS2304: [0mCannot find name 'multer'.
+
+[7m27[0m const upload = multer({ storage: multer.memoryStorage() });
+[7m  [0m [91m                                 ~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-24 15:12:29 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/routes/listingRoutes.ts[0m:[93m48[0m:[93m16[0m - [91merror[0m[90m TS2528: [0mA module cannot have multiple default exports.
+
+[7m48[0m export default router;
+[7m  [0m [91m               ~~~~~~[0m
+
+  [96msrc/routes/listingRoutes.ts[0m:[93m55[0m:[93m16[0m
+    [7m55[0m export default router;
+    [7m  [0m [96m               ~~~~~~[0m
+    Another export default is here.
+[96msrc/routes/listingRoutes.ts[0m:[93m55[0m:[93m16[0m - [91merror[0m[90m TS2528: [0mA module cannot have multiple default exports.
+
+[7m55[0m export default router;
+[7m  [0m [91m               ~~~~~~[0m
+
+  [96msrc/routes/listingRoutes.ts[0m:[93m48[0m:[93m16[0m
+    [7m48[0m export default router;
+    [7m  [0m [96m               ~~~~~~[0m
+    The first export default is here.
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-25 16:03:54 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/feedbackController.ts[0m:[93m3[0m:[93m38[0m - [91merror[0m[90m TS2307: [0mCannot find module '../types/auth' or its corresponding type declarations.
+
+[7m3[0m import { AuthenticatedRequest } from '../types/auth';
+[7m [0m [91m                                     ~~~~~~~~~~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-25 16:04:03 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/feedbackController.ts[0m:[93m3[0m:[93m38[0m - [91merror[0m[90m TS2306: [0mFile 'C:/Users/salih/Desktop/TruckBus/Backend/src/types/auth.ts' is not a module.
+
+[7m3[0m import { AuthenticatedRequest } from '../types/auth';
+[7m [0m [91m                                     ~~~~~~~~~~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-25 16:06:52 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/feedbackController.ts[0m:[93m3[0m:[93m38[0m - [91merror[0m[90m TS2306: [0mFile 'C:/Users/salih/Desktop/TruckBus/Backend/src/types/auth.ts' is not a module.
+
+[7m3[0m import { AuthenticatedRequest } from '../types/auth';
+[7m [0m [91m                                     ~~~~~~~~~~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-25 16:07:02 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/feedbackController.ts[0m:[93m3[0m:[93m38[0m - [91merror[0m[90m TS2306: [0mFile 'C:/Users/salih/Desktop/TruckBus/Backend/src/types/auth.ts' is not a module.
+
+[7m3[0m import { AuthenticatedRequest } from '../types/auth';
+[7m [0m [91m                                     ~~~~~~~~~~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-25 16:07:14 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/feedbackController.ts[0m:[93m3[0m:[93m38[0m - [91merror[0m[90m TS2306: [0mFile 'C:/Users/salih/Desktop/TruckBus/Backend/src/types/auth.ts' is not a module.
+
+[7m3[0m import { AuthenticatedRequest } from '../types/auth';
+[7m [0m [91m                                     ~~~~~~~~~~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-25 16:07:24 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/feedbackController.ts[0m:[93m3[0m:[93m38[0m - [91merror[0m[90m TS2306: [0mFile 'C:/Users/salih/Desktop/TruckBus/Backend/src/types/auth.ts' is not a module.
+
+[7m3[0m import { AuthenticatedRequest } from '../types/auth';
+[7m [0m [91m                                     ~~~~~~~~~~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-25 16:07:36 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/feedbackController.ts[0m:[93m3[0m:[93m38[0m - [91merror[0m[90m TS2306: [0mFile 'C:/Users/salih/Desktop/TruckBus/Backend/src/types/auth.ts' is not a module.
+
+[7m3[0m import { AuthenticatedRequest } from '../types/auth';
+[7m [0m [91m                                     ~~~~~~~~~~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-25 16:33:04 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/feedbackController.ts[0m:[93m3[0m:[93m38[0m - [91merror[0m[90m TS2306: [0mFile 'C:/Users/salih/Desktop/TruckBus/Backend/src/types/auth.ts' is not a module.
+
+[7m3[0m import { AuthenticatedRequest } from '../types/auth';
+[7m [0m [91m                                     ~~~~~~~~~~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-25 16:33:17 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/feedbackController.ts[0m:[93m3[0m:[93m38[0m - [91merror[0m[90m TS2306: [0mFile 'C:/Users/salih/Desktop/TruckBus/Backend/src/types/auth.ts' is not a module.
+
+[7m3[0m import { AuthenticatedRequest } from '../types/auth';
+[7m [0m [91m                                     ~~~~~~~~~~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-25 17:01:21 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/feedbackController.ts[0m:[93m3[0m:[93m38[0m - [91merror[0m[90m TS2306: [0mFile 'C:/Users/salih/Desktop/TruckBus/Backend/src/types/auth.ts' is not a module.
+
+[7m3[0m import { AuthenticatedRequest } from '../types/auth';
+[7m [0m [91m                                     ~~~~~~~~~~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-25 18:04:57 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/feedbackController.ts[0m:[93m3[0m:[93m38[0m - [91merror[0m[90m TS2306: [0mFile 'C:/Users/salih/Desktop/TruckBus/Backend/src/types/auth.ts' is not a module.
+
+[7m3[0m import { AuthenticatedRequest } from '../types/auth';
+[7m [0m [91m                                     ~~~~~~~~~~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-25 18:04:58 [error]: PrismaClientInitializationError: Can't reach database server at `ballast.proxy.rlwy.net:19163`
+
+Please make sure your database server is running at `ballast.proxy.rlwy.net:19163`.
+    at r (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\core\engines\library\LibraryEngine.ts:440:17)
+    at async startServer (C:\Users\salih\Desktop\TruckBus\Backend\src\simpleIndex.ts:372:5)
+2025-08-25 18:19:36 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/feedbackController.ts[0m:[93m3[0m:[93m38[0m - [91merror[0m[90m TS2306: [0mFile 'C:/Users/salih/Desktop/TruckBus/Backend/src/types/auth.ts' is not a module.
+
+[7m3[0m import { AuthenticatedRequest } from '../types/auth';
+[7m [0m [91m                                     ~~~~~~~~~~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-25 18:19:36 [error]: PrismaClientInitializationError: Can't reach database server at `ballast.proxy.rlwy.net:19163`
+
+Please make sure your database server is running at `ballast.proxy.rlwy.net:19163`.
+    at r (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\core\engines\library\LibraryEngine.ts:440:17)
+    at async startServer (C:\Users\salih\Desktop\TruckBus\Backend\src\simpleIndex.ts:372:5)
+2025-08-25 18:20:14 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/feedbackController.ts[0m:[93m3[0m:[93m38[0m - [91merror[0m[90m TS2306: [0mFile 'C:/Users/salih/Desktop/TruckBus/Backend/src/types/auth.ts' is not a module.
+
+[7m3[0m import { AuthenticatedRequest } from '../types/auth';
+[7m [0m [91m                                     ~~~~~~~~~~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-25 18:20:14 [error]: PrismaClientInitializationError: Can't reach database server at `ballast.proxy.rlwy.net:19163`
+
+Please make sure your database server is running at `ballast.proxy.rlwy.net:19163`.
+    at r (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\core\engines\library\LibraryEngine.ts:440:17)
+    at async startServer (C:\Users\salih\Desktop\TruckBus\Backend\src\simpleIndex.ts:372:5)
+2025-08-25 18:29:56 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/feedbackController.ts[0m:[93m3[0m:[93m38[0m - [91merror[0m[90m TS2306: [0mFile 'C:/Users/salih/Desktop/TruckBus/Backend/src/types/auth.ts' is not a module.
+
+[7m3[0m import { AuthenticatedRequest } from '../types/auth';
+[7m [0m [91m                                     ~~~~~~~~~~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-25 18:29:56 [error]: PrismaClientInitializationError: Can't reach database server at `ballast.proxy.rlwy.net:19163`
+
+Please make sure your database server is running at `ballast.proxy.rlwy.net:19163`.
+    at r (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\core\engines\library\LibraryEngine.ts:440:17)
+    at async startServer (C:\Users\salih\Desktop\TruckBus\Backend\src\simpleIndex.ts:372:5)
+2025-08-25 18:35:39 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/feedbackController.ts[0m:[93m3[0m:[93m38[0m - [91merror[0m[90m TS2306: [0mFile 'C:/Users/salih/Desktop/TruckBus/Backend/src/types/auth.ts' is not a module.
+
+[7m3[0m import { AuthenticatedRequest } from '../types/auth';
+[7m [0m [91m                                     ~~~~~~~~~~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-25 18:35:40 [error]: PrismaClientInitializationError: Can't reach database server at `ballast.proxy.rlwy.net:19163`
+
+Please make sure your database server is running at `ballast.proxy.rlwy.net:19163`.
+    at r (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\core\engines\library\LibraryEngine.ts:440:17)
+    at async startServer (C:\Users\salih\Desktop\TruckBus\Backend\src\simpleIndex.ts:372:5)
+2025-08-25 18:36:02 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/feedbackController.ts[0m:[93m3[0m:[93m38[0m - [91merror[0m[90m TS2306: [0mFile 'C:/Users/salih/Desktop/TruckBus/Backend/src/types/auth.ts' is not a module.
+
+[7m3[0m import { AuthenticatedRequest } from '../types/auth';
+[7m [0m [91m                                     ~~~~~~~~~~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-25 18:36:03 [error]: PrismaClientInitializationError: Can't reach database server at `ballast.proxy.rlwy.net:19163`
+
+Please make sure your database server is running at `ballast.proxy.rlwy.net:19163`.
+    at r (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\core\engines\library\LibraryEngine.ts:440:17)
+    at async startServer (C:\Users\salih\Desktop\TruckBus\Backend\src\simpleIndex.ts:372:5)
+2025-08-25 18:37:10 [error]: TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/feedbackController.ts[0m:[93m3[0m:[93m38[0m - [91merror[0m[90m TS2306: [0mFile 'C:/Users/salih/Desktop/TruckBus/Backend/src/types/auth.ts' is not a module.
+
+[7m3[0m import { AuthenticatedRequest } from '../types/auth';
+[7m [0m [91m                                     ~~~~~~~~~~~~~~~[0m
+
+    at createTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-08-25 18:37:10 [error]: PrismaClientInitializationError: Can't reach database server at `ballast.proxy.rlwy.net:19163`
+
+Please make sure your database server is running at `ballast.proxy.rlwy.net:19163`.
+    at r (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\core\engines\library\LibraryEngine.ts:440:17)
+    at async startServer (C:\Users\salih\Desktop\TruckBus\Backend\src\simpleIndex.ts:372:5)
+2025-08-25 20:02:57 [error]: PrismaClientInitializationError: Can't reach database server at `ballast.proxy.rlwy.net:19163`
+
+Please make sure your database server is running at `ballast.proxy.rlwy.net:19163`.
+    at r (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\core\engines\library\LibraryEngine.ts:440:17)
+    at async connectDatabase (C:\Users\salih\Desktop\TruckBus\Backend\src\index.ts:169:5)
+    at async startServer (C:\Users\salih\Desktop\TruckBus\Backend\src\index.ts:201:7)
+2025-08-25 20:02:57 [error]: PrismaClientInitializationError: Can't reach database server at `ballast.proxy.rlwy.net:19163`
+
+Please make sure your database server is running at `ballast.proxy.rlwy.net:19163`.
+    at r (C:\Users\salih\Desktop\TruckBus\Backend\node_modules\@prisma\client\src\runtime\core\engines\library\LibraryEngine.ts:440:17)
+    at async connectDatabase (C:\Users\salih\Desktop\TruckBus\Backend\src\index.ts:169:5)
+    at async startServer (C:\Users\salih\Desktop\TruckBus\Backend\src\index.ts:201:7)

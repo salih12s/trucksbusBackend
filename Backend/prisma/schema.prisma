@@ -1,0 +1,584 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model blocked_users {
+  id         String   @id
+  blocker_id String
+  blocked_id String
+  created_at DateTime @default(now())
+
+  @@unique([blocker_id, blocked_id])
+}
+
+model brands {
+  id              String        @id
+  name            String
+  vehicle_type_id String
+  created_at      DateTime      @default(now())
+  updated_at      DateTime
+  image_url       String?
+  vehicle_types   vehicle_types @relation(fields: [vehicle_type_id], references: [id], onDelete: Cascade)
+  listings        listings[]
+  models          models[]
+}
+
+model categories {
+  id                  String                @id
+  name                String
+  created_at          DateTime              @default(now())
+  updated_at          DateTime
+  category_attributes category_attributes[]
+  listings            listings[]
+  vehicle_types       vehicle_types[]
+}
+
+model category_attributes {
+  id              String         @id
+  category_id     String
+  vehicle_type_id String?
+  key             String
+  label           String
+  type            PropertyType
+  is_required     Boolean        @default(false)
+  is_filterable   Boolean        @default(false)
+  sort_order      Int            @default(0)
+  options         Json?
+  categories      categories     @relation(fields: [category_id], references: [id])
+  vehicle_types   vehicle_types? @relation(fields: [vehicle_type_id], references: [id])
+
+  @@unique([category_id, vehicle_type_id, key])
+}
+
+model cities {
+  id         String      @id
+  name       String
+  plate_code String?
+  created_at DateTime    @default(now())
+  updated_at DateTime
+  districts  districts[]
+  listings   listings[]
+}
+
+model complaints {
+  id                                     String            @id
+  user_id                                String
+  target_type                            ComplaintTarget
+  target_user_id                         String?
+  target_listing_id                      String?
+  category                               ComplaintCategory
+  description                            String?
+  status                                 ComplaintStatus   @default(PENDING)
+  admin_response                         String?
+  admin_id                               String?
+  created_at                             DateTime          @default(now())
+  updated_at                             DateTime
+  listings                               listings?         @relation(fields: [target_listing_id], references: [id], onDelete: Cascade)
+  users_complaints_target_user_idTousers users?            @relation("complaints_target_user_idTousers", fields: [target_user_id], references: [id], onDelete: Cascade)
+  users_complaints_user_idTousers        users             @relation("complaints_user_idTousers", fields: [user_id], references: [id], onDelete: Cascade)
+}
+
+model conversation_counters {
+  conversation_id      String        @id
+  last_message_id      String?
+  last_message_preview String?       @db.VarChar(160)
+  last_message_at      DateTime?
+  conversations        conversations @relation(fields: [conversation_id], references: [id], onDelete: Cascade)
+  messages             messages?     @relation(fields: [last_message_id], references: [id])
+
+  @@index([last_message_at])
+}
+
+model conversation_participants {
+  id              String        @id
+  conversation_id String
+  user_id         String
+  role            String?       @default("participant")
+  joined_at       DateTime      @default(now())
+  conversations   conversations @relation(fields: [conversation_id], references: [id], onDelete: Cascade)
+  users           users         @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([conversation_id, user_id])
+}
+
+model conversation_unread_counters {
+  id              String        @id
+  conversation_id String
+  user_id         String
+  unread_count    Int           @default(0)
+  updated_at      DateTime      @default(now())
+  conversations   conversations @relation(fields: [conversation_id], references: [id], onDelete: Cascade)
+  users           users         @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([conversation_id, user_id])
+}
+
+model conversations {
+  id                           String                         @id
+  listing_id                   String?
+  least_user_id                String
+  greatest_user_id             String
+  created_at                   DateTime                       @default(now())
+  conversation_counters        conversation_counters?
+  conversation_hidden          conversation_hidden[]
+  conversation_participants    conversation_participants[]
+  conversation_unread_counters conversation_unread_counters[]
+  listings                     listings?                      @relation(fields: [listing_id], references: [id], onDelete: Cascade)
+  message_reads                message_reads[]
+  messages                     messages[]
+
+  @@unique([least_user_id, greatest_user_id, listing_id])
+}
+
+model districts {
+  id         String     @id
+  name       String
+  city_id    String
+  created_at DateTime   @default(now())
+  updated_at DateTime
+  cities     cities     @relation(fields: [city_id], references: [id], onDelete: Cascade)
+  listings   listings[]
+}
+
+model favorites {
+  id         String   @id
+  user_id    String
+  listing_id String
+  created_at DateTime @default(now())
+  listings   listings @relation(fields: [listing_id], references: [id], onDelete: Cascade)
+  users      users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, listing_id])
+}
+
+model feature_definitions {
+  id             String         @id
+  group_id       String
+  key            String
+  label          String
+  sort_order     Int            @default(0)
+  feature_groups feature_groups @relation(fields: [group_id], references: [id])
+
+  @@unique([group_id, key])
+}
+
+model feature_groups {
+  id                  String                @id
+  vehicle_type_id     String
+  name                String
+  label               String
+  sort_order          Int                   @default(0)
+  feature_definitions feature_definitions[]
+  vehicle_types       vehicle_types         @relation(fields: [vehicle_type_id], references: [id])
+
+  @@unique([vehicle_type_id, name])
+}
+
+model listing_images {
+  id         String   @id
+  listing_id String
+  url        String
+  alt        String?
+  sort_order Int      @default(0)
+  listings   listings @relation(fields: [listing_id], references: [id], onDelete: Cascade)
+}
+
+model listing_properties {
+  id         String       @id
+  listing_id String
+  key        String
+  value      String
+  type       PropertyType
+  listings   listings     @relation(fields: [listing_id], references: [id], onDelete: Cascade)
+
+  @@unique([listing_id, key])
+}
+
+model listings {
+  id                 String               @id
+  title              String
+  description        String?
+  price              Decimal              @db.Decimal(12, 2)
+  year               Int
+  category_id        String
+  vehicle_type_id    String
+  brand_id           String?
+  model_id           String?
+  variant_id         String?
+  status             ListingStatus        @default(DRAFT)
+  is_active          Boolean              @default(true)
+  is_approved        Boolean              @default(false)
+  is_pending         Boolean              @default(true)
+  view_count         Int                  @default(0)
+  is_promoted        Boolean              @default(false)
+  approved_by        String?
+  approved_at        DateTime?
+  rejected_at        DateTime?
+  reject_reason      String?
+  seller_name        String
+  seller_phone       String
+  seller_email       String
+  city_id            String?
+  district_id        String?
+  created_at         DateTime             @default(now())
+  updated_at         DateTime
+  user_id            String
+  color              String?
+  engine_power       String?
+  engine_volume      String?
+  fuel_type          String?
+  is_exchangeable    Boolean              @default(false)
+  km                 Int?
+  license_plate      String?
+  neighborhood_id    String?
+  transmission       String?
+  vehicle_condition  String?
+  images             Json?                @default("[]")
+  moderation_status  ModerationStatus     @default(ACTIVE)
+  body_type          String?
+  cabin_type         String?
+  carrying_capacity  String?
+  damage_record      String?
+  drive_type         String?
+  features           Json?                @default("{}")
+  paint_change       String?
+  plate_origin       String?
+  tire_condition     String?
+  tramer_record      String?
+  complaints         complaints[]
+  conversations      conversations[]
+  favorites          favorites[]
+  listing_images     listing_images[]
+  listing_properties listing_properties[]
+  brands             brands?              @relation(fields: [brand_id], references: [id])
+  categories         categories           @relation(fields: [category_id], references: [id])
+  cities             cities?              @relation(fields: [city_id], references: [id])
+  districts          districts?           @relation(fields: [district_id], references: [id])
+  models             models?              @relation(fields: [model_id], references: [id])
+  users              users                @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  variants           variants?            @relation(fields: [variant_id], references: [id])
+  vehicle_types      vehicle_types        @relation(fields: [vehicle_type_id], references: [id])
+  reports            reports[]
+}
+
+model message_reads {
+  id                   String        @id
+  conversation_id      String
+  user_id              String
+  last_read_message_id String?
+  updated_at           DateTime      @default(now())
+  conversations        conversations @relation(fields: [conversation_id], references: [id], onDelete: Cascade)
+  messages             messages?     @relation(fields: [last_read_message_id], references: [id])
+  users                users         @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([conversation_id, user_id])
+}
+
+model messages {
+  id                    String                  @id
+  conversation_id       String
+  sender_id             String
+  body                  String
+  attachment_url        String?
+  status                MessageStatus           @default(SENT)
+  created_at            DateTime                @default(now())
+  conversation_counters conversation_counters[]
+  message_reads         message_reads[]
+  conversations         conversations           @relation(fields: [conversation_id], references: [id], onDelete: Cascade)
+  users                 users                   @relation(fields: [sender_id], references: [id], onDelete: Cascade)
+
+  @@index([conversation_id, created_at])
+  @@index([conversation_id, id])
+}
+
+model models {
+  id         String     @id
+  name       String
+  brand_id   String
+  created_at DateTime   @default(now())
+  updated_at DateTime
+  listings   listings[]
+  brands     brands     @relation(fields: [brand_id], references: [id], onDelete: Cascade)
+  variants   variants[]
+}
+
+model feedback {
+  id             String         @id
+  user_id        String
+  type           FeedbackType   @default(GENERAL)
+  subject        String
+  message        String
+  priority       Priority       @default(MEDIUM)
+  status         FeedbackStatus @default(OPEN)
+  admin_response String?
+  admin_id       String?
+  responded_at   DateTime?
+  created_at     DateTime       @default(now())
+  updated_at     DateTime       @updatedAt
+  admin          users?         @relation("FeedbackAdmin", fields: [admin_id], references: [id])
+  user           users          @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([status, created_at])
+  @@index([user_id])
+}
+
+model notifications {
+  id         String           @id
+  user_id    String
+  type       NotificationType
+  title      String
+  message    String
+  data       Json?
+  is_read    Boolean          @default(false)
+  created_at DateTime         @default(now())
+  users      users            @relation(fields: [user_id], references: [id], onDelete: Cascade)
+}
+
+model user_unread_counters {
+  user_id      String   @id
+  total_unread Int      @default(0)
+  updated_at   DateTime @default(now())
+  users        users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+}
+
+model users {
+  id                                          String                         @id
+  email                                       String                         @unique
+  password                                    String?
+  first_name                                  String
+  last_name                                   String
+  username                                    String?                        @unique
+  phone                                       String?
+  city                                        String?
+  district                                    String?
+  role                                        UserRole                       @default(USER)
+  is_active                                   Boolean                        @default(true)
+  is_email_verified                           Boolean                        @default(false)
+  reset_password_token                        String?
+  reset_password_expires                      DateTime?
+  last_login                                  DateTime?
+  login_attempts                              Int                            @default(0)
+  lock_until                                  DateTime?
+  created_at                                  DateTime                       @default(now())
+  updated_at                                  DateTime
+  email_verification_expires                  DateTime?
+  email_verification_token                    String?
+  google_id                                   String?                        @unique(map: "idx_users_google_id")
+  provider                                    String?                        @default("email")
+  refresh_token                               String?
+  refresh_token_expires                       DateTime?
+  avatar                                      String?
+  complaints_complaints_target_user_idTousers complaints[]                   @relation("complaints_target_user_idTousers")
+  complaints_complaints_user_idTousers        complaints[]                   @relation("complaints_user_idTousers")
+  conversation_hidden                         conversation_hidden[]
+  conversation_participants                   conversation_participants[]
+  conversation_unread_counters                conversation_unread_counters[]
+  favorites                                   favorites[]
+  feedback_admin                              feedback[]                     @relation("FeedbackAdmin")
+  feedback                                    feedback[]
+  listings                                    listings[]
+  message_reads                               message_reads[]
+  messages                                    messages[]
+  notifications                               notifications[]
+  report_history                              report_history[]
+  reports_as_owner                            reports[]                      @relation("ReportsToOwner")
+  reports_as_reporter                         reports[]                      @relation("ReportsByReporter")
+  reports_reviewed                            reports[]                      @relation("ReportsReviewed")
+  user_unread_counters                        user_unread_counters?
+}
+
+model variants {
+  id         String     @id
+  name       String
+  model_id   String
+  created_at DateTime   @default(now())
+  updated_at DateTime
+  listings   listings[]
+  models     models     @relation(fields: [model_id], references: [id], onDelete: Cascade)
+}
+
+model vehicle_types {
+  id                  String                @id
+  name                String
+  category_id         String
+  created_at          DateTime              @default(now())
+  updated_at          DateTime
+  image_url           String?
+  brands              brands[]
+  category_attributes category_attributes[]
+  feature_groups      feature_groups[]
+  listings            listings[]
+  categories          categories            @relation(fields: [category_id], references: [id], onDelete: Cascade)
+}
+
+model conversation_hidden {
+  id              String        @id
+  conversation_id String
+  user_id         String
+  hidden_at       DateTime      @default(now())
+  conversations   conversations @relation(fields: [conversation_id], references: [id], onDelete: Cascade)
+  users           users         @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([conversation_id, user_id])
+}
+
+model reports {
+  id              String           @id @default(cuid())
+  listing_id      String
+  reporter_id     String
+  owner_id        String
+  reason          ReportReason
+  description     String
+  status          ReportStatus     @default(OPEN)
+  resolution_note String?
+  reviewer_id     String?
+  created_at      DateTime         @default(now())
+  updated_at      DateTime         @updatedAt
+  history         report_history[]
+  listing         listings         @relation(fields: [listing_id], references: [id])
+  owner           users            @relation("ReportsToOwner", fields: [owner_id], references: [id])
+  reporter        users            @relation("ReportsByReporter", fields: [reporter_id], references: [id])
+  reviewer        users?           @relation("ReportsReviewed", fields: [reviewer_id], references: [id])
+
+  @@index([status, created_at])
+  @@index([listing_id])
+  @@index([reporter_id])
+  @@index([owner_id])
+}
+
+model report_history {
+  id          String        @id @default(cuid())
+  report_id   String
+  actor_id    String?
+  action      ReportAction
+  from_status ReportStatus?
+  to_status   ReportStatus?
+  note        String?
+  created_at  DateTime      @default(now())
+  actor       users?        @relation(fields: [actor_id], references: [id])
+  report      reports       @relation(fields: [report_id], references: [id])
+}
+
+enum ComplaintCategory {
+  MISLEADING_FAKE_AD
+  WRONG_CATEGORY
+  SPAM_DUPLICATE
+  FRAUD_SUSPICION
+  INAPPROPRIATE_CONTENT
+  HARASSMENT_ABUSE
+  PROHIBITED_ITEM
+  OTHER
+}
+
+enum ComplaintStatus {
+  PENDING
+  RESOLVED
+  REJECTED
+}
+
+enum ComplaintTarget {
+  LISTING
+  USER
+}
+
+enum ListingStatus {
+  DRAFT
+  ACTIVE
+  INACTIVE
+  SOLD
+  EXPIRED
+  REJECTED
+  PENDING
+}
+
+enum ModerationStatus {
+  ACTIVE
+  REMOVED_BY_MODERATION
+}
+
+enum ReportStatus {
+  OPEN
+  UNDER_REVIEW
+  ACCEPTED
+  REJECTED
+}
+
+enum ReportReason {
+  FRAUD
+  NUDITY
+  WRONG_CATEGORY
+  MISLEADING_INFO
+  COPYRIGHT
+  OTHER
+}
+
+enum ReportAction {
+  CREATE
+  STATUS_CHANGE
+  NOTE_ADDED
+  LISTING_REMOVED
+}
+
+enum MessageStatus {
+  SENT
+  DELIVERED
+  READ
+}
+
+enum NotificationType {
+  LISTING_APPROVED
+  LISTING_REJECTED
+  LISTING_EXPIRED
+  GENERAL
+  COMPLAINT_RESPONSE
+  MESSAGE_RECEIVED
+  CONVERSATION_NEW
+  REPORT_NEW
+  REPORT_RESOLVED_ACCEPTED
+  REPORT_RESOLVED_REJECTED
+  LISTING_REMOVED
+  FEEDBACK_RESPONSE
+  LISTING_PUBLISHED
+  FEEDBACK_NEW
+}
+
+enum FeedbackType {
+  COMPLAINT
+  SUGGESTION
+  BUG_REPORT
+  FEATURE_REQUEST
+  GENERAL
+}
+
+enum FeedbackStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum PropertyType {
+  STRING
+  NUMBER
+  BOOLEAN
+  SELECT
+  MULTISELECT
+}
+
+enum UserRole {
+  USER
+  ADMIN
+  CORPORATE
+}
