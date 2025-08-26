@@ -180,6 +180,19 @@ export class SocketService {
       socket.join(`user:${userId}`);
       logger.info(`User ${userId} connected with socket ${socket.id}`);
 
+      // 🏠 Handle user joining their personal room (explicit)
+      socket.on("user:join", (data: { user_id: string }) => {
+        const room = `user:${data.user_id}`;
+        socket.join(room);
+        logger.info(`🏠 Socket ${socket.id} joined user room: ${room}`);
+      });
+      
+      // 🏠 Handle generic room joining (admin, etc.)
+      socket.on("join", (data: { room: string }) => {
+        logger.info(`🏠 Socket ${socket.id} joining room: ${data.room}`);
+        socket.join(data.room);
+      });
+
       // 🔒 Güvenli conversation join
       socket.on('conversation:join', async ({ conversation_id }: { conversation_id: string }, cb?: (r:any)=>void) => {
         try {
@@ -275,10 +288,13 @@ export class SocketService {
 
       // 🔒 Güvenli mesaj gönderme - ana handler
       socket.on('message:send', async (payload: { conversation_id: string; body: string }, cb?: (ack: any) => void) => {
+        console.log(`🔥 message:send received from user ${userId}:`, payload);
         try {
           const res = await this.createAndBroadcastMessage(payload.conversation_id, userId, payload.body);
+          console.log(`✅ message:send success, sending ack:`, { ok: true, message: res });
           cb?.({ ok: true, message: res });
         } catch (err: any) {
+          console.error(`❌ message:send error for user ${userId}:`, err);
           logger.error('message:send error:', err);
           cb?.({ ok: false, error: err?.message || 'Failed to send' });
         }
@@ -286,11 +302,14 @@ export class SocketService {
 
       // 🔒 Legacy alias - güvenli
       socket.on('send_message', async (payload: { conversationId: string; content?: string; body?: string }, cb?: (ack: any) => void) => {
+        console.log(`🔥 send_message received from user ${userId}:`, payload);
         try {
           const messageBody = payload.content || payload.body || '';
           const res = await this.createAndBroadcastMessage(payload.conversationId, userId, messageBody);
+          console.log(`✅ send_message success, sending ack:`, { ok: true, message: res });
           cb?.({ ok: true, message: res });
         } catch (err: any) {
+          console.error(`❌ send_message error for user ${userId}:`, err);
           logger.error('send_message error:', err);
           cb?.({ ok: false, error: err?.message || 'Failed to send' });
         }

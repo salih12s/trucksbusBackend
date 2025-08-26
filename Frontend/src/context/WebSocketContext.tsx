@@ -151,7 +151,8 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
     
     const socketInstance = io(serverUrl, {
       auth: { token },
-      path: '/socket.io/', // ✅ Explicit path
+      // Railway specific config - try without explicit path
+      // path: '/socket.io/', // ✅ Explicit path
       transports: ['polling', 'websocket'], // ✅ Polling first, then WebSocket
       // 🔧 Reconnection ve backoff ayarları
       reconnection: true,
