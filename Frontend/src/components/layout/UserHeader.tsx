@@ -27,7 +27,6 @@ import {
 import { alpha } from "@mui/material/styles";
 
 // Icons (clean)
-import SearchRounded from "@mui/icons-material/SearchRounded";
 import AddCircleRounded from "@mui/icons-material/AddCircleRounded";
 import NotificationsRounded from "@mui/icons-material/NotificationsRounded";
 import ChatBubbleRounded from "@mui/icons-material/ChatBubbleRounded";
@@ -53,7 +52,6 @@ const UserHeader: React.FC = () => {
   const { favoritesCount } = useFavorites();
   const { notifications, unreadCount, markAsRead } = useNotifications();
 
-  const [query, setQuery] = useState("");
   const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
   const [anchorElMobile, setAnchorElMobile] = useState<null | HTMLElement>(null);
   const [notificationAnchor, setNotificationAnchor] = useState<null | HTMLElement>(null);
@@ -147,10 +145,6 @@ const UserHeader: React.FC = () => {
     setNotificationAnchor(null);
   };
   
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (query.trim()) navigate(`/?search=${encodeURIComponent(query)}`);
-  };
   const handleUserMenuOpen = (e: React.MouseEvent<HTMLElement>) => setAnchorElUser(e.currentTarget);
   const handleUserMenuClose = () => setAnchorElUser(null);
   const handleMobileMenuClose = () => setAnchorElMobile(null);
@@ -236,25 +230,6 @@ const UserHeader: React.FC = () => {
 
           {/* Right */}
           <Box sx={{ display: "flex", alignItems: "center", gap: { xs: 0.5, sm: 1.5 }, ml: { xs: 1, sm: 2 } }}>
-            {/* Mobile Search */}
-            <IconButton
-              sx={{
-                display: { xs: "flex", md: "none" },
-                color: "white",
-                opacity: 0.9,
-                "&:hover": { 
-                  opacity: 1, 
-                  bgcolor: alpha("#fff", 0.1),
-                  transform: 'scale(1.05)',
-                },
-                transition: 'all 0.2s ease',
-                borderRadius: 2,
-                p: { xs: 0.5, sm: 1 },
-              }}
-            >
-              <SearchRounded sx={{ fontSize: { xs: 20, sm: 24 } }} />
-            </IconButton>
-
             {/* Desktop Icons Container */}
             <Box sx={{ 
               display: { xs: "none", sm: "flex" }, 

@@ -192,9 +192,11 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
       transports: ['websocket', 'polling'],
       // 🔧 Reconnection ve backoff ayarları
       reconnection: true,
-      reconnectionAttempts: 10,
-      reconnectionDelay: 500,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
       reconnectionDelayMax: 5000,
+      timeout: 10000,
+      forceNew: true,
     });
 
     // Connection events

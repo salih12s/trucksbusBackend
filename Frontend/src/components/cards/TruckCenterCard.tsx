@@ -46,14 +46,14 @@ const ActionButton: React.FC<{
   const theme = useTheme();
   
   const base = {
-    fontSize: { xs: compact ? 8 : 10, md: compact ? 9 : 12 }, // Mobile'da küçük font
+    fontSize: { xs: compact ? 10 : 12, md: compact ? 11 : 13 }, // Mobile'da biraz büyük font
     fontWeight: 600, // Slightly bolder for better readability
-    borderRadius: '12px', // Theme'den alınan border radius
-    px: { xs: compact ? 0.5 : 1, md: compact ? 0.8 : 1.2 }, // Mobile'da küçük padding
-    py: { xs: compact ? 0.3 : 0.5, md: compact ? 0.5 : 0.7 },
-    minWidth: { xs: compact ? '60px' : 'auto', md: compact ? '72px' : 'auto' }, // Mobile'da küçük
-    width: { xs: compact ? '60px' : '100%', md: compact ? '72px' : '100%' },
-    height: { xs: compact ? '26px' : 'auto', md: compact ? '30px' : 'auto' },
+    borderRadius: '8px', // Daha modern border radius
+    px: { xs: compact ? 1 : 1.5, md: compact ? 1.2 : 1.5 }, // Mobile'da daha büyük padding
+    py: { xs: compact ? 0.6 : 0.8, md: compact ? 0.7 : 0.9 },
+    minWidth: { xs: compact ? '70px' : 'auto', md: compact ? '80px' : 'auto' }, // Mobile'da büyük
+    width: { xs: compact ? '70px' : '100%', md: compact ? '80px' : '100%' },
+    height: { xs: compact ? '32px' : 'auto', md: compact ? '36px' : 'auto' }, // Mobile'da daha yüksek
     border: '1px solid',
     display: 'inline-flex',
     alignItems: 'center',
@@ -124,12 +124,12 @@ const ActionButton: React.FC<{
       title={label}
     >
       {icon && <Box sx={{ 
-        fontSize: { xs: compact ? '10px' : '14px', md: compact ? '12px' : '16px' }, 
+        fontSize: { xs: compact ? '14px' : '16px', md: compact ? '16px' : '18px' }, 
         display: 'flex', 
         alignItems: 'center' 
       }}>{icon}</Box>}
       {label && <Box sx={{ 
-        fontSize: { xs: compact ? 7 : 9, md: compact ? 9 : 12 }, 
+        fontSize: { xs: compact ? 10 : 12, md: compact ? 11 : 13 }, 
         fontWeight: 600, 
         lineHeight: 1 
       }}>{label}</Box>}
@@ -144,7 +144,6 @@ const TruckCenterCard: React.FC<TruckCenterCardProps> = ({
   onViewDetails,
   onSendMessage,
   onReport,
-  onDelete,
   onEdit,
   isAdminView = false,
   onApprove,
@@ -276,11 +275,11 @@ const TruckCenterCard: React.FC<TruckCenterCardProps> = ({
                   sm: 'repeat(3, 1fr)', // Small tablet'te 3 kolon  
                   md: '1fr 1fr' // Desktop'ta 2 kolon
                 }, 
-                gap: { xs: 0.5, md: 0.75 }, 
+                gap: { xs: 1, md: 1 }, // Mobile'da daha büyük gap
                 width: '100%', 
                 height: { xs: 'auto', md: '64px' },
                 '& > *': {
-                  fontSize: { xs: '0.7rem', md: '0.75rem' }, // Mobile'da küçük metin
+                  fontSize: { xs: '0.8rem', md: '0.85rem' }, // Mobile'da biraz büyük metin
                 }
               }}
             >
