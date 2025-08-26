@@ -147,16 +147,21 @@ export class SocketService {
       try {
         const token = socket.handshake.auth?.token;
         
+        console.log(`🔐 Socket auth attempt, token exists: ${!!token}`);
+        
         if (!token) {
+          console.error('❌ No token provided in socket auth');
           return next(new Error('NO_TOKEN'));
         }
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key') as any;
         socket.userId = decoded.id; // Ensure we're using decoded.id
         
+        console.log(`✅ Socket authenticated for user: ${decoded.id}`);
         logger.info(`Socket authenticated for user: ${decoded.id}`);
         next();
       } catch (error) {
+        console.error('❌ Socket authentication failed:', error);
         logger.error('Socket authentication failed:', error);
         next(new Error('BAD_TOKEN'));
       }
@@ -165,19 +170,26 @@ export class SocketService {
 
   private setupEventHandlers() {
     this.io.on('connection', (socket) => {
+      console.log(`🔌 NEW SOCKET CONNECTION: ${socket.id}`);
+      
       const userId = socket.userId;
       
+      console.log(`🔍 Socket userId from auth: ${userId}`);
+      
       if (!userId) {
+        console.error(`❌ No userId found, disconnecting socket: ${socket.id}`);
         socket.disconnect();
         return;
       }
       
       // Store user connection
       this.connectedUsers.set(userId, socket.id);
+      console.log(`✅ User ${userId} connected with socket ${socket.id}`);
       logger.info(`User ${userId} connected with socket ${socket.id}`);
 
       // Join user to their personal room
       socket.join(`user:${userId}`);
+      console.log(`🏠 User ${userId} joined personal room: user:${userId}`);
       logger.info(`User ${userId} connected with socket ${socket.id}`);
 
       // 🏠 Handle user joining their personal room (explicit)

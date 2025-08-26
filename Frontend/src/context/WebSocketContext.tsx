@@ -167,17 +167,22 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
     // Connection events
     socketInstance.on('connect', async () => {
       console.log('🟢 WebSocket connected successfully!');
+      console.log('🔍 Socket ID:', socketInstance.id);
+      console.log('🔍 Socket connected:', socketInstance.connected);
+      console.log('🔍 Socket transport:', socketInstance.io.engine?.transport?.name);
       if (import.meta.env.DEV) console.log('🟢 WebSocket connected');
       setIsConnected(true);
       joinedRoomsRef.current.clear();                 // 🔧 önemli
 
       // Join user-specific room
       if (user?.id) {
+        console.log('🏠 Emitting user:join for user:', user.id);
         socketInstance.emit('user:join', { user_id: user.id });
         socketInstance.emit('join', { room: `user:${user.id}` }); // extra
         
         // Join admin room if user is admin
         if (user.role === 'ADMIN') {
+          console.log('👑 Emitting admin room join');
           socketInstance.emit('join', { room: 'role:admin' });
         }
       }
@@ -205,6 +210,8 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
 
     socketInstance.on('connect_error', (error) => {
       console.error('❌ WebSocket connection error:', error);
+      console.error('❌ Error message:', error.message);
+      console.error('❌ Full error object:', JSON.stringify(error, null, 2));
       setIsConnected(false);
     });
 
