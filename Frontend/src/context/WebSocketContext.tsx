@@ -88,6 +88,19 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
     activeConversationIdRef.current = id;
   }, []);
 
+  // helper - Odaya tüm varyantlarla katıl
+  const joinAllRoomVariants = (sock: Socket, id: string) => {
+    // ID odası
+    sock.emit('conversation:join', { conversation_id: id }, (ack: any) => {
+      console.log('[JOIN ACK] conversation:join', id, ack);
+    });
+    sock.emit('join_conversation', id, (ack: any) => {
+      console.log('[JOIN ACK] join_conversation', id, ack);
+    });              // legacy
+    // "conversation:ID" isimli oda
+    sock.emit('join', { room: `conversation:${id}` });
+  };
+
   // Tüm konuşmalara join olmak için yardımcı fonksiyon
   const joinAllConversations = async (sock: Socket, uid?: string) => {
     try {
@@ -96,9 +109,7 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
       const res = await messageService.getConversations();
       const ids = res?.conversations?.map(c => c.id) ?? [];
       ids.forEach(id => {
-        // 🔧 Backend'e uyumlu event ismi: çift emit
-        sock.emit('conversation:join', { conversation_id: id });
-        sock.emit('join_conversation', id); // legacy
+        joinAllRoomVariants(sock, id);
         joinedRoomsRef.current.add(id); // ✅ Set'e ekle
       });
       console.log('🧩 Joined conversations for notifications:', ids.length, ids);
@@ -112,9 +123,7 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
     if (!socket || !isConnected) return;
     if (joinedRoomsRef.current.has(conversationId)) return;
 
-    socket.emit('conversation:join', { conversation_id: conversationId });
-    socket.emit('join_conversation', conversationId); // legacy
-
+    joinAllRoomVariants(socket, conversationId);
     joinedRoomsRef.current.add(conversationId);
     if (import.meta.env.DEV) console.log('🚪 joined room (once):', conversationId);
   }, [socket, isConnected]);
@@ -142,18 +151,21 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
     
     const socketInstance = io(serverUrl, {
       auth: { token },
-      transports: ['websocket', 'polling'],
+      path: '/socket.io/', // ✅ Explicit path
+      transports: ['polling', 'websocket'], // ✅ Polling first, then WebSocket
       // 🔧 Reconnection ve backoff ayarları
       reconnection: true,
       reconnectionAttempts: 5,
       reconnectionDelay: 1000,
       reconnectionDelayMax: 5000,
-      timeout: 10000,
+      timeout: 20000, // ✅ 20 saniye timeout
       forceNew: true,
+      upgrade: true, // ✅ Allow transport upgrading
     });
 
     // Connection events
     socketInstance.on('connect', async () => {
+      console.log('🟢 WebSocket connected successfully!');
       if (import.meta.env.DEV) console.log('🟢 WebSocket connected');
       setIsConnected(true);
       joinedRoomsRef.current.clear();                 // 🔧 önemli
@@ -161,6 +173,7 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
       // Join user-specific room
       if (user?.id) {
         socketInstance.emit('user:join', { user_id: user.id });
+        socketInstance.emit('join', { room: `user:${user.id}` }); // extra
         
         // Join admin room if user is admin
         if (user.role === 'ADMIN') {
@@ -183,8 +196,14 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
       await joinAllConversations(socketInstance, user?.id);
     });
 
-    socketInstance.on('disconnect', () => {
+    socketInstance.on('disconnect', (reason) => {
+      console.log('🔴 WebSocket disconnected:', reason);
       if (import.meta.env.DEV) console.log('🔴 WebSocket disconnected');
+      setIsConnected(false);
+    });
+
+    socketInstance.on('connect_error', (error) => {
+      console.error('❌ WebSocket connection error:', error);
       setIsConnected(false);
     });
 
@@ -236,17 +255,40 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
     };
 
     // ---- socket event'lerinde SADECE bu handler'ı çağır:
-    socketInstance.on('new_message', (raw: any) => {
-      const message = normalizeMessage(raw);
-      if (import.meta.env.DEV) console.log('📨 new_message:', message);
-      handleIncoming(message);
+    // Comprehensive message event handling - catch ALL possible variants
+    const INCOMING_EVENTS = [
+      'new_message',
+      'message:new',
+      'message',                 // <-- ekledik
+      'conversation:message',    // <-- ekledik
+      'notify:message',
+      'message:notify',
+      'user:new_message',
+      'user:notification',
+      'notification',
+    ];
+
+    INCOMING_EVENTS.forEach((ev) => {
+      socketInstance.on(ev, (raw: any) => {
+        const payload = raw?.message ?? raw;
+        try {
+          const m = normalizeMessage(payload);
+          if (import.meta.env.DEV) console.log(`📨 ${ev}:`, m);
+          handleIncoming(m);
+        } catch (e) {
+          console.log('[ws] payload message değil:', ev, raw);
+        }
+      });
     });
 
-    // message:new alias (backend compatibility)
-    socketInstance.on('message:new', (raw: any) => {
-      const message = normalizeMessage(raw.message || raw);
-      if (import.meta.env.DEV) console.log('📨 message:new (alias):', message);
-      handleIncoming(message);
+    // Geçici debug: prod'da da açık kalsın, sorunu görün
+    socketInstance.onAny((event, payload) => {
+      console.log('[ws->client]', event, payload);
+    });
+
+    // Handle forbidden join attempts
+    socketInstance.on('error:forbidden', (data: any) => {
+      console.warn('🚫 Forbidden join attempt:', data);
     });
 
     // Typing events - dual support
@@ -434,14 +476,16 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
     // 1) Ack gelmezse HTTP fallback
     const t = setTimeout(async () => {
       if (settled) return;
+      console.warn('[HTTP FALLBACK] /conversations/:id/messages - WS ack timeout');
       try {
         const res = await messageService.sendMessage({ conversationId, content });
         if (res?.success && res?.message) done(res.message);
       } catch {}
-    }, 1500);
+    }, 4000); // ✅ 1500 → 4000ms timeout increase
 
     // 2) Yeni isim
     socket.emit('message:send', { conversation_id: conversationId, body: content }, (raw: any) => {
+      console.log('[WS ACK] message:send ->', raw);
       clearTimeout(t);
       if (settled) return; // ✅ Çift callback koruması
       if (raw?.ok && raw?.message) return done(raw.message);
@@ -450,6 +494,7 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
 
     // 3) Legacy isim
     socket.emit('send_message', { conversationId, content }, (raw: any) => {
+      console.log('[WS ACK] send_message ->', raw);
       clearTimeout(t);
       if (settled) return;
       if (raw?.message) return done(raw.message);

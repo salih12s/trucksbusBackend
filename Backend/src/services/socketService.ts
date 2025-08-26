@@ -11,13 +11,27 @@ export class SocketService {
   private io: SocketIOServer;
   private connectedUsers: Map<string, string> = new Map(); // userId -> socketId
 
-  constructor(server: HTTPServer) {
-    this.io = new SocketIOServer(server, {
-      cors: { 
-        origin: ["http://localhost:5173"], 
-        credentials: true 
-      }
-    });
+  constructor(server: HTTPServer, existingIO?: SocketIOServer) {
+    // Use existing IO instance if provided, otherwise create new one
+    if (existingIO) {
+      this.io = existingIO;
+      console.log('✅ SocketService using shared IO instance');
+    } else {
+      this.io = new SocketIOServer(server, {
+        cors: { 
+          origin: process.env.NODE_ENV === 'production' 
+            ? [
+                "https://trucksbus.com", 
+                "https://www.trucksbus.com",
+                "https://trucksbus.com.tr", 
+                "https://www.trucksbus.com.tr"
+              ]
+            : "*", // Development - all origins
+          credentials: true 
+        }
+      });
+      console.log('⚠️ SocketService created new IO instance');
+    }
 
     this.setupMiddleware();
     this.setupEventHandlers();
@@ -167,36 +181,48 @@ export class SocketService {
       logger.info(`User ${userId} connected with socket ${socket.id}`);
 
       // 🔒 Güvenli conversation join
-      socket.on('conversation:join', async ({ conversation_id }: { conversation_id: string }) => {
+      socket.on('conversation:join', async ({ conversation_id }: { conversation_id: string }, cb?: (r:any)=>void) => {
         try {
-          if (!conversation_id) return;
+          if (!conversation_id) {
+            cb?.({ ok: false, reason: 'no_conversation_id' });
+            return;
+          }
           const ok = await this.isParticipant(userId, conversation_id);
           if (!ok) {
             logger.warn(`🚫 Forbidden join attempt by ${userId} to ${conversation_id}`);
             socket.emit('error:forbidden', { resource: 'conversation', id: conversation_id });
+            cb?.({ ok: false, reason: 'forbidden' });
             return;
           }
           socket.join(`conversation:${conversation_id}`);
+          cb?.({ ok: true });
           logger.info(`✅ User ${userId} joined conversation: ${conversation_id}`);
         } catch (error) {
           logger.error('join error:', error);
+          cb?.({ ok: false, reason: 'error' });
         }
       });
 
       // 🔒 Legacy alias for join_conversation - güvenli
-      socket.on('join_conversation', async (conversationId: string) => {
+      socket.on('join_conversation', async (conversationId: string, cb?: (r:any)=>void) => {
         try {
-          if (!conversationId) return;
+          if (!conversationId) {
+            cb?.({ ok: false, reason: 'no_conversation_id' });
+            return;
+          }
           const ok = await this.isParticipant(userId, conversationId);
           if (!ok) {
             logger.warn(`🚫 Forbidden legacy join attempt by ${userId} to ${conversationId}`);
             socket.emit('error:forbidden', { resource: 'conversation', id: conversationId });
+            cb?.({ ok: false, reason: 'forbidden' });
             return;
           }
           socket.join(`conversation:${conversationId}`);
+          cb?.({ ok: true });
           logger.info(`✅ User ${userId} joined conversation (legacy): ${conversationId}`);
         } catch (error) {
           logger.error('legacy join error:', error);
+          cb?.({ ok: false, reason: 'error' });
         }
       });
 
