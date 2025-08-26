@@ -3,6 +3,7 @@ import { io, Socket } from 'socket.io-client';
 import { useAuth } from './AuthContext';
 import { Message } from '../services/messageService';
 import { messageService } from '../services/messageService';
+import { normalizeMessage } from '../utils/normalizers';
 
 // ---- ROUTE HELPERS (HashRouter/BrowseRouter fark etmez, route'u sağlam tespit eder)
 const getRoutePath = () => {
@@ -16,25 +17,6 @@ const isMessagesRoute = () => {
   const p = getRoutePath();
   return p.startsWith('/real-time-messages') || p.startsWith('/messages');
 };
-
-// 🔧 Normalize message schema - fixes body/content mismatch
-const normalizeMessage = (raw: any): Message => ({
-  id: raw.id,
-  conversation_id: raw.conversation_id ?? raw.conversationId,
-  sender_id: raw.sender_id ?? raw.senderId,
-  // body/content farkını kapatıyoruz
-  content: raw.content ?? raw.body ?? '',
-  is_read: Boolean(raw.is_read ?? raw.isRead ?? false),
-  is_edited: Boolean(raw.is_edited ?? raw.isEdited ?? false),
-  created_at: raw.created_at ?? raw.createdAt ?? new Date().toISOString(),
-  updated_at: raw.updated_at ?? raw.updatedAt ?? raw.created_at ?? raw.createdAt ?? new Date().toISOString(),
-  users: raw.users ?? raw.user ?? {
-    id: raw.user_id ?? raw.userId ?? '',
-    first_name: raw.first_name ?? raw.firstName ?? '',
-    last_name: raw.last_name ?? raw.lastName ?? '',
-    username: raw.username ?? undefined,
-  },
-});
 
 // Notification interface
 interface NotificationEvent {
@@ -102,25 +84,9 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
 
   // 🔧 Room katılım takibi
   const joinedRoomsRef = React.useRef<Set<string>>(new Set());
-
-  // 🔧 handleIncoming ref için
-  const handleIncomingRef = React.useRef<((message: Message) => void) | null>(null);
   const setActiveConversationId = React.useCallback((id: string | null) => {
     activeConversationIdRef.current = id;
   }, []);
-
-  // 🔧 Smart notification guard - aktif konuşma bilgisini ref'ten al
-  const isViewingActiveConv = (convId?: string) => {
-    if (!convId) return false;
-    const onMessagesRoute =
-      window.location.pathname === '/messages' ||
-      window.location.pathname === '/real-time-messages';
-    return (
-      document.visibilityState === 'visible' &&
-      onMessagesRoute &&
-      activeConversationIdRef.current === convId
-    );
-  };
 
   // Tüm konuşmalara join olmak için yardımcı fonksiyon
   const joinAllConversations = async (sock: Socket, uid?: string) => {
@@ -130,38 +96,25 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
       const res = await messageService.getConversations();
       const ids = res?.conversations?.map(c => c.id) ?? [];
       ids.forEach(id => {
-        // 🔧 Backend'e uyumlu event ismi: conversation:join
+        // 🔧 Backend'e uyumlu event ismi: çift emit
         sock.emit('conversation:join', { conversation_id: id });
+        sock.emit('join_conversation', id); // legacy
+        joinedRoomsRef.current.add(id); // ✅ Set'e ekle
       });
       console.log('🧩 Joined conversations for notifications:', ids.length, ids);
-      
-      // Force refresh conversation list için event listener ekle
-      sock.on('conversation:upsert', async () => {
-        console.log('🔄 conversation:upsert received, refreshing...');
-        try {
-          const newRes = await messageService.getConversations();
-          const newIds = newRes?.conversations?.map(c => c.id) ?? [];
-          newIds.forEach(id => {
-            if (!joinedRoomsRef.current.has(id)) {
-              sock.emit('conversation:join', { conversation_id: id });
-              joinedRoomsRef.current.add(id);
-            }
-          });
-        } catch (e) {
-          if (import.meta.env.DEV) console.warn('conversation:upsert refresh failed', e);
-        }
-      });
     } catch (e) {
       console.warn('joinAllConversations failed', e);
     }
   };
 
-  // 🔧 Tek seferlik join
+  // 🔧 Tek seferlik join - çift emit
   const ensureJoined = React.useCallback((conversationId: string) => {
     if (!socket || !isConnected) return;
     if (joinedRoomsRef.current.has(conversationId)) return;
-    // 🔧 Backend'e uyumlu event ismi: conversation:join
+
     socket.emit('conversation:join', { conversation_id: conversationId });
+    socket.emit('join_conversation', conversationId); // legacy
+
     joinedRoomsRef.current.add(conversationId);
     if (import.meta.env.DEV) console.log('🚪 joined room (once):', conversationId);
   }, [socket, isConnected]);
@@ -266,22 +219,21 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
       }
 
       // Bildirim listesine ekle
+      const senderName = `${message.users?.first_name ?? ''} ${message.users?.last_name ?? ''}`.trim() || 'Bilinmeyen';
+      
       const notification: NotificationEvent = {
         id: `msg-${message.id}-${Date.now()}`,
         type: 'message',
         title: 'Yeni Mesaj',
-        content: `${message.users?.first_name ?? ''} ${message.users?.last_name ?? ''}: ${message.content}`,
+        content: `${senderName}: ${message.content}`,
         senderId: message.sender_id,
-        senderName: `${message.users?.first_name ?? ''} ${message.users?.last_name ?? ''}`.trim(),
+        senderName,
         conversationId: message.conversation_id,
         createdAt: new Date(message.created_at),
         isRead: viewingThisConv,
       };
       setNotifications(prev => [notification, ...prev]);
     };
-
-    // 🔧 handleIncoming'i ref'e at
-    handleIncomingRef.current = handleIncoming;
 
     // ---- socket event'lerinde SADECE bu handler'ı çağır:
     socketInstance.on('new_message', (raw: any) => {
@@ -467,36 +419,41 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
     typingCallbacksRef.current.delete(callback);
   }, []);
 
-  // Send methods - dual emit for compatibility
+  // Send methods - çift emit + HTTP fallback
   const sendMessage = useCallback((conversationId: string, content: string, ack?: (msg: Message) => void) => {
     if (!socket || !isConnected) return;
 
-    ensureJoined(conversationId); // emin ol
+    ensureJoined(conversationId);
 
-    // 🔧 Backend'e uyumlu event ismi: message:send
-    socket.emit('message:send', { conversation_id: conversationId, body: content }, (raw: any) => {
-      // sunucudan dönen onay (ack) - updated format
+    let settled = false;
+    const done = (m?: any) => { 
+      settled = true; 
+      if (m) ack?.(normalizeMessage(m)); 
+    };
+
+    // 1) Ack gelmezse HTTP fallback
+    const t = setTimeout(async () => {
+      if (settled) return;
       try {
-        if (raw?.ok && raw?.message) {
-          // Backend şimdi full message object döndürüyor
-          const m = normalizeMessage(raw.message);
-          ack?.(m);
-        } else if (raw?.ok && raw?.id) {
-          // Legacy format fallback
-          const m = normalizeMessage({ 
-            id: raw.id, 
-            conversation_id: conversationId, 
-            content,
-            sender_id: user?.id,
-            created_at: new Date().toISOString()
-          });
-          ack?.(m);
-        } else {
-          if (import.meta.env.DEV) console.warn('sendMessage ACK failed:', raw);
-        }
-      } catch (e) {
-        if (import.meta.env.DEV) console.warn('ack parse failed:', e, raw);
-      }
+        const res = await messageService.sendMessage({ conversationId, content });
+        if (res?.success && res?.message) done(res.message);
+      } catch {}
+    }, 1500);
+
+    // 2) Yeni isim
+    socket.emit('message:send', { conversation_id: conversationId, body: content }, (raw: any) => {
+      clearTimeout(t);
+      if (settled) return; // ✅ Çift callback koruması
+      if (raw?.ok && raw?.message) return done(raw.message);
+      if (raw?.ok && raw?.id) return done({ id: raw.id, conversation_id: conversationId, body: content });
+    });
+
+    // 3) Legacy isim
+    socket.emit('send_message', { conversationId, content }, (raw: any) => {
+      clearTimeout(t);
+      if (settled) return;
+      if (raw?.message) return done(raw.message);
+      if (raw?.id) return done({ id: raw.id, conversationId, content });
     });
   }, [socket, isConnected, ensureJoined]);
 
@@ -506,8 +463,8 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
 
   const leaveConversation = useCallback((conversationId: string) => {
     if (socket && isConnected) {
-      // 🔧 Backend'e uyumlu event ismi: conversation:leave
       socket.emit('conversation:leave', { conversation_id: conversationId });
+      socket.emit('leave_conversation', conversationId); // legacy
       joinedRoomsRef.current.delete(conversationId);
       if (import.meta.env.DEV) console.log('🚪 left room:', conversationId);
     }
@@ -515,17 +472,17 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
 
   const startTyping = useCallback((conversationId: string) => {
     if (socket && isConnected) {
-      // 🔧 Tutarlı payload formatı
       const payload = { conversation_id: conversationId };
       socket.emit('typing_start', payload);
+      socket.emit('typing:start', payload); // legacy
     }
   }, [socket, isConnected]);
 
   const stopTyping = useCallback((conversationId: string) => {
     if (socket && isConnected) {
-      // 🔧 Tutarlı payload formatı  
       const payload = { conversation_id: conversationId };
       socket.emit('typing_stop', payload);
+      socket.emit('typing:stop', payload); // legacy
     }
   }, [socket, isConnected]);
 

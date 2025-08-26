@@ -14,7 +14,6 @@ import {
   Chip,
   Stack,
   Container,
-  Alert,
   CircularProgress
 } from '@mui/material';
 import { useConfirmDialog } from '../../hooks/useConfirmDialog';
@@ -122,8 +121,8 @@ const Profile: React.FC = () => {
       
       // AuthContext'teki user'ı da güncelle (header avatar için)
       updateUser({
-        avatar: updatedUser.avatar,
-        phone: updatedUser.phone,
+        avatar: updatedUser.avatar|| undefined,
+        phone: updatedUser.phone || undefined,
       });
       
       setIsEditing(false);

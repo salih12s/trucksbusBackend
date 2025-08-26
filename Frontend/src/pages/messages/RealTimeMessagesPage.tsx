@@ -168,9 +168,9 @@ const RealTimeMessagesPage: React.FC = () => {
 
       // 🔧 Artık gizli konuşma kontrolü yok, direkt mesajı işle
 
-      if (activeConversation && message.conversation_id === activeConversation.id) {
+      if (activeConversation && String(message.conversation_id) === String(activeConversation.id)) {
         setMessages((prev) => {
-          if (prev.some((m) => m.id === message.id)) return prev;
+          if (prev.some((m) => String(m.id) === String(message.id))) return prev;
           const i = prev.findIndex(
             (m) =>
               String(m.id).startsWith('temp-') &&
@@ -189,9 +189,9 @@ const RealTimeMessagesPage: React.FC = () => {
 
       setConversations((prevConversations) => {
         const updated = prevConversations.map((conv) => {
-          if (conv.id !== message.conversation_id) return conv;
+          if (String(conv.id) !== String(message.conversation_id)) return conv;
           const isOwn = message.sender_id === user?.id;
-          const isActive = activeConversation?.id === conv.id;
+          const isActive = String(activeConversation?.id) === String(conv.id);
           return {
             ...conv,
             lastMessage: {
