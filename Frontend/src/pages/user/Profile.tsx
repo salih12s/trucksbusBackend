@@ -214,28 +214,33 @@ const Profile: React.FC = () => {
   }
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <Container maxWidth="lg" sx={{ py: { xs: 2, md: 4 }, px: { xs: 1, sm: 2 } }}>
       {/* Header Card */}
       <Card sx={{ mb: 3 }}>
         <Box
           sx={{
             background: 'linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)',
-            height: 200,
+            height: { xs: 180, md: 200 },
             position: 'relative',
             display: 'flex',
             alignItems: 'flex-end',
-            p: 3,
+            p: { xs: 2, md: 3 },
           }}
         >
-          <Stack direction="row" spacing={3} alignItems="center" sx={{ width: '100%' }}>
+          <Stack 
+            direction={{ xs: 'column', sm: 'row' }} 
+            spacing={{ xs: 2, sm: 3 }} 
+            alignItems={{ xs: 'center', sm: 'center' }} 
+            sx={{ width: '100%' }}
+          >
             <Box sx={{ position: 'relative' }}>
               <Avatar
                 src={editedUser.avatar || user?.avatar || undefined}
                 sx={{ 
-                  width: 120, 
-                  height: 120, 
+                  width: { xs: 80, md: 120 }, 
+                  height: { xs: 80, md: 120 }, 
                   border: '4px solid white',
-                  fontSize: '3rem'
+                  fontSize: { xs: '2rem', md: '3rem' }
                 }}
               >
                 {user?.first_name?.[0]}{user?.last_name?.[0]}
@@ -264,11 +269,25 @@ const Profile: React.FC = () => {
                 </IconButton>
               )}
             </Box>
-            <Box sx={{ color: 'white', flex: 1 }}>
-              <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold', mb: 1 }}>
+            <Box sx={{ color: 'white', flex: 1, textAlign: { xs: 'center', sm: 'left' } }}>
+              <Typography 
+                variant="h4"
+                component="h1" 
+                sx={{ 
+                  fontWeight: 'bold', 
+                  mb: 1,
+                  fontSize: { xs: '1.5rem', md: '2.125rem' }
+                }}
+              >
                 {user?.first_name} {user?.last_name}
               </Typography>
-              <Typography variant="h6" sx={{ opacity: 0.9 }}>
+              <Typography 
+                variant="h6"
+                sx={{ 
+                  opacity: 0.9,
+                  fontSize: { xs: '0.9rem', md: '1.25rem' }
+                }}
+              >
                 {user?.email}
               </Typography>
             </Box>
@@ -279,18 +298,24 @@ const Profile: React.FC = () => {
                   color="secondary"
                   startIcon={<Edit />}
                   onClick={() => setIsEditing(true)}
-                  sx={{ color: 'white' }}
+                  sx={{ 
+                    color: 'white',
+                    fontSize: { xs: '0.75rem', md: '0.875rem' },
+                    px: { xs: 2, md: 3 }
+                  }}
+                  size="medium"
                 >
                   Düzenle
                 </Button>
               ) : (
-                <Stack direction="row" spacing={1}>
+                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
                   <Button
                     variant="contained"
                     color="success"
                     startIcon={avatarLoading ? <CircularProgress size={16} color="inherit" /> : <Save />}
                     onClick={handleSave}
                     disabled={avatarLoading}
+                    size="medium"
                   >
                     {avatarLoading ? 'Kaydediliyor...' : 'Kaydet'}
                   </Button>
@@ -299,7 +324,12 @@ const Profile: React.FC = () => {
                     startIcon={<Cancel />}
                     onClick={handleCancel}
                     disabled={avatarLoading}
-                    sx={{ backgroundColor: 'rgba(255,255,255,0.1)', color: 'white' }}
+                    sx={{ 
+                      backgroundColor: 'rgba(255,255,255,0.1)', 
+                      color: 'white',
+                      borderColor: 'rgba(255,255,255,0.3)'
+                    }}
+                    size="medium"
                   >
                     İptal
                   </Button>
@@ -312,12 +342,33 @@ const Profile: React.FC = () => {
 
       {/* Stats Cards */}
       <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
-        <Paper sx={{ p: 3, textAlign: 'center', minWidth: '1150px', maxWidth: '400px' }}>
-          <Dashboard sx={{ fontSize: 40, color: 'success.main', mb: 1 }} />
-          <Typography variant="h4" component="div" sx={{ fontWeight: 'bold', color: 'success.main' }}>
+        <Paper sx={{ 
+          p: { xs: 2, md: 3 }, 
+          textAlign: 'center', 
+          minWidth: { xs: '100%', sm: '350px' },
+          maxWidth: '400px' 
+        }}>
+          <Dashboard sx={{ 
+            fontSize: { xs: 32, md: 40 }, 
+            color: 'success.main', 
+            mb: 1 
+          }} />
+          <Typography 
+            variant="h4" 
+            component="div" 
+            sx={{ 
+              fontWeight: 'bold', 
+              color: 'success.main',
+              fontSize: { xs: '1.75rem', md: '2.125rem' }
+            }}
+          >
             {stats?.activeListings || 0}
           </Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Typography 
+            variant="body2" 
+            color="text.secondary"
+            sx={{ fontSize: { xs: '0.75rem', md: '0.875rem' } }}
+          >
             Aktif İlan
           </Typography>
         </Paper>
@@ -343,8 +394,13 @@ const Profile: React.FC = () => {
         </Box>
 
         <TabPanel value={tabValue} index={0}>
-          <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
-            <Box sx={{ flex: 1, minWidth: '300px' }}>
+          <Box sx={{ 
+            display: 'flex', 
+            gap: { xs: 2, md: 3 }, 
+            flexWrap: 'wrap',
+            flexDirection: { xs: 'column', md: 'row' }
+          }}>
+            <Box sx={{ flex: 1, minWidth: { xs: '100%', md: '300px' } }}>
               <Typography variant="h6" gutterBottom>
                 Kişisel Bilgiler
               </Typography>
@@ -377,7 +433,7 @@ const Profile: React.FC = () => {
                 </Box>
               </Stack>
             </Box>
-            <Box sx={{ flex: 1, minWidth: '300px' }}>
+            <Box sx={{ flex: 1, minWidth: { xs: '100%', md: '300px' } }}>
               <Typography variant="h6" gutterBottom>
                 Hesap Durumu
               </Typography>
@@ -406,9 +462,14 @@ const Profile: React.FC = () => {
         </TabPanel>
 
         <TabPanel value={tabValue} index={1}>
-          <Box sx={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+          <Box sx={{ 
+            display: 'flex', 
+            gap: { xs: 2, md: 4 }, 
+            flexWrap: 'wrap',
+            flexDirection: { xs: 'column', lg: 'row' }
+          }}>
             {/* Profil Ayarları */}
-            <Box sx={{ flex: 1, minWidth: '400px' }}>
+            <Box sx={{ flex: 1, minWidth: { xs: '100%', lg: '400px' } }}>
               <Typography variant="h6" gutterBottom>
                 Profil Ayarları
               </Typography>
@@ -445,13 +506,14 @@ const Profile: React.FC = () => {
                 />
                 
                 {isEditing && (
-                  <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+                  <Box sx={{ display: 'flex', gap: 2, mt: 2, flexDirection: { xs: 'column', sm: 'row' } }}>
                     <Button
                       variant="contained"
                       color="primary"
                       startIcon={avatarLoading ? <CircularProgress size={16} color="inherit" /> : <Save />}
                       onClick={handleSave}
                       disabled={avatarLoading}
+                      fullWidth={false}
                     >
                       {avatarLoading ? 'Kaydediliyor...' : 'Değişiklikleri Kaydet'}
                     </Button>
@@ -460,6 +522,7 @@ const Profile: React.FC = () => {
                       startIcon={<Cancel />}
                       onClick={handleCancel}
                       disabled={avatarLoading}
+                      fullWidth={false}
                     >
                       İptal
                     </Button>
@@ -469,7 +532,7 @@ const Profile: React.FC = () => {
             </Box>
 
             {/* Şifre Değiştir */}
-            <Box sx={{ flex: 1, minWidth: '400px' }}>
+            <Box sx={{ flex: 1, minWidth: { xs: '100%', lg: '400px' } }}>
               <Typography variant="h6" gutterBottom>
                 Şifre Değiştir
               </Typography>
@@ -498,15 +561,19 @@ const Profile: React.FC = () => {
                   onChange={(e) => setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))}
                   variant="outlined"
                 />
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={handlePasswordChange}
-                  disabled={!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword}
-                  sx={{ mt: 2 }}
-                >
-                  Şifre Değiştir
-                </Button>
+                <Box sx={{ mt: 2 }}>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handlePasswordChange}
+                    disabled={!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword}
+                    sx={{ 
+                      width: { xs: '100%', sm: 'auto' }
+                    }}
+                  >
+                    Şifre Değiştir
+                  </Button>
+                </Box>
               </Box>
             </Box>
           </Box>

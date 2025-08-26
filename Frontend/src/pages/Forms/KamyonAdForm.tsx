@@ -1267,10 +1267,15 @@ const KamyonAdForm = () => {
   };
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <Container maxWidth="lg" sx={{ py: { xs: 2, md: 4 }, px: { xs: 1, sm: 2 } }}>
       {/* Header */}
-      <Box sx={{ mb: 4, textAlign: 'center' }}>
-        <Typography variant="h4" component="h1" gutterBottom>
+      <Box sx={{ mb: { xs: 2, md: 4 }, textAlign: 'center' }}>
+        <Typography 
+          variant="h4" 
+          component="h1" 
+          gutterBottom
+          sx={{ fontSize: { xs: '1.75rem', md: '2.125rem' } }}
+        >
           🚛 Kamyon & Kamyonet İlanı Oluştur
         </Typography>
         
@@ -1283,8 +1288,16 @@ const KamyonAdForm = () => {
         </Box>
 
         {/* Stepper */}
-        <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
-          <Stepper activeStep={activeStep} alternativeLabel>
+        <Paper elevation={2} sx={{ p: { xs: 2, md: 3 }, mb: 3 }}>
+          <Stepper 
+            activeStep={activeStep} 
+            alternativeLabel
+            sx={{
+              '& .MuiStepLabel-label': {
+                fontSize: { xs: '0.75rem', md: '0.875rem' }
+              }
+            }}
+          >
             {steps.map((label) => (
               <Step key={label}>
                 <StepLabel>{label}</StepLabel>
@@ -1294,7 +1307,7 @@ const KamyonAdForm = () => {
         </Paper>
 
         {/* Form Content */}
-        <Paper elevation={2} sx={{ p: 3 }}>
+        <Paper elevation={2} sx={{ p: { xs: 2, md: 3 } }}>
           {error && (
             <Alert severity="error" sx={{ mb: 3 }}>
               {error}
@@ -1306,11 +1319,20 @@ const KamyonAdForm = () => {
           {renderStepContent(activeStep)}
 
           {/* Navigation Buttons */}
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
+          <Box 
+            sx={{ 
+              display: 'flex', 
+              justifyContent: 'space-between', 
+              mt: 4,
+              flexDirection: { xs: 'column', sm: 'row' },
+              gap: { xs: 2, sm: 0 }
+            }}
+          >
             {activeStep > 0 && (
               <Button
                 onClick={handleBack}
                 disabled={loading}
+                sx={{ order: { xs: 2, sm: 1 } }}
               >
                 Geri
               </Button>
@@ -1322,7 +1344,11 @@ const KamyonAdForm = () => {
                 onClick={handleSubmit}
                 disabled={loading}
                 size="large"
-                sx={{ minWidth: 200, ml: 'auto' }}
+                sx={{ 
+                  minWidth: 200, 
+                  ml: { xs: 0, sm: 'auto' },
+                  order: { xs: 1, sm: 2 }
+                }}
               >
                 {loading ? 'İlan Oluşturuluyor...' : 'İlanı Yayınla'}
               </Button>

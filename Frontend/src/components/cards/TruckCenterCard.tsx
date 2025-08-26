@@ -193,22 +193,22 @@ const TruckCenterCard: React.FC<TruckCenterCardProps> = ({
       sx={{
         // Premium kart stili - yeni gölge sistemi
         width: '100%',
-        maxWidth: { xs: '100%', md: 420 }, // Mobile'da tam genişlik
+        maxWidth: { xs: '100%', sm: 400, md: 420 }, // Responsive max width
         height: { xs: 'auto', md: 280 }, // Mobile'da otomatik yükseklik
         minHeight: { xs: 200, md: 280 }, // Mobile için minimum yükseklik
         display: 'flex',
         flexDirection: { xs: 'column', md: 'row' }, // Mobile'da dikey, desktop'ta yatay
-        borderRadius: 0, // ✅ border radius kaldırıldı (düz kare)
-        border: `1px solid #EEF2F7`, // ✅ yeni bölücü rengi
+        borderRadius: { xs: 2, md: 0 }, // Mobile'da rounded, desktop'ta düz
+        border: `1px solid #EEF2F7`,
         bgcolor: 'background.paper',
-        boxShadow: '0 6px 18px rgba(0,0,0,0.06)', // ✅ yeni gölge dili
-        transition: 'all 0.15s ease', // ✅ daha hızlı transition
+        boxShadow: { xs: '0 2px 8px rgba(0,0,0,0.05)', md: '0 6px 18px rgba(0,0,0,0.06)' }, // Mobile'da az gölge
+        transition: 'all 0.15s ease',
         '&:hover': {
-          transform: 'translateY(-2px)', // ✅ daha yumuşak lift
-          boxShadow: '0 10px 24px rgba(0,0,0,0.08)', // ✅ hover gölgesi
-          borderColor: theme.palette.grey[400], // ✅ kırmızı yerine gri vurgu
+          transform: { xs: 'none', md: 'translateY(-2px)' }, // Mobile'da hover efekti yok
+          boxShadow: { xs: '0 4px 12px rgba(0,0,0,0.08)', md: '0 10px 24px rgba(0,0,0,0.08)' },
+          borderColor: theme.palette.grey[400],
         },
-        '&:focus-visible': { // ✅ A11y focus ring - yumuşak
+        '&:focus-visible': { // A11y focus ring
           outline: '2px solid #6B7280',
           outlineOffset: '2px',
         },
@@ -271,10 +271,17 @@ const TruckCenterCard: React.FC<TruckCenterCardProps> = ({
             <Box
               sx={{ 
                 display: 'grid', 
-                gridTemplateColumns: { xs: 'repeat(4, 1fr)', md: '1fr 1fr' }, // Mobile'da 4 kolon
-                gap: 0.75, 
+                gridTemplateColumns: { 
+                  xs: 'repeat(2, 1fr)', // Mobile'da 2 kolon
+                  sm: 'repeat(3, 1fr)', // Small tablet'te 3 kolon  
+                  md: '1fr 1fr' // Desktop'ta 2 kolon
+                }, 
+                gap: { xs: 0.5, md: 0.75 }, 
                 width: '100%', 
-                height: { xs: 'auto', md: '64px' } // Mobile'da otomatik yükseklik
+                height: { xs: 'auto', md: '64px' },
+                '& > *': {
+                  fontSize: { xs: '0.7rem', md: '0.75rem' }, // Mobile'da küçük metin
+                }
               }}
             >
               {isAdminView ? (
