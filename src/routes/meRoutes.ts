@@ -288,4 +288,82 @@ router.put('/change-password', authMiddleware, async (req: AuthRequest, res: Res
 // GET /api/me/reports - Get user's reports
 router.get('/reports', authMiddleware, ReportsController.getMyReports);
 
+// DELETE /api/me/account - Delete account permanently
+router.delete('/account', authMiddleware, async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user!.id;
+    const { password, confirmation } = req.body;
+    
+    // Güvenlik kontrolü - şifre ve onay gerekli
+    if (!password || confirmation !== 'Onaylıyorum') {
+      res.status(400).json({ 
+        success: false, 
+        message: 'Şifre ve "Onaylıyorum" onay metni gereklidir' 
+      });
+      return;
+    }
+
+    // Kullanıcıyı bul ve şifreyi kontrol et
+    const user = await prisma.users.findUnique({
+      where: { id: userId },
+      select: { 
+        id: true, 
+        email: true, 
+        password: true,
+        first_name: true,
+        last_name: true
+      }
+    });
+
+    if (!user) {
+      res.status(404).json({ 
+        success: false, 
+        message: 'Kullanıcı bulunamadı' 
+      });
+      return;
+    }
+
+    // Şifreyi doğrula (basit kontrol)
+    const bcrypt = require('bcryptjs');
+    const isPasswordValid = await bcrypt.compare(password, user.password || '');
+    if (!isPasswordValid) {
+      res.status(400).json({ 
+        success: false, 
+        message: 'Geçersiz şifre' 
+      });
+      return;
+    }
+
+    // Kullanıcının tüm verilerini sil (Cascade delete için transaction kullan)
+    await prisma.$transaction(async (tx) => {
+      // İlişkili verileri sil
+      await tx.favorites.deleteMany({ where: { user_id: userId } });
+      await tx.notifications.deleteMany({ where: { user_id: userId } });
+      await tx.messages.deleteMany({ where: { sender_id: userId } });
+      await tx.conversation_participants.deleteMany({ where: { user_id: userId } });
+      await tx.feedback.deleteMany({ where: { user_id: userId } });
+      await tx.reports.deleteMany({ where: { reporter_id: userId } });
+      await tx.reports.deleteMany({ where: { owner_id: userId } });
+      await tx.listings.deleteMany({ where: { user_id: userId } });
+      
+      // Son olarak kullanıcıyı sil
+      await tx.users.delete({ where: { id: userId } });
+    });
+
+    // Log kaydet
+    console.log(`Account deleted: ${user.email} (${user.first_name} ${user.last_name}) at ${new Date().toISOString()}`);
+
+    res.status(200).json({ 
+      success: true, 
+      message: 'Hesabınız başarıyla silindi' 
+    });
+  } catch (error) {
+    console.error('Delete account error:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Hesap silme işlemi sırasında bir hata oluştu' 
+    });
+  }
+});
+
 export default router;

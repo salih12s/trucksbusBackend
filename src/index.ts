@@ -30,8 +30,12 @@ import feedbackRoutes from './routes/feedbackRoutes';
 import { logger } from './utils/logger';
 import { prisma } from './utils/database';
 
-// Load environment variables
-dotenv.config();
+// Load environment variables - development environment için
+if (process.env.NODE_ENV === 'development') {
+  dotenv.config({ path: '.env.development' });
+} else {
+  dotenv.config();
+}
 
 const app = express();
 const server = createServer(app);

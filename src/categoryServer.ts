@@ -11,7 +11,7 @@ const PORT = process.env.PORT || 3002;
 
 // Middleware
 app.use(cors({
-  origin: "http://localhost:5173",
+  origin: ["https://truckbus.com.tr", "http://localhost:5173"],
   credentials: true
 }));
 app.use(express.json());
