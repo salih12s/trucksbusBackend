@@ -31,11 +31,7 @@ import { logger } from './utils/logger';
 import { prisma } from './utils/database';
 
 // Load environment variables - development environment için
-if (process.env.NODE_ENV === 'development') {
-  dotenv.config({ path: '.env.development' });
-} else {
   dotenv.config();
-}
 
 const app = express();
 const server = createServer(app);
@@ -76,7 +72,9 @@ app.use(cors({
         "https://trucksbus.com", 
         "https://www.trucksbus.com",
         "https://trucksbus.com.tr", 
-        "https://www.trucksbus.com.tr"
+        "https://www.trucksbus.com.tr",
+        "https://trucksbusbackend-production-0e23.up.railway.app",
+        "*" // Geçici olarak tüm origin'lere izin ver
       ]
     : "*", // Development - all origins
   credentials: true
