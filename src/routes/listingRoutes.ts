@@ -23,6 +23,8 @@ const upload = multer({ storage: multer.memoryStorage() });
 router.get('/', getListings);  // GET /api/listings
 router.get('/debug', debugListingData);  // GET /api/listings/debug - Debug endpoint
 router.get('/debug-images', debugListingImages);  // GET /api/listings/debug-images - Debug images
+router.get('/:id/details', getListingDetails);  // GET /api/listings/:id/details - Enhanced listing detail view (PUBLIC)
+router.get('/:id', getListingById);  // GET /api/listings/:id - Public listing detail view
 
 // Protected routes - authentication required BEFORE ID routes
 router.use(authMiddleware);
@@ -40,8 +42,6 @@ router.post(
 );  // POST /api/listings - Now requires authentication
 
 // ID-based routes must be AFTER specific routes to avoid conflicts
-router.get('/:id/details', getListingDetails);  // GET /api/listings/:id/details - Enhanced listing detail view
-router.get('/:id', getListingById);  // GET /api/listings/:id - Public listing detail view
 router.put('/:id', updateListing);  // PUT /api/listings/:id
 router.delete('/:id', deleteListing);  // DELETE /api/listings/:id
 

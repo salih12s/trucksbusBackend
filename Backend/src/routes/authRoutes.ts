@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { register, login, getMe, refreshToken, forgotPassword, resetPassword, verifyEmail } from '../controllers/authController';
+import { register, login, getMe, refreshToken, forgotPassword, resetPassword, verifyEmail, deleteAccount } from '../controllers/authController';
 import { authMiddleware } from '../middleware/auth';
 
 const router = Router();
@@ -14,5 +14,6 @@ router.post('/verify-email', verifyEmail);
 
 // Protected routes
 router.get('/me', authMiddleware, getMe);
+router.delete('/delete-account', authMiddleware, deleteAccount);
 
 export default router;

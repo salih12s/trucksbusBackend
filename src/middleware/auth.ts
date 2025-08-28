@@ -34,7 +34,8 @@ export const authMiddleware = async (req: AuthRequest, res: Response, next: Next
     console.log('Token found:', token.substring(0, 20) + '...');
 
     try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { id: string };
+      const jwtSecret = process.env.JWT_SECRET || process.env.AUTH_SECRET || 'temporary-railway-debug-secret-2024';
+      const decoded = jwt.verify(token, jwtSecret) as { id: string };
       console.log('Token decoded, userId:', decoded.id);
       
       // Get user from database

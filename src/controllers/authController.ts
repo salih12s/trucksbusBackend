@@ -5,16 +5,26 @@ import { ulid } from 'ulid';
 import { prisma } from '../utils/database';
 import { logger } from '../utils/logger';
 import { normalizePhoneTR, isValidPhoneTR } from '../utils/phone';
+import { sendPasswordResetEmail, sendWelcomeEmail } from '../services/emailService';
 
 export const register = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { email, password, first_name, last_name, phone, city, district } = req.body;
+    const { email, password, first_name, last_name, phone, city, district, kvkk_accepted } = req.body;
 
     // Validate required fields
     if (!email || !password || !first_name || !last_name || !phone) {
       res.status(400).json({ 
         success: false, 
         message: 'E-posta, şifre, ad, soyad ve telefon alanları zorunludur.' 
+      });
+      return;
+    }
+
+    // KVKK kontrolü
+    if (!kvkk_accepted) {
+      res.status(400).json({ 
+        success: false, 
+        message: 'KVKK Aydınlatma Metni kabul edilmelidir.' 
       });
       return;
     }
@@ -60,18 +70,23 @@ export const register = async (req: Request, res: Response): Promise<void> => {
         role: 'USER',
         is_active: true,
         is_email_verified: false,
+        kvkk_accepted: true,
+        kvkk_accepted_at: new Date(),
+        kvkk_ip_address: req.ip || req.connection.remoteAddress || 'unknown',
+        kvkk_version: 'v1.0',
         updated_at: new Date()
       }
     });
 
     // Generate JWT token
+    const registerJwtSecret = process.env.JWT_SECRET || process.env.AUTH_SECRET || 'temporary-railway-debug-secret-2024';
     const token = jwt.sign(
       { 
         id: user.id, 
         email: user.email, 
         role: user.role 
       },
-      process.env.JWT_SECRET || 'your-secret-key',
+      registerJwtSecret,
       { expiresIn: '24h' }
     );
 
@@ -106,10 +121,49 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 
 export const login = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { email, password } = req.body;
+    console.log('🔐 Login attempt started:', {
+      hasEmail: !!req.body?.email,
+      hasPassword: !!req.body?.password,
+      rememberMe: req.body?.rememberMe,
+      timestamp: new Date().toISOString(),
+      environment: {
+        NODE_ENV: process.env.NODE_ENV,
+        JWT_SECRET_exists: !!process.env.JWT_SECRET,
+        AUTH_SECRET_exists: !!process.env.AUTH_SECRET,
+        DATABASE_URL_exists: !!process.env.DATABASE_URL,
+      }
+    });
+    
+    const { email, password, rememberMe } = req.body;
+
+    // Test database connection first
+    console.log('🔍 Testing database connection...');
+    try {
+      await prisma.$queryRaw`SELECT 1 as test`;
+      console.log('✅ Database connection test successful');
+    } catch (dbTestError) {
+      console.error('❌ Database connection test failed:', dbTestError);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Database bağlantısında sorun var.' 
+      });
+      return;
+    }
+
+    // JWT Secret check
+    const loginJwtSecret = process.env.JWT_SECRET || process.env.AUTH_SECRET;
+    if (!loginJwtSecret) {
+      console.error('❌ No JWT secret available');
+      res.status(500).json({ 
+        success: false, 
+        message: 'Server configuration error: No JWT secret' 
+      });
+      return;
+    }
 
     // Validate input
     if (!email || !password) {
+      console.log('❌ Login failed: Missing credentials');
       res.status(400).json({ 
         success: false, 
         message: 'E-posta ve şifre alanları zorunludur.' 
@@ -118,6 +172,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     }
 
     // Find user by email
+    console.log('🔍 Searching for user:', email);
     const user = await prisma.users.findUnique({
       where: { email },
       select: {
@@ -140,6 +195,13 @@ export const login = async (req: Request, res: Response): Promise<void> => {
         updated_at: true
       }
     });
+    
+    console.log('👤 User found:', {
+      exists: !!user,
+      email: user?.email,
+      isActive: user?.is_active,
+      hasPassword: !!user?.password
+    });
 
     if (!user) {
       res.status(401).json({ 
@@ -159,9 +221,14 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     }
 
     // Verify password
+    logger.info(`Login attempt for user ${email}`);
+    logger.info(`Stored password hash: ${user.password?.substring(0, 10)}...`);
+    
     const isValidPassword = await bcrypt.compare(password, user.password || '');
+    logger.info(`Password comparison result: ${isValidPassword}`);
 
     if (!isValidPassword) {
+      logger.warn(`Failed login attempt for user ${email} - invalid password`);
       res.status(401).json({ 
         success: false, 
         message: 'Geçersiz e-posta veya şifre.' 
@@ -179,17 +246,23 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       }
     });
 
-    // Generate JWT token
+    // Generate JWT token with dynamic expiration
+    const tokenExpiration = rememberMe ? '30d' : '24h'; // Remember me: 30 gün, normal: 24 saat
+    
+    const jwtSecret = process.env.JWT_SECRET || process.env.AUTH_SECRET || 'temporary-railway-debug-secret-2024';
+    console.log('🔐 Using JWT secret from:', process.env.JWT_SECRET ? 'JWT_SECRET' : process.env.AUTH_SECRET ? 'AUTH_SECRET' : 'fallback');
+    
     const token = jwt.sign(
       { 
         id: user.id, 
         email: user.email, 
         role: user.role,
         first_name: user.first_name,
-        last_name: user.last_name
+        last_name: user.last_name,
+        rememberMe: Boolean(rememberMe)
       },
-      process.env.JWT_SECRET || 'your-secret-key',
-      { expiresIn: '24h' }
+      jwtSecret,
+      { expiresIn: tokenExpiration }
     );
 
     res.status(200).json({
@@ -213,6 +286,13 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       }
     });
   } catch (error) {
+    console.error('💥 Login error details:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      name: error instanceof Error ? error.name : undefined,
+      timestamp: new Date().toISOString()
+    });
+    
     logger.error('Error in login:', error);
     res.status(500).json({ 
       success: false, 
@@ -374,7 +454,7 @@ export const forgotPassword = async (req: Request, res: Response): Promise<void>
       return;
     }
 
-    // Generate reset token (in production, send this via email)
+    // Generate reset token
     const resetToken = jwt.sign(
       { id: user.id, email: user.email, type: 'password_reset' },
       process.env.JWT_SECRET || 'your-secret-key',
@@ -391,8 +471,23 @@ export const forgotPassword = async (req: Request, res: Response): Promise<void>
       }
     });
 
-    // TODO: Send email with reset link
-    logger.info(`Password reset requested for ${email}, token: ${resetToken}`);
+    // Send password reset email
+    const emailSent = await sendPasswordResetEmail(
+      user.email,
+      resetToken,
+      user.first_name
+    );
+
+    if (!emailSent) {
+      logger.error(`Failed to send password reset email to ${email}`);
+      res.status(500).json({ 
+        success: false, 
+        message: 'E-posta gönderilirken bir hata oluştu. Lütfen tekrar deneyiniz.' 
+      });
+      return;
+    }
+
+    logger.info(`Password reset email sent successfully to ${email}`);
 
     res.status(200).json({ 
       success: true, 
@@ -461,8 +556,12 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
       // Hash new password
       const hashedPassword = await bcrypt.hash(newPassword, 10);
 
+      logger.info(`Updating password for user ${user.id} with email ${user.email}`);
+      logger.info(`Old password hash: ${user.password.substring(0, 10)}...`);
+      logger.info(`New password hash: ${hashedPassword.substring(0, 10)}...`);
+
       // Update password and clear reset token
-      await prisma.users.update({
+      const updatedUser = await prisma.users.update({
         where: { id: user.id },
         data: {
           password: hashedPassword,
@@ -471,6 +570,9 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
           updated_at: new Date()
         }
       });
+
+      logger.info(`Password updated successfully for user ${user.id}`);
+      logger.info(`Updated password hash: ${updatedUser.password.substring(0, 10)}...`);
 
       res.status(200).json({ 
         success: true, 
