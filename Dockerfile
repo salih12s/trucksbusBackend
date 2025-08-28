@@ -20,5 +20,9 @@ RUN npx tsc
 ENV NODE_ENV=production
 EXPOSE 3000
 
-# Compiled JS'den çalıştır
-CMD ["node", "dist/index.js"]
+# Database migration ve server start script
+COPY start.sh ./
+RUN chmod +x start.sh
+
+# Start script ile migration + server
+CMD ["./start.sh"]
