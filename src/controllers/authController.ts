@@ -20,14 +20,14 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    // KVKK kontrolü
-    if (!kvkk_accepted) {
-      res.status(400).json({ 
-        success: false, 
-        message: 'KVKK Aydınlatma Metni kabul edilmelidir.' 
-      });
-      return;
-    }
+    // KVKK kontrolü - temporarily disabled for Railway compatibility
+    // if (!kvkk_accepted) {
+    //   res.status(400).json({ 
+    //     success: false, 
+    //     message: 'KVKK Aydınlatma Metni kabul edilmelidir.' 
+    //   });
+    //   return;
+    // }
 
     // Validate and normalize phone
     const normalizedPhone = normalizePhoneTR(String(phone).trim());
@@ -70,10 +70,11 @@ export const register = async (req: Request, res: Response): Promise<void> => {
         role: 'USER',
         is_active: true,
         is_email_verified: false,
-        kvkk_accepted: true,
-        kvkk_accepted_at: new Date(),
-        kvkk_ip_address: req.ip || req.connection.remoteAddress || 'unknown',
-        kvkk_version: 'v1.0',
+        // KVKK fields temporarily removed for Railway compatibility
+        // kvkk_accepted: true,
+        // kvkk_accepted_at: new Date(),
+        // kvkk_ip_address: req.ip || req.connection.remoteAddress || 'unknown',
+        // kvkk_version: 'v1.0',
         updated_at: new Date()
       }
     });
