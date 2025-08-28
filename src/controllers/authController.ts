@@ -136,6 +136,20 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     
     const { email, password, rememberMe } = req.body;
 
+    // Test database connection first
+    console.log('🔍 Testing database connection...');
+    try {
+      await prisma.$queryRaw`SELECT 1 as test`;
+      console.log('✅ Database connection test successful');
+    } catch (dbTestError) {
+      console.error('❌ Database connection test failed:', dbTestError);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Database bağlantısında sorun var.' 
+      });
+      return;
+    }
+
     // JWT Secret check
     const loginJwtSecret = process.env.JWT_SECRET || process.env.AUTH_SECRET;
     if (!loginJwtSecret) {
