@@ -49,9 +49,6 @@ export type AuthenticatedMiddleware = (
   next: NextFunction
 ) => void;
 
-// Default export to make this a proper module
-export default {};
-
 export interface AuthProvider {
   name: string;
   clientId: string;
@@ -85,26 +82,3 @@ export interface AuthResponse {
   token: string;
   message?: string;
 }
-
-export interface LoginCredentials {
-  email: string;
-  password: string;
-}
-
-export interface RegisterData {
-  email: string;
-  password: string;
-  name: string;
-  phone?: string;
-}
-
-// Default export for module compatibility
-export default {
-  User,
-  AuthenticatedRequest,
-  AuthMiddleware,
-  JWTPayload,
-  AuthResponse,
-  LoginCredentials,
-  RegisterData
-};

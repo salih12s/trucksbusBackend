@@ -373,10 +373,10 @@ model users {
   refresh_token                               String?
   refresh_token_expires                       DateTime?
   avatar                                      String?
-  kvkk_accepted                              Boolean                        @default(false)
-  kvkk_accepted_at                           DateTime?
-  kvkk_ip_address                            String?
-  kvkk_version                               String?                        @default("v1.0")
+  kvkk_accepted                               Boolean?                       @default(false)
+  kvkk_accepted_at                            DateTime?
+  kvkk_ip_address                             String?
+  kvkk_version                                String?                        @default("v1.0")
   complaints_complaints_target_user_idTousers complaints[]                   @relation("complaints_target_user_idTousers")
   complaints_complaints_user_idTousers        complaints[]                   @relation("complaints_user_idTousers")
   conversation_hidden                         conversation_hidden[]
@@ -548,7 +548,6 @@ enum NotificationType {
   LISTING_REMOVED
   FEEDBACK_RESPONSE
   LISTING_PUBLISHED
-  FEEDBACK_NEW
 }
 
 enum FeedbackType {

@@ -173,7 +173,7 @@ export class UserController {
   }
 
   // DELETE /users/account - Hesabı tamamen sil
-  static async deleteAccount(req: AuthenticatedRequest, res: Response) {
+  static async deleteAccount(req: AuthenticatedRequest, res: Response): Promise<Response | void> {
     try {
       const userId = req.user?.id;
       const { password, confirmation } = req.body;
@@ -240,7 +240,7 @@ export class UserController {
       // Log kaydet
       console.log(`Account deleted: ${user.email} (${user.first_name} ${user.last_name}) at ${new Date().toISOString()}`);
 
-      res.status(200).json({ 
+      return res.status(200).json({ 
         success: true, 
         message: 'Hesabınız başarıyla silindi' 
       });
