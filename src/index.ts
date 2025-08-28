@@ -25,6 +25,7 @@ import notificationRoutes from './routes/notificationRoutes';
 import favoritesRoutes from './routes/favorites';
 import meRoutes from './routes/meRoutes';
 import feedbackRoutes from './routes/feedbackRoutes';
+import debugRoutes from './routes/debugRoutes';
 
 // Import utils
 import { logger } from './utils/logger';
@@ -117,6 +118,9 @@ app.use('/api/categories', categoryRoutes);
 app.use('/api/locations', locationRoutes);
 app.use('/api/listings', listingRoutes);
 app.use('/api/admin', adminRoutes);
+
+// Debug Routes (only in production for debugging)
+app.use('/api/debug', debugRoutes);
 
 // Yeni Mesajlaşma Sistemi Routes
 app.use('/api/conversations', conversationsRoutes);
