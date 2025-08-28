@@ -154,6 +154,34 @@ app.get('/api/debug/users', async (req, res) => {
   }
 });
 
+// EMERGENCY: Add KVKK fields to production database
+app.post('/api/debug/fix-kvkk', async (req, res) => {
+  try {
+    console.log('🚨 EMERGENCY KVKK FIX: Adding KVKK fields to production database');
+    
+    // Add KVKK fields using raw SQL
+    await prisma.$executeRaw`ALTER TABLE "users" ADD COLUMN IF NOT EXISTS "kvkk_accepted" BOOLEAN DEFAULT FALSE;`;
+    await prisma.$executeRaw`ALTER TABLE "users" ADD COLUMN IF NOT EXISTS "kvkk_accepted_at" TIMESTAMP(3);`;
+    await prisma.$executeRaw`ALTER TABLE "users" ADD COLUMN IF NOT EXISTS "kvkk_ip_address" TEXT;`;
+    await prisma.$executeRaw`ALTER TABLE "users" ADD COLUMN IF NOT EXISTS "kvkk_version" TEXT DEFAULT 'v1.0';`;
+    
+    console.log('✅ KVKK fields added successfully');
+    
+    res.status(200).json({
+      success: true,
+      message: 'KVKK fields added to production database',
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('❌ KVKK fix failed:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to add KVKK fields',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
 // Also add root endpoint for quick test
 app.get('/', (req, res) => {
   res.status(200).send('TruckBus Backend is running!');
