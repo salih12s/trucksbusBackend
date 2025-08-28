@@ -107,6 +107,21 @@ app.get('/api/health', (req, res) => {
   res.status(200).send('OK');
 });
 
+// Debug endpoint for Railway troubleshooting
+app.get('/api/debug', (req, res) => {
+  console.log('🔍 Debug endpoint called');
+  res.status(200).json({
+    success: true,
+    message: 'Debug info',
+    environment: process.env.NODE_ENV,
+    port: process.env.PORT,
+    hasDatabase: !!process.env.DATABASE_URL,
+    hasJwtSecret: !!process.env.JWT_SECRET,
+    hasAuthSecret: !!process.env.AUTH_SECRET,
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Also add root endpoint for quick test
 app.get('/', (req, res) => {
   res.status(200).send('TruckBus Backend is running!');
