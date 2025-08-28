@@ -85,7 +85,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
         email: user.email, 
         role: user.role 
       },
-      process.env.JWT_SECRET || 'your-secret-key',
+      process.env.JWT_SECRET || process.env.AUTH_SECRET || 'your-secret-key',
       { expiresIn: '24h' }
     );
 
@@ -120,10 +120,18 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 
 export const login = async (req: Request, res: Response): Promise<void> => {
   try {
+    console.log('🔐 Login attempt started:', {
+      hasEmail: !!req.body?.email,
+      hasPassword: !!req.body?.password,
+      rememberMe: req.body?.rememberMe,
+      timestamp: new Date().toISOString()
+    });
+    
     const { email, password, rememberMe } = req.body;
 
     // Validate input
     if (!email || !password) {
+      console.log('❌ Login failed: Missing credentials');
       res.status(400).json({ 
         success: false, 
         message: 'E-posta ve şifre alanları zorunludur.' 
@@ -132,6 +140,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     }
 
     // Find user by email
+    console.log('🔍 Searching for user:', email);
     const user = await prisma.users.findUnique({
       where: { email },
       select: {
@@ -153,6 +162,13 @@ export const login = async (req: Request, res: Response): Promise<void> => {
         created_at: true,
         updated_at: true
       }
+    });
+    
+    console.log('👤 User found:', {
+      exists: !!user,
+      email: user?.email,
+      isActive: user?.is_active,
+      hasPassword: !!user?.password
     });
 
     if (!user) {
@@ -210,7 +226,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
         last_name: user.last_name,
         rememberMe: Boolean(rememberMe)
       },
-      process.env.JWT_SECRET || 'your-secret-key',
+      process.env.JWT_SECRET || process.env.AUTH_SECRET || 'your-secret-key',
       { expiresIn: tokenExpiration }
     );
 
@@ -235,6 +251,13 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       }
     });
   } catch (error) {
+    console.error('💥 Login error details:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      name: error instanceof Error ? error.name : undefined,
+      timestamp: new Date().toISOString()
+    });
+    
     logger.error('Error in login:', error);
     res.status(500).json({ 
       success: false, 

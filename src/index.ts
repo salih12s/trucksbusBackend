@@ -174,9 +174,21 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
 // Database connection test
 async function connectDatabase() {
   try {
+    console.log('🔗 Testing database connection...');
     await prisma.$connect();
+    console.log('✅ Database connected successfully');
     logger.info('✅ Database connected successfully');
+    
+    // Test a simple query
+    await prisma.$queryRaw`SELECT 1`;
+    console.log('✅ Database query test successful');
+    
   } catch (error) {
+    console.error('❌ Database connection failed:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      code: (error as any)?.code,
+      errno: (error as any)?.errno
+    });
     logger.error('❌ Database connection failed:', error);
     // Don't exit - let the caller decide
     throw error;
@@ -202,6 +214,19 @@ async function startServer() {
   console.log('🔧 NODE_ENV:', process.env.NODE_ENV);
   console.log('🔧 PORT:', process.env.PORT);
   console.log('🔧 DATABASE_URL exists:', !!process.env.DATABASE_URL);
+  console.log('🔧 JWT_SECRET exists:', !!process.env.JWT_SECRET);
+  console.log('🔧 AUTH_SECRET exists:', !!process.env.AUTH_SECRET);
+  
+  // Environment checks
+  if (!process.env.DATABASE_URL) {
+    console.error('❌ DATABASE_URL environment variable is required');
+    process.exit(1);
+  }
+  
+  if (!process.env.JWT_SECRET && !process.env.AUTH_SECRET) {
+    console.error('❌ JWT_SECRET or AUTH_SECRET environment variable is required');
+    process.exit(1);
+  }
   
   try {
     // Try to connect to database but don't fail if it fails
