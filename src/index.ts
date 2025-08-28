@@ -122,6 +122,38 @@ app.get('/api/debug', (req, res) => {
   });
 });
 
+// Debug users endpoint - REMOVE AFTER FIXING
+app.get('/api/debug/users', async (req, res) => {
+  try {
+    console.log('🔍 Debug users endpoint called');
+    const users = await prisma.users.findMany({
+      select: {
+        id: true,
+        email: true,
+        first_name: true,
+        last_name: true,
+        is_active: true,
+        created_at: true
+      },
+      take: 10 // Sadece ilk 10 kullanıcı
+    });
+    
+    res.status(200).json({
+      success: true,
+      message: 'Debug users info',
+      count: users.length,
+      users: users
+    });
+  } catch (error) {
+    console.error('❌ Debug users error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Database error',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
 // Also add root endpoint for quick test
 app.get('/', (req, res) => {
   res.status(200).send('TruckBus Backend is running!');
