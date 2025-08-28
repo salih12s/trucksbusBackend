@@ -79,13 +79,14 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     });
 
     // Generate JWT token
+    const registerJwtSecret = process.env.JWT_SECRET || process.env.AUTH_SECRET || 'temporary-railway-debug-secret-2024';
     const token = jwt.sign(
       { 
         id: user.id, 
         email: user.email, 
         role: user.role 
       },
-      process.env.JWT_SECRET || process.env.AUTH_SECRET || 'your-secret-key',
+      registerJwtSecret,
       { expiresIn: '24h' }
     );
 
@@ -124,10 +125,27 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       hasEmail: !!req.body?.email,
       hasPassword: !!req.body?.password,
       rememberMe: req.body?.rememberMe,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      environment: {
+        NODE_ENV: process.env.NODE_ENV,
+        JWT_SECRET_exists: !!process.env.JWT_SECRET,
+        AUTH_SECRET_exists: !!process.env.AUTH_SECRET,
+        DATABASE_URL_exists: !!process.env.DATABASE_URL,
+      }
     });
     
     const { email, password, rememberMe } = req.body;
+
+    // JWT Secret check
+    const loginJwtSecret = process.env.JWT_SECRET || process.env.AUTH_SECRET;
+    if (!loginJwtSecret) {
+      console.error('❌ No JWT secret available');
+      res.status(500).json({ 
+        success: false, 
+        message: 'Server configuration error: No JWT secret' 
+      });
+      return;
+    }
 
     // Validate input
     if (!email || !password) {
@@ -217,6 +235,9 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     // Generate JWT token with dynamic expiration
     const tokenExpiration = rememberMe ? '30d' : '24h'; // Remember me: 30 gün, normal: 24 saat
     
+    const jwtSecret = process.env.JWT_SECRET || process.env.AUTH_SECRET || 'temporary-railway-debug-secret-2024';
+    console.log('🔐 Using JWT secret from:', process.env.JWT_SECRET ? 'JWT_SECRET' : process.env.AUTH_SECRET ? 'AUTH_SECRET' : 'fallback');
+    
     const token = jwt.sign(
       { 
         id: user.id, 
@@ -226,7 +247,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
         last_name: user.last_name,
         rememberMe: Boolean(rememberMe)
       },
-      process.env.JWT_SECRET || process.env.AUTH_SECRET || 'your-secret-key',
+      jwtSecret,
       { expiresIn: tokenExpiration }
     );
 
