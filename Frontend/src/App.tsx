@@ -12,8 +12,10 @@ import { PromptDialogProvider } from './context/PromptDialogProvider';
 import UserLayout from './components/layout/UserLayout';
 import AdminLayout from './components/layout/AdminLayout';
 import AdminRoute from './components/auth/AdminRoute';
+import ProtectedRoute from './components/common/ProtectedRoute';
 import NewHomePage from './pages/user/NewHomePage';
 import NewCategoryPage from './pages/user/NewCategoryPage';
+
 import CategoryListingsPage from './pages/listings/CategoryListingsPage';
 import CategorySelection from './pages/listing/CategorySelection';
 import BrandSelection from './pages/listing/BrandSelection';
@@ -85,6 +87,13 @@ import Profile from './pages/user/Profile';
 import MyListings from './pages/user/MyListings';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
+import ForgotPassword from './pages/auth/ForgotPassword';
+import ResetPassword from './pages/auth/ResetPassword';
+import AboutPage from './pages/static/AboutPage';
+import ContactPage from './pages/static/ContactPage';
+import PrivacyPage from './pages/static/PrivacyPage';
+import TermsPage from './pages/static/TermsPage';
+import KVKKPage from './pages/static/KVKKPage';
 
 const App: React.FC = () => {
   console.log('🚀 App component with full routing rendering...');
@@ -101,9 +110,12 @@ const App: React.FC = () => {
                   <WebSocketProvider>
                 <Router>
                 <Routes>
+                {/* 🔐 Auth rotaları - Login'den GuestRoute'u kaldıralım */}
                 <Route path="/auth/login" element={<Login />} />
                 <Route path="/auth/register" element={<Register />} />
-                
+                <Route path="/auth/forgot-password" element={<ForgotPassword />} />
+                <Route path="/auth/reset-password" element={<ResetPassword />} />
+
                 <Route path="/category-selection" element={<CategorySelection />} />
                 <Route path="/brand-selection/:vehicleTypeId" element={<BrandSelection />} />
                 <Route path="/model-selection/:brandId" element={<ModelSelection />} />
@@ -119,108 +131,117 @@ const App: React.FC = () => {
                 <Route path="category/:id/vehicle-type/:vehicleTypeId/brand/:brandId" element={<NewCategoryPage />} />
                 <Route path="category/:id/vehicle-type/:vehicleTypeId/brand/:brandId/model/:modelId" element={<NewCategoryPage />} />
                 <Route path="listing/:id" element={<DetailOrchestrator />} />
-                <Route path="edit-listing/:id" element={<EditListingOrchestrator />} />
-                <Route path="messages" element={<RealTimeMessagesPage />} />
-                <Route path="favorites" element={<FavoritesPage />} />
-                <Route path="my-reports" element={<MyReportsPage />} />
-                <Route path="profile" element={<Profile />} />
-                <Route path="my-listings" element={<MyListings />} />
+                
+                {/* 🔒 Korumalı kullanıcı rotaları */}
+                <Route path="edit-listing/:id" element={<ProtectedRoute><EditListingOrchestrator /></ProtectedRoute>} />
+                <Route path="messages" element={<ProtectedRoute><RealTimeMessagesPage /></ProtectedRoute>} />
+                <Route path="favorites" element={<ProtectedRoute><FavoritesPage /></ProtectedRoute>} />
+                <Route path="my-reports" element={<ProtectedRoute><MyReportsPage /></ProtectedRoute>} />
+                <Route path="profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+                <Route path="my-listings" element={<ProtectedRoute><MyListings /></ProtectedRoute>} />
                 {/* 🔧 Alias route for backward compatibility */}
-                <Route path="real-time-messages" element={<RealTimeMessagesPage />} />
+                <Route path="real-time-messages" element={<ProtectedRoute><RealTimeMessagesPage /></ProtectedRoute>} />
+                
+                {/* Static Pages */}
+                <Route path="about" element={<AboutPage />} />
+                <Route path="contact" element={<ContactPage />} />
+                <Route path="privacy" element={<PrivacyPage />} />
+                <Route path="terms" element={<TermsPage />} />
+                <Route path="kvkk" element={<KVKKPage />} />
                 
                 {/* Form Routes - Now with UserLayout */}
-                <Route path="create-ad/minibus/:variantId" element={<MinibusAdForm />} />
-                <Route path="create-ad/kamyon/:variantId" element={<KamyonAdForm />} />
-                <Route path="create-ad/otobus/:variantId" element={<OtobusAdForm />} />
-                <Route path="create-ad/cekici/:variantId" element={<CekiciAdForm />} />
+                <Route path="create-ad/minibus/:variantId" element={<ProtectedRoute><MinibusAdForm /></ProtectedRoute>} />
+                <Route path="create-ad/kamyon/:variantId" element={<ProtectedRoute><KamyonAdForm /></ProtectedRoute>} />
+                <Route path="create-ad/otobus/:variantId" element={<ProtectedRoute><OtobusAdForm /></ProtectedRoute>} />
+                <Route path="create-ad/cekici/:variantId" element={<ProtectedRoute><CekiciAdForm /></ProtectedRoute>} />
                 
-                <Route path="create-ad/dorse/damperli/kapakli-tip/:variantId" element={<KapakliTipForm />} />
-                <Route path="create-ad/dorse/damperli/hafriyat-tipi/:variantId" element={<HafriyatTipiFormDorse />} />
-                <Route path="create-ad/dorse/damperli/havuz-hardox-tipi/:variantId" element={<HavuzHardoxTipiFormDorse />} />
-                <Route path="create-ad/dorse/damperli/kaya-tipi/:variantId" element={<KayaTipiFormDorse />} />
-                <Route path="create-ad/dorse/frigofirik/:variantId" element={<FrigofirikForm />} />
-                <Route path="create-ad/dorse/lowbed/havuzlu/:variantId" element={<HavuzluForm />} />
-                <Route path="create-ad/dorse/lowbed/ondekirmalı/:variantId" element={<OndekirmalıForm />} />
+                <Route path="create-ad/dorse/damperli/kapakli-tip/:variantId" element={<ProtectedRoute><KapakliTipForm /></ProtectedRoute>} />
+                <Route path="create-ad/dorse/damperli/hafriyat-tipi/:variantId" element={<ProtectedRoute><HafriyatTipiFormDorse /></ProtectedRoute>} />
+                <Route path="create-ad/dorse/damperli/havuz-hardox-tipi/:variantId" element={<ProtectedRoute><HavuzHardoxTipiFormDorse /></ProtectedRoute>} />
+                <Route path="create-ad/dorse/damperli/kaya-tipi/:variantId" element={<ProtectedRoute><KayaTipiFormDorse /></ProtectedRoute>} />
+                <Route path="create-ad/dorse/frigofirik/:variantId" element={<ProtectedRoute><FrigofirikForm /></ProtectedRoute>} />
+                <Route path="create-ad/dorse/lowbed/havuzlu/:variantId" element={<ProtectedRoute><HavuzluForm /></ProtectedRoute>} />
+                <Route path="create-ad/dorse/lowbed/ondekirmalı/:variantId" element={<ProtectedRoute><OndekirmalıForm /></ProtectedRoute>} />
                 
                 {/* Kuruyük Routes */}
-                <Route path="create-ad/dorse/kuruyuk/kapakli/:variantId" element={<KapakliForm />} />
-                <Route path="create-ad/dorse/kuruyuk/kapakli-kaya-tipi/:variantId" element={<KapakliKayaTipiForm />} />
-                <Route path="create-ad/dorse/kuruyuk/kapaksiz-platform/:variantId" element={<KapaksızPlatformForm />} />
+                <Route path="create-ad/dorse/kuruyuk/kapakli/:variantId" element={<ProtectedRoute><KapakliForm /></ProtectedRoute>} />
+                <Route path="create-ad/dorse/kuruyuk/kapakli-kaya-tipi/:variantId" element={<ProtectedRoute><KapakliKayaTipiForm /></ProtectedRoute>} />
+                <Route path="create-ad/dorse/kuruyuk/kapaksiz-platform/:variantId" element={<ProtectedRoute><KapaksızPlatformForm /></ProtectedRoute>} />
                 
                 {/* Tenteli Routes */}
-                <Route path="create-ad/dorse/tenteli/pilot/:variantId" element={<PilotForm />} />
-                <Route path="create-ad/dorse/tenteli/midilli/:variantId" element={<MidilliForm />} />
-                <Route path="create-ad/dorse/tenteli/yari-midilli/:variantId" element={<YariMidilliForm />} />
+                <Route path="create-ad/dorse/tenteli/pilot/:variantId" element={<ProtectedRoute><PilotForm /></ProtectedRoute>} />
+                <Route path="create-ad/dorse/tenteli/midilli/:variantId" element={<ProtectedRoute><MidilliForm /></ProtectedRoute>} />
+                <Route path="create-ad/dorse/tenteli/yari-midilli/:variantId" element={<ProtectedRoute><YariMidilliForm /></ProtectedRoute>} />
                 
                 {/* Tanker Routes */}
-                <Route path="create-ad/dorse/tanker/:variantId" element={<TankerForm />} />
+                <Route path="create-ad/dorse/tanker/:variantId" element={<ProtectedRoute><TankerForm /></ProtectedRoute>} />
                 
                 {/* Tekstil Routes */}
-                <Route path="create-ad/dorse/tekstil/:variantId" element={<TekstilForm />} />
+                <Route path="create-ad/dorse/tekstil/:variantId" element={<ProtectedRoute><TekstilForm /></ProtectedRoute>} />
                 
                 {/* Silobas Routes */}
-                <Route path="create-ad/dorse/silobas/:variantId" element={<SilobasForm />} />
+                <Route path="create-ad/dorse/silobas/:variantId" element={<ProtectedRoute><SilobasForm /></ProtectedRoute>} />
                 
                 {/* Individual Şasi Routes */}
-                <Route path="create-ad/dorse/damper-sasi/:variantId" element={<DamperSasiForm />} />
-                <Route path="create-ad/dorse/kilcik-sasi/:variantId" element={<KilcikSasiForm />} />
-                <Route path="create-ad/dorse/platform-sasi/:variantId" element={<PlatformSasiForm />} />
-                <Route path="create-ad/dorse/romork-konvantoru/:variantId" element={<RomorkKonvantöruForm />} />
-                <Route path="create-ad/dorse/tanker-sasi/:variantId" element={<TankerSasiForm />} />
-                <Route path="create-ad/dorse/uzayabilir-sasi/:variantId" element={<UzayabilirSasiForm />} />
+                <Route path="create-ad/dorse/damper-sasi/:variantId" element={<ProtectedRoute><DamperSasiForm /></ProtectedRoute>} />
+                <Route path="create-ad/dorse/kilcik-sasi/:variantId" element={<ProtectedRoute><KilcikSasiForm /></ProtectedRoute>} />
+                <Route path="create-ad/dorse/platform-sasi/:variantId" element={<ProtectedRoute><PlatformSasiForm /></ProtectedRoute>} />
+                <Route path="create-ad/dorse/romork-konvantoru/:variantId" element={<ProtectedRoute><RomorkKonvantöruForm /></ProtectedRoute>} />
+                <Route path="create-ad/dorse/tanker-sasi/:variantId" element={<ProtectedRoute><TankerSasiForm /></ProtectedRoute>} />
+                <Route path="create-ad/dorse/uzayabilir-sasi/:variantId" element={<ProtectedRoute><UzayabilirSasiForm /></ProtectedRoute>} />
                 
                 {/* Römork Routes */}
-                <Route path="create-ad/romork/kamyon-romorklari/:variantId" element={<KamyonRomorkForm />} />
-                <Route path="create-ad/romork/tarim-romork-acik-kasa/:variantId" element={<AcikKasaForm />} />
-                <Route path="create-ad/romork/tarim-romork-kapali-kasa/:variantId" element={<KapaliKasaForm />} />
-                <Route path="create-ad/romork/tarim-romork-sulama/:variantId" element={<SulamaForm />} />
-                <Route path="create-ad/romork/tarim-romork-tanker/:variantId" element={<TarimTankerForm />} />
+                <Route path="create-ad/romork/kamyon-romorklari/:variantId" element={<ProtectedRoute><KamyonRomorkForm /></ProtectedRoute>} />
+                <Route path="create-ad/romork/tarim-romork-acik-kasa/:variantId" element={<ProtectedRoute><AcikKasaForm /></ProtectedRoute>} />
+                <Route path="create-ad/romork/tarim-romork-kapali-kasa/:variantId" element={<ProtectedRoute><KapaliKasaForm /></ProtectedRoute>} />
+                <Route path="create-ad/romork/tarim-romork-sulama/:variantId" element={<ProtectedRoute><SulamaForm /></ProtectedRoute>} />
+                <Route path="create-ad/romork/tarim-romork-tanker/:variantId" element={<ProtectedRoute><TarimTankerForm /></ProtectedRoute>} />
                 
                 {/* Taşıma Römorkları Routes */}
-                <Route path="create-ad/romork/tasima-romorklari-boru/:variantId" element={<BoruRomorkForm />} />
-                <Route path="create-ad/romork/tasima-romorklari-frigo/:variantId" element={<FrigoRomorkForm />} />
-                <Route path="create-ad/romork/tasima-romorklari-hayvan/:variantId" element={<HayvanRomorkForm />} />
-                <Route path="create-ad/romork/tasima-romorklari-platform/:variantId" element={<PlatformRomorkForm />} />
-                <Route path="create-ad/romork/tasima-romorklari-seyehat/:variantId" element={<SeyehatRomorkForm />} />
-                <Route path="create-ad/romork/tasima-romorklari-tup-damacana/:variantId" element={<TupDamacanaRomorkForm />} />
-                <Route path="create-ad/romork/tasima-romorklari-vasita/:variantId" element={<VasitaRomorkForm />} />
-                <Route path="create-ad/romork/tasima-romorklari-yuk/:variantId" element={<YukRomorkForm />} />
+                <Route path="create-ad/romork/tasima-romorklari-boru/:variantId" element={<ProtectedRoute><BoruRomorkForm /></ProtectedRoute>} />
+                <Route path="create-ad/romork/tasima-romorklari-frigo/:variantId" element={<ProtectedRoute><FrigoRomorkForm /></ProtectedRoute>} />
+                <Route path="create-ad/romork/tasima-romorklari-hayvan/:variantId" element={<ProtectedRoute><HayvanRomorkForm /></ProtectedRoute>} />
+                <Route path="create-ad/romork/tasima-romorklari-platform/:variantId" element={<ProtectedRoute><PlatformRomorkForm /></ProtectedRoute>} />
+                <Route path="create-ad/romork/tasima-romorklari-seyehat/:variantId" element={<ProtectedRoute><SeyehatRomorkForm /></ProtectedRoute>} />
+                <Route path="create-ad/romork/tasima-romorklari-tup-damacana/:variantId" element={<ProtectedRoute><TupDamacanaRomorkForm /></ProtectedRoute>} />
+                <Route path="create-ad/romork/tasima-romorklari-vasita/:variantId" element={<ProtectedRoute><VasitaRomorkForm /></ProtectedRoute>} />
+                <Route path="create-ad/romork/tasima-romorklari-yuk/:variantId" element={<ProtectedRoute><YukRomorkForm /></ProtectedRoute>} />
                 
                 {/* Özel Amaçlı Römork Routes */}
-                <Route path="create-ad/romork/ozel-amacli-romork/:variantId" element={<OzelAmacliRomorkForm />} />
+                <Route path="create-ad/romork/ozel-amacli-romork/:variantId" element={<ProtectedRoute><OzelAmacliRomorkForm /></ProtectedRoute>} />
                 
                 {/* Özel Amaçlı Dorseler Routes */}
-                <Route path="create-ad/dorse/ozel-amacli-dorseler/:variantId" element={<OzelAmacliRomorkForm />} />
+                <Route path="create-ad/dorse/ozel-amacli-dorseler/:variantId" element={<ProtectedRoute><OzelAmacliRomorkForm /></ProtectedRoute>} />
                 
                 {/* Karoser & Üstyapı Damperli Routes */}
-                <Route path="create-ad/karoser-ustyapi/damperli-ahsap-kasa/:variantId" element={<AhsapKasaForm />} />
-                <Route path="create-ad/karoser-ustyapi/damperli-hafriyat-tipi/:variantId" element={<HafriyatTipiForm />} />
-                <Route path="create-ad/karoser-ustyapi/damperli-havuz-hardox-tipi/:variantId" element={<HavuzHardoxTipiForm />} />
-                <Route path="create-ad/karoser-ustyapi/damperli-kaya-tipi/:variantId" element={<KayaTipiForm />} />
+                <Route path="create-ad/karoser-ustyapi/damperli-ahsap-kasa/:variantId" element={<ProtectedRoute><AhsapKasaForm /></ProtectedRoute>} />
+                <Route path="create-ad/karoser-ustyapi/damperli-hafriyat-tipi/:variantId" element={<ProtectedRoute><HafriyatTipiForm /></ProtectedRoute>} />
+                <Route path="create-ad/karoser-ustyapi/damperli-havuz-hardox-tipi/:variantId" element={<ProtectedRoute><HavuzHardoxTipiForm /></ProtectedRoute>} />
+                <Route path="create-ad/karoser-ustyapi/damperli-kaya-tipi/:variantId" element={<ProtectedRoute><KayaTipiForm /></ProtectedRoute>} />
                 
                 {/* Karoser & Üstyapı Sabit Kabin Routes */}
-                <Route path="create-ad/karoser-ustyapi/sabit-kabin-acik-kasa/:variantId" element={<AcikKasaFormSabit />} />
-                <Route path="create-ad/karoser-ustyapi/sabit-kabin-kapali-kasa/:variantId" element={<KapaliKasaFormSabit />} />
-                <Route path="create-ad/karoser-ustyapi/sabit-kabin-ozel-kasa/:variantId" element={<OzelKasaForm />} />
+                <Route path="create-ad/karoser-ustyapi/sabit-kabin-acik-kasa/:variantId" element={<ProtectedRoute><AcikKasaFormSabit /></ProtectedRoute>} />
+                <Route path="create-ad/karoser-ustyapi/sabit-kabin-kapali-kasa/:variantId" element={<ProtectedRoute><KapaliKasaFormSabit /></ProtectedRoute>} />
+                <Route path="create-ad/karoser-ustyapi/sabit-kabin-ozel-kasa/:variantId" element={<ProtectedRoute><OzelKasaForm /></ProtectedRoute>} />
                 
                 {/* Oto Kurtarıcı & Taşıyıcı Routes */}
-                <Route path="create-ad/oto-kurtarici-tasiyici/tekli-arac/:variantId" element={<TekliAracForm />} />
-                <Route path="create-ad/oto-kurtarici-tasiyici/coklu-arac/:variantId" element={<CokluAracForm />} />
+                <Route path="create-ad/oto-kurtarici-tasiyici/tekli-arac/:variantId" element={<ProtectedRoute><TekliAracForm /></ProtectedRoute>} />
+                <Route path="create-ad/oto-kurtarici-tasiyici/coklu-arac/:variantId" element={<ProtectedRoute><CokluAracForm /></ProtectedRoute>} />
               </Route>
               
-              {/* Admin Routes with Layout */}
+              {/* Admin Routes - Completely Separate System */}
               <Route path="/admin" element={
                 <AdminRoute>
                   <AdminLayout />
                 </AdminRoute>
               }>
                 <Route index element={<AdminDashboard />} />
+                <Route path="dashboard" element={<AdminDashboard />} />
                 <Route path="all-listings" element={<AllListings />} />
                 <Route path="pending-listings" element={<PendingListings />} />
                 <Route path="reports" element={<AdminReportsPage />} />
                 <Route path="feedback" element={<FeedbackManagement />} />
                 <Route path="users" element={<Users />} />
-                {/* 🔧 Admin messages kaldırıldı - tek mimari */}
               </Route>
               
               {/* Test Route without Layout */}

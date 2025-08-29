@@ -2,6 +2,7 @@ import React from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import UserHeader from './UserHeader';
 import Sidebar from './Sidebar';
+import Footer from './Footer';
 
 const UserLayout: React.FC = () => {
   const location = useLocation();
@@ -10,7 +11,7 @@ const UserLayout: React.FC = () => {
   const isProfilePage = location.pathname === '/profile';
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50">
+    <div className="flex flex-col min-h-screen bg-gray-50">
       {/* Header */}
       <UserHeader />
 
@@ -41,6 +42,9 @@ const UserLayout: React.FC = () => {
           )}
         </main>
       </div>
+      
+      {/* Footer */}
+      <Footer />
     </div>
   );
 };

@@ -17,6 +17,7 @@ import {
   CircularProgress
 } from '@mui/material';
 import { useConfirmDialog } from '../../hooks/useConfirmDialog';
+import DeleteAccountModal from '../../components/modals/DeleteAccountModal';
 import {
   PhotoCamera,
   Person,
@@ -83,6 +84,7 @@ const Profile: React.FC = () => {
     newPassword: '',
     confirmPassword: ''
   });
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   useEffect(() => {
     fetchProfile();
@@ -575,9 +577,38 @@ const Profile: React.FC = () => {
                 </Box>
               </Box>
             </Box>
+
+            {/* Hesabı Sil */}
+            <Box sx={{ mt: 4, p: 3, border: '1px solid #ef4444', borderRadius: 2, bgcolor: 'rgba(239, 68, 68, 0.05)' }}>
+              <Typography variant="h6" sx={{ color: '#dc2626', mb: 2 }}>
+                Tehlikeli Bölge
+              </Typography>
+              <Typography variant="body2" sx={{ mb: 2, color: 'text.secondary' }}>
+                Bu işlem geri alınamaz. Hesabınız ve tüm verileriniz kalıcı olarak silinecektir.
+              </Typography>
+              <Button
+                variant="contained"
+                color="error"
+                onClick={() => setIsDeleteModalOpen(true)}
+                sx={{ 
+                  width: { xs: '100%', sm: 'auto' },
+                  '&:hover': {
+                    bgcolor: '#dc2626'
+                  }
+                }}
+              >
+                Hesabı Sil
+              </Button>
+            </Box>
           </Box>
         </TabPanel>
       </Card>
+
+      {/* Delete Account Modal */}
+      <DeleteAccountModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+      />
     </Container>
   );
 };

@@ -16,13 +16,18 @@ interface AuthRequest extends Request {
 
 export const authMiddleware = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
-    console.log('=== AUTH MIDDLEWARE ===');
-    console.log('Headers:', req.headers.authorization);
+    // Development'ta debug için log
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('=== AUTH MIDDLEWARE ===');
+      console.log('Headers:', req.headers.authorization);
+    }
     
     const authHeader = req.headers.authorization;
     
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      console.log('No valid auth header found');
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('No valid auth header found');
+      }
       res.status(401).json({
         success: false,
         message: 'Access denied. No token provided.',
@@ -31,11 +36,16 @@ export const authMiddleware = async (req: AuthRequest, res: Response, next: Next
     }
 
     const token = authHeader.substring(7); // Remove 'Bearer ' prefix
-    console.log('Token found:', token.substring(0, 20) + '...');
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('Token found:', token.substring(0, 20) + '...');
+    }
 
     try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { id: string };
-      console.log('Token decoded, userId:', decoded.id);
+      const jwtSecret = process.env.JWT_SECRET || process.env.AUTH_SECRET || 'temporary-railway-debug-secret-2024';
+      const decoded = jwt.verify(token, jwtSecret) as { id: string };
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('Token decoded, userId:', decoded.id);
+      }
       
       // Get user from database
       const user = await prisma.users.findUnique({
@@ -52,10 +62,14 @@ export const authMiddleware = async (req: AuthRequest, res: Response, next: Next
         }
       });
 
-      console.log('User found:', user ? user.email : 'Not found');
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('User found:', user ? user.email : 'Not found');
+      }
 
       if (!user) {
-        console.log('User not found in database');
+        if (process.env.NODE_ENV !== 'production') {
+          console.log('User not found in database');
+        }
         res.status(401).json({
           success: false,
           message: 'Access denied. User not found.',
@@ -76,7 +90,10 @@ export const authMiddleware = async (req: AuthRequest, res: Response, next: Next
         ...user,
         role: String(user.role).toUpperCase()
       };
-      console.log('User role normalized:', normalizedUser.role);
+      
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('User role normalized:', normalizedUser.role);
+      }
 
       req.user = normalizedUser;
       next();

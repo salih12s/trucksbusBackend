@@ -138,7 +138,7 @@ api.interceptors.response.use(
     // 401 durumunda token'ı temizle
     if (error.response?.status === 401) {
       localStorage.removeItem('token');
-      window.location.href = '/login';
+      window.location.href = '/auth/login';
     }
     
     return Promise.reject(apiError);

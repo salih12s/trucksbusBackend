@@ -1,15 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-
+import { api } from "../../services/api";
 import {
   AppBar,
   Toolbar,
   Container,
   Box,
   Button,
-  TextField,
-  InputAdornment,
   IconButton,
   Menu,
   MenuItem,
@@ -26,7 +24,7 @@ import {
 } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 
-// Icons (clean)
+// Icons
 import AddCircleRounded from "@mui/icons-material/AddCircleRounded";
 import NotificationsRounded from "@mui/icons-material/NotificationsRounded";
 import ChatBubbleRounded from "@mui/icons-material/ChatBubbleRounded";
@@ -36,15 +34,17 @@ import ReportGmailerrorredRounded from "@mui/icons-material/ReportGmailerrorredR
 import LogoutRounded from "@mui/icons-material/LogoutRounded";
 import BookmarkIcon from '@mui/icons-material/Bookmark';
 import FeedbackRounded from '@mui/icons-material/FeedbackRounded';
+import DeleteIcon from '@mui/icons-material/Delete';
+
 import NotificationDetailModal from "../modals/NotificationDetailModal";
 import { useFavorites } from '../../context/FavoritesContext';
 import FeedbackModal from '../modals/FeedbackModal';
+import DeleteAccountModal from '../modals/DeleteAccountModal';
 import { useNotifications } from '../../hooks/useNotifications';
 
-// 🎨 YENİ PALET — Logo ile %100 Uyumlu
-const PRIMARY_DARK = "#2D3748"; // Logonun antrasit/füme tonu
-const LOGO_RED = "#E14D43";     // Logonun canlı kırmızısı (Vurgu ve CTA için)
-const LOGO_RED_HOVER = "#D34237"; // Kırmızı hover tonu
+const PRIMARY_DARK = "#2D3748";
+const LOGO_RED = "#E14D43";
+const LOGO_RED_HOVER = "#D34237";
 
 const UserHeader: React.FC = () => {
   const navigate = useNavigate();
@@ -58,10 +58,11 @@ const UserHeader: React.FC = () => {
   const [selectedNotification, setSelectedNotification] = useState<any>(null);
   const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const [deleteAccountOpen, setDeleteAccountOpen] = useState(false);
 
-  // Auto-logout timer (30 dakika = 1800000 ms)
+  // Auto-logout timer (30 dakika)
   const logoutTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const LOGOUT_TIME = 30 * 60 * 1000; // 30 dakika
+  const LOGOUT_TIME = 30 * 60 * 1000;
 
   // Kullanıcı aktivitesini izle ve auto-logout timer'ı yönet
   useEffect(() => {
@@ -90,16 +91,13 @@ const UserHeader: React.FC = () => {
       }
     };
 
-    // İlk timer'ı başlat
     resetTimer();
 
-    // Aktivite event listener'ları
     const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
     events.forEach(event => {
       document.addEventListener(event, handleActivity, true);
     });
 
-    // Cleanup
     return () => {
       if (logoutTimerRef.current) {
         clearTimeout(logoutTimerRef.current);
@@ -110,7 +108,6 @@ const UserHeader: React.FC = () => {
     };
   }, [isAuthenticated, logout, navigate]);
 
-  // İlan Ver butonları için auth kontrolü
   const handleCreateAdClick = () => {
     if (!isAuthenticated) {
       navigate("/auth/login");
@@ -121,22 +118,19 @@ const UserHeader: React.FC = () => {
   
   const handleNotificationClose = () => setNotificationAnchor(null);
   const handleMarkAllAsRead = () => markAsRead();
+  
   const handleNotificationItemClick = (n: any) => {
-    // İlan yayınlandı bildirimlerinde ilana git
     if (n.type === "LISTING_PUBLISHED" && n.data?.listing_id) {
       navigate(`/listings/${n.data.listing_id}`);
     } 
-    // Feedback yanıtı bildirimlerinde modal aç
     else if (n.type === "FEEDBACK_RESPONSE") {
       setSelectedNotification(n);
       setIsNotificationModalOpen(true);
-      setNotificationAnchor(null); // Notification dropdown'unu kapat
+      setNotificationAnchor(null);
     } 
-    // Mesaj bildirimlerinde konuşmaya git
     else if (n.type === "message" && n.conversationId) {
       navigate(`/real-time-messages?conversation=${n.conversationId}`);
     } 
-    // Diğer durumlarda mesajlar sayfasına git
     else {
       navigate("/real-time-messages");
     }
@@ -148,11 +142,34 @@ const UserHeader: React.FC = () => {
   const handleUserMenuOpen = (e: React.MouseEvent<HTMLElement>) => setAnchorElUser(e.currentTarget);
   const handleUserMenuClose = () => setAnchorElUser(null);
   const handleMobileMenuClose = () => setAnchorElMobile(null);
+  
   const handleLogout = () => {
     logout();
     setAnchorElUser(null);
     navigate("/");
   };
+
+  const handleDeleteAccount = () => {
+    setDeleteAccountOpen(true);
+    setAnchorElUser(null);
+  };
+
+    const handleConfirmDeleteAccount = async (password: string) => {
+    try {
+      const response = await api.delete('/auth/delete-account', {
+        data: { password }
+      });
+
+      if (response.data.success) {
+        logout();
+        navigate("/");
+      }
+    } catch (error) {
+      console.error('Error deleting account:', error);
+      throw error; // DeleteAccountModal will handle the error
+    }
+  };
+
   const menuItems = [
     { label: "Ana Sayfa", path: "/" },
     { label: "Profil", path: "/profile" },
@@ -162,75 +179,65 @@ const UserHeader: React.FC = () => {
   ];
 
   return (
-<AppBar
-  position="sticky"
-  elevation={0}
-  sx={{
-    backgroundColor: PRIMARY_DARK,
-    borderBottom: `1px solid ${alpha("#ffffff", 0.1)}`,
-    zIndex: (theme) => theme.zIndex.drawer + 1,
-    overflow: "visible", // taşan büyük logo görünür
-  }}
->
+    <AppBar
+      position="sticky"
+      elevation={0}
+      sx={{
+        backgroundColor: PRIMARY_DARK,
+        borderBottom: `1px solid ${alpha("#ffffff", 0.1)}`,
+        zIndex: (theme) => theme.zIndex.drawer + 1,
+        overflow: "visible",
+      }}
+    >
       <Container maxWidth="xl">
-       <Toolbar
-  disableGutters
-  sx={{
-    minHeight: { xs: 64, md: 76 },
-    gap: { xs: 0.5, sm: 2 },
-    justifyContent: "space-between",
-    alignItems: "center",
-    px: { xs: 1, sm: 2 }, // Mobile'da daha az padding
-  }}
->
-          {/* --- DEĞİŞİKLİK: LOGO BÜYÜTME VE "FLOATING" EFEKTİ --- */}
-          {/* Header yüksekliğini sabit tutarken logoyu büyütmek için */}
-          {/* logoyu kendi container'ından taşıyoruz. */}
-        {/* --- BÜYÜK “FLOATING” LOGO (header boyunu büyütmez) --- */}
-{/* --- BÜYÜK ve ORTALANMIŞ “FLOATING” LOGO --- */}
-<Box
-  component={Link}
-  to="/"
-  sx={{
-    position: "relative",
-    display: "block",
-    textDecoration: "none",
-    zIndex: 2,
+        <Toolbar
+          disableGutters
+          sx={{
+            minHeight: { xs: 64, md: 76 },
+            gap: { xs: 0.5, sm: 2 },
+            justifyContent: "space-between",
+            alignItems: "center",
+            px: { xs: 1, sm: 2 },
+          }}
+        >
+          {/* Logo/Slogan */}
+          <Box
+            component={Link}
+            to="/"
+            sx={{
+              position: "relative",
+              display: "flex",
+              alignItems: "center",
+              textDecoration: "none",
+              zIndex: 2,
+              flexShrink: 0,
+              "&:hover": {
+                transform: "scale(1.02)",
+              },
+              transition: "transform 0.2s ease",
+            }}
+          >
+            <Typography
+              variant="h6"
+              sx={{
+                background: "linear-gradient(45deg, #fff 30%, #f0f0f0 90%)",
+                backgroundClip: "text",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                fontWeight: 700,
+                fontSize: { xs: "0.9rem", sm: "1.1rem", md: "1.25rem" },
+                textShadow: "0 2px 4px rgba(0,0,0,0.3)",
+                whiteSpace: "nowrap",
+                letterSpacing: "0.5px",
+              }}
+            >
+              Alın Satın Trucksbus.com'la Mutlu Kalın
+            </Typography>
+          </Box>
 
-    // Bu kutu header’ı büyütmez, sadece yer tutar
-    width: { xs: 120, md: 190 },
-    height: { xs: 56, md: 64 }, // Toolbar yüksekliğine yakın
-    "&:hover .logo-img": {
-      transform: {
-        xs: "translateY(-50%) scale(1.03)",
-        md: "translateY(-50%) scale(1.06)",
-      },
-    },
-  }}
->
-  <Box
-    component="img"
-    src="/TruckBus.png"
-    alt="TruckBus"
-    className="logo-img"
-    sx={{
-      position: "absolute",
-      left: 0,
-      top: "50%",                     // 🔥 dikey merkez
-      transform: "translateY(-50%)",  // 🔥 tam ortalama
-      height: { xs: 96, md: "clamp(120px, 11vw, 160px)" }, // büyük ama header büyümez
-      objectFit: "contain",
-      filter: "drop-shadow(0 8px 12px rgba(0,0,0,0.35))",
-      pointerEvents: "none",          // tıklama alanı link kutusu
-      transition: "transform 0.2s ease",
-    }}
-  />
-</Box>
-      
-
-          {/* Right */}
+          {/* Right Side */}
           <Box sx={{ display: "flex", alignItems: "center", gap: { xs: 0.5, sm: 1.5 }, ml: { xs: 1, sm: 2 } }}>
-            {/* Desktop Icons Container */}
+            {/* Desktop Icons */}
             <Box sx={{ 
               display: { xs: "none", sm: "flex" }, 
               alignItems: "center", 
@@ -297,13 +304,14 @@ const UserHeader: React.FC = () => {
                       }}
                       onClick={(e) => setNotificationAnchor(e.currentTarget)}
                     >
-                                            <Badge badgeContent={unreadCount} sx={{ "& .MuiBadge-badge": { bgcolor: LOGO_RED } }}>
+                      <Badge badgeContent={unreadCount} sx={{ "& .MuiBadge-badge": { bgcolor: LOGO_RED } }}>
                         <NotificationsRounded />
                       </Badge>
                     </IconButton>
                   </Tooltip>
 
-                    <Tooltip title="Kaydedilenler">
+                  {/* Favorites */}
+                  <Tooltip title="Kaydedilenler">
                     <IconButton
                       sx={{ 
                         color: "white", 
@@ -323,13 +331,11 @@ const UserHeader: React.FC = () => {
                       </Badge>
                     </IconButton>
                   </Tooltip>
-
-                 
                 </>
               )}
             </Box>
 
-            {/* İLAN VER */}
+            {/* İLAN VER Button */}
             <Button
               variant="contained"
               startIcon={<AddCircleRounded />}
@@ -354,12 +360,11 @@ const UserHeader: React.FC = () => {
                 boxShadow: `0 2px 8px rgba(225, 77, 67, 0.2)`,
               }}
             >
-              {/* Mobile'da kısa metin */}
               <Box sx={{ display: { sm: 'block', md: 'none' } }}>İLAN</Box>
               <Box sx={{ display: { xs: 'none', md: 'block' } }}>İLAN VER</Box>
             </Button>
 
-            {/* Mobile Add */}
+            {/* Mobile Add Button */}
             <IconButton
               sx={{
                 display: { xs: "flex", sm: "none" },
@@ -378,40 +383,38 @@ const UserHeader: React.FC = () => {
               <AddCircleRounded sx={{ fontSize: { xs: 20 } }} />
             </IconButton>
 
+            {/* Auth Buttons */}
             {isAuthenticated ? (
-              <>
-                {/* Avatar - Mobile and Desktop */}
-                <Tooltip title="Kullanıcı Menüsü">
-                  <IconButton
-                    onClick={handleUserMenuOpen}
-                    sx={{ 
-                      p: { xs: 0.3, sm: 0.5 },
-                      "&:hover": {
-                        bgcolor: alpha("#fff", 0.1),
-                        transform: 'scale(1.05)',
-                      },
-                      transition: 'all 0.2s ease',
-                      borderRadius: 2,
+              <Tooltip title="Kullanıcı Menüsü">
+                <IconButton
+                  onClick={handleUserMenuOpen}
+                  sx={{ 
+                    p: { xs: 0.3, sm: 0.5 },
+                    "&:hover": {
+                      bgcolor: alpha("#fff", 0.1),
+                      transform: 'scale(1.05)',
+                    },
+                    transition: 'all 0.2s ease',
+                    borderRadius: 2,
+                  }}
+                >
+                  <Avatar
+                    sx={{
+                      width: { xs: 32, sm: 36 },
+                      height: { xs: 32, sm: 36 },
+                      bgcolor: LOGO_RED,
+                      fontSize: { xs: 12, sm: 13 },
+                      fontWeight: 800,
+                      border: `2px solid ${alpha("#ffffff", 0.8)}`,
+                      boxShadow: `0 2px 8px rgba(0,0,0,0.15)`,
                     }}
+                    src={user?.avatar}
                   >
-                    <Avatar
-                      sx={{
-                        width: { xs: 32, sm: 36 },
-                        height: { xs: 32, sm: 36 },
-                        bgcolor: LOGO_RED,
-                        fontSize: { xs: 12, sm: 13 },
-                        fontWeight: 800,
-                        border: `2px solid ${alpha("#ffffff", 0.8)}`,
-                        boxShadow: `0 2px 8px rgba(0,0,0,0.15)`,
-                      }}
-                      src={user?.avatar}
-                    >
-                      {user?.first_name?.charAt(0)}
-                      {user?.last_name?.charAt(0)}
-                    </Avatar>
-                  </IconButton>
-                </Tooltip>
-              </>
+                    {user?.first_name?.charAt(0)}
+                    {user?.last_name?.charAt(0)}
+                  </Avatar>
+                </IconButton>
+              </Tooltip>
             ) : (
               <>
                 <Button
@@ -524,11 +527,36 @@ const UserHeader: React.FC = () => {
           <ReportGmailerrorredRounded sx={{ mr: 1.5 }} /> Şikayetlerim
         </MenuItem>
         <Divider />
+        <MenuItem onClick={handleDeleteAccount} sx={{ color: 'error.main' }}>
+          <DeleteIcon sx={{ mr: 1.5 }} /> Hesabı Sil
+        </MenuItem>
         <MenuItem onClick={handleLogout}>
           <LogoutRounded sx={{ mr: 1.5 }} /> Çıkış Yap
         </MenuItem>
       </Menu>
-      <Menu anchorEl={anchorElMobile} open={Boolean(anchorElMobile)} onClose={handleMobileMenuClose} PaperProps={{ elevation: 3, sx: { mt: 1.5, minWidth: 220, borderRadius: 2 } }} > {menuItems.map((m) => ( <MenuItem key={m.path} onClick={() => { navigate(m.path); handleMobileMenuClose(); }}> {m.label} </MenuItem> ))} </Menu>
+
+      {/* Mobile Menu */}
+      <Menu 
+        anchorEl={anchorElMobile} 
+        open={Boolean(anchorElMobile)} 
+        onClose={handleMobileMenuClose} 
+        PaperProps={{ 
+          elevation: 3, 
+          sx: { mt: 1.5, minWidth: 220, borderRadius: 2 } 
+        }} 
+      > 
+        {menuItems.map((m) => ( 
+          <MenuItem 
+            key={m.path} 
+            onClick={() => { 
+              navigate(m.path); 
+              handleMobileMenuClose(); 
+            }}
+          > 
+            {m.label} 
+          </MenuItem> 
+        ))} 
+      </Menu>
       
       {/* Notifications Popover */}
       <Popover 
@@ -581,13 +609,18 @@ const UserHeader: React.FC = () => {
         )} 
       </Popover>
 
-      {/* Feedback Modal */}
+      {/* Modals */}
       <FeedbackModal 
         open={feedbackOpen}
         onClose={() => setFeedbackOpen(false)}
       />
 
-      {/* Notification Detail Modal */}
+      <DeleteAccountModal 
+        open={deleteAccountOpen}
+        onClose={() => setDeleteAccountOpen(false)}
+        onConfirm={handleConfirmDeleteAccount}
+      />
+
       <NotificationDetailModal
         open={isNotificationModalOpen}
         onClose={() => setIsNotificationModalOpen(false)}

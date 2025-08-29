@@ -12,6 +12,9 @@ export class SocketService {
   private connectedUsers: Map<string, string> = new Map(); // userId -> socketId
 
   constructor(server: HTTPServer, existingIO?: SocketIOServer) {
+    console.log('🔥 SocketService constructor called');
+    console.log('🔥 existingIO provided:', !!existingIO);
+    
     // Use existing IO instance if provided, otherwise create new one
     if (existingIO) {
       this.io = existingIO;
@@ -33,8 +36,11 @@ export class SocketService {
       console.log('⚠️ SocketService created new IO instance');
     }
 
+    console.log('🔥 About to setup middleware...');
     this.setupMiddleware();
+    console.log('🔥 About to setup event handlers...');
     this.setupEventHandlers();
+    console.log('✅ SocketService initialization complete');
     logger.info('Socket.IO service initialized');
   }
 
@@ -169,6 +175,8 @@ export class SocketService {
   }
 
   private setupEventHandlers() {
+    console.log('🔥 Setting up Socket.IO event handlers...');
+    
     this.io.on('connection', (socket) => {
       console.log(`🔌 NEW SOCKET CONNECTION: ${socket.id}`);
       

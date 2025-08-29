@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useAuth } from '../context/AuthContext';
 import { Message } from '../services/messageService';
@@ -26,7 +26,7 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
   useEffect(() => {
     if (!user) return;
 
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
     if (!token) return;
 
     const serverUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://trucksbusbackend-production-0e23.up.railway.app';

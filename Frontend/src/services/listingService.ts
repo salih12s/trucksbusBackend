@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { Listing, CreateListingData, UpdateListingData } from '../types';
-import { ApiResponse, StandardListingPayload, validateListingPayload, normalizeListing } from './apiNormalizer';
+import { ApiResponse, StandardListingPayload, validateListingPayload} from './apiNormalizer';
 
 // Use the same base URL as other services (Railway production)
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://trucksbusbackend-production-0e23.up.railway.app';

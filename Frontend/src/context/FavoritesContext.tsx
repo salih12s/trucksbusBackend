@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { useAuth } from './AuthContext';
+import { useAuthGate } from '../hooks/useAuthGate';
 import { useNotification } from './NotificationContext';
 import { api } from '../services/api';
 
@@ -37,7 +38,8 @@ interface FavoritesContextType {
 const FavoritesContext = createContext<FavoritesContextType | undefined>(undefined);
 
 export const FavoritesProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, token } = useAuth();
+  const authReady = useAuthGate();
   const { showSuccessNotification, showErrorNotification } = useNotification();
   const [favorites, setFavorites] = useState<Favorite[]>([]);
   const [favoriteIds, setFavoriteIds] = useState<Set<string>>(new Set());
@@ -52,10 +54,12 @@ export const FavoritesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   };
 
   const fetchFavorites = async () => {
-    if (!isAuthenticated || !user) {
+    // 🔴 Auth hazır değilse hiçbir şey yapma
+    if (!authReady || !token) {
       syncSets([]);
       return;
     }
+    
     setLoading(true);
     try {
       const res = await api.get(`/favorites`);
@@ -69,11 +73,12 @@ export const FavoritesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   };
 
   const addToFavorites = async (listingId: string) => {
-    if (!isAuthenticated || !user) {
+    if (!authReady || !token) {
       showErrorNotification('Favorilere eklemek için giriş yapmalısınız');
       return;
     }
     if (isFavorite(listingId)) return; // dedup
+    if (!user) return; // user null check
 
     // optimistic
     const optimistic: Favorite = {
@@ -157,13 +162,13 @@ export const FavoritesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   };
 
   useEffect(() => {
-    if (isAuthenticated && user) {
+    if (authReady && token) {
       fetchFavorites();
     } else {
       syncSets([]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAuthenticated, user?.id]);
+  }, [authReady, token]);
 
   const value: FavoritesContextType = {
     favorites,

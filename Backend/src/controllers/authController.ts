@@ -6,6 +6,7 @@ import { prisma } from '../utils/database';
 import { logger } from '../utils/logger';
 import { normalizePhoneTR, isValidPhoneTR } from '../utils/phone';
 import { sendPasswordResetEmail, sendWelcomeEmail } from '../services/emailService';
+import { AuthRequest } from '@/types';
 
 export const register = async (req: Request, res: Response): Promise<void> => {
   try {

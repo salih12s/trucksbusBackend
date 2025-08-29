@@ -177,9 +177,11 @@ export interface PaginatedResponse<T> {
 export interface LoginRequest {
   email: string;
   password: string;
+  rememberMe?: boolean;
 }
 
 export interface RegisterRequest {
+  kvkkAccepted: boolean;
   email: string;
   password: string;
   username: string;

@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
-import { User, AuthResponse } from '../types';
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode, useRef } from 'react';
+import { User } from '../types';
 import { authService } from '../services/authService';
 
 interface AuthState {
@@ -8,18 +8,11 @@ interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
+  isInitialized: boolean; // ✨ Yeni: Initialization durumunu takip et
 }
 
-type AuthAction =
-  | { type: 'AUTH_START' }
-  | { type: 'AUTH_SUCCESS'; payload: AuthResponse }
-  | { type: 'AUTH_ERROR'; payload: string }
-  | { type: 'AUTH_LOGOUT' }
-  | { type: 'UPDATE_USER'; payload: Partial<User> }
-  | { type: 'CLEAR_ERROR' };
-
 interface AuthContextType extends AuthState {
-  login: (email: string, password: string) => Promise<User>;
+  login: (email: string, password: string, rememberMe?: boolean) => Promise<User>;
   register: (userData: any) => Promise<User>;
   logout: () => void;
   updateUser: (userData: Partial<User>) => void;
@@ -30,57 +23,79 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export { AuthContext };
 
-const authReducer = (state: AuthState, action: AuthAction): AuthState => {
-  console.log('🔐 Auth action:', action.type, action);
-  
-  switch (action.type) {
-    case 'AUTH_START':
-      return { ...state, isLoading: true, error: null };
-    case 'AUTH_SUCCESS':
-      return {
-        ...state,
-        user: action.payload.user,
-        token: action.payload.token,
-        isAuthenticated: true,
-        isLoading: false,
-        error: null,
-      };
-    case 'AUTH_ERROR':
-      return {
-        ...state,
-        user: null,
-        token: null,
-        isAuthenticated: false,
-        isLoading: false,
-        error: action.payload,
-      };
-    case 'AUTH_LOGOUT':
-      return {
-        ...state,
-        user: null,
-        token: null,
-        isAuthenticated: false,
-        isLoading: false,
-        error: null,
-      };
-    case 'UPDATE_USER':
-      return {
-        ...state,
-        user: state.user ? { ...state.user, ...action.payload } : null,
-      };
-    case 'CLEAR_ERROR':
-      return { ...state, error: null };
-    default:
-      return state;
+// ✨ Helper: Storage operations
+const StorageHelper = {
+  getToken: () => {
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    console.log('🎟️ DEBUG: StorageHelper.getToken():', Boolean(token), token ? token.substring(0, 20) + '...' : 'null');
+    return token;
+  },
+  getUser: () => {
+    const userStr = localStorage.getItem('user') || sessionStorage.getItem('user');
+    console.log('👤 DEBUG: StorageHelper.getUser():', Boolean(userStr));
+    if (!userStr) return null;
+    try {
+      const user = JSON.parse(userStr) as User;
+      console.log('✅ DEBUG: User parsed successfully:', user.email);
+      return user;
+    } catch (e) {
+      console.error('❌ DEBUG: Failed to parse saved user:', e);
+      localStorage.removeItem('user');
+      sessionStorage.removeItem('user');
+      return null;
+    }
+  },
+  isRememberMe: () => localStorage.getItem('rememberMe') === 'true',
+  setAuth: (token: string, user: User, rememberMe: boolean) => {
+    if (rememberMe) {
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(user));
+      localStorage.setItem('rememberMe', 'true');
+      // Session storage'ı temizle
+      sessionStorage.removeItem('token');
+      sessionStorage.removeItem('user');
+    } else {
+      sessionStorage.setItem('token', token);
+      sessionStorage.setItem('user', JSON.stringify(user));
+      // Local storage'ı temizle
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      localStorage.removeItem('rememberMe');
+    }
+  },
+  clearAuth: () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('rememberMe');
+    sessionStorage.removeItem('token');
+    sessionStorage.removeItem('user');
   }
 };
 
-const initialState: AuthState = {
-  user: null,
-  token: localStorage.getItem('token'),
-  isAuthenticated: false,
-  isLoading: true, // App başlarken loading state'te başla
-  error: null,
+// ✨ Initial state calculator
+const getInitialState = (): AuthState => {
+  console.log('🏗️ DEBUG: getInitialState() çağırıldı');
+  const token = StorageHelper.getToken();
+  const user = StorageHelper.getUser();
+  
+  const initialState = {
+    user,
+    token,
+    isAuthenticated: Boolean(token && user),
+    isLoading: Boolean(token), // Token varsa loading, yoksa false
+    error: null,
+    isInitialized: false, // Henüz initialize olmadı
+  };
+  
+  console.log('🎯 DEBUG: Initial state:', {
+    hasToken: Boolean(token),
+    hasUser: Boolean(user),
+    isAuthenticated: initialState.isAuthenticated,
+    isLoading: initialState.isLoading,
+    isInitialized: initialState.isInitialized
+  });
+  
+  return initialState;
 };
 
 interface AuthProviderProps {
@@ -88,147 +103,244 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  console.log('🏗️ AuthProvider initializing...');
+  console.log('🏗️ AuthProvider: Component mounting...');
   
-  const [state, dispatch] = useReducer(authReducer, initialState);
+  const [state, setState] = useState<AuthState>(getInitialState);
+  const isInitializing = useRef(false); // ✨ Initialization guard
 
-  console.log('🔐 Current auth state:', state);
+  // ✨ State updater function
+  const updateState = useCallback((updates: Partial<AuthState>) => {
+    setState(prevState => ({
+      ...prevState,
+      ...updates
+    }));
+  }, []);
 
+  // ✨ Authentication initialization - SADECE BİR KEZ ÇALIŞIR
   useEffect(() => {
-    console.log('🔍 AuthProvider useEffect running...');
-    const token = localStorage.getItem('token');
-    const savedUser = localStorage.getItem('user');
-    
-    console.log('🎟️ Token from localStorage:', token ? 'exists' : 'not found');
-    console.log('👤 User from localStorage:', savedUser ? 'exists' : 'not found');
-    
-    if (!token) {
-      console.log('❌ No token found, setting not authenticated');
-      dispatch({ type: 'AUTH_LOGOUT' });
+    if (isInitializing.current || state.isInitialized) {
+      console.log('🚫 AuthProvider: Already initialized, skipping...');
       return;
     }
 
-    // Eğer saved user varsa, önce onu kullan
-    if (savedUser) {
-      try {
-        const user = JSON.parse(savedUser);
-        console.log('✅ Using saved user data:', user);
-        dispatch({
-          type: 'AUTH_SUCCESS',
-          payload: { user, token, refreshToken: '' }
-        });
-        
-        // Background'da token verify et ama UI'ı bloklamadan
-        authService.verifyToken(token)
-          .then((verifiedUser: User) => {
-            console.log('✅ Token verified in background, updating user:', verifiedUser);
-            localStorage.setItem('user', JSON.stringify(verifiedUser));
-            dispatch({
-              type: 'AUTH_SUCCESS',
-              payload: { user: verifiedUser, token, refreshToken: '' }
-            });
-          })
-          .catch((error) => {
-            console.error('❌ Background token verification failed:', error);
-            // Sadece 401 durumunda logout yap
-            if (error.response?.status === 401) {
-              console.log('🚫 401 error, logging out');
-              localStorage.removeItem('token');
-              localStorage.removeItem('user');
-              dispatch({ type: 'AUTH_LOGOUT' });
-            }
-          });
-        
-        return;
-      } catch (e) {
-        console.error('Saved user data parse error:', e);
-        localStorage.removeItem('user');
-      }
-    }
+    isInitializing.current = true;
+    console.log('🔧 AuthProvider: Starting initialization...');
 
-    // Saved user yoksa token verify et
-    console.log('🔒 Verifying token...');
-    authService.verifyToken(token)
-      .then((user: User) => {
-        console.log('✅ Token verified, user:', user);
-        localStorage.setItem('user', JSON.stringify(user));
-        dispatch({
-          type: 'AUTH_SUCCESS',
-          payload: { user, token, refreshToken: '' }
+    const initializeAuth = async () => {
+      const token = StorageHelper.getToken();
+      const savedUser = StorageHelper.getUser();
+
+      console.log('🎟️ Token exists:', Boolean(token));
+      console.log('👤 Saved user exists:', Boolean(savedUser));
+
+      // Token yoksa hemen authenticated değil olarak işaretle
+      if (!token) {
+        console.log('❌ No token found, setting unauthenticated');
+        updateState({
+          user: null,
+          token: null,
+          isAuthenticated: false,
+          isLoading: false,
+          isInitialized: true,
+          error: null
         });
-      })
-      .catch((error) => {
-        console.error('❌ Token verification failed:', error);
+        return;
+      }
+
+      // Token var ama user yoksa verify et
+      if (token && !savedUser) {
+        console.log('🔒 Token exists but no saved user, verifying...');
         
-        // Sadece 401/403 durumunda logout yap
-        if (error.response?.status === 401 || error.response?.status === 403) {
-          console.log('� Authentication error, logging out');
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
-          dispatch({ type: 'AUTH_LOGOUT' });
-        } else {
-          // Network hatası vs. durumunda previous state'i kullan veya logout
-          console.log('🌐 Network error, checking if we have valid saved data');
-          if (savedUser) {
-            try {
-              const user = JSON.parse(savedUser);
-              dispatch({
-                type: 'AUTH_SUCCESS',
-                payload: { user, token, refreshToken: '' }
-              });
-            } catch {
-              dispatch({ type: 'AUTH_LOGOUT' });
-            }
-          } else {
-            dispatch({ type: 'AUTH_LOGOUT' });
-          }
+        try {
+          const user = await authService.verifyToken(token);
+          console.log('✅ Token verified successfully:', user);
+          
+          StorageHelper.setAuth(token, user, StorageHelper.isRememberMe());
+          updateState({
+            user,
+            token,
+            isAuthenticated: true,
+            isLoading: false,
+            isInitialized: true,
+            error: null
+          });
+        } catch (error: any) {
+          console.error('❌ Token verification failed:', error);
+          StorageHelper.clearAuth();
+          updateState({
+            user: null,
+            token: null,
+            isAuthenticated: false,
+            isLoading: false,
+            isInitialized: true,
+            error: error.message || 'Token verification failed'
+          });
         }
+        return;
+      }
+
+      // Token ve saved user ikisi de var
+      if (token && savedUser) {
+        console.log('✅ Token and user found, setting authenticated immediately');
+        
+        // UI'ı authenticate et ve initialization'ı tamamla
+        updateState({
+          user: savedUser,
+          token,
+          isAuthenticated: true,
+          isLoading: false,
+          isInitialized: true,
+          error: null
+        });
+
+        // REMOVED: Background token verification to prevent infinite loops
+        // The token will be verified naturally when the user makes their first authenticated request
+        console.log('ℹ️ Skipping background token verification to prevent infinite loops');
+      }
+    };
+
+    initializeAuth();
+  }, []); // ✨ Boş dependency array - sadece mount'ta çalışır
+
+  // ✅ 401 sinyalini dinle - merkezi logout
+  useEffect(() => {
+    const onUnauthorized = () => {
+      console.log('🚫 Received auth:unauthorized event - logging out');
+      StorageHelper.clearAuth();
+      updateState({
+        user: null, 
+        token: null,
+        isAuthenticated: false, 
+        isLoading: false,
+        isInitialized: true, 
+        error: 'Oturum süresi doldu'
       });
+    };
+    
+    window.addEventListener('auth:unauthorized', onUnauthorized);
+    return () => window.removeEventListener('auth:unauthorized', onUnauthorized);
+  }, [updateState]);
+
+  // ✨ Login function
+  const login = useCallback(async (email: string, password: string, rememberMe = false): Promise<User> => {
+    console.log('🔐 Login attempt started...');
+    
+    updateState({ isLoading: true, error: null });
+
+    try {
+      const response = await authService.login({ email, password, rememberMe });
+      console.log('✅ Login successful');
+      console.log('👤 DEBUG: Received user data:', response.user);
+      console.log('🔑 DEBUG: User role:', response.user.role);
+      console.log('🎟️ DEBUG: Token received:', Boolean(response.token));
+
+      StorageHelper.setAuth(response.token, response.user, rememberMe);
+      
+      updateState({
+        user: response.user,
+        token: response.token,
+        isAuthenticated: true,
+        isLoading: false,
+        error: null,
+        isInitialized: true
+      });
+
+      return response.user;
+    } catch (error: any) {
+      console.error('❌ Login failed:', error);
+      
+      updateState({
+        isLoading: false,
+        error: error.message || 'Login failed'
+      });
+      
+      throw error;
+    }
   }, []);
 
-  const login = async (email: string, password: string): Promise<User> => {
-    try {
-      dispatch({ type: 'AUTH_START' });
-      const response = await authService.login({ email, password });
-      localStorage.setItem('token', response.token);
-      localStorage.setItem('user', JSON.stringify(response.user));
-      dispatch({ type: 'AUTH_SUCCESS', payload: response });
-      return response.user;
-    } catch (error: any) {
-      dispatch({ type: 'AUTH_ERROR', payload: error.message || 'Giriş başarısız' });
-      throw error;
-    }
-  };
+  // ✨ Register function
+  const register = useCallback(async (userData: any): Promise<User> => {
+    console.log('📝 Register attempt started...');
+    
+    updateState({ isLoading: true, error: null });
 
-  const register = async (userData: any): Promise<User> => {
     try {
-      dispatch({ type: 'AUTH_START' });
       const response = await authService.register(userData);
-      localStorage.setItem('token', response.token);
-      localStorage.setItem('user', JSON.stringify(response.user));
-      dispatch({ type: 'AUTH_SUCCESS', payload: response });
+      console.log('✅ Registration successful');
+
+      StorageHelper.setAuth(response.token, response.user, false); // Register'da default olarak remember me false
+      
+      updateState({
+        user: response.user,
+        token: response.token,
+        isAuthenticated: true,
+        isLoading: false,
+        error: null,
+        isInitialized: true
+      });
+
       return response.user;
     } catch (error: any) {
-      dispatch({ type: 'AUTH_ERROR', payload: error.message || 'Kayıt başarısız' });
+      console.error('❌ Registration failed:', error);
+      
+      updateState({
+        isLoading: false,
+        error: error.message || 'Registration failed'
+      });
+      
       throw error;
     }
-  };
+  }, []);
 
-  const logout = (): void => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    dispatch({ type: 'AUTH_LOGOUT' });
-  };
+  // ✨ Logout function
+  const logout = useCallback((): void => {
+    console.log('🚪 Logout initiated...');
+    
+    StorageHelper.clearAuth();
+    
+    updateState({
+      user: null,
+      token: null,
+      isAuthenticated: false,
+      isLoading: false,
+      error: null,
+      isInitialized: true
+    });
+    
+    // Force reload to clear any lingering state
+    setTimeout(() => {
+      window.location.href = '/';
+    }, 100);
+  }, []);
 
-  const clearError = (): void => {
-    dispatch({ type: 'CLEAR_ERROR' });
-  };
+  // ✨ Update user function
+  const updateUser = useCallback((userData: Partial<User>): void => {
+    console.log('🔄 User data update:', userData);
+    
+    setState(prevState => {
+      if (!prevState.user) return prevState;
+      
+      const updatedUser = { ...prevState.user, ...userData };
+      
+      // Storage'ı da güncelle
+      if (prevState.token) {
+        StorageHelper.setAuth(prevState.token, updatedUser, StorageHelper.isRememberMe());
+      }
+      
+      return {
+        ...prevState,
+        user: updatedUser
+      };
+    });
+  }, []);
 
-  const updateUser = (userData: Partial<User>): void => {
-    dispatch({ type: 'UPDATE_USER', payload: userData });
-  };
+  // ✨ Clear error function
+  const clearError = useCallback((): void => {
+    updateState({ error: null });
+  }, []);
 
-  const value: AuthContextType = {
+  // ✨ Context value
+  const contextValue: AuthContextType = {
     ...state,
     login,
     register,
@@ -237,9 +349,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     clearError,
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  console.log('🔐 AuthProvider: Current state:', {
+    isAuthenticated: state.isAuthenticated,
+    isLoading: state.isLoading,
+    isInitialized: state.isInitialized,
+    hasUser: Boolean(state.user),
+    hasToken: Boolean(state.token)
+  });
+
+  return (
+    <AuthContext.Provider value={contextValue}>
+      {children}
+    </AuthContext.Provider>
+  );
 };
 
+// ✨ Hook
 export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (context === undefined) {

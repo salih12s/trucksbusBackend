@@ -1,5 +1,11 @@
 import axios, { AxiosResponse } from 'axios';
-import { User, LoginRequest, RegisterRequest, AuthResponse, ApiResponse } from '../types'; 
+import { User, LoginRequest, RegisterRequest, AuthResponse, ApiRespons      console.log('✅ Login response:', response.data);
+      console.log('🔍 DEBUG: User object from backend:', response.data.data?.user);
+      console.log('🔍 DEBUG: User role from backend:', response.data.data?.user?.role);
+      
+      if (response.data.success && response.data.data) {
+        return response.data.data;
+      }rom '../types';
 
 // ✅ Ortak helper: token'ı hem local hem session'dan oku
 const getStoredToken = () =>
@@ -217,25 +223,6 @@ export const authService = {
         throw new Error(response.data.message || 'Şifre sıfırlama başarısız');
       }
     } catch (error: any) {
-      throw error;
-    }
-  },
-
-  deleteAccount: async (password: string): Promise<void> => {
-    try {
-      console.log('🗑️ Delete account attempt started...');
-      
-      const response: AxiosResponse<ApiResponse<any>> = await api.delete('/auth/delete-account', {
-        data: { password }
-      });
-      
-      if (!response.data.success) {
-        throw new Error(response.data.message || 'Hesap silme işlemi başarısız');
-      }
-      
-      console.log('✅ Account deleted successfully');
-    } catch (error: any) {
-      console.error('❌ Delete account error:', error);
       throw error;
     }
   }

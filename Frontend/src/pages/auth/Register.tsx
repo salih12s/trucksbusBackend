@@ -16,6 +16,7 @@ const Register: React.FC = () => {
     phone: '',
   });
   const [showPassword, setShowPassword] = useState(false);
+  const [kvkkAccepted, setKvkkAccepted] = useState(false);
 
   const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,6 +25,12 @@ const Register: React.FC = () => {
     // Telefon validasyonu
     if (!isValidPhoneTR(formData.phone)) {
       return; // PhoneInputTR komponenti zaten error gösteriyor
+    }
+    
+    // KVKK kabulü validasyonu
+    if (!kvkkAccepted) {
+      alert('KVKK metinini okuyup kabul etmelisiniz.');
+      return;
     }
     
     try {
@@ -201,10 +208,34 @@ const Register: React.FC = () => {
               </div>
             </div>
 
+            {/* KVKK Onayı */}
+            <div className="flex items-start space-x-3 pt-2">
+              <input
+                type="checkbox"
+                id="kvkk-checkbox"
+                checked={kvkkAccepted}
+                onChange={(e) => setKvkkAccepted(e.target.checked)}
+                className="mt-1 w-4 h-4 text-sky-600 bg-gray-100 border-gray-300 rounded focus:ring-sky-500 focus:ring-2"
+              />
+              <div className="text-sm text-slate-600 leading-relaxed">
+                <label htmlFor="kvkk-checkbox" className="cursor-pointer">
+                  <Link
+                    to="/kvkk"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sky-500 hover:text-sky-600 underline font-medium"
+                  >
+                    KVKK Aydınlatma Metni
+                  </Link>
+                  'ni okudum ve kabul ediyorum.
+                </label>
+              </div>
+            </div>
+
             <button 
               className="w-full mt-6 px-4 py-3.5 bg-sky-500 hover:bg-sky-600 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-bold text-base rounded-xl transition-all duration-150 hover:shadow-lg active:translate-y-0.5" 
               type="submit" 
-              disabled={isLoading || !isValidPhoneTR(formData.phone)}
+              disabled={isLoading || !isValidPhoneTR(formData.phone) || !kvkkAccepted}
             >
               {isLoading ? 'Hesap oluşturuluyor…' : 'Hesap Aç'}
             </button>

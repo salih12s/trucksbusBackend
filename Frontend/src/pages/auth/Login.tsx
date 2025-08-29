@@ -14,70 +14,83 @@ const Login: React.FC = () => {
     e.preventDefault();
     clearError();
     try {
-      const user = await login(formData.email, formData.password);
-      if (user.role === 'ADMIN') navigate('/admin');
-      else navigate('/');
-    } catch {/* AuthContext hatayı gösteriyor */}
+      console.log('🔐 Login form submitted');
+      const user = await login(formData.email, formData.password, rememberMe);
+      console.log('✅ Login successful, user role:', user.role);
+      
+      // Admin kontrolü - window.location.href kullanarak yönlendirme
+      if (user.role === 'ADMIN') {
+        console.log('🔧 Admin detected, redirecting to /admin');
+        window.location.href = '/admin';
+      } else {
+        console.log('👤 Regular user, redirecting to home');
+        navigate('/');
+      }
+    } catch (err: any) {
+      console.error('❌ Login failed:', err);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
 
-  const logoSrc = '/TruckBus.png'; // public/TruckBus.png
+  const logoSrc = '/TruckBus.png';
 
   return (
     <div className="min-h-screen flex bg-slate-900">
       {/* LEFT: LOGO PANEL */}
       <aside className="hidden lg:flex lg:w-1/2 relative items-center justify-center overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-700">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_40%,rgba(120,119,198,0.3),transparent_50%)]"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(255,107,107,0.2),transparent_50%)]"></div>
+        
         <div className="relative text-center z-10 p-6">
-          <img 
-            className="w-full max-w-md h-auto mx-auto object-contain" 
-            src={logoSrc} 
-            alt="TRUCK-BUS" 
-          />
-          <h3 className="text-slate-200 text-2xl font-bold tracking-wide mt-4 mb-1">
-            TRUCK–BUS
-          </h3>
-          <p className="text-slate-400 text-base">
-            Ağır vasıta ve otobüs ilan platformu
+          <div className="mb-8 flex justify-center">
+            <div className="w-28 h-28 bg-gradient-to-br from-white to-slate-100 rounded-3xl flex items-center justify-center shadow-2xl shadow-black/30">
+              <img 
+                src={logoSrc} 
+                alt="TruckBus Logo" 
+                className="w-20 h-20 object-contain filter drop-shadow-lg"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = 'none';
+                  target.parentElement!.innerHTML = '<div class="text-4xl font-bold text-slate-700">TB</div>';
+                }}
+              />
+            </div>
+          </div>
+          <h1 className="text-4xl font-bold text-white mb-4 tracking-tight">
+            TruckBus'a Hoş Geldin
+          </h1>
+          <p className="text-slate-300 text-lg leading-relaxed max-w-md">
+            Türkiye'nin en kapsamlı ticari araç platformu. 
+            <br className="hidden sm:block" />
+            Hemen giriş yapın, hayalinizdeki aracı bulun.
           </p>
         </div>
-
-        {/* Background decorations */}
-        <div className="absolute inset-0 opacity-10 bg-gradient-to-r from-white/20 via-transparent to-white/20" />
-        <div className="absolute top-0 left-0 w-96 h-96 bg-white/10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
-        <div className="absolute bottom-0 right-0 w-80 h-80 bg-white/10 rounded-full blur-3xl translate-x-1/2 translate-y-1/2" />
       </aside>
 
-      {/* RIGHT: FORM PANEL */}
-      <main className="w-full lg:w-1/2 flex items-center justify-center bg-slate-50 p-6">
-        <div className="w-full max-w-md bg-white border border-slate-200 rounded-3xl shadow-xl p-8">
-          {/* Mobile logo */}
-          <div className="flex justify-center mb-2 lg:hidden">
-            <img src={logoSrc} alt="TRUCK-BUS" className="w-30 h-auto" />
+      {/* RIGHT: LOGIN FORM */}
+      <main className="flex-1 flex items-center justify-center p-6 lg:p-12 bg-white">
+        <div className="w-full max-w-md space-y-6">
+          <div className="text-center lg:text-left">
+            <h2 className="text-3xl font-bold text-slate-800 mb-2">Giriş Yap</h2>
+            <p className="text-slate-600">Hesabınıza giriş yaparak devam edin</p>
           </div>
 
-          <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight mb-2">
-            Giriş yap
-          </h2>
-          <p className="text-slate-600 mb-4">
-            Hesabına devam et
-          </p>
-
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-xl text-sm mb-4">
+            <div className="p-4 text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl">
               {error}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
               <label className="block text-sm text-slate-600">E-posta</label>
               <input
                 className="w-full px-4 py-3.5 border border-slate-200 rounded-xl bg-white focus:outline-none focus:ring-3 focus:ring-sky-500/15 focus:border-sky-500 transition-all duration-150 text-base"
                 name="email"
                 type="email"
-                placeholder="ornek@mail.com"
+                placeholder="ornek@email.com"
                 value={formData.email}
                 onChange={handleChange}
                 required
@@ -92,7 +105,7 @@ const Login: React.FC = () => {
                   className="w-full px-4 py-3.5 pr-12 border border-slate-200 rounded-xl bg-white focus:outline-none focus:ring-3 focus:ring-sky-500/15 focus:border-sky-500 transition-all duration-150 text-base"
                   name="password"
                   type={showPassword ? 'text' : 'password'}
-                  placeholder="••••••••"
+                  placeholder="Şifrenizi girin"
                   value={formData.password}
                   onChange={handleChange}
                   required
@@ -109,8 +122,8 @@ const Login: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex items-center justify-between gap-3 pt-2">
-              <label className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
+            <div className="flex items-center justify-between text-sm">
+              <label className="flex items-center space-x-2 text-sm">
                 <input
                   type="checkbox"
                   checked={rememberMe}
@@ -119,9 +132,13 @@ const Login: React.FC = () => {
                 />
                 <span>Oturumum açık kalsın</span>
               </label>
-              <a href="#" className="text-sm text-sky-500 hover:text-sky-600 hover:underline transition-colors">
+              <button 
+                type="button"
+                onClick={() => navigate('/auth/forgot-password')}
+                className="text-sm text-sky-500 hover:text-sky-600 hover:underline transition-colors"
+              >
                 Şifremi unuttum
-              </a>
+              </button>
             </div>
 
             <button 
