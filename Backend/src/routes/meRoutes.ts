@@ -162,13 +162,110 @@ router.get('/stats', authMiddleware, async (req: AuthRequest, res: Response) => 
   }
 });
 
-// Get unread message count
-router.get('/unread-count', authMiddleware, async (req: AuthRequest, res: Response) => {
+// Get user's listings
+router.get('/listings', authMiddleware, async (req: AuthRequest, res: Response) => {
   try {
-    // For now, return 0 until we implement proper messaging
-    res.json({ success: true, data: { unreadCount: 0 } });
+    console.log('🔍 GET /me/listings called for user:', req.user?.id);
+    const userId = req.user!.id;
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 12;
+    const offset = (page - 1) * limit;
+
+    // Get total count
+    const totalCount = await prisma.listings.count({
+      where: { user_id: userId }
+    });
+
+    // Get listings with related data
+    const listings = await prisma.listings.findMany({
+      where: { user_id: userId },
+      include: {
+        categories: {
+          select: {
+            id: true,
+            name: true
+          }
+        },
+        cities: {
+          select: {
+            name: true
+          }
+        },
+        districts: {
+          select: {
+            name: true
+          }
+        },
+        users: {
+          select: {
+            id: true,
+            first_name: true,
+            last_name: true,
+            phone: true,
+            avatar: true,
+            is_corporate: true,
+            company_name: true
+          }
+        },
+        listing_images: {
+          select: {
+            url: true
+          },
+          orderBy: {
+            sort_order: 'asc'
+          }
+        }
+      },
+      orderBy: {
+        created_at: 'desc'
+      },
+      skip: offset,
+      take: limit
+    });
+
+    // Format listings for frontend
+    const formattedListings = listings.map(listing => ({
+      id: listing.id,
+      title: listing.title,
+      price: Number(listing.price),
+      year: listing.year,
+      kilometers: listing.km || 0,
+      km: listing.km || 0,
+      city_name: listing.cities?.name || '',
+      district_name: listing.districts?.name || '',
+      description: listing.description,
+      images: listing.listing_images?.map(img => img.url) || [],
+      created_at: listing.created_at,
+      user_id: listing.user_id,
+      seller_phone: listing.users?.phone,
+      categories: listing.categories,
+      owner: {
+        name: `${listing.users?.first_name || ''} ${listing.users?.last_name || ''}`.trim(),
+        phone: listing.users?.phone
+      },
+      seller: {
+        is_corporate: listing.users?.is_corporate,
+        company_name: listing.users?.company_name,
+        doping_status: null // Will be filled from local storage on frontend
+      }
+    }));
+
+    const totalPages = Math.ceil(totalCount / limit);
+
+    res.json({
+      success: true,
+      data: {
+        listings: formattedListings,
+        pagination: {
+          page,
+          limit,
+          total: totalCount,
+          pages: totalPages
+        }
+      }
+    });
   } catch (error) {
-    console.error('Error fetching unread count:', error);
+    console.error('Error fetching user listings:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
