@@ -33,7 +33,7 @@ const ContactPage: React.FC = () => {
               📍 Adres
             </Typography>
             <Typography variant="body1" sx={{ lineHeight: 1.8, mb: 3 }}>
-              TruckBus Merkez Ofis<br />
+              TrucksBus Merkez Ofis<br />
               İstanbul, Türkiye
             </Typography>
 
@@ -48,8 +48,8 @@ const ContactPage: React.FC = () => {
               ✉️ E-posta
             </Typography>
             <Typography variant="body1" sx={{ lineHeight: 1.8, mb: 3 }}>
-              info@truckbus.com<br />
-              destek@truckbus.com
+              info@trucksbus.com<br />
+              destek@trucksbus.com
             </Typography>
 
             <Typography variant="h6" sx={{ color: '#E14D43', mb: 2, fontWeight: 600 }}>

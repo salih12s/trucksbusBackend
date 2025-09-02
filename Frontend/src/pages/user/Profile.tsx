@@ -17,7 +17,6 @@ import {
   CircularProgress
 } from '@mui/material';
 import { useConfirmDialog } from '../../hooks/useConfirmDialog';
-import DeleteAccountModal from '../../components/modals/DeleteAccountModal';
 import {
   PhotoCamera,
   Person,
@@ -25,7 +24,8 @@ import {
   Dashboard,
   Edit,
   Save,
-  Cancel
+  Cancel,
+  TrendingUp
 } from '@mui/icons-material';
 import { userService, UserProfile, UserStats, ChangePasswordData } from '../../services/userService';
 import { useAuth } from '../../context/AuthContext';
@@ -84,7 +84,6 @@ const Profile: React.FC = () => {
     newPassword: '',
     confirmPassword: ''
   });
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   useEffect(() => {
     fetchProfile();
@@ -94,6 +93,21 @@ const Profile: React.FC = () => {
   const fetchProfile = async () => {
     try {
       const userData = await userService.getProfile();
+      console.log('👤 Profile userData:', userData);
+      console.log('🚀 Doping status:', userData.doping_status);
+      
+      // Backend'den doping status gelmiyorsa localStorage'dan kullanıcı ID'sine özgü kontrol et
+      const localDopingStatus = userData.id ? localStorage.getItem(`local_doping_status_${userData.id}`) : null;
+      const localDopingExpiresAt = userData.id ? localStorage.getItem(`local_doping_expires_at_${userData.id}`) : null;
+      
+      if (localDopingStatus && (!userData.doping_status)) {
+        userData.doping_status = localDopingStatus as 'ACTIVE' | 'INACTIVE';
+        if (localDopingExpiresAt) {
+          userData.doping_expires_at = localDopingExpiresAt;
+        }
+        console.log('🔧 Local doping data applied for user:', userData.id, localDopingStatus);
+      }
+      
       setUser(userData);
       setEditedUser(userData);
     } catch (error) {
@@ -291,6 +305,24 @@ const Profile: React.FC = () => {
               >
                 {user?.email}
               </Typography>
+              {/* Doping Badge */}
+              {user?.doping_status === 'ACTIVE' && (
+                <Chip
+                  icon={<TrendingUp />}
+                  label="Dopingli Üye"
+                  color="secondary"
+                  variant="filled"
+                  sx={{
+                    mt: 1,
+                    bgcolor: '#ff6b35',
+                    color: 'white',
+                    fontWeight: 'bold',
+                    '& .MuiChip-icon': {
+                      color: 'white'
+                    }
+                  }}
+                />
+              )}
             </Box>
             <Box>
               {!isEditing ? (
@@ -577,38 +609,9 @@ const Profile: React.FC = () => {
                 </Box>
               </Box>
             </Box>
-
-            {/* Hesabı Sil */}
-            <Box sx={{ mt: 4, p: 3, border: '1px solid #ef4444', borderRadius: 2, bgcolor: 'rgba(239, 68, 68, 0.05)' }}>
-              <Typography variant="h6" sx={{ color: '#dc2626', mb: 2 }}>
-                Tehlikeli Bölge
-              </Typography>
-              <Typography variant="body2" sx={{ mb: 2, color: 'text.secondary' }}>
-                Bu işlem geri alınamaz. Hesabınız ve tüm verileriniz kalıcı olarak silinecektir.
-              </Typography>
-              <Button
-                variant="contained"
-                color="error"
-                onClick={() => setIsDeleteModalOpen(true)}
-                sx={{ 
-                  width: { xs: '100%', sm: 'auto' },
-                  '&:hover': {
-                    bgcolor: '#dc2626'
-                  }
-                }}
-              >
-                Hesabı Sil
-              </Button>
-            </Box>
           </Box>
         </TabPanel>
       </Card>
-
-      {/* Delete Account Modal */}
-      <DeleteAccountModal
-        isOpen={isDeleteModalOpen}
-        onClose={() => setIsDeleteModalOpen(false)}
-      />
     </Container>
   );
 };

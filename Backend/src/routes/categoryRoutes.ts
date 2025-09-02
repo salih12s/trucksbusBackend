@@ -19,10 +19,8 @@ router.get('/:categoryId/vehicle-types', getVehicleTypes);
 // Tüm vehicle type'ları getir
 router.get('/vehicle-types', getVehicleTypes);
 
-// Tüm markaları getir
+// Tüm markaları getir - Frontend filtreleme için
 router.get('/brands/all', getBrands);
-
-// Query parametreli markalar (Frontend'in beklediği format)
 router.get('/brands', getBrands);
 
 // Vehicle type ID'ye göre markaları getir

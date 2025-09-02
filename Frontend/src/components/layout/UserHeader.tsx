@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import { api } from "../../services/api";
+import {  authService } from "../../services/authService"; // ✨ DOĞRU API INSTANCE
 import {
   AppBar,
   Toolbar,
@@ -25,7 +25,6 @@ import {
 import { alpha } from "@mui/material/styles";
 
 // Icons
-import AddCircleRounded from "@mui/icons-material/AddCircleRounded";
 import NotificationsRounded from "@mui/icons-material/NotificationsRounded";
 import ChatBubbleRounded from "@mui/icons-material/ChatBubbleRounded";
 import PersonOutlineRounded from "@mui/icons-material/PersonOutlineRounded";
@@ -34,12 +33,12 @@ import ReportGmailerrorredRounded from "@mui/icons-material/ReportGmailerrorredR
 import LogoutRounded from "@mui/icons-material/LogoutRounded";
 import BookmarkIcon from '@mui/icons-material/Bookmark';
 import FeedbackRounded from '@mui/icons-material/FeedbackRounded';
-import DeleteIcon from '@mui/icons-material/Delete';
+import BusinessIcon from '@mui/icons-material/Business';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 
 import NotificationDetailModal from "../modals/NotificationDetailModal";
 import { useFavorites } from '../../context/FavoritesContext';
 import FeedbackModal from '../modals/FeedbackModal';
-import DeleteAccountModal from '../modals/DeleteAccountModal';
 import { useNotifications } from '../../hooks/useNotifications';
 
 const PRIMARY_DARK = "#2D3748";
@@ -58,7 +57,6 @@ const UserHeader: React.FC = () => {
   const [selectedNotification, setSelectedNotification] = useState<any>(null);
   const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
-  const [deleteAccountOpen, setDeleteAccountOpen] = useState(false);
 
   // Auto-logout timer (30 dakika)
   const logoutTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -149,32 +147,13 @@ const UserHeader: React.FC = () => {
     navigate("/");
   };
 
-  const handleDeleteAccount = () => {
-    setDeleteAccountOpen(true);
-    setAnchorElUser(null);
-  };
-
-    const handleConfirmDeleteAccount = async (password: string) => {
-    try {
-      const response = await api.delete('/auth/delete-account', {
-        data: { password }
-      });
-
-      if (response.data.success) {
-        logout();
-        navigate("/");
-      }
-    } catch (error) {
-      console.error('Error deleting account:', error);
-      throw error; // DeleteAccountModal will handle the error
-    }
-  };
-
   const menuItems = [
     { label: "Ana Sayfa", path: "/" },
     { label: "Profil", path: "/profile" },
     { label: "İlanlarım", path: "/my-listings" },
+    ...(user?.is_corporate ? [{ label: "Mağazam", path: "/my-store" }] : []),
     { label: "Favorilerim", path: "/favorites" },
+    { label: "Doping", path: "/doping" },
     { label: "Kategoriler", path: "/categories" },
   ];
 
@@ -220,18 +199,22 @@ const UserHeader: React.FC = () => {
             <Typography
               variant="h6"
               sx={{
-                background: "linear-gradient(45deg, #fff 30%, #f0f0f0 90%)",
-                backgroundClip: "text",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
+                color: "#D34237",
                 fontWeight: 700,
-                fontSize: { xs: "0.9rem", sm: "1.1rem", md: "1.25rem" },
+                fontSize: { xs: "0.7rem", sm: "0.9rem", md: "1.1rem", lg: "1.25rem" },
                 textShadow: "0 2px 4px rgba(0,0,0,0.3)",
-                whiteSpace: "nowrap",
+                whiteSpace: { xs: "normal", sm: "nowrap" },
                 letterSpacing: "0.5px",
+                lineHeight: { xs: 1.2, sm: 1.4 },
+                textAlign: { xs: "center", sm: "left" },
               }}
             >
-              Alın Satın Trucksbus.com'la Mutlu Kalın
+              <Box component="span" sx={{ display: { xs: "block", sm: "inline" } }}>
+                Alın Satın Trucksbus.com'la 
+              </Box>
+              <Box component="span" sx={{ display: { xs: "block", sm: "inline" } }}>
+                Mutlu Kalın
+              </Box>
             </Typography>
           </Box>
 
@@ -338,7 +321,6 @@ const UserHeader: React.FC = () => {
             {/* İLAN VER Button */}
             <Button
               variant="contained"
-              startIcon={<AddCircleRounded />}
               onClick={handleCreateAdClick}
               disableElevation
               sx={{
@@ -349,39 +331,44 @@ const UserHeader: React.FC = () => {
                   transform: 'translateY(-1px)',
                   boxShadow: `0 6px 16px rgba(225, 77, 67, 0.3)`,
                 },
-                minWidth: { sm: 100, md: 140 },
+                minWidth: { sm: 80, md: 140 },
                 fontWeight: 700,
                 letterSpacing: 0.4,
                 borderRadius: 999,
-                px: { sm: 1.5, md: 2.4 },
-                py: 1,
-                fontSize: { sm: '0.8rem', md: '0.875rem' },
+                px: { sm: 1, md: 2.4 },
+                py: { xs: 0.5, sm: 1 },
+                fontSize: { xs: '0.7rem', sm: '0.75rem', md: '0.875rem' },
                 transition: 'all 0.2s ease',
                 boxShadow: `0 2px 8px rgba(225, 77, 67, 0.2)`,
               }}
             >
-              <Box sx={{ display: { sm: 'block', md: 'none' } }}>İLAN</Box>
-              <Box sx={{ display: { xs: 'none', md: 'block' } }}>İLAN VER</Box>
+              İLAN VER
             </Button>
 
-            {/* Mobile Add Button */}
-            <IconButton
+            {/* Mobile İlan Ver Button */}
+            <Button
+              variant="contained"
+              onClick={handleCreateAdClick}
+              disableElevation
               sx={{
                 display: { xs: "flex", sm: "none" },
-                color: "white",
                 bgcolor: LOGO_RED,
                 "&:hover": { 
                   bgcolor: LOGO_RED_HOVER,
-                  transform: 'scale(1.05)',
+                  transform: 'scale(1.02)',
                 },
                 transition: 'all 0.2s ease',
-                borderRadius: 2,
-                p: { xs: 0.5 },
+                borderRadius: 999,
+                px: 1.5,
+                py: 0.5,
+                fontSize: '0.7rem',
+                fontWeight: 600,
+                minWidth: 'auto',
+                height: 32,
               }}
-              onClick={handleCreateAdClick}
             >
-              <AddCircleRounded sx={{ fontSize: { xs: 20 } }} />
-            </IconButton>
+              İLAN VER
+            </Button>
 
             {/* Auth Buttons */}
             {isAuthenticated ? (
@@ -520,6 +507,14 @@ const UserHeader: React.FC = () => {
         <MenuItem onClick={() => navigate("/my-listings")}>
           <StorefrontRounded sx={{ mr: 1.5 }} /> İlanlarım
         </MenuItem>
+        {user?.is_corporate && (
+          <MenuItem onClick={() => navigate("/my-store")}>
+            <BusinessIcon sx={{ mr: 1.5 }} /> Mağazam
+          </MenuItem>
+        )}
+        <MenuItem onClick={() => navigate("/doping")}>
+          <TrendingUpIcon sx={{ mr: 1.5 }} /> Doping
+        </MenuItem>
         <MenuItem onClick={() => navigate("/real-time-messages")}>
           <ChatBubbleRounded sx={{ mr: 1.5 }} /> Mesajlarım
         </MenuItem>
@@ -527,9 +522,6 @@ const UserHeader: React.FC = () => {
           <ReportGmailerrorredRounded sx={{ mr: 1.5 }} /> Şikayetlerim
         </MenuItem>
         <Divider />
-        <MenuItem onClick={handleDeleteAccount} sx={{ color: 'error.main' }}>
-          <DeleteIcon sx={{ mr: 1.5 }} /> Hesabı Sil
-        </MenuItem>
         <MenuItem onClick={handleLogout}>
           <LogoutRounded sx={{ mr: 1.5 }} /> Çıkış Yap
         </MenuItem>
@@ -613,12 +605,6 @@ const UserHeader: React.FC = () => {
       <FeedbackModal 
         open={feedbackOpen}
         onClose={() => setFeedbackOpen(false)}
-      />
-
-      <DeleteAccountModal 
-        open={deleteAccountOpen}
-        onClose={() => setDeleteAccountOpen(false)}
-        onConfirm={handleConfirmDeleteAccount}
       />
 
       <NotificationDetailModal

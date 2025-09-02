@@ -2,8 +2,8 @@ import axios from 'axios';
 import { Listing, CreateListingData, UpdateListingData } from '../types';
 import { ApiResponse, StandardListingPayload, validateListingPayload} from './apiNormalizer';
 
-// Use the same base URL as other services (Railway production)
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://trucksbusbackend-production-0e23.up.railway.app';
+// Use the same base URL as other services (Local development)
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3002';
 
 export interface ListingSearchParams {
   category?: string;
@@ -16,6 +16,10 @@ export interface ListingSearchParams {
   limit?: number;
 }
 
+// Helper function to get token from both storage types
+const getStoredToken = () =>
+  localStorage.getItem('token') || sessionStorage.getItem('token');
+
 const listingApi = axios.create({
   baseURL: `${API_BASE_URL}/api`,
   withCredentials: true,
@@ -24,13 +28,16 @@ const listingApi = axios.create({
 // Request interceptor to add auth token
 listingApi.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
+    const token = getStoredToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+      console.log('🎟️ Token added to listing request:', config.url);
+    } else {
+      console.log('⚠️ No token found for listing request:', config.url);
     }
     return config;
   },
-  (error) => Promise.reject(error)
+  (error: any) => Promise.reject(error)
 );
 
 export const listingService = {

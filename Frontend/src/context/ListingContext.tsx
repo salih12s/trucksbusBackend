@@ -17,6 +17,8 @@ export interface SimpleListing {
   seller: {
     name: string;
     phone: string;
+    is_corporate?: boolean;
+    company_name?: string;
   };
   owner: {
     name: string;

@@ -21,7 +21,7 @@ const PrivacyPage: React.FC = () => {
 
         <Box sx={{ maxWidth: '800px', mx: 'auto' }}>
           <Typography variant="body1" paragraph sx={{ lineHeight: 1.8, mb: 3 }}>
-            TruckBus olarak, kullanıcılarımızın gizliliğini korumak en önemli önceliklerimizden biridir. 
+            TrucksBus olarak, kullanıcılarımızın gizliliğini korumak en önemli önceliklerimizden biridir. 
             Bu gizlilik politikası, kişisel verilerinizin nasıl toplandığı, kullanıldığı ve korunduğu 
             hakkında bilgi verir.
           </Typography>
@@ -53,13 +53,7 @@ const PrivacyPage: React.FC = () => {
             Sadece yetkili personel erişim sağlayabilir.
           </Typography>
 
-          <Typography variant="h6" sx={{ color: '#E14D43', mb: 2, fontWeight: 600, mt: 4 }}>
-            Haklarınız
-          </Typography>
-          <Typography variant="body1" paragraph sx={{ lineHeight: 1.8 }}>
-            KVKK kapsamında verilerinize erişim, düzeltme, silme ve işleme itiraz etme 
-            haklarına sahipsiniz. Bu haklarınızı kullanmak için bizimle iletişime geçebilirsiniz.
-          </Typography>
+        
 
           <Typography variant="body2" sx={{ 
             color: '#666', 

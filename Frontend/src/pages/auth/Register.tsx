@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import PhoneInputTR from '../../components/common/PhoneInputTR';
 import { isValidPhoneTR, normalizePhoneTR } from '../../utils/phone';
 
 const Register: React.FC = () => {
   const navigate = useNavigate();
-  const { register, error, isLoading, clearError } = useAuth();
+  const location = useLocation();
+  const { register, error, isLoading, clearError, isAuthenticated, user, isInitialized } = useAuth();
 
   const [formData, setFormData] = useState({
     email: '',
@@ -14,9 +15,37 @@ const Register: React.FC = () => {
     lastName: '',
     password: '',
     phone: '',
+    isCorporate: false,
+    companyName: '',
   });
   const [showPassword, setShowPassword] = useState(false);
   const [kvkkAccepted, setKvkkAccepted] = useState(false);
+
+  // ✅ Korunan sayfadan geldiyse oraya dön
+  const fromPath = (location.state as any)?.from?.pathname || '/';
+
+  // ✅ Güvenli hedef path belirleme
+  const safeTarget = (role: string | undefined, fromPath: string) => {
+    const isAdmin = role?.toUpperCase() === 'ADMIN';
+    if (!isAdmin && fromPath.startsWith('/admin')) return '/';
+    if (fromPath.startsWith('/auth')) return '/';
+    return isAdmin ? '/admin/dashboard' : (fromPath || '/');
+  };
+
+  // ✅ GELDİĞİN YERE DÖN - Loop'u keser
+  useEffect(() => {
+    if (isInitialized && isAuthenticated && user) {
+      console.log('🚀 User authenticated from register, returning to:', fromPath);
+      
+      const targetPath = safeTarget(user.role, fromPath);
+      console.log('🎯 Safe redirect target:', targetPath);
+      
+      // Biraz bekleyip redirect et - AuthContext'in settle olmasını sağla
+      setTimeout(() => {
+        navigate(targetPath, { replace: true });
+      }, 100);
+    }
+  }, [isInitialized, isAuthenticated, user, navigate, fromPath]);
 
   const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,14 +62,28 @@ const Register: React.FC = () => {
       return;
     }
     
+    // Kurumsal hesap validasyonu
+    if (formData.isCorporate && !formData.companyName.trim()) {
+      alert('Kurumsal hesap için şirket adı zorunludur.');
+      return;
+    }
+    
     try {
-      const user = await register({
+      const registerData: any = {
         email: formData.email,
         password: formData.password,
         firstName: formData.firstName,
         lastName: formData.lastName,
         phone: normalizePhoneTR(formData.phone),
-      });
+        kvkk_accepted: kvkkAccepted,
+        is_corporate: formData.isCorporate,
+      };
+
+      if (formData.isCorporate) {
+        registerData.company_name = formData.companyName.trim();
+      }
+
+      const user = await register(registerData);
       if (user.role === 'ADMIN') navigate('/admin');
       else navigate('/');
     } catch {/* AuthContext hatayı gösteriyor */}
@@ -206,6 +249,57 @@ const Register: React.FC = () => {
                   {showPassword ? '🙈' : '👁️'}
                 </button>
               </div>
+            </div>
+
+            {/* Kurumsal Hesap Seçimi */}
+            <div className="space-y-3 pt-2">
+              <div className="border border-slate-200 rounded-xl p-4">
+                <div className="flex items-center space-x-3 mb-3">
+                  <input
+                    type="radio"
+                    id="individual-account"
+                    name="accountType"
+                    checked={!formData.isCorporate}
+                    onChange={() => setFormData({ ...formData, isCorporate: false })}
+                    className="w-4 h-4 text-sky-600 bg-gray-100 border-gray-300 focus:ring-sky-500 focus:ring-2"
+                  />
+                  <label htmlFor="individual-account" className="text-sm font-medium text-slate-700 cursor-pointer">
+                    Bireysel Hesap
+                  </label>
+                </div>
+                
+                <div className="flex items-center space-x-3">
+                  <input
+                    type="radio"
+                    id="corporate-account"
+                    name="accountType"
+                    checked={formData.isCorporate}
+                    onChange={() => setFormData({ ...formData, isCorporate: true })}
+                    className="w-4 h-4 text-sky-600 bg-gray-100 border-gray-300 focus:ring-sky-500 focus:ring-2"
+                  />
+                  <label htmlFor="corporate-account" className="text-sm font-medium text-slate-700 cursor-pointer">
+                    <span className="text-sky-600">Kurumsal hesap aç</span>
+                    <span className="block text-xs text-slate-500 mt-1">İşletme sahibi misin?</span>
+                  </label>
+                </div>
+              </div>
+
+              {/* Kurumsal Hesap Alanları */}
+              {formData.isCorporate && (
+                <div className="space-y-3 border border-sky-200 rounded-xl p-4 bg-sky-50/50">
+                  <div className="space-y-2">
+                    <label className="block text-sm text-slate-600 font-medium">Şirket Adı</label>
+                    <input
+                      className="w-full px-4 py-3 border border-slate-200 rounded-xl bg-white focus:outline-none focus:ring-3 focus:ring-sky-500/15 focus:border-sky-500 transition-all duration-150 text-base"
+                      name="companyName"
+                      placeholder="Şirket adınızı girin"
+                      value={formData.companyName}
+                      onChange={handleChange}
+                      required={formData.isCorporate}
+                    />
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* KVKK Onayı */}

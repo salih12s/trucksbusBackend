@@ -44,10 +44,16 @@ export const getVehicleTypes = async (req: Request, res: Response) => {
       console.log(`🔍 Vehicle types query without filter, found ${vehicleTypes.length} vehicle types`);
     }
     
-    res.json(vehicleTypes);
+    res.json({
+      success: true,
+      data: vehicleTypes
+    });
   } catch (error) {
     logger.error('Error fetching vehicle types:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ 
+      success: false, 
+      error: 'Internal server error' 
+    });
   }
 };
 
@@ -80,10 +86,16 @@ export const getBrands = async (req: Request, res: Response) => {
       console.log(`🔍 Brands query without filter, found ${brands.length} brands`);
     }
     
-    res.json(brands);
+    res.json({
+      success: true,
+      data: brands
+    });
   } catch (error) {
     logger.error('Error fetching brands:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ 
+      success: false, 
+      error: 'Internal server error' 
+    });
   }
 };
 
@@ -116,10 +128,16 @@ export const getModels = async (req: Request, res: Response) => {
       console.log(`🔍 Models query without filter, found ${models.length} models`);
     }
     
-    res.json(models);
+    res.json({
+      success: true,
+      data: models
+    });
   } catch (error) {
     logger.error('Error fetching models:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ 
+      success: false, 
+      error: 'Internal server error' 
+    });
   }
 };
 

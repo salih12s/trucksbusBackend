@@ -29,7 +29,7 @@ app.set('socketService', socketService);
 // Middleware
 app.use(helmet());
 app.use(cors({
-  origin: ['https://truckbus.com.tr', 'http://localhost:5173'],
+  origin: ['https://truckbus.com.tr', 'https://www.trucksbus.com.tr', 'https://astonishing-abundance-production.up.railway.app', '*'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']

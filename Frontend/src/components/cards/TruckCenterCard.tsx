@@ -1,6 +1,6 @@
-import { Card, CardContent, Typography, Box } from '@mui/material';
+import { Card, CardContent, Typography, Box, Chip } from '@mui/material';
 import { alpha, useTheme } from '@mui/material/styles';
-import { Person, Phone, CalendarToday, Visibility, Chat, Flag, Bookmark, Check, Close, Edit } from '@mui/icons-material';
+import { Person, Phone, CalendarToday, Visibility, Chat, Flag, Bookmark, Check, Close, Store, TrendingUp } from '@mui/icons-material';
 import { SimpleListing } from '../../context/ListingContext';
 import { useAuth } from '../../context/AuthContext';
 import { useFavorites } from '../../context/FavoritesContext';
@@ -29,10 +29,10 @@ interface TruckCenterCardProps {
   onSendMessage?: (id: string) => void;
   onReport?: (id: string) => void;
   onDelete?: (id: string) => void;
-  onEdit?: (id: string) => void;
   isAdminView?: boolean;
   onApprove?: (id: string) => void;
   onReject?: (id: string) => void;
+  onVisitStore?: (userId: string, companyName: string) => void;
 }
 
 /** Buton stilleri theme değerleriyle uyumlu hale getirildi */
@@ -46,19 +46,19 @@ const ActionButton: React.FC<{
   const theme = useTheme();
   
   const base = {
-    fontSize: { xs: compact ? 10 : 12, md: compact ? 11 : 13 }, // Mobile'da biraz büyük font
+    fontSize: { xs: compact ? 9 : 10, md: compact ? 10 : 12 }, // Font biraz büyüttük
     fontWeight: 600, // Slightly bolder for better readability
-    borderRadius: '8px', // Daha modern border radius
-    px: { xs: compact ? 1 : 1.5, md: compact ? 1.2 : 1.5 }, // Mobile'da daha büyük padding
-    py: { xs: compact ? 0.6 : 0.8, md: compact ? 0.7 : 0.9 },
-    minWidth: { xs: compact ? '70px' : 'auto', md: compact ? '80px' : 'auto' }, // Mobile'da büyük
-    width: { xs: compact ? '70px' : '100%', md: compact ? '80px' : '100%' },
-    height: { xs: compact ? '32px' : 'auto', md: compact ? '36px' : 'auto' }, // Mobile'da daha yüksek
+    borderRadius: '6px', // Daha küçük border radius
+    px: { xs: compact ? 0.6 : 1, md: compact ? 1 : 1.2 }, // Padding biraz artırdık
+    py: { xs: compact ? 0.4 : 0.6, md: compact ? 0.5 : 0.7 },
+    minWidth: { xs: compact ? '50px' : '60px', md: compact ? '65px' : 'auto' }, // Width biraz artırdık
+    width: { xs: compact ? '50px' : '60px', md: compact ? '65px' : '100%' },
+    height: { xs: compact ? '28px' : '30px', md: compact ? '30px' : 'auto' }, // Height artırdık
     border: '1px solid',
     display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 0.5,
+    gap: { xs: 0.3, md: 0.3 }, // Gap biraz artırdık
     transition: 'all 0.2s ease',
     cursor: 'pointer',
     userSelect: 'none' as const,
@@ -124,12 +124,12 @@ const ActionButton: React.FC<{
       title={label}
     >
       {icon && <Box sx={{ 
-        fontSize: { xs: compact ? '14px' : '16px', md: compact ? '16px' : '18px' }, 
+        fontSize: { xs: compact ? '12px' : '14px', md: compact ? '14px' : '16px' }, // Icon biraz büyüttük
         display: 'flex', 
         alignItems: 'center' 
       }}>{icon}</Box>}
       {label && <Box sx={{ 
-        fontSize: { xs: compact ? 10 : 12, md: compact ? 11 : 13 }, 
+        fontSize: { xs: compact ? 9 : 10, md: compact ? 10 : 12 }, // Text biraz büyüttük
         fontWeight: 600, 
         lineHeight: 1 
       }}>{label}</Box>}
@@ -144,14 +144,30 @@ const TruckCenterCard: React.FC<TruckCenterCardProps> = ({
   onViewDetails,
   onSendMessage,
   onReport,
-  onEdit,
   isAdminView = false,
   onApprove,
   onReject,
+  onVisitStore,
 }) => {
   const { user } = useAuth();
   const { isFavorite, toggleFavorite } = useFavorites();
   const theme = useTheme();
+
+  // Debug: Component başlangıcı
+  console.log('🚗 TruckCenterCard render başlangıcı:', {
+    listing_id: listing.id,
+    title: listing.title,
+    seller_data: listing.seller,
+    seller_is_corporate: listing.seller?.is_corporate,
+    seller_company_name: listing.seller?.company_name,
+    onVisitStore_exists: !!onVisitStore,
+    isAdminView: isAdminView,
+    isOwn: isOwn,
+    current_user_id: user?.id,
+    listing_user_id: listing.user_id,
+    user_exists: !!user,
+    user_authenticated: !!user?.id
+  });
 
   const idStr = String(listing.id);
 
@@ -191,8 +207,9 @@ const TruckCenterCard: React.FC<TruckCenterCardProps> = ({
       }}
       sx={{
         // Premium kart stili - yeni gölge sistemi
+        position: 'relative', // Rozet için pozisyon
         width: '100%',
-        maxWidth: { xs: '100%', sm: 400, md: 420 }, // Responsive max width
+        maxWidth: { xs: '100%', sm: 400, md: 480 }, // Responsive max width
         height: { xs: 'auto', md: 280 }, // Mobile'da otomatik yükseklik
         minHeight: { xs: 200, md: 280 }, // Mobile için minimum yükseklik
         display: 'flex',
@@ -249,65 +266,148 @@ const TruckCenterCard: React.FC<TruckCenterCardProps> = ({
         </Box>
 
         <Box sx={{ 
-          p: 1, 
-          flex: { xs: 0, md: 1 }, // Mobile'da flex yok, desktop'ta flex
-          minHeight: { xs: 50, md: 'auto' }, // Mobile için minimum yükseklik
+          p: { xs: 1 , md: 1 }, // Yukarıdan padding ekledik
+          flex: { xs: 0}, // Mobile'da flex yok, desktop'ta flex
+          minHeight: { xs: 60, md: 'auto' }, // Mobile için minimum yükseklik artırdık
           display: 'flex', 
           alignItems: 'center', 
           justifyContent: 'center', 
           bgcolor: alpha(theme.palette.text.secondary, 0.03)
         }}>
           {!user ? (
-            <Box sx={{ width: '100%', px: 1 }}>
+            <Box sx={{ 
+              display: 'flex',
+              flexDirection: 'column', // Alt alta dizmek için column kullan
+              gap: 1.2, 
+              width: '100%',
+              px: 1 
+            }}>
               <ActionButton
                 label="Detayları Gör"
                 icon={<Visibility />}
                 variant="soft"
                 onClick={handleViewDetails}
               />
+              {/* Kullanıcı giriş yapmamışken de kurumsal mağaza butonu göster */}
+              {(() => {
+                console.log('🔍 TruckCenterCard - Guest User Kurumsal Kontrol:', {
+                  title: listing.title,
+                  is_corporate: listing.seller.is_corporate,
+                  company_name: listing.seller.company_name,
+                  shouldShowButton: listing.seller.is_corporate && listing.seller.company_name
+                });
+                
+                return listing.seller.is_corporate && listing.seller.company_name ? (
+                  <ActionButton 
+                    label="" 
+                    icon={<Store />} 
+                    variant="info" 
+                    onClick={() => onVisitStore?.(listing.user_id!, listing.seller.company_name!)} 
+                  />
+                ) : null;
+              })()}
             </Box>
           ) : (
             <Box
               sx={{ 
                 display: 'grid', 
                 gridTemplateColumns: { 
-                  xs: 'repeat(2, 1fr)', // Mobile'da 2 kolon
-                  sm: 'repeat(3, 1fr)', // Small tablet'te 3 kolon  
-                  md: '1fr 1fr' // Desktop'ta 2 kolon
+                  xs: 'repeat(3, 1fr)', // Mobile'da 3 kolon (sığacak)
+                  sm: 'repeat(4, 1fr)', // Small tablet'te 4 kolon  
+                  md: '1fr 1fr' // Desktop'ta 3 kolon
                 }, 
-                gap: { xs: 1, md: 1 }, // Mobile'da daha büyük gap
+                gap: { xs: 0.8, md: 1 }, // Mobile'da gap artırdık
                 width: '100%', 
                 height: { xs: 'auto', md: '64px' },
                 '& > *': {
-                  fontSize: { xs: '0.8rem', md: '0.85rem' }, // Mobile'da biraz büyük metin
+                  fontSize: { xs: '0.65rem', md: '0.85rem' }, // Mobile'da çok küçük metin
                 }
               }}
             >
-              {isAdminView ? (
-                <>
-                  <ActionButton label="Onayla" icon={<Check />} variant="primary" compact onClick={() => onApprove?.(listing.id)} />
-                  <ActionButton label="Reddet" icon={<Close />} variant="soft" compact onClick={() => onReject?.(listing.id)} />
-                </>
-              ) : isOwn ? (
-                // Kendi ilanları için özel butonlar
-                <>
-                  <ActionButton label="Detaylar" icon={<Visibility />} variant="primary" compact onClick={() => onViewDetails?.(listing.id)} />
-                  <ActionButton label="Düzenle" icon={<Edit />} variant="secondary" compact onClick={() => onEdit?.(listing.id)} />
-                </>
-              ) : (
-                <>
-                  <ActionButton label="Detaylar" icon={<Visibility />} variant="primary" compact onClick={() => onViewDetails?.(listing.id)} />
-                  {listing.user_id !== user?.id && <ActionButton label="Mesaj" icon={<Chat />} variant="secondary" compact onClick={() => onSendMessage?.(listing.id)} />}
-                  {!isOwn && <ActionButton label="Şikayet" icon={<Flag />} variant="soft" compact onClick={() => onReport?.(idStr)} />}
-                  <ActionButton 
-                    label={isFavorite(idStr) ? 'Kaydedildi' : 'Kaydet'} 
-                    icon={<Bookmark />} 
-                    variant={isFavorite(idStr) ? 'primary' : 'neutral'} 
-                    compact 
-                    onClick={handleFavoriteClick} 
-                  />
-                </>
-              )}
+              {(() => {
+                console.log('🎭 TruckCenterCard - Button Logic:', {
+                  title: listing.title,
+                  isAdminView: isAdminView,
+                  isOwn: isOwn,
+                  user_id: user?.id,
+                  listing_user_id: listing.user_id,
+                  condition_isAdminView: isAdminView,
+                  condition_isOwn: isOwn,
+                  which_block: isAdminView ? 'admin' : (isOwn ? 'own' : 'normal')
+                });
+                
+                if (isAdminView) {
+                  return (
+                    <>
+                      <ActionButton label="Onayla" icon={<Check />} variant="primary" compact onClick={() => onApprove?.(listing.id)} />
+                      <ActionButton label="Reddet" icon={<Close />} variant="soft" compact onClick={() => onReject?.(listing.id)} />
+                    </>
+                  );
+                } else if (isOwn) {
+                  // Kendi ilanları için özel butonlar
+                  return (
+                    <>
+                      <ActionButton label="Detaylar" icon={<Visibility />} variant="primary" compact onClick={() => onViewDetails?.(listing.id)} />
+                      {/* Kendi kurumsal ilanlarında da mağaza butonu göster */}
+                      {(() => {
+                        console.log('🔍 TruckCenterCard - Own Listing Kurumsal Kontrol:', {
+                          title: listing.title,
+                          is_corporate: listing.seller.is_corporate,
+                          company_name: listing.seller.company_name,
+                          user_id: listing.user_id,
+                          shouldShowButton: listing.seller.is_corporate && listing.seller.company_name
+                        });
+                        
+                        return listing.seller.is_corporate && listing.seller.company_name ? (
+                          <ActionButton 
+                            label="" 
+                            icon={<Store />} 
+                            variant="info" 
+                            compact 
+                            onClick={() => onVisitStore?.(listing.user_id!, listing.seller.company_name!)} 
+                          />
+                        ) : null;
+                      })()}
+                    </>
+                  );
+                } else {
+                  return (
+                    <>
+                      <ActionButton label="Detaylar" icon={<Visibility />} variant="primary" compact onClick={() => onViewDetails?.(listing.id)} />
+                      {listing.user_id !== user?.id && <ActionButton label="Mesaj" icon={<Chat />} variant="secondary" compact onClick={() => onSendMessage?.(listing.id)} />}
+                      {/* Kurumsal mağaza butonu */}
+                      {(() => {
+                        // Debug: Kurumsal kontrolü
+                        console.log('🔍 TruckCenterCard - Kurumsal Kontrol:', {
+                          title: listing.title,
+                          is_corporate: listing.seller.is_corporate,
+                          company_name: listing.seller.company_name,
+                          user_id: listing.user_id,
+                          shouldShowButton: listing.seller.is_corporate && listing.seller.company_name
+                        });
+                        
+                        return listing.seller.is_corporate && listing.seller.company_name ? (
+                          <ActionButton 
+                            label="" 
+                            icon={<Store />} 
+                            variant="info" 
+                            compact 
+                            onClick={() => onVisitStore?.(listing.user_id!, listing.seller.company_name!)} 
+                          />
+                        ) : null;
+                      })()}
+                      {!isOwn && <ActionButton label="Şikayet" icon={<Flag />} variant="soft" compact onClick={() => onReport?.(idStr)} />}
+                      <ActionButton 
+                        label={isFavorite(idStr) ? 'Kaydedildi' : 'Kaydet'} 
+                        icon={<Bookmark />} 
+                        variant={isFavorite(idStr) ? 'primary' : 'neutral'} 
+                        compact 
+                        onClick={handleFavoriteClick} 
+                      />
+                    </>
+                  );
+                }
+              })()}
             </Box>
           )}
         </Box>
@@ -399,7 +499,7 @@ const TruckCenterCard: React.FC<TruckCenterCardProps> = ({
               İlan Tarihi: {formatDate(listing.createdAt)}
             </Typography>
           </Box>
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, gap: 1 }}>
             <Person sx={{ 
               fontSize: 13, 
               mr: 0.75, 
@@ -411,6 +511,25 @@ const TruckCenterCard: React.FC<TruckCenterCardProps> = ({
             }}>
               İlan Sahibi: {listing.owner.name}
             </Typography>
+            {/* Doping Badge - Satıcı bilgisi yanında */}
+            {(listing.seller?.doping_status === 'ACTIVE' || (isOwn && user?.id && localStorage.getItem(`local_doping_status_${user.id}`) === 'ACTIVE')) && (
+              <Chip
+                icon={<TrendingUp />}
+                label="Dopingli"
+                size="small"
+                sx={{
+                  height: '20px',
+                  bgcolor: '#ff6b35',
+                  color: 'white',
+                  fontSize: '10px',
+                  fontWeight: 'bold',
+                  '& .MuiChip-icon': {
+                    color: 'white',
+                    fontSize: '12px'
+                  }
+                }}
+              />
+            )}
           </Box>
 
           {/* Telefon kutusu - sade ama belirgin */}
@@ -439,6 +558,33 @@ const TruckCenterCard: React.FC<TruckCenterCardProps> = ({
           </Box>
         </Box>
       </CardContent>
+      
+      {/* Doping Rozeti - Kartın sağ üst köşesinde */}
+      {isOwn && user?.id && localStorage.getItem(`local_doping_status_${user.id}`) === 'ACTIVE' && (
+        <Box
+          sx={{
+            position: 'absolute',
+            top: 8,
+            right: 8,
+            width: 32,
+            height: 32,
+            borderRadius: '50%',
+            bgcolor: '#ff6b35',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 4px 12px rgba(255, 107, 53, 0.3)',
+            border: '2px solid white',
+            zIndex: 10
+          }}
+        >
+          <TrendingUp sx={{ 
+            color: 'white', 
+            fontSize: 18,
+            fontWeight: 'bold'
+          }} />
+        </Box>
+      )}
     </Card>
   );
 };

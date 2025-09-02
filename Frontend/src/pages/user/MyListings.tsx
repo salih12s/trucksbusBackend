@@ -10,11 +10,6 @@ import {
   Stack,
   Pagination,
   Alert,
-  Card,
-  CardContent,
-  CardMedia,
-  Chip,
-  IconButton,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -25,8 +20,7 @@ import {
   Add as AddIcon,
   LocalShipping as TruckIcon,
   Delete as DeleteIcon,
-  Edit as EditIcon,
-  Visibility as VisibilityIcon
+
 } from '@mui/icons-material';
 import TruckCenterCard from '../../components/cards/TruckCenterCard';
 import { useAuth } from '../../context/AuthContext';
@@ -97,18 +91,6 @@ interface Listing {
   isFavorite?: boolean;
 }
 
-interface ListingsResponse {
-  success: boolean;
-  data: {
-    listings: Listing[];
-    pagination: {
-      page: number;
-      limit: number;
-      total: number;
-      pages: number;
-    };
-  };
-}
 
 const MyListings: React.FC = () => {
   const navigate = useNavigate();
@@ -138,7 +120,8 @@ const MyListings: React.FC = () => {
       setLoading(true);
       setError(null);
       
-      const response = await api.get(`/listings/my-listings?page=${currentPage}&limit=${itemsPerPage}`);
+      console.log('🔍 Making request to /me/listings with user:', user?.id);
+      const response = await api.get(`/me/listings?page=${currentPage}&limit=${itemsPerPage}`);
       
       if (response.data.success) {
         const { listings: fetchedListings, pagination } = response.data.data;
@@ -175,10 +158,6 @@ const MyListings: React.FC = () => {
 
   const handleReport = (id: string) => {
     // Kendi ilanını şikayet etmek mantıklı değil, edit sayfasına yönlendir
-    navigate(`/edit-listing/${id}`);
-  };
-
-  const handleEdit = (id: string) => {
     navigate(`/edit-listing/${id}`);
   };
 
@@ -348,7 +327,6 @@ const MyListings: React.FC = () => {
                 onSendMessage={handleSendMessage}
                 onReport={handleReport}
                 onDelete={handleDelete}
-                onEdit={handleEdit}
               />
             ))}
           </Box>

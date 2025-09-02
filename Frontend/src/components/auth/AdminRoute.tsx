@@ -41,7 +41,7 @@ const AdminRoute = ({ children }: AdminRouteProps) => {
     return <Navigate to="/auth/login" state={{ from: location }} replace />;
   }
 
-  if (user?.role !== 'ADMIN') {
+  if (user?.role?.toUpperCase() !== 'ADMIN') {
     console.log('❌ AdminRoute: User is not admin, redirecting to home');
     console.log('🔍 AdminRoute: User role is:', user?.role);
     return <Navigate to="/" replace />;

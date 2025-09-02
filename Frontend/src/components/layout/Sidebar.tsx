@@ -51,16 +51,16 @@ type Item = {
 const sidebarItems: Item[] = [
   { text: "Tüm İlanlar", icon: <HomeIcon sx={{ fontSize: 22 }} />, path: "/", group: "ana" },
 
-  { text: "Çekici", icon: <LocalShippingIcon sx={{ fontSize: 22 }} />, path: "/category/cekici", group: "agir-ticari" },
-  { text: "Dorse", icon: <RvHookupIcon sx={{ fontSize: 22 }} />, path: "/category/dorse", group: "agir-ticari" },
-  { text: "Kamyon & Kamyonet", icon: <LocalShippingIcon sx={{ fontSize: 22 }} />, path: "/category/kamyon", group: "agir-ticari" },
-  { text: "Römork", icon: <RvHookupIcon sx={{ fontSize: 22 }} />, path: "/category/romork", group: "agir-ticari" },
+  { text: "Çekici", icon: <LocalShippingIcon sx={{ fontSize: 22 }} />, path: "/?category=cekici", group: "agir-ticari" },
+  { text: "Dorse", icon: <RvHookupIcon sx={{ fontSize: 22 }} />, path: "/?category=dorse", group: "agir-ticari" },
+  { text: "Kamyon & Kamyonet", icon: <LocalShippingIcon sx={{ fontSize: 22 }} />, path: "/?category=kamyon", group: "agir-ticari" },
+  { text: "Römork", icon: <RvHookupIcon sx={{ fontSize: 22 }} />, path: "/?category=romork", group: "agir-ticari" },
 
-  { text: "Minibüs & Midibüs", icon: <DirectionsBusIcon sx={{ fontSize: 22 }} />, path: "/category/minibus", group: "yolcu-tasima" },
-  { text: "Otobüs", icon: <DirectionsBusIcon sx={{ fontSize: 22 }} />, path: "/category/otobus", group: "yolcu-tasima" },
+  { text: "Minibüs & Midibüs", icon: <DirectionsBusIcon sx={{ fontSize: 22 }} />, path: "/?category=minibus", group: "yolcu-tasima" },
+  { text: "Otobüs", icon: <DirectionsBusIcon sx={{ fontSize: 22 }} />, path: "/?category=otobus", group: "yolcu-tasima" },
 
-  { text: "Karoser & Üst Yapı", icon: <GroupWorkIcon sx={{ fontSize: 22 }} />, path: "/category/karoser", group: "ozel-araclar" },
-  { text: "Oto Kurtarıcı & Taşıyıcı", icon: <CarCrashIcon sx={{ fontSize: 22 }} />, path: "/category/kurtarici", group: "ozel-araclar" },
+  { text: "Karoser & Üst Yapı", icon: <GroupWorkIcon sx={{ fontSize: 22 }} />, path: "/?category=karoser", group: "ozel-araclar" },
+  { text: "Oto Kurtarıcı & Taşıyıcı", icon: <CarCrashIcon sx={{ fontSize: 22 }} />, path: "/?category=kurtarici", group: "ozel-araclar" },
 ];
 
 const Sidebar: React.FC = () => {
@@ -157,7 +157,11 @@ const Sidebar: React.FC = () => {
                   component={Link}
                   to={item.path}
                   selected={isActive}
-                  onClick={toggleMobileSidebar}
+                  onClick={() => {
+                    // URL parametresini kontrol et
+                    console.log('🔗 Sidebar link clicked:', item.path);
+                    toggleMobileSidebar();
+                  }}
                   sx={{
                     height: 48,
                     px: 2,
@@ -272,6 +276,9 @@ const Sidebar: React.FC = () => {
               component={Link}
               to={item.path}
               selected={isActive}
+              onClick={() => {
+                console.log('🔗 Desktop Sidebar link clicked:', item.path);
+              }}
               sx={{
                 position: "relative",
                 height: 48,

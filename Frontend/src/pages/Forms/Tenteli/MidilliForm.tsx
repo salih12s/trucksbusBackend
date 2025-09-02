@@ -2,10 +2,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useDropzone } from 'react-dropzone';
 import { useAuth } from '../../../context/AuthContext';
-import { useConfirmDialog } from '../../../hooks/useConfirmDialog';
-import { useEditListing } from '../../../hooks/useEditListing';
-import { listingService } from '../../../services/listingService';
-import { createStandardPayload, validateListingPayload } from '../../../services/apiNormalizer';
 import { locationService, City, District } from '../../../services/locationService';
 import {
   Box,
@@ -45,7 +41,6 @@ import {
   Close,
   Umbrella,
 } from '@mui/icons-material';
-import { locationService, City, District } from '../../../services/locationService';
 import { api } from '../../../services/api';
 import { formatPhoneNumber } from '../../../utils/phoneUtils';
 
@@ -92,8 +87,6 @@ const MidilliForm: React.FC = () => {
   const navigate = useNavigate();
   const { variantId } = useParams<{ variantId: string }>();
   const { user } = useAuth();
-  const { confirm } = useConfirmDialog();
-  const { isEditMode, editData, editLoading, fillFormWithEditData } = useEditListing();
   
   const [activeStep, setActiveStep] = useState(0);
   const [loading, setLoading] = useState(false);

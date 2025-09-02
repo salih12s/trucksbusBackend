@@ -22,7 +22,7 @@ const KVKKPage: React.FC = () => {
             Kişisel Verilerin Korunması Kanunu Bilgilendirmesi
           </Typography>
           <Typography variant="body1" paragraph sx={{ lineHeight: 1.9 }}>
-            6698 sayılı Kişisel Verilerin Korunması Kanunu (“<strong>KVKK</strong>”) uyarınca, TruckBus
+            6698 sayılı Kişisel Verilerin Korunması Kanunu (“<strong>KVKK</strong>”) uyarınca, TrucksBus
             olarak kişisel verilerinizi aşağıda açıklanan kapsamda işlemekteyiz. Bu metin, hangi
             verileri hangi amaçlarla işlediğimizi, hukuki sebeplerimizi, verilerinizi kimlerle
             paylaşabileceğimizi, saklama sürelerini ve KVKK m.11 kapsamındaki haklarınızı açıklar.
@@ -30,14 +30,7 @@ const KVKKPage: React.FC = () => {
 
           <Divider sx={{ my: 3 }} />
 
-          {/* Veri Sorumlusu */}
-          <Typography variant="h6" sx={{ color: accent, fontWeight: 700, mb: 1 }}>
-            Veri Sorumlusu
-          </Typography>
-          <Typography variant="body1" paragraph sx={{ lineHeight: 1.9 }}>
-            TruckBus (“<strong>Platform</strong>”), kişisel verilerin işleme amaç ve vasıtalarını
-            belirleyen veri sorumlusudur. İletişim: <strong>kvkk@truckbus.com</strong>
-          </Typography>
+    
 
           {/* İşlenen Veri Kategorileri */}
           <Typography variant="h6" sx={{ color: accent, fontWeight: 700, mt: 2, mb: 1 }}>

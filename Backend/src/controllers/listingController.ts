@@ -574,14 +574,26 @@ export const getListings = async (req: Request, res: Response): Promise<void> =>
       vehicle_type_id,
       vehicle_type, // Vehicle type ismi ile filtreleme için
       brand_id,
+      brand, // Marka ismi ile filtreleme için  
       model_id,
+      model, // Model ismi ile filtreleme için
       city_id,
+      city, // Şehir ismi ile filtreleme için
       district_id,
+      district, // İlçe ismi ile filtreleme için
       min_price,
       max_price,
+      priceMin, // Frontend'den gelen format
+      priceMax, // Frontend'den gelen format
       min_year,
       max_year,
-      search
+      yearMin, // Frontend'den gelen format
+      yearMax, // Frontend'den gelen format
+      kmMin, // Kilometre min
+      kmMax, // Kilometre max
+      search,
+      isCorporate, // Kurumsal filtresi
+      user_id // Belirli bir kullanıcının ilanlarını filtrelemek için
     } = req.query;
 
     const skip = (Number(page) - 1) * Number(limit);
@@ -595,15 +607,32 @@ export const getListings = async (req: Request, res: Response): Promise<void> =>
     console.log('🔍 Initial where clause:', where);
 
     if (category_id) where.category_id = category_id as string;
+    if (user_id) where.user_id = user_id as string;
     
-    // Kategori ismi ile filtreleme
+    // Kategori ismi ile filtreleme - aslında vehicle_types tablosunda ara
     if (category) {
-      where.categories = {
-        name: {
-          equals: category as string,
-          mode: 'insensitive'
-        }
+      // Frontend'den gelen kategori isimleri vehicle_type isimleriyle eşleşir
+      const categoryMapping: Record<string, string> = {
+        'cekici': 'Çekici',
+        'dorse': 'Dorse',
+        'kamyon': 'Kamyon & Kamyonet',
+        'romork': 'Römork',
+        'minibus': 'Minibüs & Midibüs',
+        'otobus': 'Otobüs',
+        'karoser': 'Karoser & Üst Yapı',
+        'kurtarici': 'Oto Kurtarıcı & Taşıyıcı'
       };
+      
+      const vehicleTypeName = categoryMapping[category as string];
+      if (vehicleTypeName) {
+        where.vehicle_types = {
+          name: {
+            equals: vehicleTypeName,
+            mode: 'insensitive'
+          }
+        };
+        console.log('🎯 Category filter applied:', category, '->', vehicleTypeName);
+      }
     }
     
     // Vehicle type ismi ile filtreleme
@@ -616,30 +645,93 @@ export const getListings = async (req: Request, res: Response): Promise<void> =>
       };
     }
     
+    // Marka filtreleme (ID veya isim)
     if (vehicle_type_id) where.vehicle_type_id = vehicle_type_id as string;
     if (brand_id) where.brand_id = brand_id as string;
+    if (brand) {
+      where.brands = {
+        name: {
+          contains: brand as string,
+          mode: 'insensitive'
+        }
+      };
+    }
+    
+    // Model filtreleme (ID veya isim)
     if (model_id) where.model_id = model_id as string;
+    if (model) {
+      where.models = {
+        name: {
+          contains: model as string,
+          mode: 'insensitive'
+        }
+      };
+    }
+    
+    // Şehir/İlçe filtreleme (ID veya isim)
     if (city_id) where.city_id = city_id as string;
+    if (city) {
+      where.cities = {
+        name: {
+          contains: city as string,
+          mode: 'insensitive'
+        }
+      };
+    }
+    
     if (district_id) where.district_id = district_id as string;
+    if (district) {
+      where.districts = {
+        name: {
+          contains: district as string,
+          mode: 'insensitive'
+        }
+      };
+    }
 
-    if (min_price || max_price) {
+    // Fiyat filtreleme (eski ve yeni formatları destekle)
+    const minPriceValue = priceMin || min_price;
+    const maxPriceValue = priceMax || max_price;
+    if (minPriceValue || maxPriceValue) {
       where.price = {};
-      if (min_price) where.price.gte = Number(min_price);
-      if (max_price) where.price.lte = Number(max_price);
+      if (minPriceValue) where.price.gte = Number(minPriceValue);
+      if (maxPriceValue) where.price.lte = Number(maxPriceValue);
     }
 
-    if (min_year || max_year) {
+    // Yıl filtreleme (eski ve yeni formatları destekle)  
+    const minYearValue = yearMin || min_year;
+    const maxYearValue = yearMax || max_year;
+    if (minYearValue || maxYearValue) {
       where.year = {};
-      if (min_year) where.year.gte = Number(min_year);
-      if (max_year) where.year.lte = Number(max_year);
+      if (minYearValue) where.year.gte = Number(minYearValue);
+      if (maxYearValue) where.year.lte = Number(maxYearValue);
     }
 
+    // Kilometre filtreleme
+    if (kmMin || kmMax) {
+      where.km = {};
+      if (kmMin) where.km.gte = Number(kmMin);
+      if (kmMax) where.km.lte = Number(kmMax);
+    }
+
+    // Kurumsal filtreleme
+    if (isCorporate !== undefined) {
+      where.users = {
+        is_corporate: isCorporate === 'true'
+      };
+    }
+
+    // Arama filtreleme (başlık, açıklama, marka, model)
     if (search) {
       where.OR = [
         { title: { contains: search as string, mode: 'insensitive' } },
-        { description: { contains: search as string, mode: 'insensitive' } }
+        { description: { contains: search as string, mode: 'insensitive' } },
+        { brands: { name: { contains: search as string, mode: 'insensitive' } } },
+        { models: { name: { contains: search as string, mode: 'insensitive' } } }
       ];
     }
+
+    console.log('🔍 Final where clause:', JSON.stringify(where, null, 2));
 
     const [listings, total] = await Promise.all([
       prisma.listings.findMany({
@@ -727,7 +819,11 @@ export const getListings = async (req: Request, res: Response): Promise<void> =>
               id: true,
               first_name: true,
               last_name: true,
-              phone: true
+              phone: true,
+              // @ts-ignore - Prisma type issue with corporate fields
+              is_corporate: true,
+              // @ts-ignore - Prisma type issue with corporate fields  
+              company_name: true
             }
           }
         },
@@ -752,13 +848,7 @@ export const getListings = async (req: Request, res: Response): Promise<void> =>
     console.log('📋 About to send response - seller data check:');
     console.log('📋 Category filter applied:', category);
     console.log('📋 Total listings found:', total);
-    if (responseData.listings[0]) {
-      console.log('  - seller_name:', responseData.listings[0].seller_name);
-      console.log('  - seller_phone:', responseData.listings[0].seller_phone);
-      console.log('  - users:', responseData.listings[0].users);
-      console.log('  - categories:', responseData.listings[0].categories);
-      console.log('🔍 FULL LISTING OBJECT:', JSON.stringify(responseData.listings[0], null, 2));
-    }
+
     
     res.json({
       success: true,

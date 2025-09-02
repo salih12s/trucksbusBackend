@@ -7,11 +7,11 @@ import { logger } from './utils/logger';
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3002;
+const PORT = process.env.PORT || 3005;
 
 // Middleware
 app.use(cors({
-  origin: ["https://truckbus.com.tr", "http://localhost:5173"],
+  origin: ["https://truckbus.com.tr", "https://www.trucksbus.com.tr", "https://astonishing-abundance-production.up.railway.app", "*"],
   credentials: true
 }));
 app.use(express.json());

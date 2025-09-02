@@ -22,7 +22,7 @@ export interface LocationApiResponse {
 }
 
 class LocationService {
-  private baseURL = import.meta.env.VITE_API_BASE_URL || 'https://trucksbusbackend-production-0e23.up.railway.app/api';
+  private baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api';
 
   async getCities(): Promise<City[]> {
     try {

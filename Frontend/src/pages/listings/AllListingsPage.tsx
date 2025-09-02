@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Box,
   Container,
@@ -7,8 +7,10 @@ import {
   Pagination,
   CircularProgress,
   Alert,
+  Chip,
 } from '@mui/material';
 import TruckCenterCard from '../../components/cards/TruckCenterCard';
+import ListingFilters, { FilterValues } from '../../components/filters/ListingFilters';
 import ReportModal from '../../components/ReportModal';
 import { useAuth } from '../../context/AuthContext';
 import { useNotification } from '../../context/NotificationContext';
@@ -95,12 +97,18 @@ const AllListingsPage: React.FC = () => {
   const { showErrorNotification } = useNotification();
   const { confirm } = useConfirmDialog();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const categoryParam = searchParams.get('category');
+  
   const [rawListings, setRawListings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
   const itemsPerPage = 12;
+
+  // Filter state
+  const [activeFilters, setActiveFilters] = useState<FilterValues>({});
 
   // Report modal state
   const [reportModal, setReportModal] = useState<{
@@ -158,9 +166,32 @@ const AllListingsPage: React.FC = () => {
     
     const validDate = getValidDate(listing.created_at);
     
-    // Seller bilgilerini belirle - listings tablosundaki seller_name/phone kullan
-    const sellerName = listing.seller_name || 'İlan Sahibi';
-    const sellerPhone = listing.seller_phone || 'Telefon Belirtilmemiş';
+    // Seller bilgilerini belirle - users relation'ından kurumsal bilgileri al
+    const sellerName = listing.users?.is_corporate 
+      ? listing.users.company_name || listing.seller_name || 'İlan Sahibi'
+      : listing.seller_name || `${listing.users?.first_name || ''} ${listing.users?.last_name || ''}`.trim() || 'İlan Sahibi';
+    const sellerPhone = listing.users?.phone || listing.seller_phone || 'Telefon Belirtilmemiş';
+    
+    // Debug: Kurumsal bilgileri kontrol et
+    if (listing.users?.is_corporate) {
+      console.log('🏢 Kurumsal ilan bulundu:', {
+        id: listing.id,
+        title: listing.title,
+        is_corporate: listing.users.is_corporate,
+        company_name: listing.users.company_name,
+        user_id: listing.user_id
+      });
+    }
+    
+    // Debug: Backend'den gelen users bilgilerini logla
+    if (listing.title.includes('Mercedes')) {
+      console.log('🔍 Mercedes ilan users data:', {
+        title: listing.title,
+        users: listing.users,
+        is_corporate: listing.users?.is_corporate,
+        company_name: listing.users?.company_name
+      });
+    }
     
     return {
       id: listing.id,
@@ -183,6 +214,8 @@ const AllListingsPage: React.FC = () => {
       seller: {
         name: sellerName,
         phone: sellerPhone,
+        is_corporate: listing.users?.is_corporate || false,
+        company_name: listing.users?.company_name || '',
       },
       owner: {
         name: sellerName,
@@ -247,12 +280,65 @@ const AllListingsPage: React.FC = () => {
     try {
       setLoading(true);
       console.log('🔍 Loading listings from API...');
-      const response = await api.get<ListingsResponse>('/listings', {
-        params: {
-          page: currentPage,
-          limit: itemsPerPage
-        }
-      });
+      console.log('🔍 Category Param:', categoryParam);
+      console.log('🔍 Current Page:', currentPage);
+      console.log('🔍 Active Filters:', activeFilters);
+      
+      const params: any = {
+        page: currentPage,
+        limit: itemsPerPage
+      };
+      
+      // Kategori filtresi ekle (URL parametresinden)
+      if (categoryParam) {
+        params.category = categoryParam;
+        console.log('🎯 Adding category filter:', categoryParam);
+      }
+      
+      // Aktif filtreleri ekle
+      if (activeFilters.search) {
+        params.search = activeFilters.search;
+      }
+      if (activeFilters.category) {
+        params.category = activeFilters.category;
+      }
+      if (activeFilters.brand) {
+        params.brand = activeFilters.brand;
+      }
+      if (activeFilters.model) {
+        params.model = activeFilters.model;
+      }
+      if (activeFilters.city) {
+        params.city = activeFilters.city;
+      }
+      if (activeFilters.district) {
+        params.district = activeFilters.district;
+      }
+      if (activeFilters.yearMin) {
+        params.yearMin = activeFilters.yearMin;
+      }
+      if (activeFilters.yearMax) {
+        params.yearMax = activeFilters.yearMax;
+      }
+      if (activeFilters.priceMin) {
+        params.priceMin = activeFilters.priceMin;
+      }
+      if (activeFilters.priceMax) {
+        params.priceMax = activeFilters.priceMax;
+      }
+      if (activeFilters.kmMin) {
+        params.kmMin = activeFilters.kmMin;
+      }
+      if (activeFilters.kmMax) {
+        params.kmMax = activeFilters.kmMax;
+      }
+      if (activeFilters.isCorporate !== undefined) {
+        params.isCorporate = activeFilters.isCorporate;
+      }
+      
+      console.log('📤 API request params:', params);
+      
+      const response = await api.get<ListingsResponse>('/listings', { params });
       
       // Backend response format: { success: true, data: { listings: [], pagination: {} } }
       const responseData = response.data.data || response.data;
@@ -262,7 +348,7 @@ const AllListingsPage: React.FC = () => {
         const listingsClone = JSON.parse(JSON.stringify(responseData.listings));
         setRawListings(listingsClone);
         setTotalPages(responseData.pagination.pages);
-        console.log('✅ Raw listings set:', listingsClone.length);
+        console.log('✅ Raw listings set:', listingsClone.length, 'for category:', categoryParam || 'all');
       } else {
         console.warn('⚠️ No listings data or invalid format', { responseData });
         setRawListings([]);
@@ -276,8 +362,26 @@ const AllListingsPage: React.FC = () => {
   };
 
   useEffect(() => {
+    console.log('🔄 Category param changed:', categoryParam);
+    setCurrentPage(1); // Kategori değiştiğinde ilk sayfaya dön
+    loadListings();
+  }, [categoryParam]);
+
+  useEffect(() => {
+    console.log('🔄 Current page changed:', currentPage);
     loadListings();
   }, [currentPage]);
+
+  useEffect(() => {
+    console.log('🔄 Active filters changed:', activeFilters);
+    setCurrentPage(1); // Filtre değiştiğinde ilk sayfaya dön
+    loadListings();
+  }, [activeFilters]);
+
+  const handleFiltersChange = (newFilters: FilterValues) => {
+    console.log('🎯 Filters changed:', newFilters);
+    setActiveFilters(newFilters);
+  };
 
   const handleFavoriteClick = (id: string) => {
     console.log('Favorileme:', id);
@@ -285,6 +389,13 @@ const AllListingsPage: React.FC = () => {
 
   const handleViewDetails = (id: string) => {
     navigate(`/listing/${id}`);
+  };
+
+  const handleVisitStore = (userId: string, companyName: string) => {
+    // Kurumsal mağaza sayfasına yönlendir
+    navigate(`/store/${userId}`, { 
+      state: { companyName } 
+    });
   };
 
   const handleSendMessage = async (listingId: string) => {
@@ -332,6 +443,24 @@ const AllListingsPage: React.FC = () => {
     setCurrentPage(page);
   };
 
+  // Kategori isimlerini Türkçeye çevir
+  const getCategoryDisplayName = (category: string | null): string => {
+    if (!category) return 'Tüm İlanlar';
+    
+    const categoryNames: Record<string, string> = {
+      'cekici': 'Çekici',
+      'dorse': 'Dorse', 
+      'kamyon': 'Kamyon & Kamyonet',
+      'romork': 'Römork',
+      'minibus': 'Minibüs & Midibüs',
+      'otobus': 'Otobüs',
+      'karoser': 'Karoser & Üst Yapı',
+      'kurtarici': 'Oto Kurtarıcı & Taşıyıcı'
+    };
+    
+    return categoryNames[category] || 'Tüm İlanlar';
+  };
+
   console.log('Component state:', { loading, error, listingsCount: listings.length });
 
   if (error) {
@@ -344,6 +473,13 @@ const AllListingsPage: React.FC = () => {
 
   return (
     <Container maxWidth="xl" sx={{ py: { xs: 1, md: 2 }, px: { xs: 1, sm: 2, md: 3 } }}> {/* Mobile'da daha az padding */}
+      {/* Filtreleme Sistemi */}
+      <ListingFilters
+        onFiltersChange={handleFiltersChange}
+        initialFilters={activeFilters}
+        loading={loading}
+      />
+      
       {loading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
           <CircularProgress />
@@ -351,16 +487,6 @@ const AllListingsPage: React.FC = () => {
         </Box>
       ) : (
         <>
-          <Typography 
-            variant="h6" 
-            sx={{ 
-              mb: { xs: 1.5, md: 2 }, 
-              px: 0,
-              fontSize: { xs: '1.1rem', md: '1.25rem' } // Mobile'da küçük başlık
-            }}
-          > 
-            Toplam {listings.length} ilan bulundu
-          </Typography>
           
           {/* İlan Kartları - Responsive Grid */}
           <Box 
@@ -373,26 +499,37 @@ const AllListingsPage: React.FC = () => {
                 lg: 'repeat(2, 1fr)',         // Desktop: 2 kolon
                 xl: 'repeat(3, 1fr)'          // Large desktop: 3 kolon
               },
-              gap: { xs: 1.5, sm: 2, md: 2.5, lg: 3 }, // Responsive gap
+              gap: { xs: 2, sm: 2.5, md: 3, lg: 3.5 }, // Gap artırıldı
               alignItems: "stretch", // ✅ yükseklikleri eşitle
               mb: 4,
               // Mobile'da daha kompakt görünüm
               '& .MuiCard-root': {
-                maxWidth: { xs: '100%', md: 420 }
+                maxWidth: { xs: '100%', md: 460 } // Max width artırıldı
               }
             }}
           >
-            {listings.filter(listing => listing !== null).map(listing => (
-              <TruckCenterCard
-                key={listing!.id}
-                listing={listing!}
-                isOwn={!!user && listing!.user_id === user.id}
-                onFavoriteClick={handleFavoriteClick}
-                onViewDetails={handleViewDetails}
-                onSendMessage={handleSendMessage}
-                onReport={handleReport}
-              />
-            ))}
+            {listings.filter(listing => listing !== null).map(listing => {
+              console.log('🎯 Rendering TruckCenterCard for listing:', {
+                id: listing!.id,
+                title: listing!.title,
+                seller_is_corporate: listing!.seller.is_corporate,
+                seller_company_name: listing!.seller.company_name,
+                user_id: listing!.user_id
+              });
+              
+              return (
+                <TruckCenterCard
+                  key={listing!.id}
+                  listing={listing!}
+                  isOwn={!!user && listing!.user_id === user.id}
+                  onFavoriteClick={handleFavoriteClick}
+                  onViewDetails={handleViewDetails}
+                  onSendMessage={handleSendMessage}
+                  onReport={handleReport}
+                  onVisitStore={handleVisitStore}
+                />
+              );
+            })}
           </Box>
 
           {/* Sayfalama */}

@@ -9,6 +9,7 @@ import { ListingProvider } from './context/ListingContext';
 import { WebSocketProvider } from './context/WebSocketContext';
 import { ConfirmDialogProvider } from './context/ConfirmDialogProvider';
 import { PromptDialogProvider } from './context/PromptDialogProvider';
+import ScrollToTop from './components/common/ScrollToTop';
 import UserLayout from './components/layout/UserLayout';
 import AdminLayout from './components/layout/AdminLayout';
 import AdminRoute from './components/auth/AdminRoute';
@@ -94,6 +95,9 @@ import ContactPage from './pages/static/ContactPage';
 import PrivacyPage from './pages/static/PrivacyPage';
 import TermsPage from './pages/static/TermsPage';
 import KVKKPage from './pages/static/KVKKPage';
+import MyStorePage from './pages/user/MyStorePage';
+import DopingPage from './pages/user/DopingPage';
+import CorporateStorePage from './pages/store/CorporateStorePage';
 
 const App: React.FC = () => {
   console.log('🚀 App component with full routing rendering...');
@@ -109,6 +113,7 @@ const App: React.FC = () => {
                 <ListingProvider>
                   <WebSocketProvider>
                 <Router>
+                  <ScrollToTop />
                 <Routes>
                 {/* 🔐 Auth rotaları - Login'den GuestRoute'u kaldıralım */}
                 <Route path="/auth/login" element={<Login />} />
@@ -131,6 +136,7 @@ const App: React.FC = () => {
                 <Route path="category/:id/vehicle-type/:vehicleTypeId/brand/:brandId" element={<NewCategoryPage />} />
                 <Route path="category/:id/vehicle-type/:vehicleTypeId/brand/:brandId/model/:modelId" element={<NewCategoryPage />} />
                 <Route path="listing/:id" element={<DetailOrchestrator />} />
+                <Route path="store/:userId" element={<CorporateStorePage />} />
                 
                 {/* 🔒 Korumalı kullanıcı rotaları */}
                 <Route path="edit-listing/:id" element={<ProtectedRoute><EditListingOrchestrator /></ProtectedRoute>} />
@@ -139,6 +145,8 @@ const App: React.FC = () => {
                 <Route path="my-reports" element={<ProtectedRoute><MyReportsPage /></ProtectedRoute>} />
                 <Route path="profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
                 <Route path="my-listings" element={<ProtectedRoute><MyListings /></ProtectedRoute>} />
+                <Route path="my-store" element={<ProtectedRoute><MyStorePage /></ProtectedRoute>} />
+                <Route path="doping" element={<ProtectedRoute><DopingPage /></ProtectedRoute>} />
                 {/* 🔧 Alias route for backward compatibility */}
                 <Route path="real-time-messages" element={<ProtectedRoute><RealTimeMessagesPage /></ProtectedRoute>} />
                 

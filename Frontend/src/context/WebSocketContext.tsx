@@ -144,7 +144,7 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
     if (!token) return;
 
     // 🔧 Standardized environment variable usage (Railway production)
-    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://trucksbusbackend-production-0e23.up.railway.app/api';
+    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3002/api';
     const serverUrl = new URL(API_BASE_URL).origin;
     
     if (import.meta.env.DEV) console.log('🔌 Initializing WebSocket connection to:', serverUrl);

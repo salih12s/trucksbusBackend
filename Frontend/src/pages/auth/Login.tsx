@@ -1,31 +1,53 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
-  const { login, error, isLoading, clearError } = useAuth();
+  const location = useLocation();
+  const { login, error, isLoading, clearError, isAuthenticated, user, isInitialized } = useAuth();
 
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
 
+  // ✅ Korunan sayfadan geldiyse oraya dön
+  const fromPath = (location.state as any)?.from?.pathname || '/';
+
+  // ✅ Güvenli hedef path belirleme
+  const safeTarget = (role: string | undefined, fromPath: string) => {
+    const isAdmin = role?.toUpperCase() === 'ADMIN';
+    if (!isAdmin && fromPath.startsWith('/admin')) return '/';
+    if (fromPath.startsWith('/auth')) return '/';
+    return isAdmin ? '/admin/dashboard' : (fromPath || '/');
+  };
+
+  // ✅ GELDİĞİN YERE DÖN - Loop'u keser
+  useEffect(() => {
+    if (isInitialized && isAuthenticated && user) {
+      console.log('🚀 User authenticated, returning to:', fromPath);
+      
+      const targetPath = safeTarget(user.role, fromPath);
+      console.log('🎯 Safe redirect target:', targetPath);
+      
+      // Biraz bekleyip redirect et - AuthContext'in settle olmasını sağla
+      setTimeout(() => {
+        navigate(targetPath, { replace: true });
+      }, 100);
+    }
+  }, [isInitialized, isAuthenticated, user, navigate, fromPath]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     clearError();
+    
+    if (isLoading) return;
+    
     try {
       console.log('🔐 Login form submitted');
-      const user = await login(formData.email, formData.password, rememberMe);
-      console.log('✅ Login successful, user role:', user.role);
+      await login(formData.email, formData.password, rememberMe);
+      console.log('✅ Login successful - redirect will happen via useEffect');
       
-      // Admin kontrolü - window.location.href kullanarak yönlendirme
-      if (user.role === 'ADMIN') {
-        console.log('🔧 Admin detected, redirecting to /admin');
-        window.location.href = '/admin';
-      } else {
-        console.log('👤 Regular user, redirecting to home');
-        navigate('/');
-      }
     } catch (err: any) {
       console.error('❌ Login failed:', err);
     }

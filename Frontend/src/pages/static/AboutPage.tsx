@@ -22,7 +22,7 @@ const AboutPage: React.FC = () => {
             lineHeight: 1.2,
           }}
         >
-          <span style={{ color: accent }}>🚛</span> TruckBus Hakkında
+          <span style={{ color: accent }}>🚛</span> TrucksBus Hakkında
         </Typography>
 
         <Typography
@@ -41,7 +41,7 @@ const AboutPage: React.FC = () => {
         <Box sx={{ maxWidth: 880, mx: 'auto' }}>
           {/* Giriş */}
           <Typography variant="body1" paragraph sx={{ lineHeight: 1.9, mb: 2 }}>
-            TruckBus; kamyon, çekici, otobüs, minibüs–midibüs, dorse ve benzeri ağır ticari
+            TrucksBus; kamyon, çekici, otobüs, minibüs–midibüs, dorse ve benzeri ağır ticari
             araçların alım–satımını kolaylaştıran modern bir pazaryeridir. Amacımız; alıcıyla
             satıcıyı aynı masaya hızla, şeffaf bilgilerle ve net adımlarla getirip işlemleri
             güven içinde tamamlamanızı sağlamak.

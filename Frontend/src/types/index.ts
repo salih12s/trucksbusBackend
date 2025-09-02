@@ -8,10 +8,14 @@ export interface User {
   phone?: string;
   city?: string;
   district?: string;
-  role: 'USER' | 'ADMIN';
+  role: 'USER' | 'ADMIN' | 'CORPORATE';
   is_active: boolean;
   is_email_verified: boolean;
   avatar?: string; // Added for profile picture
+  is_corporate?: boolean; // Kurumsal hesap kontrolü
+  company_name?: string; // Şirket adı
+  doping_status?: 'ACTIVE' | 'INACTIVE' | null; // Doping durumu
+  doping_expires_at?: Date; // Doping bitiş tarihi
   created_at: Date;
   updated_at: Date;
 }
@@ -181,13 +185,15 @@ export interface LoginRequest {
 }
 
 export interface RegisterRequest {
-  kvkkAccepted: boolean;
+  kvkk_accepted: boolean;
   email: string;
   password: string;
   username: string;
   firstName: string;
   lastName: string;
   phone?: string;
+  is_corporate?: boolean;
+  company_name?: string;
 }
 
 export interface AuthResponse {

@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode, useRef } from 'react';
 import { User } from '../types';
 import { authService } from '../services/authService';
+import { api } from '../services/authService';
 
 interface AuthState {
   user: User | null;
@@ -26,76 +27,64 @@ export { AuthContext };
 // ✨ Helper: Storage operations
 const StorageHelper = {
   getToken: () => {
-    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-    console.log('🎟️ DEBUG: StorageHelper.getToken():', Boolean(token), token ? token.substring(0, 20) + '...' : 'null');
-    return token;
+    return localStorage.getItem('token') || sessionStorage.getItem('token');
   },
   getUser: () => {
     const userStr = localStorage.getItem('user') || sessionStorage.getItem('user');
-    console.log('👤 DEBUG: StorageHelper.getUser():', Boolean(userStr));
     if (!userStr) return null;
     try {
-      const user = JSON.parse(userStr) as User;
-      console.log('✅ DEBUG: User parsed successfully:', user.email);
-      return user;
+      return JSON.parse(userStr) as User;
     } catch (e) {
-      console.error('❌ DEBUG: Failed to parse saved user:', e);
       localStorage.removeItem('user');
       sessionStorage.removeItem('user');
       return null;
     }
   },
   isRememberMe: () => localStorage.getItem('rememberMe') === 'true',
-  setAuth: (token: string, user: User, rememberMe: boolean) => {
+  setAuth: (token: string, user: User, rememberMe: boolean, refreshToken?: string) => {
     if (rememberMe) {
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(user));
       localStorage.setItem('rememberMe', 'true');
+      if (refreshToken) localStorage.setItem('refreshToken', refreshToken);
       // Session storage'ı temizle
       sessionStorage.removeItem('token');
       sessionStorage.removeItem('user');
     } else {
       sessionStorage.setItem('token', token);
       sessionStorage.setItem('user', JSON.stringify(user));
+      if (refreshToken) sessionStorage.setItem('refreshToken', refreshToken);
       // Local storage'ı temizle
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       localStorage.removeItem('rememberMe');
+      localStorage.removeItem('refreshToken');
     }
   },
   clearAuth: () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     localStorage.removeItem('rememberMe');
+    localStorage.removeItem('refreshToken');
     sessionStorage.removeItem('token');
     sessionStorage.removeItem('user');
+    sessionStorage.removeItem('refreshToken');
   }
 };
 
 // ✨ Initial state calculator
 const getInitialState = (): AuthState => {
-  console.log('🏗️ DEBUG: getInitialState() çağırıldı');
   const token = StorageHelper.getToken();
   const user = StorageHelper.getUser();
   
-  const initialState = {
+  return {
     user,
     token,
     isAuthenticated: Boolean(token && user),
-    isLoading: Boolean(token), // Token varsa loading, yoksa false
+    isLoading: Boolean(token),
     error: null,
-    isInitialized: false, // Henüz initialize olmadı
+    isInitialized: false,
   };
-  
-  console.log('🎯 DEBUG: Initial state:', {
-    hasToken: Boolean(token),
-    hasUser: Boolean(user),
-    isAuthenticated: initialState.isAuthenticated,
-    isLoading: initialState.isLoading,
-    isInitialized: initialState.isInitialized
-  });
-  
-  return initialState;
 };
 
 interface AuthProviderProps {
@@ -103,39 +92,22 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  console.log('🏗️ AuthProvider: Component mounting...');
-  
   const [state, setState] = useState<AuthState>(getInitialState);
-  const isInitializing = useRef(false); // ✨ Initialization guard
+  const initRef = useRef(false); // Tek guard yeterli
 
-  // ✨ State updater function
   const updateState = useCallback((updates: Partial<AuthState>) => {
-    setState(prevState => ({
-      ...prevState,
-      ...updates
-    }));
+    setState(prevState => ({ ...prevState, ...updates }));
   }, []);
 
-  // ✨ Authentication initialization - SADECE BİR KEZ ÇALIŞIR
+  // ✨ SADECE BİR KEZ initialize
   useEffect(() => {
-    if (isInitializing.current || state.isInitialized) {
-      console.log('🚫 AuthProvider: Already initialized, skipping...');
-      return;
-    }
+    if (initRef.current) return;
+    initRef.current = true;
 
-    isInitializing.current = true;
-    console.log('🔧 AuthProvider: Starting initialization...');
-
-    const initializeAuth = async () => {
+    const initAuth = async () => {
       const token = StorageHelper.getToken();
-      const savedUser = StorageHelper.getUser();
 
-      console.log('🎟️ Token exists:', Boolean(token));
-      console.log('👤 Saved user exists:', Boolean(savedUser));
-
-      // Token yoksa hemen authenticated değil olarak işaretle
       if (!token) {
-        console.log('❌ No token found, setting unauthenticated');
         updateState({
           user: null,
           token: null,
@@ -147,15 +119,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return;
       }
 
-      // Token var ama user yoksa verify et
-      if (token && !savedUser) {
-        console.log('🔒 Token exists but no saved user, verifying...');
-        
+      // ✨ TOKEN VAR - HER ZAMAN VERIFY ET (expired olabilir)
+      if (token) {
         try {
           const user = await authService.verifyToken(token);
-          console.log('✅ Token verified successfully:', user);
-          
           StorageHelper.setAuth(token, user, StorageHelper.isRememberMe());
+          
+          // ✨ VERIFY SONRASI DA AXIOS DEFAULT HEADER'A KOY
+          api.defaults.headers.common.Authorization = `Bearer ${token}`;
           updateState({
             user,
             token,
@@ -165,7 +136,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             error: null
           });
         } catch (error: any) {
-          console.error('❌ Token verification failed:', error);
+          console.log('🚨 Token expired/invalid, clearing storage');
           StorageHelper.clearAuth();
           updateState({
             user: null,
@@ -173,55 +144,36 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             isAuthenticated: false,
             isLoading: false,
             isInitialized: true,
-            error: error.message || 'Token verification failed'
+            error: null
           });
         }
-        return;
-      }
-
-      // Token ve saved user ikisi de var
-      if (token && savedUser) {
-        console.log('✅ Token and user found, setting authenticated immediately');
-        
-        // UI'ı authenticate et ve initialization'ı tamamla
-        updateState({
-          user: savedUser,
-          token,
-          isAuthenticated: true,
-          isLoading: false,
-          isInitialized: true,
-          error: null
-        });
-
-        // REMOVED: Background token verification to prevent infinite loops
-        // The token will be verified naturally when the user makes their first authenticated request
-        console.log('ℹ️ Skipping background token verification to prevent infinite loops');
       }
     };
 
-    initializeAuth();
-  }, []); // ✨ Boş dependency array - sadece mount'ta çalışır
+    initAuth();
+  }, [updateState]);
 
-  // ✅ 401 sinyalini dinle - merkezi logout
+    // ✅ 401 sinyalini dinle - merkezi logout
   useEffect(() => {
     const onUnauthorized = () => {
-      console.log('🚫 Received auth:unauthorized event - logging out');
+      console.log('🚫 Received auth:unauthorized event -> logging out');
       StorageHelper.clearAuth();
+      
+      // ✨ AXIOS DEFAULT HEADER'I TEMİZLE
+      delete api.defaults.headers.common.Authorization;
       updateState({
-        user: null, 
+        user: null,
         token: null,
-        isAuthenticated: false, 
+        isAuthenticated: false,
         isLoading: false,
-        isInitialized: true, 
+        isInitialized: true,
         error: 'Oturum süresi doldu'
       });
     };
     
     window.addEventListener('auth:unauthorized', onUnauthorized);
     return () => window.removeEventListener('auth:unauthorized', onUnauthorized);
-  }, [updateState]);
-
-  // ✨ Login function
+  }, [updateState]);// ✨ Login function
   const login = useCallback(async (email: string, password: string, rememberMe = false): Promise<User> => {
     console.log('🔐 Login attempt started...');
     
@@ -234,7 +186,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.log('🔑 DEBUG: User role:', response.user.role);
       console.log('🎟️ DEBUG: Token received:', Boolean(response.token));
 
-      StorageHelper.setAuth(response.token, response.user, rememberMe);
+      StorageHelper.setAuth(response.token, response.user, rememberMe, response.refreshToken);
+      
+      // ✨ ANINDA AXIOS DEFAULT HEADER'A KOY - Race condition önle
+      api.defaults.headers.common.Authorization = `Bearer ${response.token}`;
       
       updateState({
         user: response.user,
@@ -268,7 +223,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const response = await authService.register(userData);
       console.log('✅ Registration successful');
 
-      StorageHelper.setAuth(response.token, response.user, false); // Register'da default olarak remember me false
+      StorageHelper.setAuth(response.token, response.user, false, response.refreshToken); // Register'da default olarak remember me false
       
       updateState({
         user: response.user,
@@ -297,6 +252,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     console.log('🚪 Logout initiated...');
     
     StorageHelper.clearAuth();
+    
+    // ✨ AXIOS DEFAULT HEADER'I TEMİZLE  
+    delete api.defaults.headers.common.Authorization;
     
     updateState({
       user: null,

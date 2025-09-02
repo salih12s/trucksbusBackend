@@ -21,7 +21,7 @@ const TermsPage: React.FC = () => {
 
         <Box sx={{ maxWidth: '800px', mx: 'auto' }}>
           <Typography variant="body1" paragraph sx={{ lineHeight: 1.8, mb: 3 }}>
-            TruckBus platformunu kullanarak aşağıdaki şart ve koşulları kabul etmiş sayılırsınız.
+            TrucksBus platformunu kullanarak aşağıdaki şart ve koşulları kabul etmiş sayılırsınız.
           </Typography>
 
           <Typography variant="h6" sx={{ color: '#E14D43', mb: 2, fontWeight: 600, mt: 4 }}>

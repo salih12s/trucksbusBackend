@@ -77,7 +77,7 @@ const steps = [
 ];
 
 const MinibusAdForm: React.FC = () => {
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const { confirm } = useConfirmDialog();
@@ -512,6 +512,17 @@ const MinibusAdForm: React.FC = () => {
     try {
       setLoading(true);
       setError('');
+
+      // Authentication debug bilgisi
+      console.log('🔐 Authentication check:');
+      console.log('🔐 isAuthenticated:', isAuthenticated);
+      console.log('🔐 user:', user);
+      console.log('🔐 token exists:', !!localStorage.getItem('token') || !!sessionStorage.getItem('token'));
+      
+      if (!isAuthenticated || !user) {
+        setError('İlan oluşturmak için giriş yapmalısınız.');
+        return;
+      }
 
       // Edit mode kontrolü
       const urlParams = new URLSearchParams(location.search);

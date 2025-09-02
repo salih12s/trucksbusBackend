@@ -1,32 +1,31 @@
 import axios, { AxiosResponse } from 'axios';
-import { User, LoginRequest, RegisterRequest, AuthResponse, ApiResponse } from '../types'; 
+import { User, LoginRequest, RegisterRequest, AuthResponse, ApiResponse } from '../types';
 
 // ✅ Ortak helper: token'ı hem local hem session'dan oku
 const getStoredToken = () =>
   localStorage.getItem('token') || sessionStorage.getItem('token');
 
-// Multiple API endpoints for failover
 const API_ENDPOINTS = [
-  import.meta.env.VITE_API_BASE_URL || 'https://trucksbusbackend-production-0e23.up.railway.app/api',
-  'https://trucksbusbackend-production-0e23.up.railway.app/api',
-  'http://localhost:3001/api' // Development fallback
+  import.meta.env.VITE_API_BASE_URL || 'http://localhost:3002/api',
+  'http://localhost:3002/api'
 ];
 
 const API_BASE_URL = API_ENDPOINTS[0];
 console.log('🌐 Using API Base URL:', API_BASE_URL);
 
-// Token validation state management
-let isValidatingToken = false;
-let isTokenInvalid = false;
-
 const api = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 30000, // 30 saniye timeout
-  headers: {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json',
-  },
+  timeout: 30000,
+  headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
 });
+
+// ✨ BOOT TOKEN - Uygulama açılışında varsa token'ı header'a koy
+const bootToken = getStoredToken();
+if (bootToken) {
+  api.defaults.headers.common.Authorization = `Bearer ${bootToken}`;
+  console.log('🎟️ Boot token set to axios defaults');
+}
+
 
 // ✅ Request interceptor artık her iki depoyu da kontrol ediyor
 api.interceptors.request.use((config) => {
@@ -38,18 +37,12 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// ✅ 401'de her iki depoyu da temizle
+// ✅ 401'de sadece event at - AuthProvider karar versin
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      localStorage.removeItem('rememberMe');
-      sessionStorage.removeItem('token');
-      sessionStorage.removeItem('user');
-      console.log('🚫 401 error - clearing auth data and dispatching event');
-      // Uygulamaya haber ver
+      console.log('🚫 401 - dispatching auth:unauthorized');
       window.dispatchEvent(new Event('auth:unauthorized'));
     }
     return Promise.reject(error);
@@ -99,17 +92,23 @@ export const authService = {
 
   register: async (userData: RegisterRequest): Promise<AuthResponse> => {
     try {
-      console.log('📝 Register attempt:', { email: userData.email, firstName: userData.firstName });
+      console.log('📝 Register attempt:', { email: userData.email, firstName: userData.firstName, isCorporate: userData.is_corporate });
       
       // Frontend'den gelen userData'yı backend formatına dönüştür
-      const backendData = {
+      const backendData: any = {
         email: userData.email,
         password: userData.password,
         first_name: userData.firstName,
         last_name: userData.lastName,
         phone: userData.phone,
-        kvkk_accepted: userData.kvkkAccepted || false,
+        kvkk_accepted: userData.kvkk_accepted || false,
+        is_corporate: userData.is_corporate || false,
       };
+
+      // Kurumsal hesap verileri varsa ekle
+      if (userData.is_corporate && userData.company_name) {
+        backendData.company_name = userData.company_name;
+      }
       
       console.log('📤 Sending register data:', backendData);
       
@@ -160,21 +159,7 @@ export const authService = {
 
   verifyToken: async (token: string): Promise<User> => {
     if (!token) throw new Error('No token to verify');
-    
-    // Prevent concurrent token verifications
-    if (isValidatingToken) {
-      console.log('� Token verification already in progress, skipping...');
-      throw new Error('Token verification already in progress');
-    }
-    
-    // Check if token is known to be invalid
-    if (isTokenInvalid) {
-      console.log('🚫 Token is marked as invalid, skipping verification');
-      throw new Error('Token is invalid');
-    }
-    
-    isValidatingToken = true;
-    
+
     try {
       console.log('🔍 Verifying token...');
       const response: AxiosResponse<ApiResponse<{ user: User }>> = await api.get('/auth/me', {
@@ -189,10 +174,7 @@ export const authService = {
       return response.data.data.user;
     } catch (error: any) {
       console.error('❌ Token verification failed:', error);
-      isTokenInvalid = true;
       throw new Error(error.response?.data?.message || 'Token doğrulama başarısız');
-    } finally {
-      isValidatingToken = false;
     }
   },
 
@@ -224,9 +206,15 @@ export const authService = {
   deleteAccount: async (password: string): Promise<void> => {
     try {
       console.log('🗑️ Delete account attempt started...');
+      console.log('🌐 Using base URL:', API_BASE_URL);
+      console.log('🔑 Token available:', !!getStoredToken());
       
       const response: AxiosResponse<ApiResponse<any>> = await api.delete('/auth/delete-account', {
-        data: { password }
+        data: { password },
+        headers: {
+          'Authorization': `Bearer ${getStoredToken()}`,
+          'Content-Type': 'application/json'
+        }
       });
       
       if (!response.data.success) {
@@ -236,6 +224,40 @@ export const authService = {
       console.log('✅ Account deleted successfully');
     } catch (error: any) {
       console.error('❌ Delete account error:', error);
+      console.error('❌ Full error details:', {
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        url: error.config?.url,
+        method: error.config?.method
+      });
+      
+      // If first API fails, try fallback endpoints
+      if (error.response?.status === 404 || error.code === 'ERR_NETWORK') {
+        console.log('🔄 Trying fallback API endpoints...');
+        for (let i = 1; i < API_ENDPOINTS.length; i++) {
+          try {
+            console.log(`🔄 Trying endpoint ${i + 1}: ${API_ENDPOINTS[i]}`);
+            const fallbackResponse = await axios.delete(`${API_ENDPOINTS[i]}/auth/delete-account`, {
+              data: { password },
+              headers: {
+                'Authorization': `Bearer ${getStoredToken()}`,
+                'Content-Type': 'application/json'
+              },
+              timeout: 30000
+            });
+            
+            if (fallbackResponse.data.success) {
+              console.log(`✅ Account deleted successfully with endpoint ${i + 1}`);
+              return;
+            }
+          } catch (fallbackError) {
+            console.log(`❌ Endpoint ${i + 1} failed:`, fallbackError);
+            continue;
+          }
+        }
+      }
+      
       throw error;
     }
   }

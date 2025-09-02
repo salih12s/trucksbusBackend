@@ -6,11 +6,22 @@ import { prisma } from '../utils/database';
 import { logger } from '../utils/logger';
 import { normalizePhoneTR, isValidPhoneTR } from '../utils/phone';
 import { sendPasswordResetEmail, sendWelcomeEmail } from '../services/emailService';
-import { AuthRequest } from '@/types';
+import { AuthRequest } from '../types';
 
 export const register = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { email, password, first_name, last_name, phone, city, district, kvkk_accepted } = req.body;
+    const { 
+      email, 
+      password, 
+      first_name, 
+      last_name, 
+      phone, 
+      city, 
+      district, 
+      kvkk_accepted,
+      is_corporate = false,
+      company_name
+    } = req.body;
 
     // Validate required fields
     if (!email || !password || !first_name || !last_name || !phone) {
@@ -28,6 +39,17 @@ export const register = async (req: Request, res: Response): Promise<void> => {
         message: 'KVKK Aydınlatma Metni kabul edilmelidir.' 
       });
       return;
+    }
+
+    // Kurumsal hesap için ek validasyonlar
+    if (is_corporate) {
+      if (!company_name) {
+        res.status(400).json({ 
+          success: false, 
+          message: 'Kurumsal hesap için şirket adı zorunludur.' 
+        });
+        return;
+      }
     }
 
     // Validate and normalize phone
@@ -58,25 +80,29 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
     // Create user
+    const userData: any = {
+      id: ulid(),
+      email,
+      password: hashedPassword,
+      first_name,
+      last_name,
+      phone: normalizedPhone,
+      city,
+      district,
+      role: is_corporate ? 'CORPORATE' : 'USER',
+      is_active: true,
+      is_email_verified: false,
+      is_corporate,
+      updated_at: new Date()
+    };
+
+    // Kurumsal hesap bilgilerini ekle
+    if (is_corporate) {
+      userData.company_name = company_name;
+    }
+
     const user = await prisma.users.create({
-      data: {
-        id: ulid(),
-        email,
-        password: hashedPassword,
-        first_name,
-        last_name,
-        phone: normalizedPhone,
-        city,
-        district,
-        role: 'USER',
-        is_active: true,
-        is_email_verified: false,
-        kvkk_accepted: true,
-        kvkk_accepted_at: new Date(),
-        kvkk_ip_address: req.ip || req.connection.remoteAddress || 'unknown',
-        kvkk_version: 'v1.0',
-        updated_at: new Date()
-      }
+      data: userData
     });
 
     // Generate JWT token
@@ -85,7 +111,8 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       { 
         id: user.id, 
         email: user.email, 
-        role: user.role 
+        role: user.role,
+        is_corporate: is_corporate
       },
       registerJwtSecret,
       { expiresIn: '24h' }
@@ -105,6 +132,8 @@ export const register = async (req: Request, res: Response): Promise<void> => {
           avatar: user.avatar,
           is_active: user.is_active,
           is_email_verified: user.is_email_verified,
+          is_corporate: is_corporate,
+          company_name: company_name,
           created_at: user.created_at,
           updated_at: user.updated_at
         },
@@ -202,6 +231,8 @@ export const login = async (req: Request, res: Response): Promise<void> => {
         password: true,
         login_attempts: true,
         last_login: true,
+        is_corporate: true,
+        company_name: true,
         created_at: true,
         updated_at: true
       }
@@ -295,7 +326,9 @@ export const login = async (req: Request, res: Response): Promise<void> => {
           district: user.district,
           role: user.role,
           is_email_verified: user.is_email_verified,
-          avatar: user.avatar
+          avatar: user.avatar,
+          is_corporate: user.is_corporate,
+          company_name: user.company_name
         },
         token
       }
@@ -359,6 +392,8 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
         role: true,
         is_active: true,
         is_email_verified: true,
+        is_corporate: true,
+        company_name: true,
         created_at: true
       }
     });
@@ -733,8 +768,8 @@ export const deleteAccount = async (req: AuthRequest, res: Response): Promise<vo
       where: {
         OR: [
           { sender_id: userId },
-          { conversation: { participant1_id: userId } },
-          { conversation: { participant2_id: userId } }
+          { conversations: { least_user_id: userId } },
+          { conversations: { greatest_user_id: userId } }
         ]
       }
     });
@@ -742,8 +777,8 @@ export const deleteAccount = async (req: AuthRequest, res: Response): Promise<vo
     await prisma.conversations.deleteMany({
       where: {
         OR: [
-          { participant1_id: userId },
-          { participant2_id: userId }
+          { least_user_id: userId },
+          { greatest_user_id: userId }
         ]
       }
     });

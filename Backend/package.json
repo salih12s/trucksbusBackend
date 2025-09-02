@@ -7,7 +7,7 @@
     "node": ">=20"
   },
   "scripts": {
-    "dev": "nodemon src/index.ts",
+    "dev": "npx ts-node --transpile-only src/index.ts",
     "build": "npx prisma generate && npx prisma db push && npx tsc",
     "start": "node dist/index.js",
     "postbuild": "node -e \"console.log('build done')\"",

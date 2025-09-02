@@ -1,7 +1,7 @@
 import axios, { AxiosError, AxiosResponse } from 'axios';
 
-// 🔧 Environment variable kullan - Backend API (Railway production)
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://trucksbusbackend-production-0e23.up.railway.app/api';
+// 🔧 Environment variable kullan - Backend API (Production)
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://astonishing-abundance-production.up.railway.app/api';
 
 // API Response types
 export interface ApiResponse<T = any> {
@@ -70,7 +70,8 @@ export const api = axios.create({
 // İstek interceptor - token ekleme
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
+    // ✨ Hem localStorage hem sessionStorage kontrol et
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
     console.log('🚀 API Request:', {
       method: config.method?.toUpperCase(),
       url: `${config.baseURL}${config.url}`,

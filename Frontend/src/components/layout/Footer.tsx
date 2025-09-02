@@ -49,7 +49,7 @@ const Footer: React.FC = () => {
     if (!user) {
       navigate('/auth/login');
     } else {
-      navigate(path);
+      navigate(path, { replace: false });
     }
   };
 
@@ -110,8 +110,8 @@ const Footer: React.FC = () => {
         bgcolor: '#2D3748', // ARKA PLAN AYNI KALDI
         color: 'white',
         mt: 'auto',
-        pt: 6,
-        pb: 2,
+        pt: 1.9, // 2.5'den %25 azaltıp 1.9'a düşürdük
+        pb: 0.75, // 1'den %25 azaltıp 0.75'e düşürdük
         overflow: 'hidden',
         // üstte ince gradient şerit
         '&::before': {
@@ -132,17 +132,17 @@ const Footer: React.FC = () => {
       }}
     >
       <Container maxWidth="lg">
-        <Grid container spacing={4}>
+        <Grid container spacing={1.5}> {/* spacing 2'den 1.5'e düşürdük */}
           {/* Marka & İletişim & CTA */}
           <Grid item xs={12} md={3}>
-            <Box sx={{ mb: 2 }}>
+            <Box sx={{ mb: 1.1 }}> {/* mb 1.5'den 1.1'e düşürdük */}
               <Typography
                 variant="h6"
                 component="div"
                 sx={{
                   fontWeight: 'bold',
                   color: accent,
-                  mb: 1.5,
+                  mb: 0.75,
                   letterSpacing: 0.4,
                 }}
               >
@@ -152,14 +152,14 @@ const Footer: React.FC = () => {
                 variant="body2"
                 sx={{
                   color: 'rgba(255, 255, 255, 0.85)',
-                  lineHeight: 1.7,
+                  lineHeight: 1.6,
                 }}
               >
                 Türkiye&apos;nin en güvenilir ticari araç alım-satım platformu.
                 Kamyon, otobüs, minibüs ve çekici ilanları tek yerde.
               </Typography>
 
-              <Stack direction="row" spacing={1.5} sx={{ mt: 2 }}>
+              <Stack direction="row" spacing={1.5} sx={{ mt: 1.1 }}> {/* mt 1.5'den 1.1'e düşürdük */}
                 <Button
                   size="small"
                   onClick={() => navigate('/sell')}
@@ -199,30 +199,30 @@ const Footer: React.FC = () => {
                       backgroundColor: 'rgba(225,77,67,0.12)',
                     },
                   }}
-                >
+                > 
                   Bize Ulaşın
                 </Button>
               </Stack>
 
               {/* Güven/rozetler */}
-              <Stack direction="row" spacing={1} sx={{ mt: 2, flexWrap: 'wrap', gap: 1 }}>
+              <Stack direction="row" spacing={1} sx={{ mt: 1.1, flexWrap: 'wrap', gap: 1 }}> {/* mt 1.5'den 1.1'e düşürdük */}
                 <Chip label="Doğrulanmış İlanlar" size="small" sx={{ bgcolor: 'rgba(255,255,255,0.08)', color: '#fff' }} />
                 <Chip label="Kurumsal Satıcılar" size="small" sx={{ bgcolor: 'rgba(255,255,255,0.08)', color: '#fff' }} />
                 <Chip label="7/24 Destek" size="small" sx={{ bgcolor: 'rgba(255,255,255,0.08)', color: '#fff' }} />
               </Stack>
 
               {/* İletişim */}
-              <Box sx={{ mt: 3 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+              <Box sx={{ mt: 1.5 }}> {/* mt 2'den 1.5'e düşürdük */}
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.4 }}> {/* mb 0.5'den 0.4'e düşürdük */}
                   <Phone sx={{ fontSize: 18, mr: 1, color: accent }} />
                   <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.85)' }}>
                     +90 (555) 123 45 67
                   </Typography>
                 </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.4 }}> {/* mb 0.5'den 0.4'e düşürdük */}
                   <Email sx={{ fontSize: 18, mr: 1, color: accent }} />
                   <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.85)' }}>
-                    info@truckbus.com
+                    info@trucksbus.com
                   </Typography>
                 </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -241,7 +241,7 @@ const Footer: React.FC = () => {
               variant="subtitle1"
               sx={{
                 fontWeight: 700,
-                mb: 2,
+                mb: 1.1, // mb 1.5'den 1.1'e düşürdük
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: 1,
@@ -259,39 +259,61 @@ const Footer: React.FC = () => {
             </Typography>
             <Box component="ul" sx={{ listStyle: 'none', p: 0, m: 0 }}>
               {quickLinks.map((link) => (
-                <Box component="li" key={link.title} sx={{ mb: 1 }}>
-                  <Typography
-                    component="button"
-                    onClick={() => {
-                      if (link.requireAuth && !user) {
-                        navigate('/auth/login');
-                      } else {
-                        navigate(link.path);
-                      }
-                    }}
-                    variant="body2"
-                    sx={{
-                      color: 'rgba(255,255,255,0.85)',
-                      background: 'none',
-                      border: 'none',
-                      cursor: 'pointer',
-                      fontSize: '0.95rem',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      transition: 'all .2s ease',
-                      padding: 0,
-                      textAlign: 'left',
-                      '&:hover': {
-                        color: '#fff',
-                        transform: 'translateX(4px)',
-                        textDecoration: 'underline',
-                        textUnderlineOffset: '3px',
-                        textDecorationColor: accent,
-                      },
-                    }}
-                  >
-                    {link.title}
-                  </Typography>
+                <Box component="li" key={link.title} sx={{ mb: 0.5 }}>
+                  {link.requireAuth && !user ? (
+                    <Typography
+                      component="button"
+                      onClick={() => navigate('/auth/login')}
+                      variant="body2"
+                      sx={{
+                        color: 'rgba(255,255,255,0.85)',
+                        background: 'none',
+                        border: 'none',
+                        cursor: 'pointer',
+                        fontSize: '0.95rem',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        transition: 'all .2s ease',
+                        padding: 0,
+                        textAlign: 'left',
+                        '&:hover': {
+                          color: '#fff',
+                          transform: 'translateX(4px)',
+                          textDecoration: 'underline',
+                          textUnderlineOffset: '3px',
+                          textDecorationColor: accent,
+                        },
+                      }}
+                    >
+                      {link.title}
+                    </Typography>
+                  ) : (
+                    <Link
+                      to={link.path}
+                      style={{ textDecoration: 'none' }}
+                    >
+                      <Typography
+                        component="span"
+                        variant="body2"
+                        sx={{
+                          color: 'rgba(255,255,255,0.85)',
+                          fontSize: '0.95rem',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          transition: 'all .2s ease',
+                          '&:hover': {
+                            color: '#fff',
+                            transform: 'translateX(4px)',
+                            textDecoration: 'underline',
+                            textUnderlineOffset: '3px',
+                            textDecorationColor: accent,
+                          },
+                        }}
+                      >
+                        {link.title}
+                      </Typography>
+                    </Link>
+                  )}
                 </Box>
               ))}
             </Box>
@@ -303,7 +325,7 @@ const Footer: React.FC = () => {
               variant="subtitle1"
               sx={{
                 fontWeight: 700,
-                mb: 2,
+                mb: 1.1, // mb 1.5'den 1.1'e düşürdük
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: 1,
@@ -321,33 +343,61 @@ const Footer: React.FC = () => {
             </Typography>
             <Box component="ul" sx={{ listStyle: 'none', p: 0, m: 0 }}>
               {categories.map((category) => (
-                <Box component="li" key={category.title} sx={{ mb: 1 }}>
-                  <Typography
-                    component="button"
-                    onClick={() => handleAuthRequiredNavigation(category.path)}
-                    variant="body2"
-                    sx={{
-                      color: 'rgba(255,255,255,0.85)',
-                      background: 'none',
-                      border: 'none',
-                      cursor: 'pointer',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      fontSize: '0.95rem',
-                      padding: 0,
-                      textAlign: 'left',
-                      transition: 'all .2s ease',
-                      '& .MuiSvgIcon-root': { transition: 'color .2s ease' },
-                      '&:hover': {
-                        color: '#fff',
-                        transform: 'translateX(4px)',
-                        '& .MuiSvgIcon-root': { color: accent },
-                      },
-                    }}
-                  >
-                    {category.icon}
-                    {category.title}
-                  </Typography>
+                <Box component="li" key={category.title} sx={{ mb: 0.4 }}> {/* mb 0.5'den 0.4'e düşürdük */}
+                  {!user ? (
+                    <Typography
+                      component="button"
+                      onClick={() => navigate('/auth/login')}
+                      variant="body2"
+                      sx={{
+                        color: 'rgba(255,255,255,0.85)',
+                        background: 'none',
+                        border: 'none',
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        fontSize: '0.95rem',
+                        padding: 0,
+                        textAlign: 'left',
+                        transition: 'all .2s ease',
+                        '& .MuiSvgIcon-root': { transition: 'color .2s ease' },
+                        '&:hover': {
+                          color: '#fff',
+                          transform: 'translateX(4px)',
+                          '& .MuiSvgIcon-root': { color: accent },
+                        },
+                      }}
+                    >
+                      {category.icon}
+                      {category.title}
+                    </Typography>
+                  ) : (
+                    <Link
+                      to={category.path}
+                      style={{ textDecoration: 'none' }}
+                    >
+                      <Typography
+                        component="span"
+                        variant="body2"
+                        sx={{
+                          color: 'rgba(255,255,255,0.85)',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          fontSize: '0.95rem',
+                          transition: 'all .2s ease',
+                          '& .MuiSvgIcon-root': { transition: 'color .2s ease' },
+                          '&:hover': {
+                            color: '#fff',
+                            transform: 'translateX(4px)',
+                            '& .MuiSvgIcon-root': { color: accent },
+                          },
+                        }}
+                      >
+                        {category.icon}
+                        {category.title}
+                      </Typography>
+                    </Link>
+                  )}
                 </Box>
               ))}
             </Box>
@@ -359,7 +409,7 @@ const Footer: React.FC = () => {
               variant="subtitle1"
               sx={{
                 fontWeight: 700,
-                mb: 2,
+                mb: 1.1, // mb 1.5'den 1.1'e düşürdük
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: 1,
@@ -377,7 +427,7 @@ const Footer: React.FC = () => {
             </Typography>
             <Box component="ul" sx={{ listStyle: 'none', p: 0, m: 0 }}>
               {legalLinks.map((link) => (
-                <Box component="li" key={link.title} sx={{ mb: 1 }}>
+                <Box component="li" key={link.title} sx={{ mb: 0.4 }}> {/* mb 0.5'den 0.4'e düşürdük */}
                   <Typography
                     component={Link}
                     to={link.path}
@@ -408,7 +458,7 @@ const Footer: React.FC = () => {
               variant="subtitle1"
               sx={{
                 fontWeight: 700,
-                mb: 2,
+                mb: 1.1, // mb 1.5'den 1.1'e düşürdük
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: 1,
@@ -425,7 +475,7 @@ const Footer: React.FC = () => {
               Bizi Takip Edin
             </Typography>
 
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 1.1 }}> {/* mb 1.5'den 1.1'e düşürdük */}
               {socialMedia.map((s) => (
                 <Tooltip key={s.label} title={s.label}>
                   <IconButton
@@ -453,7 +503,7 @@ const Footer: React.FC = () => {
               ))}
             </Box>
 
-            <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.75)', mb: 1 }}>
+            <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.75)', mb: 0.4 }}> {/* mb 0.5'den 0.4'e düşürdük */}
               Bültene katıl:
             </Typography>
             <Box component="form" onSubmit={handleSubscribe} sx={{ display: 'flex', gap: 1 }}>
@@ -489,7 +539,7 @@ const Footer: React.FC = () => {
 
             <Typography
               variant="caption"
-              sx={{ display: 'block', color: 'rgba(255,255,255,0.6)', mt: 1 }}
+              sx={{ display: 'block', color: 'rgba(255,255,255,0.6)', mt: 0.4 }} // mt 0.5'den 0.4'e düşürdük
             >
               Yakında mobil uygulamalarımız.
             </Typography>
@@ -497,7 +547,7 @@ const Footer: React.FC = () => {
         </Grid>
 
         {/* Alt çizgi */}
-        <Divider sx={{ my: 3, borderColor: 'rgba(255,255,255,0.18)' }} />
+        <Divider sx={{ my: 2.2, borderColor: 'rgba(255,255,255,0.18)' }} /> {/* my 3'den 2.2'ye düşürdük */}
 
         {/* Copyright & back to top */}
         <Box

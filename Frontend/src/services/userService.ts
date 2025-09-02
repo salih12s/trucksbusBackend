@@ -7,6 +7,8 @@ export interface UserProfile {
   email: string;
   phone: string | null;
   avatar: string | null;
+  doping_status?: 'ACTIVE' | 'INACTIVE' | null; // Doping durumu
+  doping_expires_at?: string; // Doping bitiş tarihi (ISO string)
   created_at: string;
 }
 

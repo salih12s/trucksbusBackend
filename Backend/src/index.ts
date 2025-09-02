@@ -6,6 +6,9 @@ import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
 import path from 'path';
+
+// Load environment variables
+dotenv.config();
 import { createServer } from 'http';
 import { Server as SocketIOServer } from 'socket.io';
 import { setupSocketIO } from './middleware/socket';
@@ -26,6 +29,7 @@ import favoritesRoutes from './routes/favorites';
 import meRoutes from './routes/meRoutes';
 import feedbackRoutes from './routes/feedbackRoutes';
 import debugRoutes from './routes/debugRoutes';
+import storeRoutes from './routes/store';
 
 // Import utils
 import { logger } from './utils/logger';
@@ -75,9 +79,15 @@ app.use(cors({
         "https://trucksbus.com.tr", 
         "https://www.trucksbus.com.tr",
         "https://trucksbusbackend-production-0e23.up.railway.app",
+        "https://astonishing-abundance-production.up.railway.app",
         "*" // Geçici olarak tüm origin'lere izin ver
       ]
-    : "*", // Development - all origins
+    : [
+        "https://truckbus.com.tr",
+        "https://www.trucksbus.com.tr", 
+        "https://astonishing-abundance-production.up.railway.app",
+        "*" // Production için de tüm origin'lere izin ver
+      ], // Production origins
   credentials: true
 }));
 app.use(compression());
@@ -119,6 +129,40 @@ app.get('/api/debug', (req, res) => {
     hasJwtSecret: !!process.env.JWT_SECRET,
     hasAuthSecret: !!process.env.AUTH_SECRET,
     timestamp: new Date().toISOString()
+  });
+});
+
+// Debug routes endpoint - List all registered routes
+app.get('/api/debug/routes', (req, res) => {
+  console.log('🛣️ Debug routes endpoint called');
+  
+  const routes: any[] = [];
+  
+  // Get all registered routes
+  const extractRoutes = (stack: any, basePath = '') => {
+    stack.forEach((middleware: any) => {
+      if (middleware.route) {
+        // Direct route
+        routes.push({
+          path: basePath + middleware.route.path,
+          methods: Object.keys(middleware.route.methods),
+          middleware: middleware.route.stack?.length || 0
+        });
+      } else if (middleware.name === 'router') {
+        // Nested router
+        const routerPath = middleware.regexp.toString().match(/^\/\^\\?\/(.+)\\\//)?.[1] || '';
+        extractRoutes(middleware.handle.stack, basePath + '/' + routerPath);
+      }
+    });
+  };
+  
+  extractRoutes(app._router.stack, '/api');
+  
+  res.status(200).json({
+    success: true,
+    message: 'All registered routes',
+    routes: routes,
+    totalRoutes: routes.length
   });
 });
 
@@ -212,6 +256,9 @@ app.use('/api/notifications', notificationRoutes);
 
 // Feedback Routes
 app.use('/api', feedbackRoutes);
+
+// Store Routes (for corporate users)
+app.use('/api/store', storeRoutes);
 
 // Error handling middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {

@@ -1,5 +1,10 @@
 import { PrismaClient } from '@prisma/client';
 import { logger } from './logger';
+import dotenv from 'dotenv';
+import path from 'path';
+
+// Load environment variables from Backend/.env
+dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 // Database URL kontrolü
 const databaseUrl = process.env.DATABASE_URL;

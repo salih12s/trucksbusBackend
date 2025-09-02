@@ -377,6 +377,10 @@ model users {
   kvkk_accepted_at                            DateTime?
   kvkk_ip_address                             String?
   kvkk_version                                String?                        @default("v1.0")
+  // Kurumsal hesap alanları
+  is_corporate                                Boolean                        @default(false)
+  company_name                                String?
+  // İlişkiler
   complaints_complaints_target_user_idTousers complaints[]                   @relation("complaints_target_user_idTousers")
   complaints_complaints_user_idTousers        complaints[]                   @relation("complaints_user_idTousers")
   conversation_hidden                         conversation_hidden[]

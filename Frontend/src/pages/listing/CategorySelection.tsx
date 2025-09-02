@@ -25,7 +25,7 @@ interface VehicleType {
 }
 
 // Kategori isimleri ve resim dosyalarının eşleşmesi
-const categoryImageMap: { [key: string]: string } = {
+export const categoryImageMap: { [key: string]: string } = {
   'Çekici': '/CategoryImage/cekici.png',
   'Dorse': '/CategoryImage/Dorse.png',
   'Kamyon & Kamyonet': '/CategoryImage/KamyonKamyonet.png',
@@ -37,7 +37,7 @@ const categoryImageMap: { [key: string]: string } = {
 };
 
 // Fallback resim fonksiyonu
-const getCategoryImageSrc = (categoryName: string): string => {
+export const getCategoryImageSrc = (categoryName: string): string => {
   return categoryImageMap[categoryName] || '/TruckBus.png';
 };
 

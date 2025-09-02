@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { categoryService, Category, VehicleType, Brand, Model, Variant } from '../../services/categoryService';
 import { useConfirmDialog } from '../../hooks/useConfirmDialog';
+import { getModelImageUrl } from '../../utils/imageUtils';
 
 const CategoryPage: React.FC = () => {
   const { id: categoryId, vehicleTypeId, brandId, modelId } = useParams();
@@ -33,79 +34,8 @@ const CategoryPage: React.FC = () => {
 
   // Model resmini al
   const getModelImage = (modelName: string) => {
-    // Model adı düzenleme map'i - Tüm varyasyonları kapsayacak şekilde mevcut dosyalara yönlendir
-    const modelImageMap: { [key: string]: string } = {
-      // Scania varyasyonları - mevcut dosya: Scania.png
-      'Scanıa': '/ModelImage/Scania.png',
-      'Scania': '/ModelImage/Scania.png',
-      'SCANIA': '/ModelImage/Scania.png',
-      'scania': '/ModelImage/Scania.png',
-      
-      // Irizar varyasyonları - mevcut dosya yoksa fallback
-      'Irızar': '/TruckBus.png',
-      'Irizar': '/TruckBus.png',
-      'IRIZAR': '/TruckBus.png',
-      'irizar': '/TruckBus.png',
-      
-      // Türkkar varyasyonları - mevcut dosya: Turkkar.png
-      'Türkkar': '/ModelImage/Turkkar.png',
-      'Turkkar': '/ModelImage/Turkkar.png',
-      'TÜRKKAR': '/ModelImage/Turkkar.png',
-      'turkkar': '/ModelImage/Turkkar.png',
-      
-      // Avia varyasyonları - mevcut dosya: Avia.png
-      'Avıa': '/ModelImage/Avia.png',
-      'Avia': '/ModelImage/Avia.png',
-      'AVIA': '/ModelImage/Avia.png',
-      'avia': '/ModelImage/Avia.png',
-      
-      // Musatti varyasyonları - mevcut dosya: Musatti.png
-      'MUSATTİ': '/ModelImage/Musatti.png',
-      'MUSATTI': '/ModelImage/Musatti.png',
-      'Musatti': '/ModelImage/Musatti.png',
-      'musatti': '/ModelImage/Musatti.png',
-      'Mussatti': '/ModelImage/Musatti.png',
-      'MUSSATTI': '/ModelImage/Musatti.png',
-      
-      // Kuruyük varyasyonları
-      'Kuruyük': '/ModelImage/kuruyuk.png',
-      'Kuruyuk': '/ModelImage/kuruyuk.png',
-      'KURUYÜK': '/ModelImage/kuruyuk.png',
-      'kuruyuk': '/ModelImage/kuruyuk.png',
-      
-      // Özel dorseler
-      'Özel Amaçlı dorseler': '/ModelImage/ozel-amacli-dorseler.png',
-      'Özel Amaçlı Römorklar': '/ModelImage/Özel Amaçlı Römorklar.png'
-    };
-    
-    console.log(`🔍 Model resmi aranan: "${modelName}"`);
-    
-    // Önce tam eşleşme ara
-    if (modelImageMap[modelName]) {
-      console.log(`✅ Tam eşleşme bulundu: ${modelImageMap[modelName]}`);
-      return modelImageMap[modelName];
-    }
-    
-    // Case insensitive arama
-    const lowerName = modelName.toLowerCase();
-    for (const [key, value] of Object.entries(modelImageMap)) {
-      if (key.toLowerCase() === lowerName) {
-        console.log(`✅ Case insensitive eşleşme: ${value}`);
-        return value;
-      }
-    }
-    
-    // Kısmi eşleşme ara (içerme)
-    for (const [key, value] of Object.entries(modelImageMap)) {
-      if (key.toLowerCase().includes(lowerName) || lowerName.includes(key.toLowerCase())) {
-        console.log(`✅ Kısmi eşleşme: ${value}`);
-        return value;
-      }
-    }
-    
-    // Son çare: fallback
-    console.log(`⚠️ Eşleşme bulunamadı, fallback kullanılıyor: /TruckBus.png`);
-    return `/TruckBus.png`;
+    // Import edilen utility fonksiyonunu kullan
+    return getModelImageUrl(modelName);
   };
 
   useEffect(() => {
