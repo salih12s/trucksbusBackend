@@ -11,7 +11,7 @@ const PORT = process.env.PORT || 3005;
 
 // Middleware
 app.use(cors({
-  origin: ["https://truckbus.com.tr", "https://www.trucksbus.com.tr", "https://astonishing-abundance-production.up.railway.app", "*"],
+  origin: ["https://truckbus.com.tr", "https://www.trucksbus.com.tr", "https://trucksbusbackend-production-0e23.up.railway.app", "*"],
   credentials: true
 }));
 app.use(express.json());

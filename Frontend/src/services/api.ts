@@ -1,7 +1,7 @@
 import axios, { AxiosError, AxiosResponse } from 'axios';
 
 // 🔧 Environment variable kullan - Backend API (Production)
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://astonishing-abundance-production.up.railway.app/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://trucksbusbackend-production-0e23.up.railway.app/api';
 
 // API Response types
 export interface ApiResponse<T = any> {

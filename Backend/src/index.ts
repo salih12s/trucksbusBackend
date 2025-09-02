@@ -79,13 +79,12 @@ app.use(cors({
         "https://trucksbus.com.tr", 
         "https://www.trucksbus.com.tr",
         "https://trucksbusbackend-production-0e23.up.railway.app",
-        "https://astonishing-abundance-production.up.railway.app",
         "*" // Geçici olarak tüm origin'lere izin ver
       ]
     : [
         "https://truckbus.com.tr",
         "https://www.trucksbus.com.tr", 
-        "https://astonishing-abundance-production.up.railway.app",
+        "https://trucksbusbackend-production-0e23.up.railway.app",
         "*" // Production için de tüm origin'lere izin ver
       ], // Production origins
   credentials: true
