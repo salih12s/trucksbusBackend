@@ -11,8 +11,6 @@ import path from 'path';
 dotenv.config();
 import { createServer } from 'http';
 import { Server as SocketIOServer } from 'socket.io';
-import { setupSocketIO } from './middleware/socket';
-import { initSocket } from './utils/socket';
 import { SocketService } from './services/socketService';
 
 // Import routes
@@ -51,7 +49,12 @@ const io = new SocketIOServer(server, {
           "https://trucksbus.com.tr", 
           "https://www.trucksbus.com.tr"
         ]
-      : "*", // Development - all origins
+      : [
+          "http://localhost:3000",
+          "http://localhost:5173", 
+          "http://127.0.0.1:3000",
+          "http://127.0.0.1:5173"
+        ], // Local development origins
     methods: ["GET", "POST"],
     credentials: true
   }
@@ -78,15 +81,15 @@ app.use(cors({
         "https://www.trucksbus.com",
         "https://trucksbus.com.tr", 
         "https://www.trucksbus.com.tr",
-        "https://trucksbusbackend-production-0e23.up.railway.app",
-        "*" // Geçici olarak tüm origin'lere izin ver
+        "https://trucksbusbackend-production-0e23.up.railway.app"
       ]
     : [
-        "https://truckbus.com.tr",
-        "https://www.trucksbus.com.tr", 
-        "https://trucksbusbackend-production-0e23.up.railway.app",
-        "*" // Production için de tüm origin'lere izin ver
-      ], // Production origins
+        "http://localhost:3000",
+        "http://localhost:5173", 
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:5173",
+        "https://trucksbusbackend-production-0e23.up.railway.app"
+      ], // Local development origins
   credentials: true
 }));
 app.use(compression());
@@ -98,9 +101,11 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Static files serving - uploaded images için  
-const uploadsPath = process.env.NODE_ENV === 'production' 
-  ? path.join(__dirname, '..', 'public', 'uploads')
-  : path.resolve('C:/Users/salih/Desktop/TruckBus/Backend/public/uploads');
+const uploadsPath = process.env.UPLOADS_DIR ?? (
+  process.env.NODE_ENV === 'production' 
+    ? path.join(__dirname, '..', 'public', 'uploads')
+    : path.join(__dirname, '..', 'public', 'uploads')
+);
 console.log('🖼️ Static uploads path:', uploadsPath);
 app.use('/uploads', express.static(uploadsPath));
 
@@ -259,16 +264,7 @@ app.use('/api', feedbackRoutes);
 // Store Routes (for corporate users)
 app.use('/api/store', storeRoutes);
 
-// Error handling middleware
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  logger.error('Error:', err);
-  res.status(err.status || 500).json({
-    success: false,
-    message: err.message || 'Internal server error'
-  });
-});
-
-// 404 handler
+// 404 handler - en sonda
 app.use((req: express.Request, res: express.Response) => {
   res.status(404).json({
     success: false,
@@ -276,7 +272,7 @@ app.use((req: express.Request, res: express.Response) => {
   });
 });
 
-// Global error handler - ALWAYS returns JSON
+// Global error handler - en sonda
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
   const status = err.status || 500;
   const message = err.message || 'Internal Server Error';
@@ -363,10 +359,6 @@ async function startServer() {
       console.error('❌ Database connection failed, but server will continue:', dbError);
       logger.error('❌ Database connection failed, but server will continue:', dbError);
     }
-    
-    // Initialize room-based Socket.IO
-    initSocket(io);
-    console.log('✅ Socket.IO initialized');
     
     // Initialize SocketService for messaging - PASS EXISTING IO INSTANCE
     console.log('🔥 Creating SocketService...');

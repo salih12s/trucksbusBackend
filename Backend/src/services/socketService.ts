@@ -1,11 +1,9 @@
 import { Server as SocketIOServer } from 'socket.io';
 import { Server as HTTPServer } from 'http';
 import jwt from 'jsonwebtoken';
-import { PrismaClient } from '@prisma/client';
 import { ulid } from 'ulid';
 import { logger } from '../utils/logger';
-
-const prisma = new PrismaClient();
+import { prisma } from '../utils/database';
 
 export class SocketService {
   private io: SocketIOServer;
@@ -106,6 +104,8 @@ export class SocketService {
       conversation_id, 
       message: completeMessage 
     });
+    // 🔁 backward-compat
+    this.io.to(`conversation:${conversation_id}`).emit('new_message', completeMessage);
 
     // 6) unread counter güncelleme
     const receiverIds = [conv.least_user_id, conv.greatest_user_id].filter((id: string) => id !== senderId);
@@ -236,30 +236,7 @@ export class SocketService {
         }
       });
 
-      // 🔒 Legacy alias for join_conversation - güvenli
-      socket.on('join_conversation', async (conversationId: string, cb?: (r:any)=>void) => {
-        try {
-          if (!conversationId) {
-            cb?.({ ok: false, reason: 'no_conversation_id' });
-            return;
-          }
-          const ok = await this.isParticipant(userId, conversationId);
-          if (!ok) {
-            logger.warn(`🚫 Forbidden legacy join attempt by ${userId} to ${conversationId}`);
-            socket.emit('error:forbidden', { resource: 'conversation', id: conversationId });
-            cb?.({ ok: false, reason: 'forbidden' });
-            return;
-          }
-          socket.join(`conversation:${conversationId}`);
-          cb?.({ ok: true });
-          logger.info(`✅ User ${userId} joined conversation (legacy): ${conversationId}`);
-        } catch (error) {
-          logger.error('legacy join error:', error);
-          cb?.({ ok: false, reason: 'error' });
-        }
-      });
-
-      // 🔒 Güvenli conversation leave
+      // 🔒 Primary conversation leave
       socket.on('conversation:leave', async ({ conversation_id }: { conversation_id: string }) => {
         try {
           if (!conversation_id) return;
@@ -272,21 +249,8 @@ export class SocketService {
         }
       });
 
-      // 🔒 Legacy alias for leave_conversation - güvenli  
-      socket.on('leave_conversation', async (conversationId: string) => {
-        try {
-          if (!conversationId) return;
-          const ok = await this.isParticipant(userId, conversationId);
-          if (!ok) return; // sessizce ignore et
-          socket.leave(`conversation:${conversationId}`);
-          logger.info(`👋 User ${userId} left conversation (legacy): ${conversationId}`);
-        } catch (error) {
-          logger.error('legacy leave error:', error);
-        }
-      });
-
-      // Handle typing indicators
-      socket.on('typing_start', (data: { conversationId?: string; conversation_id?: string }) => {
+      // Handle typing indicators - ikili event desteği
+      const handleTypingStart = (data: { conversationId?: string; conversation_id?: string }) => {
         const convId = data.conversationId || data.conversation_id;
         if (!convId) return;
         
@@ -294,9 +258,9 @@ export class SocketService {
           userId: userId,
           typing: true
         });
-      });
+      };
 
-      socket.on('typing_stop', (data: { conversationId?: string; conversation_id?: string }) => {
+      const handleTypingStop = (data: { conversationId?: string; conversation_id?: string }) => {
         const convId = data.conversationId || data.conversation_id;
         if (!convId) return;
         
@@ -304,9 +268,14 @@ export class SocketService {
           userId: userId,
           typing: false
         });
-      });
+      };
 
-      // 🔒 Güvenli mesaj gönderme - ana handler
+      // İkili event dinleyicileri
+      // Typing events - primary only
+      socket.on('typing:start', handleTypingStart);
+      socket.on('typing:stop', handleTypingStop);
+
+      // 🔒 Primary message sending handler
       socket.on('message:send', async (payload: { conversation_id: string; body: string }, cb?: (ack: any) => void) => {
         console.log(`🔥 message:send received from user ${userId}:`, payload);
         try {
@@ -316,21 +285,6 @@ export class SocketService {
         } catch (err: any) {
           console.error(`❌ message:send error for user ${userId}:`, err);
           logger.error('message:send error:', err);
-          cb?.({ ok: false, error: err?.message || 'Failed to send' });
-        }
-      });
-
-      // 🔒 Legacy alias - güvenli
-      socket.on('send_message', async (payload: { conversationId: string; content?: string; body?: string }, cb?: (ack: any) => void) => {
-        console.log(`🔥 send_message received from user ${userId}:`, payload);
-        try {
-          const messageBody = payload.content || payload.body || '';
-          const res = await this.createAndBroadcastMessage(payload.conversationId, userId, messageBody);
-          console.log(`✅ send_message success, sending ack:`, { ok: true, message: res });
-          cb?.({ ok: true, message: res });
-        } catch (err: any) {
-          console.error(`❌ send_message error for user ${userId}:`, err);
-          logger.error('send_message error:', err);
           cb?.({ ok: false, error: err?.message || 'Failed to send' });
         }
       });
@@ -354,6 +308,8 @@ export class SocketService {
       conversation_id: conversationId,
       message
     });
+    // 🔁 backward-compat
+    this.io.to(`conversation:${conversationId}`).emit('new_message', message);
   }
 
   // Send badge update

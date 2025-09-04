@@ -1,9 +1,7 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
 import { ulid } from 'ulid';
 import { SocketService } from '../services/socketService';
-
-const prisma = new PrismaClient();
+import { prisma } from '../utils/database';
 
 interface AuthenticatedRequest extends Request {
   user?: {
@@ -25,7 +23,7 @@ export class ConversationsController {
         return res.status(401).json({ success: false, message: 'Unauthorized' });
       }
 
-      // Get conversations where user is a participant and not hidden by this user
+      // ⚠️ Yalnızca mesajı olan konuşmalar + bu kullanıcı için gizli olmayanlar
       // @ts-ignore - Prisma model type issue
       const rawConversations = await prisma.conversations.findMany({
         where: {
@@ -42,14 +40,16 @@ export class ConversationsController {
                 user_id: userId
               }
             }
-          }
+          },
+          // <<< boş konuşmaları listeleme
+          messages: { some: {} }
         },
-        take: 20,
+        take: 50,
         orderBy: { created_at: 'desc' }
       });
 
       // Process conversations to add participant info
-      const conversations = [];
+      const conversations: any[] = [];
       
       for (const conv of rawConversations) {
         // Determine the other participant ID
@@ -430,7 +430,6 @@ export class ConversationsController {
         });
       }
 
-      // Get listing details to find the owner (receiver)
       // @ts-ignore - Prisma model type issue
       const listing = await prisma.listings.findUnique({
         where: { id: listingId }
@@ -453,47 +452,104 @@ export class ConversationsController {
         });
       }
 
-      // İki kullanıcı arasındaki mevcut konuşmayı kontrol et
       const leastUserId = userId < receiverId ? userId : receiverId;
       const greatestUserId = userId < receiverId ? receiverId : userId;
 
-      // @ts-ignore - Prisma model type issue
+      // @ts-ignore — aynı iki kişi arasında tek konuşma
       let conversation = await prisma.conversations.findFirst({
-        where: {
-          // @ts-ignore - Prisma model type issue
-          least_user_id: leastUserId,
-          // @ts-ignore - Prisma model type issue
-          greatest_user_id: greatestUserId
+        where: { 
+          least_user_id: leastUserId, 
+          greatest_user_id: greatestUserId 
         }
       });
 
-      // Konuşma yoksa oluştur
       if (!conversation) {
-        // @ts-ignore - Prisma model type issue
+        // @ts-ignore
         conversation = await prisma.conversations.create({
           data: {
             id: ulid(),
-            // @ts-ignore - Prisma model type issue
             least_user_id: leastUserId,
-            // @ts-ignore - Prisma model type issue
             greatest_user_id: greatestUserId,
-            // @ts-ignore - Prisma model type issue
-            listing_id: listingId
+            listing_id: listingId,
+          }
+        });
+
+        // ✅ yeni konuşmayı receiver için GİZLE (ilk mesaja kadar görünmesin)
+        // @ts-ignore
+        await prisma.conversation_hidden.create({
+          data: {
+            id: ulid(),
+            conversation_id: conversation.id,
+            user_id: receiverId,
+            hidden_at: new Date(),
           }
         });
       }
 
-      return res.json({
-        success: true,
-        conversation: conversation
-      });
-
+      return res.json({ success: true, conversation });
     } catch (error) {
       console.error('Error creating conversation from listing:', error);
-      return res.status(500).json({
-        success: false,
-        message: 'Server error'
+      return res.status(500).json({ success: false, message: 'Server error' });
+    }
+  }
+
+  static async getConversationById(req: AuthenticatedRequest, res: Response) {
+    try {
+      const userId = req.user?.id;
+      const id = req.params.id;
+      if (!userId) return res.status(401).json({ success: false, message: 'Unauthorized' });
+
+      // @ts-ignore - Prisma model type issue
+      const conv = await prisma.conversations.findUnique({ where: { id } });
+      if (!conv) return res.status(404).json({ success: false, message: 'Conversation not found' });
+
+      // @ts-ignore - Prisma model type issue
+      const isParticipant = [conv.least_user_id, conv.greatest_user_id].includes(userId);
+      if (!isParticipant) return res.status(403).json({ success: false, message: 'Not a participant' });
+
+      // other participant
+      // @ts-ignore - Prisma model type issue
+      const otherId = conv.least_user_id === userId ? conv.greatest_user_id : conv.least_user_id;
+      const other = await prisma.users.findUnique({
+        where: { id: otherId },
+        select: { id: true, first_name: true, last_name: true, username: true },
       });
+
+      const listing = conv.listing_id
+        ? await prisma.listings.findUnique({
+            where: { id: conv.listing_id as any },
+            select: { id: true, title: true, images: true },
+          })
+        : null;
+
+      const lastMessage = await prisma.messages.findFirst({
+        where: { conversation_id: id },
+        orderBy: { created_at: 'desc' },
+        select: { body: true, created_at: true, sender_id: true },
+      });
+
+      return res.json({
+        success: true,
+        conversation: {
+          id: conv.id,
+          least_user_id: conv.least_user_id,
+          greatest_user_id: conv.greatest_user_id,
+          listing_id: conv.listing_id,
+          created_at: conv.created_at,
+          otherParticipant: other,
+          listing,
+          lastMessage: lastMessage
+            ? {
+                content: lastMessage.body,
+                created_at: lastMessage.created_at,
+                sender_id: lastMessage.sender_id,
+              }
+            : null,
+        },
+      });
+    } catch (error) {
+      console.error('Error getting conversation by id:', error);
+      return res.status(500).json({ success: false, message: 'Server error' });
     }
   }
 
@@ -706,5 +762,3 @@ export class ConversationsController {
     }
   }
 }
-
-export default ConversationsController;
