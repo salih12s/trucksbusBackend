@@ -10,6 +10,8 @@ import { AuthRequest } from '../types';
 
 export const register = async (req: Request, res: Response): Promise<void> => {
   try {
+    console.log('🔥 FULL REQUEST BODY:', JSON.stringify(req.body, null, 2));
+    
     const { 
       email, 
       password, 
@@ -32,10 +34,12 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       is_corporate === '1'
     );
 
-    console.log('🏢 CORPORATE REGISTER:', {
+    console.log('🏢 CORPORATE REGISTER DEBUG:', {
       email,
-      is_corporate: isCorporate,
+      raw_is_corporate: req.body.is_corporate,
+      processed_is_corporate: isCorporate,
       company_name,
+      tax_number,
       requestType: typeof req.body?.is_corporate
     });
 
@@ -428,7 +432,6 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
         is_email_verified: true,
         is_corporate: true,
         company_name: true,
-        tax_number: true,
         created_at: true
       }
     });

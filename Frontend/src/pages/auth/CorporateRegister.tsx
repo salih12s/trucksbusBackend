@@ -134,8 +134,8 @@ const CorporateRegister: React.FC = () => {
       // 🔧 KURUMSAL KAYIT VERISI
       const corporateData = {
         // Kişisel bilgiler
-        firstName: formData.firstName.trim(),
-        lastName: formData.lastName.trim(), 
+        first_name: formData.firstName.trim(),
+        last_name: formData.lastName.trim(), 
         email: formData.email.trim().toLowerCase(),
         phone: normalizePhoneTR(formData.phone),
         password: formData.password,
@@ -152,6 +152,7 @@ const CorporateRegister: React.FC = () => {
         terms_accepted: formData.termsAccepted
       };
 
+      console.log('🔥 FRONTEND CORPORATE DATA FULL:', JSON.stringify(corporateData, null, 2));
       console.log('🏢 Corporate Register Data:', corporateData);
       
       const user = await register(corporateData);

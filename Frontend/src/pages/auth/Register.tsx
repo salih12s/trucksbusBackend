@@ -67,8 +67,8 @@ const Register: React.FC = () => {
       const registerData: any = {
         email: formData.email,
         password: formData.password,
-        firstName: formData.firstName,
-        lastName: formData.lastName,
+        first_name: formData.firstName,
+        last_name: formData.lastName,
         phone: normalizePhoneTR(formData.phone),
         city: formData.city || 'Belirtilmemiş',
         district: formData.district || 'Belirtilmemiş',
