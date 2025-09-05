@@ -16,9 +16,7 @@ const Register: React.FC = () => {
     password: '',
     phone: '',
     city: '',
-    district: '',
-    isCorporate: false,
-    companyName: '',
+    district: ''
   });
   const [showPassword, setShowPassword] = useState(false);
   const [kvkkAccepted, setKvkkAccepted] = useState(false);
@@ -64,37 +62,22 @@ const Register: React.FC = () => {
       return;
     }
     
-    // Kurumsal hesap validasyonu
-    if (formData.isCorporate && !formData.companyName.trim()) {
-      alert('Kurumsal hesap için şirket adı zorunludur.');
-      return;
-    }
-    
     try {
-      // 🔧 A3 FIX: is_corporate boolean'a kesin dönüştür
-      const isCorporate = Boolean(formData.isCorporate);
-      
+      // ✅ BİREYSEL HESAP KAYIT
       const registerData: any = {
         email: formData.email,
         password: formData.password,
-        firstName: formData.firstName,  // AuthService'de first_name'e çevrilecek
-        lastName: formData.lastName,    // AuthService'de last_name'e çevrilecek
+        firstName: formData.firstName,
+        lastName: formData.lastName,
         phone: normalizePhoneTR(formData.phone),
         city: formData.city || 'Belirtilmemiş',
         district: formData.district || 'Belirtilmemiş',
         kvkk_accepted: kvkkAccepted,
-        is_corporate: isCorporate,
-        company_name: isCorporate ? formData.companyName.trim() : undefined,
+        is_corporate: false  // ✅ BİREYSEL HESAP
       };
 
-      // 🔍 Debug: Register data'sını frontend'de logla
-      console.log('🚀 Frontend Register Data:', {
-        isCorporate: formData.isCorporate,
-        is_corporate: registerData.is_corporate,
-        company_name: registerData.company_name,
-        companyName: formData.companyName,
-        booleanType: typeof registerData.is_corporate
-      });
+      // 🔍 Debug: Bireysel kayıt data
+      console.log('�‍♂️ Individual Register Data:', registerData);
 
       const user = await register(registerData);
       if (user.role === 'ADMIN') navigate('/admin');
@@ -264,57 +247,6 @@ const Register: React.FC = () => {
               </div>
             </div>
 
-            {/* Kurumsal Hesap Seçimi */}
-            <div className="space-y-3 pt-2">
-              <div className="border border-slate-200 rounded-xl p-4">
-                <div className="flex items-center space-x-3 mb-3">
-                  <input
-                    type="radio"
-                    id="individual-account"
-                    name="accountType"
-                    checked={!formData.isCorporate}
-                    onChange={() => setFormData({ ...formData, isCorporate: false })}
-                    className="w-4 h-4 text-sky-600 bg-gray-100 border-gray-300 focus:ring-sky-500 focus:ring-2"
-                  />
-                  <label htmlFor="individual-account" className="text-sm font-medium text-slate-700 cursor-pointer">
-                    Bireysel Hesap
-                  </label>
-                </div>
-                
-                <div className="flex items-center space-x-3">
-                  <input
-                    type="radio"
-                    id="corporate-account"
-                    name="accountType"
-                    checked={formData.isCorporate}
-                    onChange={() => setFormData({ ...formData, isCorporate: true })}
-                    className="w-4 h-4 text-sky-600 bg-gray-100 border-gray-300 focus:ring-sky-500 focus:ring-2"
-                  />
-                  <label htmlFor="corporate-account" className="text-sm font-medium text-slate-700 cursor-pointer">
-                    <span className="text-sky-600">Kurumsal hesap aç</span>
-                    <span className="block text-xs text-slate-500 mt-1">İşletme sahibi misin?</span>
-                  </label>
-                </div>
-              </div>
-
-              {/* Kurumsal Hesap Alanları */}
-              {formData.isCorporate && (
-                <div className="space-y-3 border border-sky-200 rounded-xl p-4 bg-sky-50/50">
-                  <div className="space-y-2">
-                    <label className="block text-sm text-slate-600 font-medium">Şirket Adı</label>
-                    <input
-                      className="w-full px-4 py-3 border border-slate-200 rounded-xl bg-white focus:outline-none focus:ring-3 focus:ring-sky-500/15 focus:border-sky-500 transition-all duration-150 text-base"
-                      name="companyName"
-                      placeholder="Şirket adınızı girin"
-                      value={formData.companyName}
-                      onChange={handleChange}
-                      required={formData.isCorporate}
-                    />
-                  </div>
-                </div>
-              )}
-            </div>
-
             {/* KVKK Onayı */}
             <div className="flex items-start space-x-3 pt-2">
               <input
@@ -355,6 +287,16 @@ const Register: React.FC = () => {
                 className="text-sky-500 hover:text-sky-600 font-bold hover:underline transition-colors"
               >
                 Giriş yap
+              </Link>
+            </p>
+            
+            <p className="text-center text-sm text-slate-600 mt-3">
+              Kurumsal hesap mı istiyorsunuz?{' '}
+              <Link 
+                to="/auth/corporate-register" 
+                className="text-orange-500 hover:text-orange-600 font-bold hover:underline transition-colors"
+              >
+                🏢 Kurumsal Kayıt
               </Link>
             </p>
           </form>

@@ -380,6 +380,7 @@ model users {
   // Kurumsal hesap alanları
   is_corporate                                Boolean                        @default(false)
   company_name                                String?
+  tax_number                                  String?
   // İlişkiler
   complaints_complaints_target_user_idTousers complaints[]                   @relation("complaints_target_user_idTousers")
   complaints_complaints_user_idTousers        complaints[]                   @relation("complaints_user_idTousers")

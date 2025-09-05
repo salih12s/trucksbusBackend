@@ -10,48 +10,34 @@ import { AuthRequest } from '../types';
 
 export const register = async (req: Request, res: Response): Promise<void> => {
   try {
-    let { 
+    const { 
       email, 
       password, 
       first_name, 
       last_name, 
       phone, 
-      city, 
-      district, 
-      kvkk_accepted,
+      city = 'Belirtilmemiş', 
+      district = 'Belirtilmemiş', 
+      kvkk_accepted = false,
       is_corporate = false,
-      company_name
+      company_name,
+      tax_number
     } = req.body;
 
-    // 🔧 B1 FIX: Hard boolean cast - prod'da string olarak gelebilir
-    console.log('📝 Register body snapshot:', {
-      is_corporate: req.body?.is_corporate,
-      type: typeof req.body?.is_corporate,
-      company_name: req.body?.company_name,
-    });
+    // 🏢 KURUMSAL SİSTEM: Basit boolean dönüşümü
+    const isCorporate = Boolean(
+      is_corporate === true || 
+      is_corporate === 'true' || 
+      is_corporate === 1 || 
+      is_corporate === '1'
+    );
 
-    is_corporate =
-      is_corporate === true ||
-      is_corporate === 'true' ||
-      is_corporate === 1 ||
-      is_corporate === '1' ||
-      is_corporate === 'on';
-
-    // 🔍 Debug: Register data'sını logla
-    console.log('📝 Register attempt data:', {
+    console.log('🏢 CORPORATE REGISTER:', {
       email,
-      first_name,
-      last_name,
-      phone,
-      city,
-      district,
-      is_corporate,
+      is_corporate: isCorporate,
       company_name,
-      kvkk_accepted,
-      convertedType: typeof is_corporate
+      requestType: typeof req.body?.is_corporate
     });
-
-    console.log('📝 Raw request body:', req.body);
 
     // Validate required fields
     if (!email || !password || !first_name || !last_name || !phone) {
@@ -71,15 +57,21 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    // Kurumsal hesap için ek validasyonlar
-    if (is_corporate) {
-      if (!company_name) {
-        res.status(400).json({ 
-          success: false, 
-          message: 'Kurumsal hesap için şirket adı zorunludur.' 
-        });
-        return;
-      }
+    // 🏢 KURUMSAL HESAP VALİDASYONU
+    if (isCorporate && !company_name?.trim()) {
+      res.status(400).json({ 
+        success: false, 
+        message: 'Kurumsal hesap için şirket adı zorunludur.' 
+      });
+      return;
+    }
+
+    if (isCorporate && !tax_number?.trim()) {
+      res.status(400).json({ 
+        success: false, 
+        message: 'Kurumsal hesap için vergi numarası zorunludur.' 
+      });
+      return;
     }
 
     // Validate and normalize phone
@@ -109,7 +101,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-    // 🔧 B1 FIX: Create user data with proper role and corporate fields
+    // 🏢 USER DATA: Kurumsal sistem ile
     const userData: any = {
       id: ulid(),
       email,
@@ -119,32 +111,27 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       phone: normalizedPhone,
       city,
       district,
-      role: is_corporate ? 'CORPORATE' : 'USER',
+      role: isCorporate ? 'CORPORATE' : 'USER',
       is_active: true,
       is_email_verified: false,
-      is_corporate,
+      is_corporate: isCorporate,
+      company_name: isCorporate ? company_name?.trim() : null,
+      tax_number: isCorporate ? tax_number?.trim() : null,
       updated_at: new Date()
     };
 
-    // Kurumsal hesap bilgilerini ekle
-    if (is_corporate && company_name) {
-      userData.company_name = company_name;
-    }
-
-    // 🔍 Debug: Log user data before creation
-    console.log('🔍 User data before creation:', {
-      email: userData.email,
+    console.log('🏢 CREATING USER:', {
+      email,
+      role: userData.role,
       is_corporate: userData.is_corporate,
-      company_name: userData.company_name,
-      role: userData.role
+      company_name: userData.company_name
     });
 
     const user = await prisma.users.create({
       data: userData
     });
 
-    // 🔍 Debug: Log what was actually created
-    console.log('🔍 Created user object:', {
+    console.log('🏢 USER CREATED:', {
       id: user.id,
       email: user.email,
       is_corporate: user.is_corporate,
@@ -441,6 +428,7 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
         is_email_verified: true,
         is_corporate: true,
         company_name: true,
+        tax_number: true,
         created_at: true
       }
     });

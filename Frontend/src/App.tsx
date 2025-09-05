@@ -88,6 +88,7 @@ import Profile from './pages/user/Profile';
 import MyListings from './pages/user/MyListings';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
+import CorporateRegister from './pages/auth/CorporateRegister';
 import ForgotPassword from './pages/auth/ForgotPassword';
 import ResetPassword from './pages/auth/ResetPassword';
 import AboutPage from './pages/static/AboutPage';
@@ -118,6 +119,7 @@ const App: React.FC = () => {
                 {/* 🔐 Auth rotaları - Login'den GuestRoute'u kaldıralım */}
                 <Route path="/auth/login" element={<Login />} />
                 <Route path="/auth/register" element={<Register />} />
+                <Route path="/auth/corporate-register" element={<CorporateRegister />} />
                 <Route path="/auth/forgot-password" element={<ForgotPassword />} />
                 <Route path="/auth/reset-password" element={<ResetPassword />} />
 
