@@ -15,6 +15,7 @@ import ReportModal from '../../components/ReportModal';
 import { useAuth } from '../../context/AuthContext';
 import { useNotification } from '../../context/NotificationContext';
 import { api } from '../../services/api';
+import { messageService } from '../../services/messageService';
 import { useConfirmDialog } from '../../hooks/useConfirmDialog';
 
 interface Listing {
@@ -406,7 +407,12 @@ const AllListingsPage: React.FC = () => {
     
     // Kendi ilanına mesaj göndermeyi engelle
     const listing = listings.find(l => l && l.id === listingId);
-    if (listing && listing.user_id === user.id) {
+    if (!listing) {
+      console.error('❌ Listing not found:', listingId);
+      return;
+    }
+    
+    if (listing.user_id === user.id) {
       await confirm({
         title: 'Uyarı',
         description: 'Kendi ilanınıza mesaj gönderemezsiniz!',
@@ -417,7 +423,29 @@ const AllListingsPage: React.FC = () => {
       return;
     }
     
-    navigate(`/real-time-messages?listing=${listingId}`);
+    try {
+      console.log('🔥 Starting conversation for listing:', listingId);
+      
+      // Backend'e conversation başlatma isteği gönder
+      const response = await messageService.startConversation({
+        listingId: listingId,
+        otherUserId: listing.user_id,
+        initialMessage: `${listing.title} ilanınız hakkında bilgi almak istiyorum.`
+      });
+      
+      if (response.success && response.conversation) {
+        console.log('✅ Conversation started:', response.conversation);
+        // Conversation ID ile mesajlaşma sayfasına git
+        navigate(`/real-time-messages?conversation=${response.conversation.id}`);
+      } else {
+        console.error('❌ Failed to start conversation:', response);
+        navigate(`/real-time-messages?listing=${listingId}`);
+      }
+    } catch (error) {
+      console.error('❌ Error starting conversation:', error);
+      // Fallback: Listing ID ile git
+      navigate(`/real-time-messages?listing=${listingId}`);
+    }
   };
 
   const handleReport = (id: string) => {

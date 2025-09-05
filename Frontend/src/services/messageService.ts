@@ -160,9 +160,9 @@ export const messageService = {
     message?: Message;
   }> {
     const response = await api.post('/conversations', {
-      listing_id: data.listingId,
-      participant_id: data.otherUserId,
-      initial_message: data.initialMessage
+      listingId: data.listingId,
+      receiverId: data.otherUserId,
+      initialMessage: data.initialMessage
     });
     
     // Normalize response

@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import {  authService } from "../../services/authService"; // ✨ DOĞRU API INSTANCE
 import {
   AppBar,
   Toolbar,
@@ -147,11 +146,23 @@ const UserHeader: React.FC = () => {
     navigate("/");
   };
 
+  // 🔧 FİX: Çifte garanti ile corporate kontrolü
+  const isCorporateUser = user?.is_corporate === true || user?.role === 'CORPORATE';
+  
+  console.log("🏢 User Corporate Debug:", {
+    user_id: user?.id,
+    is_corporate: user?.is_corporate,
+    company_name: user?.company_name,
+    role: user?.role,
+    isCorporateUser: isCorporateUser
+  });
+
+  // Mobile menü için menu items
   const menuItems = [
     { label: "Ana Sayfa", path: "/" },
     { label: "Profil", path: "/profile" },
     { label: "İlanlarım", path: "/my-listings" },
-    ...(user?.is_corporate ? [{ label: "Mağazam", path: "/my-store" }] : []),
+    ...(isCorporateUser ? [{ label: "Mağazam", path: "/my-store" }] : []),
     { label: "Favorilerim", path: "/favorites" },
     { label: "Doping", path: "/doping" },
     { label: "Kategoriler", path: "/categories" },
@@ -190,31 +201,49 @@ const UserHeader: React.FC = () => {
               textDecoration: "none",
               zIndex: 2,
               flexShrink: 0,
+              gap: { xs: 1, sm: 1.5 },
               "&:hover": {
                 transform: "scale(1.02)",
               },
               transition: "transform 0.2s ease",
             }}
           >
+            {/* Logo - Absolute positioned and larger */}
+            <Box
+              component="img"
+              src="/TruckBus-v2.png?v=20250905"
+              alt="TrucksBus Logo"
+              sx={{
+                position: "absolute",
+                left: 0,
+                top: "60%",
+                transform: "translateY(-50%)",
+                height: { xs: 48, sm: 56, md: 144 },
+                width: 120,
+                filter: "brightness(0) invert(1) drop-shadow(0 2px 4px rgba(0,0,0,0.3))", // Makes logo white
+                zIndex: 1,
+              }}
+            />
+            
+            {/* Slogan - Positioned next to logo */}
             <Typography
               variant="h6"
               sx={{
-                color: "#D34237",
+                color: "white",
                 fontWeight: 700,
-                fontSize: { xs: "0.7rem", sm: "0.9rem", md: "1.1rem", lg: "1.25rem" },
+                fontSize: { xs: "0.8rem", sm: "1rem", md: "1.2rem", lg: "1.4rem" },
                 textShadow: "0 2px 4px rgba(0,0,0,0.3)",
-                whiteSpace: { xs: "normal", sm: "nowrap" },
+                whiteSpace: "nowrap",
                 letterSpacing: "0.5px",
-                lineHeight: { xs: 1.2, sm: 1.4 },
-                textAlign: { xs: "center", sm: "left" },
+                lineHeight: 1.2,
+                ml: { xs: 6, sm: 7, md: 15 }, // Margin left to make space for absolute logo
               }}
             >
-              <Box component="span" sx={{ display: { xs: "block", sm: "inline" } }}>
-                Alın Satın Trucksbus.com'la 
+              Alın Satın{" "}
+              <Box component="span" sx={{ color: "#E14D43" }}>
+                Trucksbus.com
               </Box>
-              <Box component="span" sx={{ display: { xs: "block", sm: "inline" } }}>
-                Mutlu Kalın
-              </Box>
+              {" "}ile Mutlu Kalın
             </Typography>
           </Box>
 
@@ -507,7 +536,7 @@ const UserHeader: React.FC = () => {
         <MenuItem onClick={() => navigate("/my-listings")}>
           <StorefrontRounded sx={{ mr: 1.5 }} /> İlanlarım
         </MenuItem>
-        {user?.is_corporate && (
+        {isCorporateUser && (
           <MenuItem onClick={() => navigate("/my-store")}>
             <BusinessIcon sx={{ mr: 1.5 }} /> Mağazam
           </MenuItem>

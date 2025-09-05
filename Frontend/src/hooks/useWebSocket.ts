@@ -29,7 +29,7 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
     const token = localStorage.getItem('token') || sessionStorage.getItem('token');
     if (!token) return;
 
-    const serverUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:3002';
+    const serverUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:3005';
     
     const socketInstance = io(serverUrl, {
       auth: {

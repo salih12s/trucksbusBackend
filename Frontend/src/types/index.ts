@@ -188,10 +188,12 @@ export interface RegisterRequest {
   kvkk_accepted: boolean;
   email: string;
   password: string;
-  username: string;
+  username?: string;
   firstName: string;
   lastName: string;
   phone?: string;
+  city?: string;
+  district?: string;
   is_corporate?: boolean;
   company_name?: string;
 }

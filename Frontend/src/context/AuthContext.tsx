@@ -27,48 +27,68 @@ export { AuthContext };
 // ✨ Helper: Storage operations
 const StorageHelper = {
   getToken: () => {
-    return localStorage.getItem('token') || sessionStorage.getItem('token');
+    // 🔧 FİX: Session storage öncelikli kontrol
+    const sessionToken = sessionStorage.getItem('token');
+    if (sessionToken) return sessionToken;
+    
+    const localToken = localStorage.getItem('token');
+    return localToken;
   },
+  
   getUser: () => {
-    const userStr = localStorage.getItem('user') || sessionStorage.getItem('user');
-    if (!userStr) return null;
-    try {
-      return JSON.parse(userStr) as User;
-    } catch (e) {
-      localStorage.removeItem('user');
-      sessionStorage.removeItem('user');
-      return null;
+    // 🔧 FİX: Session storage öncelikli kontrol
+    const sessionUserStr = sessionStorage.getItem('user');
+    if (sessionUserStr) {
+      try {
+        return JSON.parse(sessionUserStr);
+      } catch (e) {
+        console.error('Session user parse error:', e);
+      }
     }
+    
+    const localUserStr = localStorage.getItem('user');
+    if (localUserStr) {
+      try {
+        return JSON.parse(localUserStr);
+      } catch (e) {
+        console.error('Local user parse error:', e);
+      }
+    }
+    
+    return null;
   },
-  isRememberMe: () => localStorage.getItem('rememberMe') === 'true',
+  
   setAuth: (token: string, user: User, rememberMe: boolean, refreshToken?: string) => {
+    console.log('💾 Storing auth data:', { 
+      token: token ? `${token.substring(0, 20)}...` : null, 
+      user_id: user?.id, 
+      is_corporate: user?.is_corporate, 
+      role: user?.role,
+      rememberMe 
+    });
+    
     if (rememberMe) {
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(user));
-      localStorage.setItem('rememberMe', 'true');
       if (refreshToken) localStorage.setItem('refreshToken', refreshToken);
-      // Session storage'ı temizle
-      sessionStorage.removeItem('token');
-      sessionStorage.removeItem('user');
     } else {
       sessionStorage.setItem('token', token);
       sessionStorage.setItem('user', JSON.stringify(user));
       if (refreshToken) sessionStorage.setItem('refreshToken', refreshToken);
-      // Local storage'ı temizle
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      localStorage.removeItem('rememberMe');
-      localStorage.removeItem('refreshToken');
     }
   },
+  
   clearAuth: () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    localStorage.removeItem('rememberMe');
     localStorage.removeItem('refreshToken');
     sessionStorage.removeItem('token');
     sessionStorage.removeItem('user');
     sessionStorage.removeItem('refreshToken');
+  },
+  
+  isRememberMe: () => {
+    return Boolean(localStorage.getItem('token'));
   }
 };
 
@@ -223,6 +243,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const response = await authService.register(userData);
       console.log('✅ Registration successful');
 
+      // 🔧 EKLE: Çifte garanti için axios header'ı set et
+      api.defaults.headers.common.Authorization = `Bearer ${response.token}`;
+
       StorageHelper.setAuth(response.token, response.user, false, response.refreshToken); // Register'da default olarak remember me false
       
       updateState({
@@ -233,6 +256,24 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         error: null,
         isInitialized: true
       });
+
+      // 🔧 FİX: İsteğe bağlı profil yenileme - corporate durumu için ekstra garanti
+      setTimeout(async () => {
+        try {
+          console.log('🔄 Optional profile refresh starting...');
+          const profileResponse = await authService.verifyToken(response.token);
+          if (profileResponse && profileResponse.is_corporate !== undefined) {
+            console.log('🔄 Profile refreshed with corporate status:', profileResponse.is_corporate);
+            const newUserData = { ...response.user, ...profileResponse };
+            updateState({
+              user: newUserData
+            });
+            StorageHelper.setAuth(response.token, newUserData, false, response.refreshToken);
+          }
+        } catch (err) {
+          console.log('🔄 Optional profile refresh failed (non-critical):', err);
+        }
+      }, 500);
 
       return response.user;
     } catch (error: any) {

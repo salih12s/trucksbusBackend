@@ -119,7 +119,17 @@ const RealTimeMessagesPage: React.FC = () => {
 
   // Refs
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const prevMessagesLength = useRef(0);
+
+  // Auto-scroll helper
+  const shouldAutoScroll = () => {
+    const el = listRef.current;
+    if (!el) return true;
+    const distance = el.scrollHeight - el.clientHeight - el.scrollTop;
+    return distance < 80; // 80px'den azsa "alta yakın" say
+  };
 
   // URL parameters
   const listingParam = searchParams.get('listing');
@@ -155,11 +165,11 @@ const RealTimeMessagesPage: React.FC = () => {
     }
   }, [joinConversation]); // 🔧 showHiddenConversations dependency kaldırıldı
 
-  // 🚪 Konuşmalar her yüklendiğinde/değiştiğinde odalara katıl
+  // Konuşmalar yüklendiğinde sağlayıcı üstünden katıl (tek, doğru event seti)
   useEffect(() => {
-    conversations.forEach(c => joinConversation(c.id));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [conversations, isConnected]);
+    if (!isConnected) return;
+    conversations.filter(c => c?.id).forEach(c => joinConversation(c.id));
+  }, [conversations, isConnected, joinConversation]);
 
   // WebSocket event handlers
   const handleNewMessage = useCallback(
@@ -320,9 +330,16 @@ const RealTimeMessagesPage: React.FC = () => {
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
+  
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    const grew = messages.length > prevMessagesLength.current;
+    if (grew && shouldAutoScroll()) {
+      const t = setTimeout(scrollToBottom, 60);
+      prevMessagesLength.current = messages.length;
+      return () => clearTimeout(t);
+    }
+    prevMessagesLength.current = messages.length;
+  }, [messages.length]);
 
   // Görünürlükle okundu işareti
   useEffect(() => {
@@ -832,6 +849,7 @@ const RealTimeMessagesPage: React.FC = () => {
 
                 {/* Messages */}
                 <Box
+                  ref={listRef}
                   sx={{
                     flex: 1,
                     overflow: 'auto',
@@ -1006,7 +1024,7 @@ const RealTimeMessagesPage: React.FC = () => {
                   <Typography variant="h6" gutterBottom>
                     Bir konuşma seçin
                   </Typography>
-                  <Typography>Mesajlaşmaya başlamak için sol taraftan bir konuşma seçin</Typography>
+                  <Typography>Mesajlaşmaya başlamak için sol taraftan uşma seçin</Typography>
                 </Box>
               </Box>
             )}

@@ -10,7 +10,7 @@ import { AuthRequest } from '../types';
 
 export const register = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { 
+    let { 
       email, 
       password, 
       first_name, 
@@ -23,6 +23,20 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       company_name
     } = req.body;
 
+    // 🔧 B1 FIX: Hard boolean cast - prod'da string olarak gelebilir
+    console.log('📝 Register body snapshot:', {
+      is_corporate: req.body?.is_corporate,
+      type: typeof req.body?.is_corporate,
+      company_name: req.body?.company_name,
+    });
+
+    is_corporate =
+      is_corporate === true ||
+      is_corporate === 'true' ||
+      is_corporate === 1 ||
+      is_corporate === '1' ||
+      is_corporate === 'on';
+
     // 🔍 Debug: Register data'sını logla
     console.log('📝 Register attempt data:', {
       email,
@@ -33,7 +47,8 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       district,
       is_corporate,
       company_name,
-      kvkk_accepted
+      kvkk_accepted,
+      convertedType: typeof is_corporate
     });
 
     console.log('📝 Raw request body:', req.body);
@@ -94,7 +109,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-    // Create user
+    // 🔧 B1 FIX: Create user data with proper role and corporate fields
     const userData: any = {
       id: ulid(),
       email,
@@ -112,7 +127,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     };
 
     // Kurumsal hesap bilgilerini ekle
-    if (is_corporate) {
+    if (is_corporate && company_name) {
       userData.company_name = company_name;
     }
 
@@ -438,15 +453,26 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
+    const responseUser = {
+      ...user,
+      is_active: Boolean(user.is_active),
+      is_email_verified: Boolean(user.is_email_verified),
+      is_corporate: Boolean(user.is_corporate)        // 🔧 FİX: Explicit boolean conversion
+    };
+    
+    // 🐛 DEBUG: Log user data before sending response
+    console.log('📄 /auth/me response user data:', {
+      id: responseUser.id,
+      email: responseUser.email,
+      is_corporate: responseUser.is_corporate,
+      company_name: responseUser.company_name,
+      role: responseUser.role
+    });
+
     res.status(200).json({
       success: true,
       data: { 
-        user: {
-          ...user,
-          is_active: Boolean(user.is_active),
-          is_email_verified: Boolean(user.is_email_verified),
-          is_corporate: Boolean(user.is_corporate)        // 🔧 FİX: Explicit boolean conversion
-        }
+        user: responseUser
       }
     });
   } catch (error) {

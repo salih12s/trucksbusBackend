@@ -175,7 +175,7 @@ const KVKKPage: React.FC = () => {
             variant="body2"
             sx={{ color: 'text.secondary', mt: 3, p: 2, bgcolor: '#f7f7f7', borderRadius: 1, fontStyle: 'italic' }}
           >
-            Not: Bu metin Platform’un gerçek işleyişi esas alınarak hazırlanmıştır. Özel durumlar için
+            Not: Bu metin Platform’un gerçek işleyişi esas alınarak hazırlnmıştır. Özel durumlar için
             hukuk danışmanınızdan teyit almanızı öneririz. <br />
             Son güncellenme: {new Date().toLocaleDateString('tr-TR')}
           </Typography>

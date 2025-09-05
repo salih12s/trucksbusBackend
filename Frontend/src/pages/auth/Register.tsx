@@ -15,6 +15,8 @@ const Register: React.FC = () => {
     lastName: '',
     password: '',
     phone: '',
+    city: '',
+    district: '',
     isCorporate: false,
     companyName: '',
   });
@@ -69,19 +71,30 @@ const Register: React.FC = () => {
     }
     
     try {
+      // 🔧 A3 FIX: is_corporate boolean'a kesin dönüştür
+      const isCorporate = Boolean(formData.isCorporate);
+      
       const registerData: any = {
         email: formData.email,
         password: formData.password,
-        firstName: formData.firstName,
-        lastName: formData.lastName,
+        firstName: formData.firstName,  // AuthService'de first_name'e çevrilecek
+        lastName: formData.lastName,    // AuthService'de last_name'e çevrilecek
         phone: normalizePhoneTR(formData.phone),
+        city: formData.city || 'Belirtilmemiş',
+        district: formData.district || 'Belirtilmemiş',
         kvkk_accepted: kvkkAccepted,
-        is_corporate: formData.isCorporate,
+        is_corporate: isCorporate,
+        company_name: isCorporate ? formData.companyName.trim() : undefined,
       };
 
-      if (formData.isCorporate) {
-        registerData.company_name = formData.companyName.trim();
-      }
+      // 🔍 Debug: Register data'sını frontend'de logla
+      console.log('🚀 Frontend Register Data:', {
+        isCorporate: formData.isCorporate,
+        is_corporate: registerData.is_corporate,
+        company_name: registerData.company_name,
+        companyName: formData.companyName,
+        booleanType: typeof registerData.is_corporate
+      });
 
       const user = await register(registerData);
       if (user.role === 'ADMIN') navigate('/admin');

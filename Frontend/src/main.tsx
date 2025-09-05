@@ -4,6 +4,39 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import App from './App.tsx'
 import './index.css'
 
+// 🔄 Cache Busting - Version kontrolü
+const CACHE_VERSION = '20250905-v2'; // ⚡ Version güncelledik
+const currentVersion = localStorage.getItem('cacheVersion');
+
+if (currentVersion !== CACHE_VERSION) {
+  console.log('🗑️ Cache temizleniyor, yeni version:', CACHE_VERSION);
+  
+  // Tüm storage'ları temizle
+  localStorage.clear();
+  sessionStorage.clear();
+  
+  // IndexedDB'yi de temizle
+  if (window.indexedDB) {
+    indexedDB.databases().then(databases => {
+      databases.forEach(db => {
+        if (db.name) indexedDB.deleteDatabase(db.name);
+      });
+    });
+  }
+  
+  // Cache API'yi temizle
+  if ('caches' in window) {
+    caches.keys().then(names => {
+      names.forEach(name => caches.delete(name));
+    });
+  }
+  
+  localStorage.setItem('cacheVersion', CACHE_VERSION);
+  
+  // Sayfayı yenile ki fresh başlasın
+  window.location.reload();
+}
+
 console.log('🎯 Main.tsx loading...');
 console.log('📦 React version:', React.version);
 
@@ -12,7 +45,7 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: 1,
-      staleTime: 30_000, // 30 seconds
+      staleTime: 0, // ⚡ Cache busting: Hiç cache yapma
       refetchOnWindowFocus: false,
     },
     mutations: {

@@ -38,14 +38,14 @@ export const categoryImageMap: { [key: string]: string } = {
 
 // Fallback resim fonksiyonu
 export const getCategoryImageSrc = (categoryName: string): string => {
-  return categoryImageMap[categoryName] || '/TruckBus.png';
+  return categoryImageMap[categoryName] || '/TruckBus-v2.png?v=20250905';
 };
 
 // Resim yüklenme hatası için fallback
 const handleImageError = (event: React.SyntheticEvent<HTMLImageElement>) => {
   const img = event.currentTarget;
-  if (img.src !== `${window.location.origin}/TruckBus.png`) {
-    img.src = '/TruckBus.png';
+  if (img.src !== `${window.location.origin}/TruckBus-v2.png?v=20250905`) {
+    img.src = '/TruckBus-v2.png?v=20250905';
   }
 };
 

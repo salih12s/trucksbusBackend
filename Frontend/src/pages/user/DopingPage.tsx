@@ -67,7 +67,7 @@ const OPTIONS: DopingOption[] = [
     title: "Üst Sıradayım",
     desc:
       "İlanınız arama sonuçlarında gelişmiş sıralama seçildiğinde üst sıralarda yer alır.",
-    prices: { "1w": 3359, "1a": 5999, "3a": 15999 },
+    prices: { "1w": 2000, "1a": 5999, "3a": 15999 },
     defaultDuration: "1w",
     badge: "Popüler",
     howPreview: "Arama sonuçlarında listenin en üst bloklarında yer alır.",
@@ -76,7 +76,7 @@ const OPTIONS: DopingOption[] = [
     id: "anasayfa",
     title: "Anasayfa Vitrini",
     desc: "İlanınız sahibinden ana sayfa vitrin alanında görüntülenir.",
-    prices: { "1w": 5679, "1a": 9999, "3a": 24999 },
+    prices: { "1w": 3000, "1a": 9999, "3a": 24999 },
     defaultDuration: "1w",
     howPreview: "Ana sayfa vitrin slider ve kart alanlarında görünür.",
   },
@@ -85,14 +85,14 @@ const OPTIONS: DopingOption[] = [
     title: "Kategori Vitrini",
     desc:
       "Seçtiğiniz kategori ve alt kategorilerde vitrin alanında yer alırsınız.",
-    prices: { "1w": 1719, "1a": 2999, "3a": 7999 },
+    prices: { "1w": 1200, "1a": 2999, "3a": 7999 },
     defaultDuration: "1w",
   },
   {
     id: "guncelle",
     title: "Güncelleme Dopingi",
     desc: "İlan tarihi yenilenir, tekrar üst sıralara taşınır.",
-    prices: { "1a": 449 },
+    prices: { "1a": 300 },
     defaultDuration: "1a",
   },
   {
@@ -100,7 +100,7 @@ const OPTIONS: DopingOption[] = [
     title: "Acil Acil",
     desc:
       "Ana sayfanın sol menüsündeki ‘Acil Acil’ kategorisinde yer alırsınız.",
-    prices: { "1w": 1349, "1a": 2299, "3a": 5999 },
+    prices: { "1w": 1000, "1a": 2299, "3a": 5999 },
     defaultDuration: "1w",
   },
   {
@@ -108,7 +108,7 @@ const OPTIONS: DopingOption[] = [
     title: "Detaylı Arama Vitrini",
     desc:
       "Detaylı arama yapan kullanıcılara sonuçlarda ek vitrin alanlarında çıkarsınız.",
-    prices: { "1w": 679, "1a": 1199, "3a": 2999 },
+    prices: { "1w": 500, "1a": 1199, "3a": 2999 },
     defaultDuration: "1w",
   },
 ];
@@ -305,6 +305,7 @@ const DopingPage: React.FC = () => {
                     variant="outlined" 
                     sx={{
                       height: '100%',
+                      width: 360,
                       border: isSelected ? '2px solid #1976d2' : '1px solid #e0e0e0',
                       borderRadius: 2,
                       transition: 'all 0.2s ease',

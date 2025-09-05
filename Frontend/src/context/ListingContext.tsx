@@ -15,6 +15,7 @@ export interface SimpleListing {
   images?: string[]; // Birden fazla resim için
   user_id?: string; // İlan sahibinin ID'si
   seller: {
+    doping_status: string;
     name: string;
     phone: string;
     is_corporate?: boolean;

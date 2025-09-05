@@ -1,0 +1,55 @@
+# Cache Busting - Agresif Önlemler
+RewriteEngine On
+
+# Tamamen cache'i devre dışı bırak - HTML, JSON, API responses
+<IfModule mod_headers.c>
+    # HTML dosyaları hiç cache'lenmesin
+    <FilesMatch "\.(html|htm)$">
+        Header unset ETag
+        Header set Cache-Control "max-age=0, no-cache, no-store, must-revalidate"
+        Header set Pragma "no-cache"
+        Header set Expires "Thu, 01 Jan 1970 00:00:00 GMT"
+    </FilesMatch>
+    
+    # JavaScript ve CSS dosyaları için agresif cache busting
+    <FilesMatch "\.(js|css)$">
+        Header unset ETag
+        Header set Cache-Control "max-age=0, no-cache, no-store, must-revalidate"
+        Header set Pragma "no-cache"
+        Header set Expires "Thu, 01 Jan 1970 00:00:00 GMT"
+    </FilesMatch>
+    
+    # Image dosyaları için cache busting (logo sorunu için)
+    <FilesMatch "\.(jpg|jpeg|png|gif|ico|svg)$">
+        Header unset ETag
+        Header set Cache-Control "max-age=0, no-cache, no-store, must-revalidate"
+        Header set Pragma "no-cache"
+        Header set Expires "Thu, 01 Jan 1970 00:00:00 GMT"
+    </FilesMatch>
+    
+    # JSON responses cache'lenmesin
+    <FilesMatch "\.json$">
+        Header unset ETag
+        Header set Cache-Control "max-age=0, no-cache, no-store, must-revalidate"
+        Header set Pragma "no-cache"
+        Header set Expires "Thu, 01 Jan 1970 00:00:00 GMT"
+    </FilesMatch>
+    
+    # Genel cache headers
+    Header always set Cache-Control "max-age=0, no-cache, no-store, must-revalidate"
+    Header always set Pragma "no-cache"
+    Header always set Expires "Thu, 01 Jan 1970 00:00:00 GMT"
+    
+    # Browser'ın cache'ini zorla temizle
+    Header always set X-Cache-Control "no-cache, no-store, must-revalidate"
+    Header always set X-Expires "0"
+</IfModule>
+
+# Versiyonlu dosyalar için rewrite rules
+RewriteCond %{QUERY_STRING} ^v=(.*)$
+RewriteRule ^(.*)$ $1 [L]
+
+# SPA için routing
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^.*$ /index.html [QSA,L]

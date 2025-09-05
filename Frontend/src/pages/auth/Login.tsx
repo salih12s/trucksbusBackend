@@ -56,7 +56,7 @@ const Login: React.FC = () => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
 
-  const logoSrc = '/TruckBus.png';
+  const logoSrc = '/TruckBus-v2.png?v=20250905';
 
   return (
     <div className="min-h-screen flex bg-slate-900">

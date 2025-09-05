@@ -3,7 +3,7 @@ import { Listing, CreateListingData, UpdateListingData } from '../types';
 import { ApiResponse, StandardListingPayload, validateListingPayload} from './apiNormalizer';
 
 // Use the same base URL as other services (Local development)
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3002';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3005';
 
 export interface ListingSearchParams {
   category?: string;
@@ -16,9 +16,9 @@ export interface ListingSearchParams {
   limit?: number;
 }
 
-// Helper function to get token from both storage types
+// Helper function to get token from both storage types (session öncelikli)
 const getStoredToken = () =>
-  localStorage.getItem('token') || sessionStorage.getItem('token');
+  sessionStorage.getItem('token') || localStorage.getItem('token');
 
 const listingApi = axios.create({
   baseURL: `${API_BASE_URL}/api`,

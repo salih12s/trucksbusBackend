@@ -144,7 +144,7 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
     if (!token) return;
 
     // 🔧 Standardized environment variable usage (Railway production)
-    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3002/api';
+    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3005/api';
     const serverUrl = new URL(API_BASE_URL).origin;
     
     if (import.meta.env.DEV) console.log('🔌 Initializing WebSocket connection to:', serverUrl);
@@ -398,14 +398,10 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
     socketInstance.on('badge:update', (data: any) => {
       if (import.meta.env.DEV) console.log('🔔 badge:update received:', data);
       
-      // Mesaj sayfasında DEĞİLKEN badge güncelle
-      const onMsgRoute = getRoutePath().startsWith('/real-time-messages') || getRoutePath().startsWith('/messages');
-      
-      if (!onMsgRoute && data?.total_unread !== undefined) {
+      // Badge güncelleme (mesaj sayfasında bile çalışır, flicker az ama state tutarlı kalır)
+      if (data?.total_unread !== undefined) {
         setUnreadCount(data.total_unread);
         if (import.meta.env.DEV) console.log('🔔 Badge updated to:', data.total_unread);
-      } else if (onMsgRoute && import.meta.env.DEV) {
-        console.log('🔔 Badge update ignored - on messages page');
       }
     });
 
@@ -562,14 +558,16 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
   }, []);
 
   // Mark only message notifications as read - for messages page
-  const markMessageNotificationsAsRead = React.useCallback(() => {
-    setNotifications(prev => {
-      const next = prev.map(n => n.type === 'message' ? { ...n, isRead: true } : n);
-      // unreadCount state'in de tutarlı kalması için:
-      const nextUnread = next.filter(n => !n.isRead).length;
-      setUnreadCount(nextUnread);
-      return next;
-    });
+  const markMessageNotificationsAsRead = React.useCallback(async () => {
+    // sadece lokal flag'leri güncelle
+    setNotifications(prev => prev.map(n => n.type === 'message' ? { ...n, isRead: true } : n));
+    // gerçek unread'ı backend'den çek
+    try {
+      const r = await messageService.getUnreadCount();
+      if (r?.success && typeof r.data?.count === 'number') {
+        setUnreadCount(r.data.count);
+      }
+    } catch {}
   }, []);
 
   // 🔧 Mark conversation as read on backend and update badge

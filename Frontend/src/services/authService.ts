@@ -1,13 +1,13 @@
 import axios, { AxiosResponse } from 'axios';
 import { User, LoginRequest, RegisterRequest, AuthResponse, ApiResponse } from '../types';
 
-// ✅ Ortak helper: token'ı hem local hem session'dan oku
+// ✅ Ortak helper: token'ı hem session hem local'dan oku (session öncelikli)
 const getStoredToken = () =>
-  localStorage.getItem('token') || sessionStorage.getItem('token');
+  sessionStorage.getItem('token') || localStorage.getItem('token');
 
 const API_ENDPOINTS = [
-  import.meta.env.VITE_API_BASE_URL || 'http://localhost:3002/api',
-  'http://localhost:3002/api'
+  import.meta.env.VITE_API_BASE_URL || 'http://localhost:3005/api',
+  'http://localhost:3005/api'
 ];
 
 const API_BASE_URL = API_ENDPOINTS[0];
@@ -92,7 +92,14 @@ export const authService = {
 
   register: async (userData: RegisterRequest): Promise<AuthResponse> => {
     try {
-      console.log('📝 Register attempt:', { email: userData.email, firstName: userData.firstName, isCorporate: userData.is_corporate });
+      console.log('📝 Register attempt:', { 
+        email: userData.email, 
+        firstName: userData.firstName, 
+        isCorporate: userData.is_corporate,
+        companyName: userData.company_name
+      });
+      
+      console.log('🔍 Full userData object:', userData);
       
       // Frontend'den gelen userData'yı backend formatına dönüştür
       const backendData: any = {
@@ -101,6 +108,8 @@ export const authService = {
         first_name: userData.firstName,
         last_name: userData.lastName,
         phone: userData.phone,
+        city: userData.city || 'Belirtilmemiş',
+        district: userData.district || 'Belirtilmemiş',
         kvkk_accepted: userData.kvkk_accepted || false,
         is_corporate: userData.is_corporate || false,
       };
@@ -117,6 +126,8 @@ export const authService = {
       console.log('✅ Register response:', response.data);
       
       if (response.data.success && response.data.data) {
+        // 🔧 EKLE: Register sonrası axios header'ı set et
+        api.defaults.headers.common.Authorization = `Bearer ${response.data.data.token}`;
         return response.data.data;
       }
       throw new Error(response.data.message || 'Kayıt başarısız');
@@ -166,6 +177,7 @@ export const authService = {
         headers: { Authorization: `Bearer ${token}` },
       });
       console.log('✅ Token verification successful');
+      console.log('📄 User data from /auth/me:', response.data.data?.user);
       
       if (!response.data?.success || !response.data?.data?.user) {
         throw new Error('Token doğrulama başarısız');

@@ -17,6 +17,7 @@ import ReportModal from '../../components/ReportModal';
 import { useAuth } from '../../context/AuthContext';
 import { useNotification } from '../../context/NotificationContext';
 import { api } from '../../services/api';
+import { messageService } from '../../services/messageService';
 import { useConfirmDialog } from '../../hooks/useConfirmDialog';
 import { SimpleListing } from '../../context/ListingContext';
 
@@ -235,6 +236,55 @@ const CategoryListingsPage: React.FC = () => {
     }
   };
 
+  const handleSendMessage = async (listingId: string) => {
+    if (!user) {
+      navigate('/auth/login');
+      return;
+    }
+    
+    // Kendi ilanına mesaj göndermeyi engelle
+    const listing = rawListings.find(l => l && l.id === listingId);
+    if (!listing) {
+      console.error('❌ Listing not found:', listingId);
+      return;
+    }
+    
+    if (listing.user_id === user.id) {
+      await confirm({
+        title: 'Uyarı',
+        description: 'Kendi ilanınıza mesaj gönderemezsiniz!',
+        severity: 'warning',
+        confirmText: 'Tamam',
+        cancelText: ''
+      });
+      return;
+    }
+    
+    try {
+      console.log('🔥 Starting conversation for listing:', listingId);
+      
+      // Backend'e conversation başlatma isteği gönder
+      const response = await messageService.startConversation({
+        listingId: listingId,
+        otherUserId: listing.user_id,
+        initialMessage: `${listing.title} ilanınız hakkında bilgi almak istiyorum.`
+      });
+      
+      if (response.success && response.conversation) {
+        console.log('✅ Conversation started:', response.conversation);
+        // Conversation ID ile mesajlaşma sayfasına git
+        navigate(`/real-time-messages?conversation=${response.conversation.id}`);
+      } else {
+        console.error('❌ Failed to start conversation:', response);
+        navigate(`/real-time-messages?listing=${listingId}`);
+      }
+    } catch (error) {
+      console.error('❌ Error starting conversation:', error);
+      // Fallback: Listing ID ile git
+      navigate(`/real-time-messages?listing=${listingId}`);
+    }
+  };
+
   // Kategori bulunamadıysa
   if (categorySlug && !categoryName) {
     return (
@@ -333,6 +383,7 @@ const CategoryListingsPage: React.FC = () => {
                   key={listing.id}
                   listing={listing}
                   onViewDetails={handleViewDetails}
+                  onSendMessage={handleSendMessage}
                   onReport={handleReport}
                   onDelete={user?.id === listing.user_id ? handleDelete : undefined}
                 />

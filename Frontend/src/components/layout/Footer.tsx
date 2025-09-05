@@ -16,7 +16,7 @@ import {
   Chip,
   Stack,
 } from '@mui/material';
-import logo from '/TruckBus.png';
+import logo from '/TruckBus-v2.png';
 import {
   Facebook,
   Twitter,
