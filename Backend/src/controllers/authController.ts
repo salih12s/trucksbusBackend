@@ -172,6 +172,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
           is_email_verified: Boolean(user.is_email_verified),
           is_corporate: Boolean(user.is_corporate),        // 🔧 FİX: Explicit boolean conversion
           company_name: user.company_name,
+          tax_number: user.tax_number,                     // 🔧 FİX: tax_number eklendi
           created_at: user.created_at,
           updated_at: user.updated_at
         },
@@ -271,6 +272,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
         last_login: true,
         is_corporate: true,
         company_name: true,
+        tax_number: true,                    // 🔧 FİX: tax_number select eklendi
         created_at: true,
         updated_at: true
       }
@@ -366,7 +368,8 @@ export const login = async (req: Request, res: Response): Promise<void> => {
           is_email_verified: Boolean(user.is_email_verified),
           avatar: user.avatar,
           is_corporate: Boolean(user.is_corporate),        // 🔧 FİX: Explicit boolean conversion
-          company_name: user.company_name
+          company_name: user.company_name,
+          tax_number: user.tax_number                      // 🔧 FİX: tax_number eklendi
         },
         token
       }
@@ -432,6 +435,7 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
         is_email_verified: true,
         is_corporate: true,
         company_name: true,
+        tax_number: true,                    // 🔧 FİX: tax_number select eklendi
         created_at: true
       }
     });

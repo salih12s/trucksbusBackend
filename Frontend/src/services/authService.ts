@@ -105,8 +105,8 @@ export const authService = {
       const backendData: any = {
         email: userData.email,
         password: userData.password,
-        first_name: userData.firstName,
-        last_name: userData.lastName,
+        first_name: userData.first_name || userData.firstName,  // 🔧 Both field names supported
+        last_name: userData.last_name || userData.lastName,    // 🔧 Both field names supported
         phone: userData.phone,
         city: userData.city || 'Belirtilmemiş',
         district: userData.district || 'Belirtilmemiş',
@@ -115,8 +115,13 @@ export const authService = {
       };
 
       // Kurumsal hesap verileri varsa ekle
-      if (userData.is_corporate && userData.company_name) {
-        backendData.company_name = userData.company_name;
+      if (userData.is_corporate) {
+        if (userData.company_name) {
+          backendData.company_name = userData.company_name;
+        }
+        if (userData.tax_number) {
+          backendData.tax_number = userData.tax_number;
+        }
       }
       
       console.log('📤 Sending register data:', backendData);
