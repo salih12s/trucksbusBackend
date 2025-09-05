@@ -116,8 +116,25 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       userData.company_name = company_name;
     }
 
+    // 🔍 Debug: Log user data before creation
+    console.log('🔍 User data before creation:', {
+      email: userData.email,
+      is_corporate: userData.is_corporate,
+      company_name: userData.company_name,
+      role: userData.role
+    });
+
     const user = await prisma.users.create({
       data: userData
+    });
+
+    // 🔍 Debug: Log what was actually created
+    console.log('🔍 Created user object:', {
+      id: user.id,
+      email: user.email,
+      is_corporate: user.is_corporate,
+      company_name: user.company_name,
+      role: user.role
     });
 
     // Generate JWT token
@@ -145,10 +162,10 @@ export const register = async (req: Request, res: Response): Promise<void> => {
           phone: user.phone,
           role: user.role,
           avatar: user.avatar,
-          is_active: user.is_active,
-          is_email_verified: user.is_email_verified,
-          is_corporate: user.is_corporate,        // ✅ Database'den gelen değer
-          company_name: user.company_name,        // ✅ Database'den gelen değer
+          is_active: Boolean(user.is_active),
+          is_email_verified: Boolean(user.is_email_verified),
+          is_corporate: Boolean(user.is_corporate),        // 🔧 FİX: Explicit boolean conversion
+          company_name: user.company_name,
           created_at: user.created_at,
           updated_at: user.updated_at
         },
@@ -340,9 +357,9 @@ export const login = async (req: Request, res: Response): Promise<void> => {
           city: user.city,
           district: user.district,
           role: user.role,
-          is_email_verified: user.is_email_verified,
+          is_email_verified: Boolean(user.is_email_verified),
           avatar: user.avatar,
-          is_corporate: user.is_corporate,
+          is_corporate: Boolean(user.is_corporate),        // 🔧 FİX: Explicit boolean conversion
           company_name: user.company_name
         },
         token
@@ -423,7 +440,14 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
 
     res.status(200).json({
       success: true,
-      data: { user }
+      data: { 
+        user: {
+          ...user,
+          is_active: Boolean(user.is_active),
+          is_email_verified: Boolean(user.is_email_verified),
+          is_corporate: Boolean(user.is_corporate)        // 🔧 FİX: Explicit boolean conversion
+        }
+      }
     });
   } catch (error) {
     logger.error('Error in getMe:', error);
