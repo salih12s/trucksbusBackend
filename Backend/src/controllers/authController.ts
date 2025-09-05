@@ -23,6 +23,21 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       company_name
     } = req.body;
 
+    // 🔍 Debug: Register data'sını logla
+    console.log('📝 Register attempt data:', {
+      email,
+      first_name,
+      last_name,
+      phone,
+      city,
+      district,
+      is_corporate,
+      company_name,
+      kvkk_accepted
+    });
+
+    console.log('📝 Raw request body:', req.body);
+
     // Validate required fields
     if (!email || !password || !first_name || !last_name || !phone) {
       res.status(400).json({ 
@@ -112,7 +127,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
         id: user.id, 
         email: user.email, 
         role: user.role,
-        is_corporate: is_corporate
+        is_corporate: user.is_corporate  // ✅ Database'den gelen değer
       },
       registerJwtSecret,
       { expiresIn: '24h' }
@@ -132,8 +147,8 @@ export const register = async (req: Request, res: Response): Promise<void> => {
           avatar: user.avatar,
           is_active: user.is_active,
           is_email_verified: user.is_email_verified,
-          is_corporate: is_corporate,
-          company_name: company_name,
+          is_corporate: user.is_corporate,        // ✅ Database'den gelen değer
+          company_name: user.company_name,        // ✅ Database'den gelen değer
           created_at: user.created_at,
           updated_at: user.updated_at
         },
